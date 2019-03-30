@@ -60,6 +60,24 @@ data class PagedAsyncData<T>(
         lastLoadingStatus = LoadingStatus.CompletedWithError(throwable)
     )
 
+    inline fun doLoadingNotInProgress(block: (PagedAsyncData<T>) -> Unit) {
+        if (lastLoadingStatus !is LoadingStatus.InProgress) {
+            block(this)
+        }
+    }
+
+    inline fun doIfLastLoadingCompletedWithError(block: (PagedAsyncData<T>) -> Unit) {
+        if (lastLoadingStatus is LoadingStatus.CompletedWithError) {
+            block(this)
+        }
+    }
+
+    inline fun doIfLastLoadingCompletedSuccessFully(block: (PagedAsyncData<T>) -> Unit) {
+        if (lastLoadingStatus is LoadingStatus.CompletedSuccessfully) {
+            block(this)
+        }
+    }
+
     sealed class LoadingStatus {
         object Idle : LoadingStatus()
         object InProgress : LoadingStatus()
