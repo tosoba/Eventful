@@ -24,9 +24,22 @@ open class BaseFeature {
     }
 
     @ExperimentalCoroutinesApi
-    protected fun <T> CoroutineScope.produceActions(
+    protected fun <T> CoroutineScope.actions(
         actionsProducer: suspend ProducerScope<Action<T>>.() -> Unit
     ): ReceiveChannel<Action<T>> = produce(block = actionsProducer)
+
+    @ExperimentalCoroutinesApi
+    protected inline fun <S> CoroutineScope.loadAsyncDataActions(
+        crossinline load: suspend () -> S
+    ): ReceiveChannel<Action<AsyncData<S>>> = actions {
+        send { AsyncData.Loading }
+        try {
+            val result = load()
+            send { AsyncData.Success(result) }
+        } catch (e: Exception) {
+            send { AsyncData.Error(e) }
+        }
+    }
 
     fun cleanUp() = Unit
 }

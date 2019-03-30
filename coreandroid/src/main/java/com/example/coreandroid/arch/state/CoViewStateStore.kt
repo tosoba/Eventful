@@ -18,7 +18,7 @@ class CoViewStateStore<State : Any>(
     fun coDispatch(makeAction: suspend () -> Action<State>): Job = launch {
         val action = makeAction()
         withContext(Dispatchers.Main) {
-            publish(action)
+            dispatch(action)
         }
     }
 
@@ -28,7 +28,7 @@ class CoViewStateStore<State : Any>(
     ): Job = launch {
         makeActions(currentState).consumeEach { action ->
             withContext(Dispatchers.Main) {
-                publish(action)
+                dispatch(action)
             }
         }
     }
@@ -37,7 +37,7 @@ class CoViewStateStore<State : Any>(
         contextJob.cancel()
     }
 
-    private fun publish(action: Action<State>) {
+    private fun dispatch(action: Action<State>) {
         if (action is StateTransition<State>) {
             dispatchStateTransition(action)
         } else if (action is Signal) {
