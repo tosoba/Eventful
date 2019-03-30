@@ -26,3 +26,44 @@ sealed class AsyncData<out T> {
         override fun <R> map(f: (Nothing) -> R): AsyncData<R> = this
     }
 }
+
+data class PagedAsyncData<T>(
+    val offset: Int = 0,
+    val items: List<T> = emptyList(),
+    val totalItems: Int = Integer.MAX_VALUE,
+    val lastLoadingStatus: LoadingStatus = LoadingStatus.Idle
+) {
+    val withLoadingInProgress: PagedAsyncData<T>
+        get() = PagedAsyncData(lastLoadingStatus = LoadingStatus.InProgress)
+
+    fun copyWithNewItems(
+        newItems: List<T>,
+        offset: Int
+    ): PagedAsyncData<T> = copy(
+        items = items + newItems,
+        offset = offset,
+        lastLoadingStatus = LoadingStatus.CompletedSuccessfully
+    )
+
+    fun copyWithNewItems(
+        newItems: List<T>,
+        offset: Int,
+        totalItems: Int
+    ): PagedAsyncData<T> = copy(
+        items = items + newItems,
+        offset = offset,
+        lastLoadingStatus = LoadingStatus.CompletedSuccessfully,
+        totalItems = totalItems
+    )
+
+    fun copyWithError(throwable: Throwable): PagedAsyncData<T> = copy(
+        lastLoadingStatus = LoadingStatus.CompletedWithError(throwable)
+    )
+
+    sealed class LoadingStatus {
+        object Idle : LoadingStatus()
+        object InProgress : LoadingStatus()
+        object CompletedSuccessfully : LoadingStatus()
+        data class CompletedWithError(val throwable: Throwable) : LoadingStatus()
+    }
+}
