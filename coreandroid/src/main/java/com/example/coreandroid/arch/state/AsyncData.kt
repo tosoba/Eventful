@@ -6,9 +6,9 @@ sealed class AsyncData<out T> {
 
     abstract fun <R> map(f: (T) -> R): AsyncData<R>
 
-    inline fun doIfSuccess(f: (T) -> Unit) {
+    inline fun doIfSuccess(block: (T) -> Unit) {
         if (this is Success) {
-            f(data)
+            block(data)
         }
     }
 
@@ -60,7 +60,7 @@ data class PagedAsyncData<T>(
         lastLoadingStatus = LoadingStatus.CompletedWithError(throwable)
     )
 
-    inline fun doLoadingNotInProgress(block: (PagedAsyncData<T>) -> Unit) {
+    inline fun doIfLoadingNotInProgress(block: (PagedAsyncData<T>) -> Unit) {
         if (lastLoadingStatus !is LoadingStatus.InProgress) {
             block(this)
         }
