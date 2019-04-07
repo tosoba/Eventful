@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.FragmentPagerAdapter
 import com.example.coreandroid.view.ActionBarDrawerToggleEnd
+import com.example.coreandroid.view.TitledFragmentsPagerAdapter
+import com.example.coreandroid.view.ViewPagerPageSelectedListener
 import com.example.favourites.FavouritesFragment
 import com.example.nearby.NearbyFragment
 import com.example.search.SearchFragment

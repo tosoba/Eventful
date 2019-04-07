@@ -1,4 +1,4 @@
-package com.example.eventsnearby
+package com.example.coreandroid.view
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager

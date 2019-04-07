@@ -54,7 +54,7 @@ class UIEventBusFactory private constructor(val owner: LifecycleOwner) {
     }
 
     /**
-     * emit will create (if needed) or use the existing Rx Subject to send events.
+     * emit will create (if needed) or use the existing Rx Subject to transition events.
      *
      * @param clazz is the Event Class
      * @param event is the instance of the Event to be sent

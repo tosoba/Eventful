@@ -11,33 +11,31 @@ import kotlinx.coroutines.channels.produce
 open class BaseFeature {
 
     @ExperimentalCoroutinesApi
-    protected suspend fun <S> ProducerScope<Action<S>>.send(action: S.() -> S) = send(
-        StateTransition(action)
-    )
-
-    @ExperimentalCoroutinesApi
-    @ObsoleteCoroutinesApi
-    protected suspend fun <T> ProducerScope<Action<T>>.sendAll(channel: ReceiveChannel<Action<T>>) {
-        channel.consumeEach { originalAction ->
-            send(originalAction)
-        }
+    protected suspend fun <S> ProducerScope<Action<S>>.transition(nextState: S.() -> S) {
+        send(StateTransition(nextState))
     }
 
     @ExperimentalCoroutinesApi
-    protected fun <T> CoroutineScope.actions(
+    @ObsoleteCoroutinesApi
+    protected suspend fun <T> ProducerScope<Action<T>>.actions(channel: ReceiveChannel<Action<T>>) {
+        channel.consumeEach { originalAction -> send(originalAction) }
+    }
+
+    @ExperimentalCoroutinesApi
+    protected fun <T> CoroutineScope.produceActions(
         actionsProducer: suspend ProducerScope<Action<T>>.() -> Unit
     ): ReceiveChannel<Action<T>> = produce(block = actionsProducer)
 
     @ExperimentalCoroutinesApi
     protected inline fun <S> CoroutineScope.loadAsyncDataActions(
         crossinline load: suspend () -> S
-    ): ReceiveChannel<Action<AsyncData<S>>> = actions {
-        send { AsyncData.Loading }
+    ): ReceiveChannel<Action<AsyncData<S>>> = produceActions {
+        transition { AsyncData.Loading }
         try {
             val result = load()
-            send { AsyncData.Success(result) }
+            transition { AsyncData.Success(result) }
         } catch (e: Exception) {
-            send { AsyncData.Error(e) }
+            transition { AsyncData.Error(e) }
         }
     }
 

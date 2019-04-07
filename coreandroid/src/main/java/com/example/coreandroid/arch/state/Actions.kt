@@ -2,8 +2,7 @@ package com.example.coreandroid.arch.state
 
 interface Action<out T>
 
-class StateTransition<State>(private val nextState: State.() -> State) :
-    Action<State> {
+class StateTransition<State>(private val nextState: State.() -> State) : Action<State> {
     operator fun invoke(state: State) = state.nextState()
 }
 
