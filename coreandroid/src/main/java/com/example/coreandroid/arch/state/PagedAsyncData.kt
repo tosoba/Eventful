@@ -29,7 +29,7 @@ data class PagedAsyncData<T>(
         totalItems = totalItems
     )
 
-    fun copyWithError(throwable: Throwable): PagedAsyncData<T> = copy(
+    fun copyWithError(throwable: Throwable?): PagedAsyncData<T> = copy(
         lastLoadingStatus = LoadingStatus.CompletedWithError(throwable)
     )
 
@@ -55,6 +55,6 @@ data class PagedAsyncData<T>(
         object Idle : LoadingStatus()
         object InProgress : LoadingStatus()
         object CompletedSuccessfully : LoadingStatus()
-        data class CompletedWithError(val throwable: Throwable) : LoadingStatus()
+        data class CompletedWithError(val throwable: Throwable?) : LoadingStatus()
     }
 }

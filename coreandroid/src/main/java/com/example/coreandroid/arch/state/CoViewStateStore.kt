@@ -48,10 +48,6 @@ class CoViewStateStore<State : Any>(
     companion object {
         val TEST_DISPATCHER = AsyncTask.THREAD_POOL_EXECUTOR.asCoroutineDispatcher()
 
-        fun <T : Any> TEST(initialState: T): CoViewStateStore<T> =
-            CoViewStateStore(
-                initialState,
-                TEST_DISPATCHER
-            )
+        fun <T : Any> TEST(initialState: T): CoViewStateStore<T> = CoViewStateStore(initialState, TEST_DISPATCHER)
     }
 }

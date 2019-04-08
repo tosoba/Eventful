@@ -20,4 +20,8 @@ interface EventsApi {
         @Query("offset") offset: Int? = null,
         @Query("sort") sort: String? = null
     ): Call<EventsResponse>
+
+    companion object {
+        const val BASE_URL = "https://api.predicthq.com/v1/"
+    }
 }

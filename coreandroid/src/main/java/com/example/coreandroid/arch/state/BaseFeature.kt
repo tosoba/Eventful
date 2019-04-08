@@ -11,7 +11,7 @@ import kotlinx.coroutines.channels.produce
 open class BaseFeature {
 
     @ExperimentalCoroutinesApi
-    protected suspend fun <S> ProducerScope<Action<S>>.transition(nextState: S.() -> S) {
+    protected suspend fun <S> ProducerScope<Action<S>>.stateTransition(nextState: S.() -> S) {
         send(StateTransition(nextState))
     }
 
@@ -30,12 +30,12 @@ open class BaseFeature {
     protected inline fun <S> CoroutineScope.loadAsyncDataActions(
         crossinline load: suspend () -> S
     ): ReceiveChannel<Action<AsyncData<S>>> = produceActions {
-        transition { AsyncData.Loading }
+        stateTransition { AsyncData.Loading }
         try {
             val result = load()
-            transition { AsyncData.Success(result) }
+            stateTransition { AsyncData.Success(result) }
         } catch (e: Exception) {
-            transition { AsyncData.Error(e) }
+            stateTransition { AsyncData.Error(e) }
         }
     }
 

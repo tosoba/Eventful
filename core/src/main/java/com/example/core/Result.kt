@@ -6,16 +6,26 @@ data class Success<out T : Any>(val data: T) : Result<T>()
 
 data class Failure(val error: Throwable?) : Result<Nothing>()
 
-fun <T : Any> Result<T>.doOnSuccess(consumer: (T) -> Unit): Result<T> {
+inline fun <T : Any> Result<T>.doOnSuccess(consumer: (T) -> Unit): Result<T> {
     if (this is Success) consumer(data)
     return this
 }
 
-fun <T : Any> Result<T>.doOnError(consumer: (Throwable?) -> Unit) {
+inline fun <T : Any> Result<T>.doOnError(consumer: (Throwable?) -> Unit) {
     if (this is Failure) consumer(error)
 }
 
-fun <T : Any, R : Any> Result<T>.mapSuccess(mapper: (T) -> R): Result<R> = when (this) {
+inline fun <T : Any> Result<T>.`do`(
+    onSuccess: (T) -> Unit,
+    onError: (Throwable?) -> Unit
+) {
+    when (this) {
+        is Success -> onSuccess(data)
+        is Failure -> onError(error)
+    }
+}
+
+inline fun <T : Any, R : Any> Result<T>.mapSuccess(mapper: (T) -> R): Result<R> = when (this) {
     is Success -> Success(mapper(data))
     is Failure -> this
 }

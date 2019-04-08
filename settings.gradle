@@ -1,1 +1,1 @@
-include ':app', ':coreandroid', ':nearby', ':search', ':favourites', ':events', ':api', ':core'
+include ':app', ':coreandroid', ':nearby', ':search', ':favourites', ':events', ':api', ':core', ':repo'
