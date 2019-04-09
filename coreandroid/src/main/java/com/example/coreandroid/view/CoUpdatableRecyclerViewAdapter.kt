@@ -7,11 +7,11 @@ import java.util.*
 
 @ObsoleteCoroutinesApi
 abstract class CoUpdatableRecyclerViewAdapter<T, VH : RecyclerView.ViewHolder>(
-    initialItems: List<T> = Collections.emptyList(),
-    diffUtilCallback: DiffUtil.ItemCallback<T>
+    diffUtilCallback: DiffUtil.ItemCallback<T>,
+    initialItems: List<T> = Collections.emptyList()
 ) : RecyclerView.Adapter<VH>() {
 
-    private val coDiffUtil: CoDiffUtil<T> by lazy { CoDiffUtil(this, diffUtilCallback) }
+    protected val coDiffUtil: CoDiffUtil<T> by lazy { CoDiffUtil(this, diffUtilCallback) }
 
     init {
         if (initialItems.isNotEmpty()) update(initialItems)

@@ -5,9 +5,10 @@
              android:layout_height="match_parent"
              tools:context=".NearbyFragment">
 
-    <TextView
+    <fragment
+            android:id="@+id/nearby_events_list_fragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="Nearby"/>
+            android:name="com.example.events.EventsFragment"/>
 
 </FrameLayout>

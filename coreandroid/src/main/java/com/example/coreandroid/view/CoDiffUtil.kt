@@ -22,18 +22,27 @@ class CoDiffUtil<T>(
 
     private sealed class UpdateListOperation {
         object Clear : UpdateListOperation()
-        data class Insert<T>(val newList: List<T>) : UpdateListOperation()
+        data class Update<T>(val newList: List<T>) : UpdateListOperation()
     }
 
     private class SimpleUpdateCallback(
         private val adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>
     ) : ListUpdateCallback {
-        override fun onChanged(position: Int, count: Int, payload: Any?) =
+        override fun onChanged(position: Int, count: Int, payload: Any?) {
             adapter.notifyItemRangeChanged(position, count, payload)
+        }
 
-        override fun onMoved(fromPosition: Int, toPosition: Int) = adapter.notifyItemMoved(fromPosition, toPosition)
-        override fun onInserted(position: Int, count: Int) = adapter.notifyItemRangeInserted(position, count)
-        override fun onRemoved(position: Int, count: Int) = adapter.notifyItemRangeRemoved(position, count)
+        override fun onMoved(fromPosition: Int, toPosition: Int) {
+            adapter.notifyItemMoved(fromPosition, toPosition)
+        }
+
+        override fun onInserted(position: Int, count: Int) {
+            adapter.notifyItemRangeInserted(position, count)
+        }
+
+        override fun onRemoved(position: Int, count: Int) {
+            adapter.notifyItemRangeRemoved(position, count)
+        }
     }
 
     constructor(
@@ -55,7 +64,7 @@ class CoDiffUtil<T>(
                         clear(oldList.size)
                     }
                 }
-                is UpdateListOperation.Insert<*> -> {
+                is UpdateListOperation.Update<*> -> {
                     if (oldList == null) {
                         insert(it.newList as List<T>)
                     } else if (oldList != it.newList) {
@@ -76,7 +85,7 @@ class CoDiffUtil<T>(
         if (newList == null) {
             updateActor.offer(UpdateListOperation.Clear)
         } else {
-            updateActor.offer(UpdateListOperation.Insert(newList))
+            updateActor.offer(UpdateListOperation.Update(newList))
         }
     }
 
@@ -98,11 +107,11 @@ class CoDiffUtil<T>(
     }
 
     @Suppress("UNCHECKED_CAST")
-    private suspend fun calculateDiff(newList: List<*>, callback: DiffUtil.Callback) {
+    private suspend fun calculateDiff(newList: List<T>, callback: DiffUtil.Callback) {
         withContext(Dispatchers.Default) {
             val result = DiffUtil.calculateDiff(callback)
             if (!coroutineContext.isActive) return@withContext
-            latch(newList as List<T>, result)
+            latch(newList, result)
         }
     }
 
