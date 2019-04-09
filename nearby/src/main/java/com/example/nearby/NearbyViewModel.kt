@@ -16,7 +16,9 @@ class NearbyViewModel(
     @ExperimentalCoroutinesApi
     fun loadEvents() {
         viewStateStore.coDispatch { state ->
-            actionsProvider.run { getEvents(latLng = state.userLatLng, offset = state.events.offset) }
+            actionsProvider.run {
+                getEvents(latLng = state.userLatLng, offset = state.events.offset)
+            }
         }
     }
 

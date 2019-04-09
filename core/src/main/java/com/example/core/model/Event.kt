@@ -17,7 +17,7 @@ data class Event(
     val scope: String,
     val start: String,
     val state: String,
-    val timezone: String,
+    val timezone: String?,
     val title: String,
     val updated: String
 )
