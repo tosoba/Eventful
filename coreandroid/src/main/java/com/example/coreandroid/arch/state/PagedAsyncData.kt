@@ -33,6 +33,12 @@ data class PagedAsyncData<T>(
         lastLoadingStatus = LoadingStatus.CompletedWithError(throwable)
     )
 
+    inline fun doIfEmptyAndLoadingNotInProgress(block: (PagedAsyncData<T>) -> Unit) {
+        if (lastLoadingStatus !is LoadingStatus.InProgress && items.isEmpty()) {
+            block(this)
+        }
+    }
+
     inline fun doIfLoadingNotInProgress(block: (PagedAsyncData<T>) -> Unit) {
         if (lastLoadingStatus !is LoadingStatus.InProgress) {
             block(this)

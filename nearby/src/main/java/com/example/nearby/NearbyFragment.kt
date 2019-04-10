@@ -18,13 +18,19 @@ class NearbyFragment : Fragment() {
         childFragmentManager.findFragmentById(R.id.nearby_events_list_fragment) as EventsFragment
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewModel.viewStateStore.currentState.events.doIfEmptyAndLoadingNotInProgress {
+            viewModel.loadEvents()
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_nearby, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.loadEvents()
         viewModel.viewStateStore.observe(this) {
             if (it.events.lastLoadingStatus == PagedAsyncData.LoadingStatus.CompletedSuccessfully) {
                 eventsFragment.updateEvents(it.events.items)

@@ -1,5 +1,9 @@
 package com.example.coreandroid.view
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.OnLifecycleEvent
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListUpdateCallback
 import androidx.recyclerview.widget.RecyclerView
@@ -11,11 +15,19 @@ import java.util.*
 import kotlin.coroutines.CoroutineContext
 
 class CoDiffUtil<T>(
+    lifecycleOwner: LifecycleOwner,
     private val itemCallback: DiffUtil.ItemCallback<T>,
     private val listUpdateCallback: ListUpdateCallback
 ) : CoroutineScope {
 
     private val job: Job = Job()
+
+    init {
+        lifecycleOwner.lifecycle.addObserver(object : LifecycleObserver {
+            @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+            fun onDestroy() = job.cancel()
+        })
+    }
 
     override val coroutineContext: CoroutineContext
         get() = job + Dispatchers.Main
@@ -46,9 +58,10 @@ class CoDiffUtil<T>(
     }
 
     constructor(
+        lifecycleOwner: LifecycleOwner,
         adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>,
         itemCallback: DiffUtil.ItemCallback<T>
-    ) : this(itemCallback, SimpleUpdateCallback(adapter))
+    ) : this(lifecycleOwner, itemCallback, SimpleUpdateCallback(adapter))
 
     @ObsoleteCoroutinesApi
     @Suppress("UNCHECKED_CAST")
@@ -78,7 +91,7 @@ class CoDiffUtil<T>(
 
     private var list: List<T>? = null
     private var readOnlyList: List<T> = emptyList()
-    val current: List<T> = readOnlyList
+    val current: List<T> get() = readOnlyList
 
     @ObsoleteCoroutinesApi
     fun update(newList: List<T>?) {
@@ -97,7 +110,6 @@ class CoDiffUtil<T>(
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
     private suspend fun insert(newList: List<T>) {
         withContext(Dispatchers.Main) {
             list = newList
@@ -106,16 +118,15 @@ class CoDiffUtil<T>(
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
     private suspend fun calculateDiff(newList: List<T>, callback: DiffUtil.Callback) {
         withContext(Dispatchers.Default) {
             val result = DiffUtil.calculateDiff(callback)
             if (!coroutineContext.isActive) return@withContext
-            latch(newList, result)
+            dispatchResult(newList, result)
         }
     }
 
-    private suspend fun latch(newList: List<T>, result: DiffUtil.DiffResult) {
+    private suspend fun dispatchResult(newList: List<T>, result: DiffUtil.DiffResult) {
         withContext(Dispatchers.Main) {
             list = newList
             readOnlyList = Collections.unmodifiableList(newList)
