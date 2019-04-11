@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 
 abstract class EndlessRecyclerViewScrollListener(
     private val layoutManager: RecyclerView.LayoutManager,
-    private val visibleThreshold: Int = 5,
+    private val visibleThreshold: Int = DEFAULT_VISIBLE_THRESHOLD,
     var pageLimit: Int = Integer.MAX_VALUE
 ) : RecyclerView.OnScrollListener() {
 
@@ -97,4 +97,8 @@ abstract class EndlessRecyclerViewScrollListener(
 
     // Defines the process for actually loading more data based on page
     abstract fun onLoadMore(page: Int, totalItemsCount: Int, view: RecyclerView)
+
+    companion object {
+        const val DEFAULT_VISIBLE_THRESHOLD = 5
+    }
 }

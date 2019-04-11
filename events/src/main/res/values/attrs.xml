@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="EventsFragment">
+        <attr name="shouldAddScrollListener" format="boolean"/>
+        <attr name="scrollListenerVisibleThreshold" format="integer"/>
+    </declare-styleable>
+</resources>

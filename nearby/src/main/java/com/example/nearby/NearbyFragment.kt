@@ -8,15 +8,14 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.coreandroid.arch.state.PagedAsyncData
 import com.example.events.EventsFragment
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import kotlin.coroutines.CoroutineContext
 
 
+@ExperimentalCoroutinesApi
+@ObsoleteCoroutinesApi
 class NearbyFragment : Fragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext
@@ -54,9 +53,17 @@ class NearbyFragment : Fragment(), CoroutineScope {
             }
         }
 
-        launch(Dispatchers.Main) {
+        launch {
             eventsFragment.eventClickedChannel.consumeEach {
                 Log.e("EVENT", it.title)
+            }
+        }
+
+        launch {
+            eventsFragment.listScrolledCloseToEndReceiveChannel.consumeEach {
+                viewModel.viewStateStore.currentState.events.doIfLoadingNotInProgress {
+                    viewModel.loadEvents()
+                }
             }
         }
     }

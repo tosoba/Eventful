@@ -7,7 +7,7 @@ data class PagedAsyncData<T>(
     val lastLoadingStatus: LoadingStatus = LoadingStatus.Idle
 ) {
     val withLoadingInProgress: PagedAsyncData<T>
-        get() = PagedAsyncData(lastLoadingStatus = LoadingStatus.InProgress)
+        get() = copy(lastLoadingStatus = LoadingStatus.InProgress)
 
     fun copyWithNewItems(
         newItems: List<T>,
