@@ -1,16 +1,28 @@
 package com.example.nearby
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.coreandroid.arch.state.PagedAsyncData
 import com.example.events.EventsFragment
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import kotlin.coroutines.CoroutineContext
 
 
-class NearbyFragment : Fragment() {
+class NearbyFragment : Fragment(), CoroutineScope {
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + supervisorJob
+
+    private val supervisorJob = Job()
 
     private val viewModel: NearbyViewModel by viewModel()
 
@@ -25,6 +37,11 @@ class NearbyFragment : Fragment() {
         }
     }
 
+    override fun onDestroy() {
+        supervisorJob.cancel()
+        super.onDestroy()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_nearby, container, false)
@@ -36,6 +53,12 @@ class NearbyFragment : Fragment() {
                 eventsFragment.updateEvents(it.events.items)
             }
         }
-    }
 
+        launch(Dispatchers.Main) {
+            eventsFragment.eventClickedChannel.consumeEach {
+                Log.e("EVENT", it.title)
+            }
+        }
+    }
 }
+

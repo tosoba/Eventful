@@ -7,11 +7,15 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.core.model.Event
 import kotlinx.android.synthetic.main.fragment_events.view.*
+import kotlinx.coroutines.channels.ReceiveChannel
 
 
 class EventsFragment : Fragment() {
 
     private val adapter by lazy(LazyThreadSafetyMode.NONE) { EventsAdapter(this) }
+
+    val eventClickedChannel: ReceiveChannel<Event>
+        get() = adapter.eventClickedReceiveChannel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
