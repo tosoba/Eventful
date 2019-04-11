@@ -27,17 +27,23 @@ class EventsAdapter(lifecycleOwner: LifecycleOwner) : CoUpdatableRecyclerViewAda
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(
         LayoutInflater.from(parent.context).inflate(R.layout.event_item, parent, false)
     ).apply {
-        view.setOnClickListener { event?.let { eventClickedChannel.offer(it) } }
+        itemView.setOnClickListener { event?.let { eventClickedChannel.offer(it) } }
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val event = coDiffUtil.current[position]
-        holder.event = event
-        with(holder.view) {
-            event_item_title_text_view.text = event.title
-            event_item_desc_text_view.text = event.description
-        }
+        holder.onBind(coDiffUtil.current[position])
     }
 
-    class ViewHolder(val view: View, var event: Event? = null) : RecyclerView.ViewHolder(view)
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        var event: Event? = null
+            private set
+
+        fun onBind(event: Event) {
+            this.event = event
+            with(itemView) {
+                event_item_title_text_view.text = event.title
+                event_item_desc_text_view.text = event.description
+            }
+        }
+    }
 }
