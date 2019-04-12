@@ -6,9 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter
-import com.example.coreandroid.util.appCompatActivity
-import com.example.coreandroid.util.drawerLayoutHost
-import com.example.coreandroid.view.ActionBarDrawerToggleEnd
+import com.example.coreandroid.util.setupToolbarWithDrawerToggle
 import com.example.coreandroid.view.TitledFragmentsPagerAdapter
 import com.example.coreandroid.view.ViewPagerPageSelectedListener
 import com.example.favourites.FavouritesFragment
@@ -57,18 +55,7 @@ class MainFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_main, container, false).apply {
-        appCompatActivity.setSupportActionBar(main_toolbar)
-
-        ActionBarDrawerToggleEnd(
-            activity!!,
-            drawerLayoutHost.drawerLayout!!,
-            main_toolbar,
-            R.string.navigation_drawer_open,
-            R.string.navigation_drawer_close
-        ).run {
-            drawerLayoutHost.drawerLayout!!.addDrawerListener(this)
-            syncState()
-        }
+        setupToolbarWithDrawerToggle(main_toolbar)
 
         main_bottom_nav_view.setOnNavigationItemSelectedListener(bottomNavigationItemSelectedListener)
 

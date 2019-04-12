@@ -6,9 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.coreandroid.arch.state.PagedAsyncData
+import com.example.coreandroid.navigation.IFragmentProvider
+import com.example.coreandroid.util.navigationFragment
 import com.example.events.EventsFragment
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.consumeEach
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import kotlin.coroutines.CoroutineContext
 
@@ -23,6 +26,8 @@ class NearbyFragment : Fragment(), CoroutineScope {
     private val supervisorJob = Job()
 
     private val viewModel: NearbyViewModel by viewModel()
+
+    private val fragmentProvider: IFragmentProvider by inject()
 
     private val eventsFragment: EventsFragment by lazy(LazyThreadSafetyMode.NONE) {
         childFragmentManager.findFragmentById(R.id.nearby_events_list_fragment) as EventsFragment
@@ -54,7 +59,7 @@ class NearbyFragment : Fragment(), CoroutineScope {
 
         launch {
             eventsFragment.eventClickedChannel.consumeEach {
-
+                navigationFragment?.showFragment(fragmentProvider.eventFragment(it))
             }
         }
 

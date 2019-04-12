@@ -31,6 +31,11 @@ class MainActivity : AppCompatActivity(), DrawerLayoutHost {
         main_drawer_nav_view.setNavigationItemSelectedListener(drawerNavigationItemSelectedListener)
     }
 
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return true
+    }
+
     override fun onBackPressed() {
         if (mainNavigationFragment?.onBackPressed() == true) return
         else super.onBackPressed()

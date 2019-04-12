@@ -8,7 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
-import com.example.core.model.Event
+import com.example.coreandroid.model.EventUiModel
 import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
 import kotlinx.android.synthetic.main.fragment_events.view.*
 import kotlinx.coroutines.ObsoleteCoroutinesApi
@@ -30,7 +30,7 @@ class EventsFragment : Fragment() {
     val listScrolledCloseToEndReceiveChannel: ReceiveChannel<Unit>
         get() = listScrolledCloseToEndChannel
 
-    val eventClickedChannel: ReceiveChannel<Event>
+    val eventClickedChannel: ReceiveChannel<EventUiModel>
         get() = adapter.eventClickedReceiveChannel
 
     override fun onInflate(context: Context, attrs: AttributeSet, savedInstanceState: Bundle?) {
@@ -61,7 +61,7 @@ class EventsFragment : Fragment() {
             })
     }
 
-    fun updateEvents(newEvents: List<Event>) {
+    fun updateEvents(newEvents: List<EventUiModel>) {
         adapter.update(newEvents)
     }
 }

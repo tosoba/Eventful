@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.example.coreandroid.util.hideBackNavArrow
 
 
 abstract class BaseNavigationFragment : Fragment() {
@@ -23,8 +24,10 @@ abstract class BaseNavigationFragment : Fragment() {
     }
 
     fun onBackPressed(): Boolean {
-        if (childFragmentManager.backStackEntryCount >= 1) {
+        val backStackEntryCount = childFragmentManager.backStackEntryCount
+        if (backStackEntryCount >= 1) {
             childFragmentManager.popBackStack()
+            if (backStackEntryCount == 1) hideBackNavArrow()
             return true
         }
         return false

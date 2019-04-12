@@ -2,7 +2,9 @@ package com.example.nearby
 
 import com.example.core.IEventsRepository
 import com.example.core.`do`
+import com.example.core.model.Event
 import com.example.coreandroid.arch.state.BaseFeature
+import com.example.coreandroid.mapper.ui
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -19,7 +21,7 @@ class NearbyActionsProvider(
         ).`do`(
             onSuccess = { (newEvents, newOffset) ->
                 stateTransition {
-                    copy(events = events.copyWithNewItems(newEvents, newOffset))
+                    copy(events = events.copyWithNewItems(newEvents.map(Event::ui), newOffset))
                 }
             },
             onError = { stateTransition { copy(events = events.copyWithError(it)) } }
