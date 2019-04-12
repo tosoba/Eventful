@@ -1,7 +1,6 @@
 package com.example.nearby
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -55,7 +54,7 @@ class NearbyFragment : Fragment(), CoroutineScope {
 
         launch {
             eventsFragment.eventClickedChannel.consumeEach {
-                Log.e("EVENT", it.title)
+
             }
         }
 

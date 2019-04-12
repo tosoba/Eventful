@@ -1,0 +1,22 @@
+package com.example.coreandroid.util
+
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import com.example.coreandroid.fragment.BaseNavigationFragment
+import com.example.coreandroid.fragment.DrawerLayoutHost
+
+val Fragment.appCompatActivity: AppCompatActivity
+    get() = activity as AppCompatActivity
+
+val Fragment.drawerLayoutHost: DrawerLayoutHost
+    get() = activity as DrawerLayoutHost
+
+val Fragment.navigationFragment: BaseNavigationFragment?
+    get() {
+        var ancestorFragment = parentFragment
+        while (ancestorFragment != null) {
+            if (ancestorFragment is BaseNavigationFragment) return ancestorFragment
+            ancestorFragment = ancestorFragment.parentFragment
+        }
+        return null
+    }

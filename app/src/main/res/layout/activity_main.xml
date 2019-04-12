@@ -9,10 +9,10 @@
         android:fitsSystemWindows="true"
         tools:openDrawer="end">
 
-    <include
-            layout="@layout/content_main"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+    <fragment android:id="@+id/main_navigation_fragment"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:name="com.example.eventsnearby.MainNavigationFragment"/>
 
     <com.google.android.material.navigation.NavigationView
             android:id="@+id/main_drawer_nav_view"
