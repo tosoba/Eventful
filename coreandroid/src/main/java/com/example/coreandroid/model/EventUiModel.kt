@@ -1,6 +1,7 @@
 package com.example.coreandroid.model
 
 import android.os.Parcelable
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
@@ -23,4 +24,6 @@ data class EventUiModel(
     val timezone: String?,
     val title: String,
     val updated: String
-) : Parcelable
+) : Parcelable {
+    val latLng: LatLng? get() = if (location.size == 2) LatLng(location[0], location[1]) else null
+}
