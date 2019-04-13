@@ -6,6 +6,7 @@ import com.example.coreandroid.main.MainViewModel
 import com.example.coreandroid.model.EventUiModel
 import com.example.coreandroid.util.observe
 import com.snakydesign.livedataextensions.distinctUntilChanged
+import com.snakydesign.livedataextensions.filter
 import com.snakydesign.livedataextensions.map
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -50,17 +51,30 @@ class NearbyViewEventHandler(
     }
 
     private fun onViewCreated(owner: LifecycleOwner) {
-        viewModel.viewStateStore.observe(owner) {
+        viewModel.viewStateObservable.observe(owner) {
             if (it.events.lastLoadingStatus == PagedAsyncData.LoadingStatus.CompletedSuccessfully) {
                 viewUpdatesChannel.offer(UpdateEvents(it.events.items))
             }
         }
 
+        viewModel.viewStateObservable.liveState
+            .filter {
+                it!!.events.lastLoadingFailed &&
+                        (it.events.lastLoadingStatus as PagedAsyncData.LoadingStatus.CompletedWithError).throwable is NearbyError
+            }
+            .map { (it.events.lastLoadingStatus as PagedAsyncData.LoadingStatus.CompletedWithError).throwable as NearbyError }
+            .observe(owner) {
+                when (it) {
+                    is NearbyError.NotConnected -> viewUpdatesChannel.offer(ShowNoConnectionMessage)
+                    is NearbyError.LocationUnavailable -> viewUpdatesChannel.offer(ShowLocationUnavailableMessage)
+                }
+            }
+
         mainViewModel.viewStateStore.liveState
             .map { it.isConnected }
             .distinctUntilChanged()
             .observe(owner) {
-                if (it && viewModel.viewStateStore.currentState.events.lastLoadingFailed) {
+                if (it && viewModel.viewStateObservable.currentState.events.emptyAndLastLoadingFailed) {
                     //TODO: check if location available
                     loadEvents()
                 }
@@ -76,7 +90,7 @@ class NearbyViewEventHandler(
     }
 
     private fun loadEvents() {
-        viewModel.viewStateStore.currentState.events.doIfEmptyAndLoadingNotInProgress {
+        viewModel.viewStateObservable.currentState.events.doIfEmptyAndLoadingNotInProgress {
             viewModel.loadEvents()
         }
     }

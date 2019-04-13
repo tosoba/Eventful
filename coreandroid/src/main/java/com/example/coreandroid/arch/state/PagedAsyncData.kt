@@ -9,6 +9,9 @@ data class PagedAsyncData<T>(
     val lastLoadingFailed: Boolean
         get() = lastLoadingStatus is LoadingStatus.CompletedWithError
 
+    val emptyAndLastLoadingFailed: Boolean
+        get() = lastLoadingFailed && items.isEmpty()
+
     val withLoadingInProgress: PagedAsyncData<T>
         get() = copy(lastLoadingStatus = LoadingStatus.InProgress)
 

@@ -8,6 +8,7 @@ import androidx.lifecycle.Observer
 
 interface StateObservable<State : Any> {
     val liveState: LiveData<State>
+    val currentState: State
     fun observe(owner: LifecycleOwner, observer: (State) -> Unit)
     fun observeSignals(owner: LifecycleOwner, executor: (Signal) -> Unit)
 }
@@ -18,11 +19,11 @@ open class ViewDataStore<State : Any>(
     private val mutableLiveState = MutableLiveData<State>().apply {
         value = initialState
     }
-    override val liveState = mutableLiveState
+    override val liveState: LiveData<State> = mutableLiveState
 
     private val liveSignal = MutableLiveData<Signal>()
 
-    val currentState: State
+    override val currentState: State
         get() = mutableLiveState.value!!
 
     override fun observe(

@@ -2,6 +2,7 @@ package com.example.nearby
 
 import androidx.lifecycle.ViewModel
 import com.example.coreandroid.arch.state.CoViewStateStore
+import com.example.coreandroid.arch.state.StateObservable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
@@ -12,7 +13,8 @@ class NearbyViewModel(
     private val actionsProvider: NearbyActionsProvider
 ) : ViewModel() {
 
-    val viewStateStore = CoViewStateStore(NearbyState.INITIAL, Dispatchers.IO)
+    private val viewStateStore = CoViewStateStore(NearbyState.INITIAL, Dispatchers.IO)
+    val viewStateObservable: StateObservable<NearbyState> = viewStateStore
 
     fun loadEvents() {
         viewStateStore.coDispatch { state ->
