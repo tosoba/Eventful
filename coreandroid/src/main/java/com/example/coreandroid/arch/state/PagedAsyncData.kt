@@ -6,6 +6,9 @@ data class PagedAsyncData<T>(
     val totalItems: Int = Integer.MAX_VALUE,
     val lastLoadingStatus: LoadingStatus = LoadingStatus.Idle
 ) {
+    val lastLoadingFailed: Boolean
+        get() = lastLoadingStatus is LoadingStatus.CompletedWithError
+
     val withLoadingInProgress: PagedAsyncData<T>
         get() = copy(lastLoadingStatus = LoadingStatus.InProgress)
 

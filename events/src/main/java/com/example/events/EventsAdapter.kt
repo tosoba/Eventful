@@ -10,27 +10,24 @@ import com.example.coreandroid.model.EventUiModel
 import com.example.coreandroid.view.CoUpdatableRecyclerViewAdapter
 import kotlinx.android.synthetic.main.event_item.view.*
 import kotlinx.coroutines.ObsoleteCoroutinesApi
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.SendChannel
 
 @ObsoleteCoroutinesApi
-class EventsAdapter(lifecycleOwner: LifecycleOwner) :
-    CoUpdatableRecyclerViewAdapter<EventUiModel, EventsAdapter.ViewHolder>(
+class EventsAdapter(
+    lifecycleOwner: LifecycleOwner, private val viewEventsChannel: SendChannel<EventsViewEvent>
+) : CoUpdatableRecyclerViewAdapter<EventUiModel, EventsAdapter.ViewHolder>(
     lifecycleOwner,
-        object : DiffUtil.ItemCallback<EventUiModel>() {
-            override fun areItemsTheSame(oldItem: EventUiModel, newItem: EventUiModel): Boolean =
-                oldItem.id == newItem.id
+    object : DiffUtil.ItemCallback<EventUiModel>() {
+        override fun areItemsTheSame(oldItem: EventUiModel, newItem: EventUiModel): Boolean =
+            oldItem.id == newItem.id
 
-            override fun areContentsTheSame(oldItem: EventUiModel, newItem: EventUiModel): Boolean = oldItem == newItem
+        override fun areContentsTheSame(oldItem: EventUiModel, newItem: EventUiModel): Boolean = oldItem == newItem
     }
 ) {
-    private val eventClickedChannel: Channel<EventUiModel> = Channel()
-    val eventClickedReceiveChannel: ReceiveChannel<EventUiModel> = eventClickedChannel
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(
         LayoutInflater.from(parent.context).inflate(R.layout.event_item, parent, false)
     ).apply {
-        itemView.setOnClickListener { event?.let { eventClickedChannel.offer(it) } }
+        itemView.setOnClickListener { event?.let { viewEventsChannel.offer(EventClicked(it)) } }
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {

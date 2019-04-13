@@ -5,8 +5,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.example.coreandroid.fragment.DrawerLayoutHost
+import com.example.coreandroid.lifecycle.ConnectivityObserver
+import com.example.coreandroid.main.MainViewModel
+import com.example.coreandroid.util.plusAssign
 import com.google.android.material.navigation.NavigationView
 import kotlinx.android.synthetic.main.activity_main.*
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
 class MainActivity : AppCompatActivity(), DrawerLayoutHost {
@@ -25,9 +29,16 @@ class MainActivity : AppCompatActivity(), DrawerLayoutHost {
         supportFragmentManager.findFragmentById(R.id.main_navigation_fragment) as? MainNavigationFragment
     }
 
+    private val viewModel: MainViewModel by viewModel()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        lifecycle += ConnectivityObserver {
+            viewModel.viewStateStore.dispatchStateTransition {
+                copy(isConnected = it)
+            }
+        }
         main_drawer_nav_view.setNavigationItemSelectedListener(drawerNavigationItemSelectedListener)
     }
 

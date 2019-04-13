@@ -2,27 +2,34 @@ package com.example.coreandroid.arch.state
 
 import androidx.annotation.MainThread
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 
+interface StateObservable<State : Any> {
+    val liveState: LiveData<State>
+    fun observe(owner: LifecycleOwner, observer: (State) -> Unit)
+    fun observeSignals(owner: LifecycleOwner, executor: (Signal) -> Unit)
+}
+
 open class ViewDataStore<State : Any>(
     initialState: State
-) {
-    private val liveState = MutableLiveData<State>().apply {
+) : StateObservable<State> {
+    private val mutableLiveState = MutableLiveData<State>().apply {
         value = initialState
     }
+    override val liveState = mutableLiveState
 
     private val liveSignal = MutableLiveData<Signal>()
 
     val currentState: State
-        get() = liveState.value!!
+        get() = mutableLiveState.value!!
 
-    fun observe(
-        owner: LifecycleOwner,
-        observer: (State) -> Unit
-    ) = liveState.observe(owner, Observer { observer(it!!) })
+    override fun observe(
+        owner: LifecycleOwner, observer: (State) -> Unit
+    ) = mutableLiveState.observe(owner, Observer { observer(it!!) })
 
-    fun observeSignals(
+    override fun observeSignals(
         owner: LifecycleOwner,
         executor: (Signal) -> Unit
     ) = liveSignal.observe(owner, Observer {
@@ -31,7 +38,12 @@ open class ViewDataStore<State : Any>(
 
     @MainThread
     fun dispatchStateTransition(transition: StateTransition<State>) {
-        liveState.value = transition(currentState)
+        mutableLiveState.value = transition(currentState)
+    }
+
+    @MainThread
+    fun dispatchStateTransition(nextState: State.() -> State) {
+        mutableLiveState.value = currentState.nextState()
     }
 
     @MainThread

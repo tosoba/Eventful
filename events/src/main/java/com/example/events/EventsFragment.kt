@@ -20,18 +20,13 @@ import kotlin.properties.Delegates
 @ObsoleteCoroutinesApi
 class EventsFragment : Fragment() {
 
-    private val adapter by lazy(LazyThreadSafetyMode.NONE) { EventsAdapter(this) }
+    private val adapter by lazy(LazyThreadSafetyMode.NONE) { EventsAdapter(this, viewEventsChannel) }
 
     private var shouldAddScrollListener: Boolean by Delegates.notNull()
     private var scrollListenerVisibleThreshold: Int by Delegates.notNull()
 
-    private val listScrolledCloseToEndChannel: Channel<Unit> = Channel()
-
-    val listScrolledCloseToEndReceiveChannel: ReceiveChannel<Unit>
-        get() = listScrolledCloseToEndChannel
-
-    val eventClickedChannel: ReceiveChannel<EventUiModel>
-        get() = adapter.eventClickedReceiveChannel
+    private val viewEventsChannel: Channel<EventsViewEvent> = Channel()
+    val viewEventsReceiveChannel: ReceiveChannel<EventsViewEvent> = viewEventsChannel
 
     override fun onInflate(context: Context, attrs: AttributeSet, savedInstanceState: Bundle?) {
         super.onInflate(context, attrs, savedInstanceState)
@@ -56,7 +51,7 @@ class EventsFragment : Fragment() {
                 events_recycler_view.layoutManager!!, scrollListenerVisibleThreshold
             ) {
                 override fun onLoadMore(page: Int, totalItemsCount: Int, view: RecyclerView) {
-                    listScrolledCloseToEndChannel.offer(Unit)
+                    viewEventsChannel.offer(EventListScrolledToEnd)
                 }
             })
     }
