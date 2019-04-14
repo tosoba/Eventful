@@ -39,11 +39,8 @@ class NearbyFragment : Fragment(), CoroutineScope {
         childFragmentManager.findFragmentById(R.id.nearby_events_list_fragment) as EventsFragment
     }
 
-    private lateinit var eventHandler: NearbyViewEventHandler
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        eventHandler = NearbyViewEventHandler(viewModel, mainViewModel)
+    private val eventHandler: NearbyViewEventHandler by lazy(LazyThreadSafetyMode.NONE) {
+        NearbyViewEventHandler(viewModel, mainViewModel)
     }
 
     override fun onDestroy() {
