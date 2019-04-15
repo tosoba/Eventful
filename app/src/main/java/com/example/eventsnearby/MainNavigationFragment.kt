@@ -1,7 +1,7 @@
 package com.example.eventsnearby
 
 import androidx.fragment.app.Fragment
-import com.example.coreandroid.fragment.BaseNavigationFragment
+import com.example.coreandroid.base.BaseNavigationFragment
 
 class MainNavigationFragment : BaseNavigationFragment() {
     override val navigationFragmentLayoutId: Int = R.layout.fragment_main_navigation

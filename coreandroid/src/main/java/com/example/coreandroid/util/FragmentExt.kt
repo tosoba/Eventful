@@ -4,8 +4,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.example.coreandroid.R
-import com.example.coreandroid.fragment.BaseNavigationFragment
-import com.example.coreandroid.fragment.DrawerLayoutHost
+import com.example.coreandroid.base.BaseNavigationFragment
+import com.example.coreandroid.base.DrawerLayoutHost
 import com.example.coreandroid.view.ActionBarDrawerToggleEnd
 
 val Fragment.appCompatActivity: AppCompatActivity

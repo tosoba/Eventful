@@ -2,7 +2,8 @@ package com.example.nearby
 
 import androidx.lifecycle.LifecycleOwner
 import com.example.coreandroid.arch.state.PagedAsyncData
-import com.example.coreandroid.main.MainViewModel
+import com.example.coreandroid.base.ConnectivityStateProvider
+import com.example.coreandroid.di.scope.FragmentScoped
 import com.example.coreandroid.model.EventUiModel
 import com.example.coreandroid.util.observe
 import com.snakydesign.livedataextensions.distinctUntilChanged
@@ -13,13 +14,16 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.consumeEach
+import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
+
 
 @ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi
-class NearbyViewEventHandler(
+@FragmentScoped
+class NearbyViewEventHandler @Inject constructor(
     private val viewModel: NearbyViewModel,
-    private val mainViewModel: MainViewModel
+    private val connectivityStateProvider: ConnectivityStateProvider
 ) : CoroutineScope {
 
     override val coroutineContext: CoroutineContext
@@ -70,8 +74,7 @@ class NearbyViewEventHandler(
                 }
             }
 
-        mainViewModel.viewStateStore.liveState
-            .map { it.isConnected }
+        connectivityStateProvider.isConnectedLive
             .distinctUntilChanged()
             .observe(owner) {
                 if (it && viewModel.viewStateObservable.currentState.events.emptyAndLastLoadingFailed) {
@@ -97,7 +100,7 @@ class NearbyViewEventHandler(
 
     private fun checkConditionsAndLoadEvents() {
         //TODO: check location first then check isConnected in else if
-        if (mainViewModel.viewStateStore.currentState.isConnected) {
+        if (connectivityStateProvider.isConnected) {
             loadEvents()
         } else {
             viewModel.onNotConnected()

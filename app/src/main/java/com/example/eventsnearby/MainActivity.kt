@@ -1,19 +1,18 @@
 package com.example.eventsnearby
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import com.example.coreandroid.fragment.DrawerLayoutHost
+import com.example.coreandroid.base.DrawerLayoutHost
 import com.example.coreandroid.lifecycle.ConnectivityObserver
-import com.example.coreandroid.main.MainViewModel
 import com.example.coreandroid.util.plusAssign
 import com.google.android.material.navigation.NavigationView
+import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import javax.inject.Inject
 
 
-class MainActivity : AppCompatActivity(), DrawerLayoutHost {
+class MainActivity : DaggerAppCompatActivity(), DrawerLayoutHost {
 
     override val drawerLayout: DrawerLayout? get() = main_drawer_layout
 
@@ -29,7 +28,8 @@ class MainActivity : AppCompatActivity(), DrawerLayoutHost {
         supportFragmentManager.findFragmentById(R.id.main_navigation_fragment) as? MainNavigationFragment
     }
 
-    private val viewModel: MainViewModel by viewModel()
+    @Inject
+    lateinit var viewModel: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

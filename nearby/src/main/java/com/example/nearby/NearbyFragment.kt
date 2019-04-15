@@ -5,43 +5,36 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import com.example.coreandroid.main.MainViewModel
 import com.example.coreandroid.navigation.IFragmentProvider
 import com.example.coreandroid.util.navigationFragment
 import com.example.events.EventClicked
 import com.example.events.EventListScrolledToEnd
 import com.example.events.EventsFragment
+import dagger.android.support.DaggerFragment
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.consumeEach
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
-class NearbyFragment : Fragment(), CoroutineScope {
+class NearbyFragment : DaggerFragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + supervisorJob
 
     private val supervisorJob = Job()
 
-    private val viewModel: NearbyViewModel by viewModel()
-
-    private val mainViewModel: MainViewModel by sharedViewModel()
-
-    private val fragmentProvider: IFragmentProvider by inject()
+    @Inject
+    lateinit var fragmentProvider: IFragmentProvider
 
     private val eventsFragment: EventsFragment by lazy(LazyThreadSafetyMode.NONE) {
         childFragmentManager.findFragmentById(R.id.nearby_events_list_fragment) as EventsFragment
     }
 
-    private val eventHandler: NearbyViewEventHandler by lazy(LazyThreadSafetyMode.NONE) {
-        NearbyViewEventHandler(viewModel, mainViewModel)
-    }
+    @Inject
+    lateinit var eventHandler: NearbyViewEventHandler
 
     override fun onDestroy() {
         launch {

@@ -1,4 +1,4 @@
-package com.example.coreandroid.main
+package com.example.eventsnearby
 
 //TODO: consider storing userLatLng here...
 data class MainState(val isConnected: Boolean) {
