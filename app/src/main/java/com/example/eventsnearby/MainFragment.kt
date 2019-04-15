@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter
+import com.example.coreandroid.base.SnackbarController
+import com.example.coreandroid.util.SnackbarContent
 import com.example.coreandroid.util.setupToolbarWithDrawerToggle
 import com.example.coreandroid.view.TitledFragmentsPagerAdapter
 import com.example.coreandroid.view.ViewPagerPageSelectedListener
@@ -24,7 +26,7 @@ import kotlinx.coroutines.ObsoleteCoroutinesApi
 
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
-class MainFragment : Fragment() {
+class MainFragment : Fragment(), SnackbarController {
 
     private val bottomNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         viewPagerItems[item.itemId]?.let {
@@ -56,6 +58,8 @@ class MainFragment : Fragment() {
         )
     }
 
+    private var snackbar: Snackbar? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_main, container, false).apply {
@@ -71,5 +75,17 @@ class MainFragment : Fragment() {
         main_view_pager.adapter = mainViewPagerAdapter
         main_view_pager.addOnPageChangeListener(viewPagerSwipedListener)
         main_view_pager.offscreenPageLimit = 2
+    }
+
+    override fun showSnackbar(content: SnackbarContent) {
+        when (content) {
+            is SnackbarContent.Loading -> {
+                Snackbar.make(main_fab, content.message, Snackbar.LENGTH_INDEFINITE)
+            }
+        }
+    }
+
+    override fun hideSnackbar() {
+        snackbar?.dismiss()
     }
 }

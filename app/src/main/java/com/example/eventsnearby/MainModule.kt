@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import com.example.coreandroid.base.ConnectivityStateProvider
 import com.example.coreandroid.di.ViewModelKey
+import com.example.coreandroid.di.scope.ActivityScoped
 import com.example.nearby.NearbyModule
 import dagger.Binds
 import dagger.Module
@@ -19,6 +20,7 @@ import dagger.multibindings.IntoMap
 )
 abstract class MainModule {
 
+    @ActivityScoped
     @ContributesAndroidInjector(
         modules = [
             SubProviders::class,
