@@ -4,10 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter
 import com.example.coreandroid.base.SnackbarController
-import com.example.coreandroid.util.SnackbarContent
+import com.example.coreandroid.util.SnackbarState
 import com.example.coreandroid.util.setupToolbarWithDrawerToggle
 import com.example.coreandroid.view.TitledFragmentsPagerAdapter
 import com.example.coreandroid.view.ViewPagerPageSelectedListener
@@ -18,15 +17,17 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
+import dagger.android.support.DaggerFragment
 import kotlinx.android.synthetic.main.fragment_main.*
 import kotlinx.android.synthetic.main.fragment_main.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
+import javax.inject.Inject
 
 
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
-class MainFragment : Fragment(), SnackbarController {
+class MainFragment : DaggerFragment(), SnackbarController {
 
     private val bottomNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         viewPagerItems[item.itemId]?.let {
@@ -60,6 +61,9 @@ class MainFragment : Fragment(), SnackbarController {
 
     private var snackbar: Snackbar? = null
 
+    @Inject
+    lateinit var viewModel: MainViewModel
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_main, container, false).apply {
@@ -75,18 +79,19 @@ class MainFragment : Fragment(), SnackbarController {
         main_view_pager.adapter = mainViewPagerAdapter
         main_view_pager.addOnPageChangeListener(viewPagerSwipedListener)
         main_view_pager.offscreenPageLimit = 2
+
+        snackbarTransition(viewModel.viewStateStore.currentState.snackbarState)
     }
 
-    override fun showSnackbar(content: SnackbarContent) {
-        when (content) {
-            is SnackbarContent.Loading -> {
-                snackbar?.dismiss()
-                snackbar = Snackbar.make(main_fab, content.message, Snackbar.LENGTH_INDEFINITE).apply { show() }
+    override fun snackbarTransition(newState: SnackbarState) {
+        main_fab?.let {
+            snackbar?.dismiss()
+            viewModel.storeSnackbarState(newState)
+            when (newState) {
+                is SnackbarState.Loading -> {
+                    snackbar = Snackbar.make(it, newState.message, Snackbar.LENGTH_INDEFINITE).apply { show() }
+                }
             }
         }
-    }
-
-    override fun hideSnackbar() {
-        snackbar?.dismiss()
     }
 }

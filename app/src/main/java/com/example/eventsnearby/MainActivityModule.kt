@@ -15,16 +15,17 @@ import dagger.multibindings.IntoMap
 
 @Module(
     includes = [
-        MainModule.Providers::class
+        MainActivityModule.Providers::class
     ]
 )
-abstract class MainModule {
+abstract class MainActivityModule {
 
     @ActivityScoped
     @ContributesAndroidInjector(
         modules = [
             SubProviders::class,
-            NearbyModule::class
+            NearbyModule::class,
+            MainFragmentModule::class
         ]
     )
     abstract fun mainActivity(): MainActivity

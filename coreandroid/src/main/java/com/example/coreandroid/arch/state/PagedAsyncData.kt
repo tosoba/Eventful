@@ -45,6 +45,16 @@ data class PagedAsyncData<T>(
         }
     }
 
+    inline fun doIfLoadingNotInProgressAndNotAllLoaded(block: (PagedAsyncData<T>) -> Unit) {
+        if (lastLoadingStatus !is LoadingStatus.InProgress && offset < totalItems) {
+            block(this)
+        }
+    }
+
+    inline fun doIfNotEmpty(block: (PagedAsyncData<T>) -> Unit) {
+        if (items.isNotEmpty()) block(this)
+    }
+
     inline fun doIfLoadingNotInProgress(block: (PagedAsyncData<T>) -> Unit) {
         if (lastLoadingStatus !is LoadingStatus.InProgress) {
             block(this)

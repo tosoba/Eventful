@@ -19,9 +19,9 @@ class NearbyActionsProvider(
         repo.getNearbyEvents(
             lat = latLng.latitude, lon = latLng.longitude, offset = offset
         ).`do`(
-            onSuccess = { (newEvents, newOffset) ->
+            onSuccess = { (newEvents, newOffset, totalItems) ->
                 stateTransition {
-                    copy(events = events.copyWithNewItems(newEvents.map(Event::ui), newOffset))
+                    copy(events = events.copyWithNewItems(newEvents.map(Event::ui), newOffset, totalItems))
                 }
             },
             onError = { stateTransition { copy(events = events.copyWithError(it)) } }

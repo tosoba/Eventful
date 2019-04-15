@@ -5,14 +5,14 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.coreandroid.di.ViewModelFactory
 import com.example.coreandroid.navigation.IFragmentProvider
 import com.example.eventsnearby.FragmentProvider
-import com.example.eventsnearby.MainModule
+import com.example.eventsnearby.MainActivityModule
 import dagger.Module
 import dagger.Provides
 import javax.inject.Provider
 
 @Module(
     includes = [
-        MainModule::class
+        MainActivityModule::class
     ]
 )
 class UiModule {

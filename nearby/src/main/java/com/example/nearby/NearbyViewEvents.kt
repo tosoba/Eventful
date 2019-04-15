@@ -11,7 +11,7 @@ sealed class Interaction : NearbyViewEvent() {
 }
 
 sealed class Lifecycle : NearbyViewEvent() {
-    data class OnViewCreated(val lifecycleOwner: LifecycleOwner) : Lifecycle()
+    data class OnViewCreated(val lifecycleOwner: LifecycleOwner, val wasRecreated: Boolean) : Lifecycle()
     object OnDestroy : Lifecycle()
 }
 

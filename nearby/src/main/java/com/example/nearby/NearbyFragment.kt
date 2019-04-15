@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.example.coreandroid.navigation.IFragmentProvider
-import com.example.coreandroid.util.SnackbarContent
+import com.example.coreandroid.util.SnackbarState
 import com.example.coreandroid.util.navigationFragment
 import com.example.coreandroid.util.snackbarController
 import com.example.events.EventClicked
@@ -50,11 +50,17 @@ class NearbyFragment : DaggerFragment(), CoroutineScope {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_nearby, container, false)
 
+    //TODO: fix onViewCreated is called twice for some reason - partially fixed - there's still a problem with events RecyclerView not preserving position after config change
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupChannels()
         launch {
-            eventHandler.viewEventsSendChannel.send(Lifecycle.OnViewCreated(this@NearbyFragment))
+            eventHandler.viewEventsSendChannel.send(
+                Lifecycle.OnViewCreated(
+                    this@NearbyFragment,
+                    savedInstanceState != null
+                )
+            )
         }
     }
 
@@ -72,7 +78,7 @@ class NearbyFragment : DaggerFragment(), CoroutineScope {
             eventHandler.viewUpdatesReceiveChannel.consumeEach {
                 when (it) {
                     is UpdateEvents -> {
-                        snackbarController?.hideSnackbar()
+                        snackbarController?.snackbarTransition(SnackbarState.Hidden)
                         eventsFragment.updateEvents(it.events)
                     }
                     is ShowEvent -> {
@@ -86,7 +92,7 @@ class NearbyFragment : DaggerFragment(), CoroutineScope {
                         //TODO
                     }
                     is ShowLoadingSnackbar -> {
-                        snackbarController?.showSnackbar(SnackbarContent.Loading())
+                        snackbarController?.snackbarTransition(SnackbarState.Loading())
                     }
                 }
             }

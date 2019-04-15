@@ -43,7 +43,7 @@ class NearbyViewEventHandler @Inject constructor(
                 when (it) {
                     is Interaction.EventListScrolledToEnd -> checkConditionsAndLoadEvents()
                     is Interaction.EventClicked -> onEventClicked(it.event)
-                    is Lifecycle.OnViewCreated -> onViewCreated(it.lifecycleOwner)
+                    is Lifecycle.OnViewCreated -> onViewCreated(it.lifecycleOwner, it.wasRecreated)
                     is Lifecycle.OnDestroy -> onDestroy()
                 }
             }
@@ -54,7 +54,7 @@ class NearbyViewEventHandler @Inject constructor(
         viewUpdatesChannel.offer(ShowEvent(event))
     }
 
-    private fun onViewCreated(owner: LifecycleOwner) {
+    private fun onViewCreated(owner: LifecycleOwner, wasRecreated: Boolean) {
         viewModel.viewStateObservable.observe(owner) {
             if (it.events.lastLoadingStatus == PagedAsyncData.LoadingStatus.CompletedSuccessfully) {
                 viewUpdatesChannel.offer(UpdateEvents(it.events.items))
@@ -85,7 +85,13 @@ class NearbyViewEventHandler @Inject constructor(
                 }
             }
 
-        checkConditionsAndLoadEvents()
+        if (!wasRecreated) {
+            checkConditionsAndLoadEvents()
+        } else {
+            viewModel.viewStateObservable.currentState.events.doIfNotEmpty {
+                viewUpdatesChannel.offer(UpdateEvents(it.items))
+            }
+        }
     }
 
     private fun onDestroy() {
@@ -97,8 +103,8 @@ class NearbyViewEventHandler @Inject constructor(
     private fun checkConditionsAndLoadEvents() {
         //TODO: check location first then check isConnected in else if
         if (connectivityStateProvider.isConnected) {
-            viewUpdatesChannel.offer(ShowLoadingSnackbar)
-            viewModel.viewStateObservable.currentState.events.doIfLoadingNotInProgress {
+            viewModel.viewStateObservable.currentState.events.doIfLoadingNotInProgressAndNotAllLoaded {
+                viewUpdatesChannel.offer(ShowLoadingSnackbar)
                 viewModel.loadEvents()
             }
         } else {

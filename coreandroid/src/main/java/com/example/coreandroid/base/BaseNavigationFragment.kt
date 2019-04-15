@@ -20,7 +20,8 @@ abstract class BaseNavigationFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        showFragment(initialFragment, false)
+        if (savedInstanceState == null)
+            showFragment(initialFragment, false)
     }
 
     fun onBackPressed(): Boolean {

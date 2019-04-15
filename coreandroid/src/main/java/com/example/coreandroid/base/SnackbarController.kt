@@ -1,8 +1,7 @@
 package com.example.coreandroid.base
 
-import com.example.coreandroid.util.SnackbarContent
+import com.example.coreandroid.util.SnackbarState
 
 interface SnackbarController {
-    fun showSnackbar(content: SnackbarContent)
-    fun hideSnackbar()
+    fun snackbarTransition(newState: SnackbarState)
 }
