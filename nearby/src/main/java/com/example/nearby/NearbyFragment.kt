@@ -38,7 +38,7 @@ class NearbyFragment : DaggerFragment(), CoroutineScope {
 
     override fun onDestroy() {
         launch {
-            eventHandler.viewEventsSendChannel.offer(Lifecycle.OnDestroy)
+            eventHandler.viewEventsSendChannel.send(Lifecycle.OnDestroy)
         }
         supervisorJob.cancel()
         super.onDestroy()
@@ -60,8 +60,8 @@ class NearbyFragment : DaggerFragment(), CoroutineScope {
         launch {
             eventsFragment.viewEventsReceiveChannel.consumeEach {
                 when (it) {
-                    is EventClicked -> eventHandler.viewEventsSendChannel.offer(Interaction.EventClicked(it.event))
-                    is EventListScrolledToEnd -> eventHandler.viewEventsSendChannel.offer(Interaction.EventListScrolledToEnd)
+                    is EventClicked -> eventHandler.viewEventsSendChannel.send(Interaction.EventClicked(it.event))
+                    is EventListScrolledToEnd -> eventHandler.viewEventsSendChannel.send(Interaction.EventListScrolledToEnd)
                 }
             }
         }

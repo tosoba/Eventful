@@ -35,9 +35,7 @@ class MainActivity : DaggerAppCompatActivity(), DrawerLayoutHost {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         lifecycle += ConnectivityObserver {
-            viewModel.viewStateStore.dispatchStateTransition {
-                copy(isConnected = it)
-            }
+            viewModel.viewStateStore.dispatchStateTransition { copy(isConnected = it) }
         }
         main_drawer_nav_view.setNavigationItemSelectedListener(drawerNavigationItemSelectedListener)
     }

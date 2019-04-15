@@ -14,7 +14,7 @@ import dagger.multibindings.IntoMap
 
 @Module(
     includes = [
-        NearbyModule.ProvideViewModel::class
+        NearbyModule.Providers::class
     ]
 )
 abstract class NearbyModule {
@@ -22,13 +22,13 @@ abstract class NearbyModule {
     @FragmentScoped
     @ContributesAndroidInjector(
         modules = [
-            InjectViewModel::class
+            SubProviders::class
         ]
     )
-    abstract fun bind(): NearbyFragment
+    abstract fun nearbyFragment(): NearbyFragment
 
     @Module
-    class ProvideViewModel {
+    class Providers {
 
         @Provides
         fun nearbyActionsProvider(
@@ -38,16 +38,16 @@ abstract class NearbyModule {
         @Provides
         @IntoMap
         @ViewModelKey(NearbyViewModel::class)
-        fun provideNearbyViewModel(
+        fun nearbyViewModel(
             nearbyActionsProvider: NearbyActionsProvider
         ): ViewModel = NearbyViewModel(nearbyActionsProvider)
     }
 
     @Module
-    class InjectViewModel {
+    class SubProviders {
 
         @Provides
-        fun provideNearbyViewModel(
+        fun nearbyViewModel(
             factory: ViewModelProvider.Factory,
             target: NearbyFragment
         ): NearbyViewModel = ViewModelProviders.of(target, factory).get(NearbyViewModel::class.java)

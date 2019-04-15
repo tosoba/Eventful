@@ -14,24 +14,24 @@ import dagger.multibindings.IntoMap
 
 @Module(
     includes = [
-        MainModule.ProvideViewModel::class
+        MainModule.Providers::class
     ]
 )
 abstract class MainModule {
 
     @ContributesAndroidInjector(
         modules = [
-            InjectViewModel::class,
+            SubProviders::class,
             NearbyModule::class
         ]
     )
-    abstract fun bind(): MainActivity
+    abstract fun mainActivity(): MainActivity
 
     @Binds
     abstract fun connectivityStateProvider(mainViewModel: MainViewModel): ConnectivityStateProvider
 
     @Module
-    class ProvideViewModel {
+    class Providers {
 
         @Provides
         @IntoMap
@@ -40,7 +40,7 @@ abstract class MainModule {
     }
 
     @Module
-    class InjectViewModel {
+    class SubProviders {
 
         @Provides
         fun mainViewModel(
