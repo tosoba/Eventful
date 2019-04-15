@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import com.example.coreandroid.R
 import com.example.coreandroid.base.BaseNavigationFragment
 import com.example.coreandroid.base.DrawerLayoutHost
+import com.example.coreandroid.base.SnackbarController
 import com.example.coreandroid.view.ActionBarDrawerToggleEnd
 
 val Fragment.appCompatActivity: AppCompatActivity
@@ -15,14 +16,19 @@ val Fragment.drawerLayoutHost: DrawerLayoutHost
     get() = activity as DrawerLayoutHost
 
 val Fragment.navigationFragment: BaseNavigationFragment?
-    get() {
-        var ancestorFragment = parentFragment
-        while (ancestorFragment != null) {
-            if (ancestorFragment is BaseNavigationFragment) return ancestorFragment
-            ancestorFragment = ancestorFragment.parentFragment
-        }
-        return null
+    get() = findAncestorFragmentOfType()
+
+val Fragment.snackbarController: SnackbarController?
+    get() = findAncestorFragmentOfType()
+
+private inline fun <reified T> Fragment.findAncestorFragmentOfType(): T? {
+    var ancestorFragment = parentFragment
+    while (ancestorFragment != null) {
+        if (ancestorFragment is T) return ancestorFragment
+        ancestorFragment = ancestorFragment.parentFragment
     }
+    return null
+}
 
 fun Fragment.setupToolbarWithDrawerToggle(toolbar: Toolbar) {
     appCompatActivity.setSupportActionBar(toolbar)

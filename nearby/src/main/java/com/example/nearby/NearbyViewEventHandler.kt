@@ -79,7 +79,9 @@ class NearbyViewEventHandler @Inject constructor(
             .observe(owner) {
                 if (it && viewModel.viewStateObservable.currentState.events.emptyAndLastLoadingFailed) {
                     //TODO: check if location available
-                    loadEvents()
+                    viewModel.viewStateObservable.currentState.events.doIfEmptyAndLoadingNotInProgress {
+                        viewModel.loadEvents()
+                    }
                 }
             }
 
@@ -92,16 +94,13 @@ class NearbyViewEventHandler @Inject constructor(
         trackerJob.cancel()
     }
 
-    private fun loadEvents() {
-        viewModel.viewStateObservable.currentState.events.doIfEmptyAndLoadingNotInProgress {
-            viewModel.loadEvents()
-        }
-    }
-
     private fun checkConditionsAndLoadEvents() {
         //TODO: check location first then check isConnected in else if
         if (connectivityStateProvider.isConnected) {
-            loadEvents()
+            viewUpdatesChannel.offer(ShowLoadingSnackbar)
+            viewModel.viewStateObservable.currentState.events.doIfLoadingNotInProgress {
+                viewModel.loadEvents()
+            }
         } else {
             viewModel.onNotConnected()
         }

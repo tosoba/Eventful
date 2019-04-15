@@ -6,7 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.example.coreandroid.navigation.IFragmentProvider
+import com.example.coreandroid.util.SnackbarContent
 import com.example.coreandroid.util.navigationFragment
+import com.example.coreandroid.util.snackbarController
 import com.example.events.EventClicked
 import com.example.events.EventListScrolledToEnd
 import com.example.events.EventsFragment
@@ -69,7 +71,10 @@ class NearbyFragment : DaggerFragment(), CoroutineScope {
         launch {
             eventHandler.viewUpdatesReceiveChannel.consumeEach {
                 when (it) {
-                    is UpdateEvents -> eventsFragment.updateEvents(it.events)
+                    is UpdateEvents -> {
+                        snackbarController?.hideSnackbar()
+                        eventsFragment.updateEvents(it.events)
+                    }
                     is ShowEvent -> {
                         navigationFragment?.showFragment(fragmentProvider.eventFragment(it.event))
                     }
@@ -79,6 +84,9 @@ class NearbyFragment : DaggerFragment(), CoroutineScope {
                     }
                     is ShowLocationUnavailableMessage -> {
                         //TODO
+                    }
+                    is ShowLoadingSnackbar -> {
+                        snackbarController?.showSnackbar(SnackbarContent.Loading())
                     }
                 }
             }

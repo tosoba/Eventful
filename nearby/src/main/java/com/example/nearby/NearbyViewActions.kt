@@ -11,3 +11,5 @@ data class ShowEvent(val event: EventUiModel) : NearbyViewAction()
 object ShowNoConnectionMessage : NearbyViewAction()
 
 object ShowLocationUnavailableMessage : NearbyViewAction()
+
+object ShowLoadingSnackbar : NearbyViewAction()

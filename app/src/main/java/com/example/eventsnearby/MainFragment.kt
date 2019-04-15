@@ -80,7 +80,8 @@ class MainFragment : Fragment(), SnackbarController {
     override fun showSnackbar(content: SnackbarContent) {
         when (content) {
             is SnackbarContent.Loading -> {
-                Snackbar.make(main_fab, content.message, Snackbar.LENGTH_INDEFINITE)
+                snackbar?.dismiss()
+                snackbar = Snackbar.make(main_fab, content.message, Snackbar.LENGTH_INDEFINITE).apply { show() }
             }
         }
     }
