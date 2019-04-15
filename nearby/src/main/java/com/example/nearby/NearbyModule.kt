@@ -31,7 +31,6 @@ abstract class NearbyModule {
     class ProvideViewModel {
 
         @Provides
-        @FragmentScoped
         fun nearbyActionsProvider(
             repository: IEventsRepository
         ): NearbyActionsProvider = NearbyActionsProvider(repository)

@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.example.coreandroid.util.registerFragmentLifecycleCallbacks
+import com.example.eventsnearby.di.DaggerAppComponent
 import dagger.android.AndroidInjection
 import dagger.android.AndroidInjector
 import dagger.android.DaggerApplication

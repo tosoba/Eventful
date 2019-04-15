@@ -9,7 +9,6 @@ import com.example.eventsnearby.MainModule
 import dagger.Module
 import dagger.Provides
 import javax.inject.Provider
-import javax.inject.Singleton
 
 @Module(
     includes = [
@@ -19,7 +18,6 @@ import javax.inject.Singleton
 class UiModule {
 
     @Provides
-    @Singleton
     fun viewModelFactory(
         providers: Map<Class<out ViewModel>, @JvmSuppressWildcards Provider<ViewModel>>
     ): ViewModelProvider.Factory = ViewModelFactory(providers)
