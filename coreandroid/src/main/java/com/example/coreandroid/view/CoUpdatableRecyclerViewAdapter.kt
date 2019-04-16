@@ -15,13 +15,16 @@ abstract class CoUpdatableRecyclerViewAdapter<T, VH : RecyclerView.ViewHolder>(
 
     protected val coDiffUtil: CoDiffUtil<T> by lazy { CoDiffUtil(lifecycleOwner, this, diffUtilCallback) }
 
+    val currentItems: List<T> get() = coDiffUtil.current
+
     init {
         if (initialItems.isNotEmpty()) update(initialItems)
     }
 
     override fun getItemCount(): Int = coDiffUtil.current.size
 
-    @ObsoleteCoroutinesApi
     fun update(items: List<T>) = coDiffUtil.update(items)
+
+    fun onRecreated(previousItems: List<T>) = coDiffUtil.insertOnEmpty(previousItems)
 }
 

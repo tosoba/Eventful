@@ -102,6 +102,12 @@ class CoDiffUtil<T>(
         }
     }
 
+    fun insertOnEmpty(items: List<T>) {
+        list = items
+        readOnlyList = Collections.unmodifiableList(items)
+        listUpdateCallback.onInserted(0, items.size)
+    }
+
     private suspend fun clear(count: Int) {
         withContext(Dispatchers.Main) {
             list = null
@@ -111,11 +117,7 @@ class CoDiffUtil<T>(
     }
 
     private suspend fun insert(newList: List<T>) {
-        withContext(Dispatchers.Main) {
-            list = newList
-            readOnlyList = Collections.unmodifiableList(newList)
-            listUpdateCallback.onInserted(0, newList.size)
-        }
+        withContext(Dispatchers.Main) { insertOnEmpty(newList) }
     }
 
     private suspend fun calculateDiff(newList: List<T>, callback: DiffUtil.Callback) {

@@ -87,10 +87,6 @@ class NearbyViewEventHandler @Inject constructor(
 
         if (!wasRecreated) {
             checkConditionsAndLoadEvents()
-        } else {
-            viewModel.viewStateObservable.currentState.events.doIfNotEmpty {
-                viewUpdatesChannel.offer(UpdateEvents(it.items))
-            }
         }
     }
 
