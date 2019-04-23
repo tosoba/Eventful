@@ -80,10 +80,10 @@ class MainFragment : DaggerFragment(), SnackbarController {
         main_view_pager.addOnPageChangeListener(viewPagerSwipedListener)
         main_view_pager.offscreenPageLimit = 2
 
-        snackbarTransition(viewModel.viewStateStore.currentState.snackbarState)
+        transition(viewModel.viewStateStore.currentState.snackbarState)
     }
 
-    override fun snackbarTransition(newState: SnackbarState) {
+    override fun transition(newState: SnackbarState) {
         main_fab?.let {
             snackbar?.dismiss()
             viewModel.storeSnackbarState(newState)

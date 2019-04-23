@@ -3,6 +3,7 @@ package com.example.nearby
 import androidx.lifecycle.ViewModel
 import com.example.coreandroid.arch.state.CoViewStateStore
 import com.example.coreandroid.arch.state.StateObservable
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
@@ -16,10 +17,10 @@ class NearbyViewModel(
     private val viewStateStore = CoViewStateStore(NearbyState.INITIAL, Dispatchers.IO)
     val viewStateObservable: StateObservable<NearbyState> = viewStateStore
 
-    fun loadEvents() {
+    fun loadEvents(userLatLng: LatLng) {
         viewStateStore.coDispatch { state ->
             actionsProvider.run {
-                getEvents(latLng = state.userLatLng, offset = state.events.offset)
+                getEvents(latLng = userLatLng, offset = state.events.offset)
             }
         }
     }

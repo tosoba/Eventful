@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import com.example.coreandroid.base.ConnectivityStateProvider
+import com.example.coreandroid.base.LocationStateProvider
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.ActivityScoped
 import com.example.nearby.NearbyModule
@@ -33,13 +34,21 @@ abstract class MainActivityModule {
     @Binds
     abstract fun connectivityStateProvider(mainViewModel: MainViewModel): ConnectivityStateProvider
 
+    @Binds
+    abstract fun locationStateProvider(mainViewModel: MainViewModel): LocationStateProvider
+
     @Module
     class Providers {
 
         @Provides
+        fun mainActionsProvider(): MainActionsProvider = MainActionsProvider()
+
+        @Provides
         @IntoMap
         @ViewModelKey(MainViewModel::class)
-        fun mainViewModel(): ViewModel = MainViewModel()
+        fun mainViewModel(
+            mainActionsProvider: MainActionsProvider
+        ): ViewModel = MainViewModel(mainActionsProvider)
     }
 
     @Module

@@ -58,6 +58,8 @@ dependencies {
     kapt "com.google.dagger:dagger-compiler:2.21"
     kapt "com.google.dagger:dagger-android-processor:2.21"
 
+    implementation 'io.nlopez.smartlocation:library:3.3.3'
+
     implementation project(':core')
 
     testImplementation 'junit:junit:4.12'

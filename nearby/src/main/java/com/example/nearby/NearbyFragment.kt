@@ -78,7 +78,7 @@ class NearbyFragment : DaggerFragment(), CoroutineScope {
             eventHandler.viewUpdatesReceiveChannel.consumeEach {
                 when (it) {
                     is UpdateEvents -> {
-                        snackbarController?.snackbarTransition(SnackbarState.Hidden)
+                        snackbarController?.transition(SnackbarState.Hidden)
                         eventsFragment.updateEvents(it.events)
                     }
                     is ShowEvent -> {
@@ -86,13 +86,14 @@ class NearbyFragment : DaggerFragment(), CoroutineScope {
                     }
                     is ShowNoConnectionMessage -> {
                         //TODO
-                        Log.e("ERR", "No connection.")
+                        Log.e("CON", "No connection.")
                     }
                     is ShowLocationUnavailableMessage -> {
                         //TODO
+                        Log.e("LOC", "Location unavailable.")
                     }
                     is ShowLoadingSnackbar -> {
-                        snackbarController?.snackbarTransition(SnackbarState.Loading())
+                        snackbarController?.transition(SnackbarState.Loading())
                     }
                 }
             }

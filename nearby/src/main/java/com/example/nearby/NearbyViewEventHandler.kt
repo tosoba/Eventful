@@ -3,8 +3,10 @@ package com.example.nearby
 import androidx.lifecycle.LifecycleOwner
 import com.example.coreandroid.arch.state.PagedAsyncData
 import com.example.coreandroid.base.ConnectivityStateProvider
+import com.example.coreandroid.base.LocationStateProvider
 import com.example.coreandroid.di.scope.FragmentScoped
 import com.example.coreandroid.model.EventUiModel
+import com.example.coreandroid.util.LocationState
 import com.example.coreandroid.util.observe
 import com.snakydesign.livedataextensions.distinctUntilChanged
 import com.snakydesign.livedataextensions.filter
@@ -23,7 +25,8 @@ import kotlin.coroutines.CoroutineContext
 @FragmentScoped
 class NearbyViewEventHandler @Inject constructor(
     private val viewModel: NearbyViewModel,
-    private val connectivityStateProvider: ConnectivityStateProvider
+    private val connectivityStateProvider: ConnectivityStateProvider,
+    private val locationStateProvider: LocationStateProvider
 ) : CoroutineScope {
 
     override val coroutineContext: CoroutineContext
@@ -78,9 +81,29 @@ class NearbyViewEventHandler @Inject constructor(
             .distinctUntilChanged()
             .observe(owner) {
                 if (it && viewModel.viewStateObservable.currentState.events.emptyAndLastLoadingFailed) {
-                    //TODO: check if location available
-                    viewModel.viewStateObservable.currentState.events.doIfEmptyAndLoadingNotInProgress {
-                        viewModel.loadEvents()
+                    val locationState = locationStateProvider.locationState
+                    if (locationState is LocationState.Found) {
+                        viewModel.viewStateObservable.currentState.events.doIfEmptyAndLoadingNotInProgress {
+                            viewUpdatesChannel.offer(ShowLoadingSnackbar)
+                            viewModel.loadEvents(locationState.latLng)
+                        }
+                    } else {
+                        viewUpdatesChannel.offer(ShowLocationUnavailableMessage)
+                    }
+                }
+            }
+
+        locationStateProvider.locationStateLive
+            .distinctUntilChanged()
+            .observe(owner) { locationState ->
+                if (locationState is LocationState.Found && viewModel.viewStateObservable.currentState.events.items.isEmpty()) {
+                    if (connectivityStateProvider.isConnected) {
+                        viewModel.viewStateObservable.currentState.events.doIfEmptyAndLoadingNotInProgress {
+                            viewUpdatesChannel.offer(ShowLoadingSnackbar)
+                            viewModel.loadEvents(locationState.latLng)
+                        }
+                    } else {
+                        viewUpdatesChannel.offer(ShowNoConnectionMessage)
                     }
                 }
             }
@@ -97,14 +120,20 @@ class NearbyViewEventHandler @Inject constructor(
     }
 
     private fun checkConditionsAndLoadEvents() {
-        //TODO: check location first then check isConnected in else if
-        if (connectivityStateProvider.isConnected) {
-            viewModel.viewStateObservable.currentState.events.doIfLoadingNotInProgressAndNotAllLoaded {
-                viewUpdatesChannel.offer(ShowLoadingSnackbar)
-                viewModel.loadEvents()
-            }
-        } else {
+        val locationState = locationStateProvider.locationState
+        if (locationState !is LocationState.Found) {
+            viewModel.onLocationUnavailable()
+            return
+        }
+
+        if (!connectivityStateProvider.isConnected) {
             viewModel.onNotConnected()
+            return
+        }
+
+        viewModel.viewStateObservable.currentState.events.doIfLoadingNotInProgressAndNotAllLoaded {
+            viewUpdatesChannel.offer(ShowLoadingSnackbar)
+            viewModel.loadEvents(locationState.latLng)
         }
     }
 }
