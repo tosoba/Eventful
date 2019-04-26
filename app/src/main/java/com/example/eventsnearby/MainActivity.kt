@@ -7,7 +7,9 @@ import androidx.drawerlayout.widget.DrawerLayout
 import com.example.coreandroid.base.DrawerLayoutHost
 import com.example.coreandroid.base.LocationController
 import com.example.coreandroid.lifecycle.ConnectivityObserver
+import com.example.coreandroid.lifecycle.LocationAvailabilityObserver
 import com.example.coreandroid.util.LocationState
+import com.example.coreandroid.util.observe
 import com.example.coreandroid.util.plusAssign
 import com.google.android.material.navigation.NavigationView
 import com.markodevcic.peko.ActivityRotatingException
@@ -15,6 +17,7 @@ import com.markodevcic.peko.Peko
 import com.markodevcic.peko.PermissionRequestResult
 import com.markodevcic.peko.rationale.AlertDialogPermissionRationale
 import com.markodevcic.peko.requestPermissionsAsync
+import com.shopify.livedataktx.map
 import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CompletableDeferred
@@ -46,6 +49,17 @@ class MainActivity : DaggerAppCompatActivity(), DrawerLayoutHost, CoroutineScope
         supportFragmentManager.findFragmentById(R.id.main_navigation_fragment) as? MainNavigationFragment
     }
 
+    private val locationAvailabilityObserver: LocationAvailabilityObserver by lazy(LazyThreadSafetyMode.NONE) {
+        LocationAvailabilityObserver(this) {
+            if (it &&
+                (viewModel.viewStateStore.currentState.locationState is LocationState.Disabled ||
+                        viewModel.viewStateStore.currentState.locationState is LocationState.Unknown)
+            ) {
+                viewModel.loadLocation(this)
+            }
+        }
+    }
+
     @Inject
     lateinit var viewModel: MainViewModel
 
@@ -54,15 +68,23 @@ class MainActivity : DaggerAppCompatActivity(), DrawerLayoutHost, CoroutineScope
         setContentView(R.layout.activity_main)
         main_drawer_nav_view.setNavigationItemSelectedListener(drawerNavigationItemSelectedListener)
 
-        //TODO: add LocationEnabledObserver - currently loading locations won't work once location is enabled after it was unavailable
-        //one of the apps has it
         lifecycle += ConnectivityObserver {
             viewModel.viewStateStore.dispatchStateTransition { copy(isConnected = it) }
         }
 
+        lifecycle += locationAvailabilityObserver
+
         val currentLocationState = viewModel.viewStateStore.currentState.locationState
         if (currentLocationState == LocationState.Unknown || currentLocationState == LocationState.Loading) {
             requestPermission()
+        }
+
+        viewModel.viewStateStore.liveState.map { it!!.locationState }.observe(this) {
+            if (it is LocationState.Disabled) {
+                locationAvailabilityObserver.start()
+            } else {
+                locationAvailabilityObserver.stop()
+            }
         }
     }
 
