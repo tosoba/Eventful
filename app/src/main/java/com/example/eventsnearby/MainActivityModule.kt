@@ -13,6 +13,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.android.ContributesAndroidInjector
 import dagger.multibindings.IntoMap
+import io.nlopez.smartlocation.SmartLocation
 
 @Module(
     includes = [
@@ -41,7 +42,7 @@ abstract class MainActivityModule {
     class Providers {
 
         @Provides
-        fun mainActionsProvider(): MainActionsProvider = MainActionsProvider()
+        fun mainActionsProvider(smartLocation: SmartLocation): MainActionsProvider = MainActionsProvider(smartLocation)
 
         @Provides
         @IntoMap

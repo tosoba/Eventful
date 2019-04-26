@@ -1,6 +1,5 @@
 package com.example.eventsnearby
 
-import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import com.example.coreandroid.arch.state.CoViewStateStore
@@ -37,10 +36,10 @@ class MainViewModel(
         viewStateStore.dispatchStateTransition { copy(snackbarState = state) }
     }
 
-    fun loadLocation(context: Context) {
+    fun loadLocation() {
         viewStateStore.coDispatch { _ ->
             actionsProvider.run {
-                getLocation(context)
+                getLocation()
             }
         }
     }

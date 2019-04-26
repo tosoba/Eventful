@@ -55,7 +55,7 @@ class MainActivity : DaggerAppCompatActivity(), DrawerLayoutHost, CoroutineScope
                 (viewModel.viewStateStore.currentState.locationState is LocationState.Disabled ||
                         viewModel.viewStateStore.currentState.locationState is LocationState.Unknown)
             ) {
-                viewModel.loadLocation(this)
+                viewModel.loadLocation()
             }
         }
     }
@@ -129,7 +129,7 @@ class MainActivity : DaggerAppCompatActivity(), DrawerLayoutHost, CoroutineScope
                 copy(locationState = LocationState.PermissionDenied)
             }
         } else {
-            viewModel.loadLocation(this)
+            viewModel.loadLocation()
         }
     }
 }

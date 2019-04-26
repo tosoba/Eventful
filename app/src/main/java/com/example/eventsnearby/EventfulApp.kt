@@ -19,6 +19,7 @@ class EventfulApp : DaggerApplication() {
 
     override fun applicationInjector(): AndroidInjector<out DaggerApplication> = DaggerAppComponent
         .builder()
+        .application(this)
         .create(this)
 
     override fun onCreate() {
