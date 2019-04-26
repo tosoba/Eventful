@@ -50,7 +50,6 @@ class NearbyFragment : DaggerFragment(), CoroutineScope {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_nearby, container, false)
 
-    //TODO: fix onViewCreated is called twice for some reason - partially fixed - there's still a problem with events RecyclerView not preserving position after config change
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupChannels()
