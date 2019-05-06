@@ -1,6 +1,8 @@
 package com.example.coreandroid.model
 
+import android.location.Location
 import android.os.Parcelable
+import androidx.databinding.ObservableField
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.android.parcel.Parcelize
 
@@ -25,5 +27,11 @@ data class EventUiModel(
     val title: String,
     val updated: String
 ) : Parcelable {
-    val latLng: LatLng? get() = if (location.size == 2) LatLng(location[0], location[1]) else null
+    val latLng: LatLng? get() = if (location.size == 2) LatLng(location[1], location[0]) else null
+    val androidLocation: Location?
+        get() = if (location.size == 2) Location("").apply {
+            latitude = location[1]
+            longitude = location[0]
+        } else null
+    val address: ObservableField<String> = ObservableField()
 }

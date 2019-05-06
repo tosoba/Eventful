@@ -3,6 +3,7 @@ package com.example.eventsnearby
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.example.coreandroid.util.registerFragmentLifecycleCallbacks
@@ -13,6 +14,7 @@ import dagger.android.DaggerApplication
 import dagger.android.support.AndroidSupportInjection
 import dagger.android.support.DaggerAppCompatActivity
 import dagger.android.support.DaggerFragment
+import io.reactivex.plugins.RxJavaPlugins
 
 
 class EventfulApp : DaggerApplication() {
@@ -25,6 +27,9 @@ class EventfulApp : DaggerApplication() {
     override fun onCreate() {
         super.onCreate()
         registerLifecycleCallbacks()
+        RxJavaPlugins.setErrorHandler {
+            Log.e("Rx error", it?.message ?: "Unknown message")
+        }
     }
 
     private fun registerLifecycleCallbacks() {

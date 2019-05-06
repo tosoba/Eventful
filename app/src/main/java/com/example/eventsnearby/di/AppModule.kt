@@ -2,6 +2,7 @@ package com.example.eventsnearby.di
 
 import android.app.Application
 import android.content.Context
+import com.patloew.rxlocation.RxLocation
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -19,5 +20,9 @@ abstract class AppModule {
         @Provides
         @Singleton
         fun smartLocation(context: Context): SmartLocation = SmartLocation.with(context)
+
+        @Provides
+        @Singleton
+        fun rxLocation(context: Context): RxLocation = RxLocation(context)
     }
 }

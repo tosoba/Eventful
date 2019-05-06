@@ -108,7 +108,7 @@ class NearbyViewEventHandler @Inject constructor(
                 }
             }
 
-        if (!wasRecreated) {
+        if (!wasRecreated && viewModel.viewStateObservable.currentState.events.items.isEmpty()) {
             checkConditionsAndLoadEvents()
         }
     }

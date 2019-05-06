@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProviders
 import com.example.core.IEventsRepository
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
+import com.patloew.rxlocation.RxLocation
 import dagger.Module
 import dagger.Provides
 import dagger.android.ContributesAndroidInjector
@@ -32,8 +33,9 @@ abstract class NearbyModule {
 
         @Provides
         fun nearbyActionsProvider(
-            repository: IEventsRepository
-        ): NearbyActionsProvider = NearbyActionsProvider(repository)
+            repository: IEventsRepository,
+            rxLocation: RxLocation
+        ): NearbyActionsProvider = NearbyActionsProvider(repository, rxLocation)
 
         @Provides
         @IntoMap
