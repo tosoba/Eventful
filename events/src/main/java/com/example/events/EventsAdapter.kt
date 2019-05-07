@@ -22,18 +22,10 @@ class EventsAdapter(
         override fun areContentsTheSame(oldItem: EventUiModel, newItem: EventUiModel): Boolean = oldItem == newItem
     }
 ) {
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding = DataBindingUtil.inflate<EventItemBinding>(
-            LayoutInflater.from(parent.context),
-            R.layout.event_item,
-            parent,
-            false
-        )
-        return ViewHolder(
-            binding
-        ).apply {
-            itemView.setOnClickListener { binding.event?.let { viewEventsChannel.offer(EventClicked(it)) } }
-        }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(
+        DataBindingUtil.inflate(LayoutInflater.from(parent.context), R.layout.event_item, parent, false)
+    ).apply {
+        itemView.setOnClickListener { binding.event?.let { viewEventsChannel.offer(EventClicked(it)) } }
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
