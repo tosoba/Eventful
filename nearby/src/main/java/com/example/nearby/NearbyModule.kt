@@ -11,6 +11,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.android.ContributesAndroidInjector
 import dagger.multibindings.IntoMap
+import kotlinx.coroutines.CoroutineDispatcher
 
 
 @Module(
@@ -36,8 +37,9 @@ abstract class NearbyModule {
         @ViewModelKey(NearbyViewModel::class)
         fun nearbyViewModel(
             repo: IEventsRepository,
-            rxLocation: RxLocation
-        ): ViewModel = NearbyViewModel(repo, rxLocation)
+            rxLocation: RxLocation,
+            ioDispatcher: CoroutineDispatcher
+        ): ViewModel = NearbyViewModel(repo, rxLocation, ioDispatcher)
     }
 
     @Module

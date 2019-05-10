@@ -2,7 +2,7 @@ package com.example.eventsnearby
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import com.example.coreandroid.arch.state.ViewDataStore
+import com.example.coreandroid.arch.state.ViewStateStore
 import com.example.coreandroid.base.ConnectivityStateProvider
 import com.example.coreandroid.base.LocationStateProvider
 import com.example.coreandroid.util.LocationState
@@ -26,7 +26,7 @@ class MainViewModel(
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main
 
-    val viewStateStore = ViewDataStore(MainState.INITIAL)
+    val viewStateStore = ViewStateStore(MainState.INITIAL)
 
     override val isConnectedLive: LiveData<Boolean>
         get() = viewStateStore.liveState.map { it!!.isConnected }

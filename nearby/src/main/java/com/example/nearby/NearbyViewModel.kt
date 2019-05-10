@@ -6,7 +6,7 @@ import com.example.core.IEventsRepository
 import com.example.core.Success
 import com.example.core.model.Event
 import com.example.coreandroid.arch.state.StateObservable
-import com.example.coreandroid.arch.state.ViewDataStore
+import com.example.coreandroid.arch.state.ViewStateStore
 import com.example.coreandroid.mapper.ui
 import com.example.coreandroid.util.reverseGeocode
 import com.google.android.gms.maps.model.LatLng
@@ -18,20 +18,21 @@ import kotlin.coroutines.CoroutineContext
 @ExperimentalCoroutinesApi
 class NearbyViewModel(
     private val repo: IEventsRepository,
-    private val rxLocation: RxLocation
+    private val rxLocation: RxLocation,
+    private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel(), CoroutineScope {
 
     private val job: Job = Job()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
 
-    private val viewStateStore = ViewDataStore(NearbyState.INITIAL)
+    private val viewStateStore = ViewStateStore(NearbyState.INITIAL)
     val viewStateObservable: StateObservable<NearbyState> = viewStateStore
 
     fun loadEvents(userLatLng: LatLng) {
         launch {
             viewStateStore.dispatchStateTransition { copy(events = events.withLoadingInProgress) }
-            when (val result = withContext(Dispatchers.IO) {
+            when (val result = withContext(ioDispatcher) {
                 repo.getNearbyEvents(
                     lat = userLatLng.latitude,
                     lon = userLatLng.longitude,

@@ -13,7 +13,7 @@ interface StateObservable<State : Any> {
     fun observeSignals(owner: LifecycleOwner, executor: (Signal) -> Unit)
 }
 
-open class ViewDataStore<State : Any>(
+open class ViewStateStore<State : Any>(
     initialState: State
 ) : StateObservable<State> {
 
