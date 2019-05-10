@@ -8,9 +8,10 @@ import com.example.coreandroid.di.scope.FragmentScoped
 import com.example.coreandroid.model.EventUiModel
 import com.example.coreandroid.util.LocationState
 import com.example.coreandroid.util.observe
-import com.snakydesign.livedataextensions.distinctUntilChanged
-import com.snakydesign.livedataextensions.filter
-import com.snakydesign.livedataextensions.map
+import com.shopify.livedataktx.distinct
+import com.shopify.livedataktx.filter
+import com.shopify.livedataktx.map
+import com.shopify.livedataktx.nonNull
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -67,8 +68,9 @@ class NearbyViewEventHandler @Inject constructor(
         }
 
         viewModel.viewStateObservable.liveState
+            .nonNull()
             .filter {
-                it!!.events.lastLoadingFailed &&
+                it.events.lastLoadingFailed &&
                         (it.events.lastLoadingStatus as PagedAsyncData.LoadingStatus.CompletedWithError).throwable is NearbyError
             }
             .map { (it.events.lastLoadingStatus as PagedAsyncData.LoadingStatus.CompletedWithError).throwable as NearbyError }
@@ -80,7 +82,7 @@ class NearbyViewEventHandler @Inject constructor(
             }
 
         connectivityStateProvider.isConnectedLive
-            .distinctUntilChanged()
+            .distinct()
             .observe(owner) {
                 if (it && events.emptyAndLastLoadingFailed) {
                     val locationState = locationStateProvider.locationState
@@ -96,17 +98,18 @@ class NearbyViewEventHandler @Inject constructor(
             }
 
         locationStateProvider.locationStateLive
-            .distinctUntilChanged()
+            .distinct()
             .observe(owner) { locationState ->
                 if (locationState is LocationState.Found && events.items.isEmpty()) {
                     if (connectivityStateProvider.isConnected) {
                         events.doIfEmptyAndLoadingNotInProgress {
-                            viewUpdatesChannel.offer(ShowLoadingSnackbar)
                             viewModel.loadEvents(locationState.latLng)
                         }
                     } else {
                         viewUpdatesChannel.offer(ShowNoConnectionMessage)
                     }
+                } else if (locationState is LocationState.Loading) {
+                    viewUpdatesChannel.offer(ShowLoadingSnackbar)
                 }
             }
 
@@ -134,7 +137,6 @@ class NearbyViewEventHandler @Inject constructor(
         }
 
         events.doIfLoadingNotInProgressAndNotAllLoaded {
-            viewUpdatesChannel.offer(ShowLoadingSnackbar)
             viewModel.loadEvents(locationState.latLng)
         }
     }

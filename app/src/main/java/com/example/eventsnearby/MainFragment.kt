@@ -85,6 +85,9 @@ class MainFragment : DaggerFragment(), SnackbarController {
 
     override fun transition(newState: SnackbarState) {
         main_fab?.let {
+            if (newState == viewModel.viewStateStore.currentState.snackbarState)
+                return
+
             snackbar?.dismiss()
             viewModel.storeSnackbarState(newState)
             when (newState) {

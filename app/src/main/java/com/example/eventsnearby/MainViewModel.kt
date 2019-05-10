@@ -10,6 +10,7 @@ import com.example.coreandroid.util.SnackbarState
 import com.example.coreandroid.util.awaitOne
 import com.example.coreandroid.util.latLng
 import com.shopify.livedataktx.map
+import com.shopify.livedataktx.nonNull
 import io.nlopez.smartlocation.SmartLocation
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
@@ -29,13 +30,13 @@ class MainViewModel(
     val viewStateStore = ViewStateStore(MainState.INITIAL)
 
     override val isConnectedLive: LiveData<Boolean>
-        get() = viewStateStore.liveState.map { it!!.isConnected }
+        get() = viewStateStore.liveState.nonNull().map { it.isConnected }
 
     override val isConnected: Boolean
         get() = viewStateStore.currentState.isConnected
 
     override val locationStateLive: LiveData<LocationState>
-        get() = viewStateStore.liveState.map { it!!.locationState }
+        get() = viewStateStore.liveState.nonNull().map { it.locationState }
 
     override val locationState: LocationState
         get() = viewStateStore.currentState.locationState
