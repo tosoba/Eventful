@@ -32,17 +32,12 @@ abstract class NearbyModule {
     class Providers {
 
         @Provides
-        fun nearbyActionsProvider(
-            repository: IEventsRepository,
-            rxLocation: RxLocation
-        ): NearbyActionsProvider = NearbyActionsProvider(repository, rxLocation)
-
-        @Provides
         @IntoMap
         @ViewModelKey(NearbyViewModel::class)
         fun nearbyViewModel(
-            nearbyActionsProvider: NearbyActionsProvider
-        ): ViewModel = NearbyViewModel(nearbyActionsProvider)
+            repo: IEventsRepository,
+            rxLocation: RxLocation
+        ): ViewModel = NearbyViewModel(repo, rxLocation)
     }
 
     @Module

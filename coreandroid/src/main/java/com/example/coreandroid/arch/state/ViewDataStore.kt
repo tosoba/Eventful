@@ -16,6 +16,7 @@ interface StateObservable<State : Any> {
 open class ViewDataStore<State : Any>(
     initialState: State
 ) : StateObservable<State> {
+
     private val mutableLiveState = MutableLiveData<State>().apply {
         value = initialState
     }

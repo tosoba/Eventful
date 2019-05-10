@@ -40,6 +40,8 @@ class NearbyViewEventHandler @Inject constructor(
     private val viewUpdatesChannel: Channel<NearbyViewAction> = Channel()
     val viewUpdatesReceiveChannel: ReceiveChannel<NearbyViewAction> = viewUpdatesChannel
 
+    private val events: PagedAsyncData<EventUiModel> = viewModel.viewStateObservable.currentState.events
+
     init {
         launch {
             viewEventsChannel.consumeEach {
@@ -80,10 +82,10 @@ class NearbyViewEventHandler @Inject constructor(
         connectivityStateProvider.isConnectedLive
             .distinctUntilChanged()
             .observe(owner) {
-                if (it && viewModel.viewStateObservable.currentState.events.emptyAndLastLoadingFailed) {
+                if (it && events.emptyAndLastLoadingFailed) {
                     val locationState = locationStateProvider.locationState
                     if (locationState is LocationState.Found) {
-                        viewModel.viewStateObservable.currentState.events.doIfEmptyAndLoadingNotInProgress {
+                        events.doIfEmptyAndLoadingNotInProgress {
                             viewUpdatesChannel.offer(ShowLoadingSnackbar)
                             viewModel.loadEvents(locationState.latLng)
                         }
@@ -96,9 +98,9 @@ class NearbyViewEventHandler @Inject constructor(
         locationStateProvider.locationStateLive
             .distinctUntilChanged()
             .observe(owner) { locationState ->
-                if (locationState is LocationState.Found && viewModel.viewStateObservable.currentState.events.items.isEmpty()) {
+                if (locationState is LocationState.Found && events.items.isEmpty()) {
                     if (connectivityStateProvider.isConnected) {
-                        viewModel.viewStateObservable.currentState.events.doIfEmptyAndLoadingNotInProgress {
+                        events.doIfEmptyAndLoadingNotInProgress {
                             viewUpdatesChannel.offer(ShowLoadingSnackbar)
                             viewModel.loadEvents(locationState.latLng)
                         }
@@ -108,7 +110,7 @@ class NearbyViewEventHandler @Inject constructor(
                 }
             }
 
-        if (!wasRecreated && viewModel.viewStateObservable.currentState.events.items.isEmpty()) {
+        if (!wasRecreated && events.items.isEmpty()) {
             checkConditionsAndLoadEvents()
         }
     }
@@ -131,7 +133,7 @@ class NearbyViewEventHandler @Inject constructor(
             return
         }
 
-        viewModel.viewStateObservable.currentState.events.doIfLoadingNotInProgressAndNotAllLoaded {
+        events.doIfLoadingNotInProgressAndNotAllLoaded {
             viewUpdatesChannel.offer(ShowLoadingSnackbar)
             viewModel.loadEvents(locationState.latLng)
         }

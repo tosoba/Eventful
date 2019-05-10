@@ -42,14 +42,11 @@ abstract class MainActivityModule {
     class Providers {
 
         @Provides
-        fun mainActionsProvider(smartLocation: SmartLocation): MainActionsProvider = MainActionsProvider(smartLocation)
-
-        @Provides
         @IntoMap
         @ViewModelKey(MainViewModel::class)
         fun mainViewModel(
-            mainActionsProvider: MainActionsProvider
-        ): ViewModel = MainViewModel(mainActionsProvider)
+            smartLocation: SmartLocation
+        ): ViewModel = MainViewModel(smartLocation)
     }
 
     @Module
