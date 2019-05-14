@@ -42,13 +42,15 @@ class NearbyViewModel(
                 is Success -> {
                     val (newEvents, newOffset, totalItems) = result.data
                     val uiEvents = newEvents.map(Event::ui)
-                    uiEvents.filter { it.androidLocation != null }.forEach { event ->
-                        val address = rxLocation.reverseGeocode(event.androidLocation!!)
-                        address?.let {
-                            if (it.thoroughfare != null) {
-                                val addressText =
-                                    "${it.thoroughfare} ${if (it.subThoroughfare != null) it.subThoroughfare else ""}"
-                                event.address.set(addressText)
+                    withContext(ioDispatcher) {
+                        uiEvents.filter { it.androidLocation != null }.forEach { event ->
+                            val address = rxLocation.reverseGeocode(event.androidLocation!!)
+                            address?.let {
+                                if (it.thoroughfare != null) {
+                                    val addressText =
+                                        "${it.thoroughfare} ${if (it.subThoroughfare != null) it.subThoroughfare else ""}"
+                                    event.address.set(addressText)
+                                }
                             }
                         }
                     }
