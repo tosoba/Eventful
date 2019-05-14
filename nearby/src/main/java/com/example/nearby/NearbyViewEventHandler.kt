@@ -41,7 +41,7 @@ class NearbyViewEventHandler @Inject constructor(
     private val viewUpdatesChannel: Channel<NearbyViewAction> = Channel()
     val viewUpdatesReceiveChannel: ReceiveChannel<NearbyViewAction> = viewUpdatesChannel
 
-    private val events: PagedAsyncData<EventUiModel> = viewModel.viewStateObservable.currentState.events
+    private val events: PagedAsyncData<EventUiModel> get() = viewModel.viewStateObservable.currentState.events
 
     init {
         launch {
@@ -64,6 +64,10 @@ class NearbyViewEventHandler @Inject constructor(
         viewModel.viewStateObservable.observe(owner) {
             if (it.events.lastLoadingStatus == PagedAsyncData.LoadingStatus.CompletedSuccessfully) {
                 viewUpdatesChannel.offer(UpdateEvents(it.events.items))
+            }
+
+            if (it.events.lastLoadingStatus == PagedAsyncData.LoadingStatus.InProgress) {
+                viewUpdatesChannel.offer(ShowLoadingSnackbar)
             }
         }
 
@@ -88,7 +92,6 @@ class NearbyViewEventHandler @Inject constructor(
                     val locationState = locationStateProvider.locationState
                     if (locationState is LocationState.Found) {
                         events.doIfEmptyAndLoadingNotInProgress {
-                            viewUpdatesChannel.offer(ShowLoadingSnackbar)
                             viewModel.loadEvents(locationState.latLng)
                         }
                     } else {

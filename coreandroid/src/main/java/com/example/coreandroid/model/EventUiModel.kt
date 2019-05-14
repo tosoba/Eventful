@@ -3,8 +3,10 @@ package com.example.coreandroid.model
 import android.location.Location
 import android.os.Parcelable
 import androidx.databinding.ObservableField
+import com.example.coreandroid.util.ObservableStringFieldParceler
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.android.parcel.Parcelize
+import kotlinx.android.parcel.WriteWith
 
 @Parcelize
 data class EventUiModel(
@@ -25,7 +27,8 @@ data class EventUiModel(
     val state: String,
     val timezone: String?,
     val title: String,
-    val updated: String
+    val updated: String,
+    val address: @WriteWith<ObservableStringFieldParceler>() ObservableField<String> = ObservableField()
 ) : Parcelable {
     val latLng: LatLng? get() = if (location.size == 2) LatLng(location[1], location[0]) else null
     val androidLocation: Location?
@@ -33,5 +36,4 @@ data class EventUiModel(
             latitude = location[1]
             longitude = location[0]
         } else null
-    val address: ObservableField<String> = ObservableField()
 }
