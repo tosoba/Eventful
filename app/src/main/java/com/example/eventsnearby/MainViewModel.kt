@@ -1,9 +1,9 @@
 package com.example.eventsnearby
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.ViewModel
 import com.example.coreandroid.arch.state.ViewStateStore
 import com.example.coreandroid.base.ConnectivityStateProvider
+import com.example.coreandroid.base.CoroutineViewModel
 import com.example.coreandroid.base.LocationStateProvider
 import com.example.coreandroid.util.LocationState
 import com.example.coreandroid.util.SnackbarState
@@ -12,22 +12,17 @@ import com.example.coreandroid.util.latLng
 import com.shopify.livedataktx.map
 import com.shopify.livedataktx.nonNull
 import io.nlopez.smartlocation.SmartLocation
-import kotlinx.coroutines.*
-import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.launch
 
 
 @ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi
 class MainViewModel(
     private val smartLocation: SmartLocation
-) : ViewModel(), ConnectivityStateProvider, LocationStateProvider, CoroutineScope {
-
-    private val job: Job = Job()
-
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main
-
-    val viewStateStore = ViewStateStore(MainState.INITIAL)
+) : CoroutineViewModel<MainState>(ViewStateStore(MainState.INITIAL)),
+    ConnectivityStateProvider, LocationStateProvider {
 
     override val isConnectedLive: LiveData<Boolean>
         get() = viewStateStore.liveState.nonNull().map { it.isConnected }
@@ -63,7 +58,11 @@ class MainViewModel(
         }
     }
 
-    override fun onCleared() {
-        job.cancel()
+    fun onConnectionStateChanged(isConnected: Boolean) {
+        viewStateStore.dispatchStateTransition { copy(isConnected = isConnected) }
+    }
+
+    fun onPermissionDenied() {
+        viewStateStore.dispatchStateTransition { copy(locationState = LocationState.PermissionDenied) }
     }
 }

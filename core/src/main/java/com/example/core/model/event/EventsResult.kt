@@ -1,4 +1,4 @@
-package com.example.core.model
+package com.example.core.model.event
 
 data class EventsResult(
     val events: List<Event>,

@@ -1,8 +1,8 @@
-package com.example.api.model
+package com.example.core.model.event
 
 import com.google.gson.annotations.SerializedName
 
-data class EventApiModel(
+data class Event(
     val category: String,
     val country: String,
     val description: String,

@@ -36,7 +36,8 @@ dependencies {
 
     implementation 'com.squareup.retrofit2:retrofit:2.5.0'
 
-    implementation project(':api')
+    implementation project(':weatherapi')
+    implementation project(':eventsapi')
     implementation project(':core')
     implementation project(':coreandroid')
 

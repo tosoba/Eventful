@@ -32,11 +32,8 @@ open class ViewStateStore<State : Any>(
     ) = mutableLiveState.observe(owner, Observer { observer(it!!) })
 
     override fun observeSignals(
-        owner: LifecycleOwner,
-        executor: (Signal) -> Unit
-    ) = liveSignal.observe(owner, Observer {
-        executor(it)
-    })
+        owner: LifecycleOwner, executor: (Signal) -> Unit
+    ) = liveSignal.observe(owner, Observer { executor(it) })
 
     @MainThread
     fun dispatchStateTransition(transition: StateTransition<State>) {

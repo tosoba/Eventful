@@ -1,4 +1,4 @@
-package com.example.api.util
+package com.example.eventsapi.util
 
 enum class EventsRadiusUnit(val symbol: String) {
     METERS("m"),

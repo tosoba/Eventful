@@ -1,7 +1,7 @@
-package com.example.api
+package com.example.eventsapi
 
-import com.example.api.model.EventsAuth
-import com.example.api.model.EventsResponse
+import com.example.eventsapi.model.EventsAuth
+import com.example.eventsapi.model.EventsResponse
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Headers

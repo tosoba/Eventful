@@ -1,4 +1,4 @@
-package com.example.api.util
+package com.example.eventsapi.util
 
 class EventsArea(
     private val radius: Int,

@@ -8,6 +8,7 @@ import com.example.coreandroid.base.LocationStateProvider
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.ActivityScoped
 import com.example.nearby.NearbyModule
+import com.example.weather.WeatherModule
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -16,9 +17,7 @@ import dagger.multibindings.IntoMap
 import io.nlopez.smartlocation.SmartLocation
 
 @Module(
-    includes = [
-        MainActivityModule.Providers::class
-    ]
+    includes = [MainActivityModule.Providers::class]
 )
 abstract class MainActivityModule {
 
@@ -27,6 +26,7 @@ abstract class MainActivityModule {
         modules = [
             SubProviders::class,
             NearbyModule::class,
+            WeatherModule::class,
             MainFragmentModule::class
         ]
     )

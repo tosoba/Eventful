@@ -1,54 +1,47 @@
-package com.example.nearby
+package com.example.weather
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
-import com.example.core.IEventsRepository
+import com.example.core.IWeatherRepository
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
-import com.patloew.rxlocation.RxLocation
 import dagger.Module
 import dagger.Provides
 import dagger.android.ContributesAndroidInjector
 import dagger.multibindings.IntoMap
 import kotlinx.coroutines.CoroutineDispatcher
 
-
 @Module(
-    includes = [
-        NearbyModule.Providers::class
-    ]
+    includes = [WeatherModule.Providers::class]
 )
-abstract class NearbyModule {
+abstract class WeatherModule {
 
     @FragmentScoped
     @ContributesAndroidInjector(
-        modules = [
-            SubProviders::class
-        ]
+        modules = [SubProviders::class]
     )
-    abstract fun nearbyFragment(): NearbyFragment
+    abstract fun weatherFragment(): WeatherFragment
 
     @Module
     class Providers {
 
         @Provides
         @IntoMap
-        @ViewModelKey(NearbyViewModel::class)
-        fun nearbyViewModel(
-            repo: IEventsRepository,
-            rxLocation: RxLocation,
+        @ViewModelKey(WeatherViewModel::class)
+        fun weatherViewModel(
+            repo: IWeatherRepository,
             ioDispatcher: CoroutineDispatcher
-        ): ViewModel = NearbyViewModel(repo, rxLocation, ioDispatcher)
+        ): ViewModel = WeatherViewModel(repo, ioDispatcher)
     }
 
     @Module
     class SubProviders {
 
         @Provides
-        fun nearbyViewModel(
+        fun weatherViewModel(
             factory: ViewModelProvider.Factory,
-            target: NearbyFragment
-        ): NearbyViewModel = ViewModelProviders.of(target, factory).get(NearbyViewModel::class.java)
+            target: WeatherFragment
+        ): WeatherViewModel = ViewModelProviders.of(target, factory).get(WeatherViewModel::class.java)
     }
 }

@@ -14,7 +14,7 @@ import javax.inject.Singleton
         UiModule::class,
         DispatcherModule::class,
         AppModule::class,
-        EventsDataModule::class,
+        DataModule::class,
         AndroidSupportInjectionModule::class
     ]
 )

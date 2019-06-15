@@ -23,10 +23,9 @@ import kotlin.coroutines.CoroutineContext
 @ObsoleteCoroutinesApi
 class NearbyFragment : DaggerFragment(), CoroutineScope {
 
+    private val supervisorJob = Job()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + supervisorJob
-
-    private val supervisorJob = Job()
 
     @Inject
     lateinit var fragmentProvider: IFragmentProvider

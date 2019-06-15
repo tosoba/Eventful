@@ -7,9 +7,9 @@ import com.example.core.Success
 import com.example.coreandroid.BuildConfig
 import com.google.gson.JsonParseException
 import kotlinx.coroutines.delay
-import retrofit2.Call
-import retrofit2.HttpException
-import retrofit2.Response
+import okhttp3.OkHttpClient
+import retrofit2.*
+import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
 import java.net.ConnectException
 import kotlin.coroutines.resume
@@ -71,7 +71,6 @@ private fun <T : Mappable<R>, R : Any> Response<T>.toMappableSuccess(): Result<R
 suspend fun <T : Any> Call<T>.awaitResult(): Result<T> {
     val callWrapper: () -> Result<T>? = {
         val call = clone()
-
         try {
             val response = call.execute()
             val result = response.toSuccess()
@@ -92,7 +91,6 @@ suspend fun <T : Any> Call<T>.awaitResult(): Result<T> {
 suspend fun <T : Mappable<R>, R : Any> Call<T>.awaitMappableResult(): Result<R> {
     val callWrapper: () -> Result<R>? = {
         val call = clone()
-
         try {
             val response = call.execute()
             val result = response.toMappableSuccess()
@@ -109,5 +107,15 @@ suspend fun <T : Mappable<R>, R : Any> Call<T>.awaitMappableResult(): Result<R> 
         dataInvalidator = makeDataInvalidator()
     )
 }
+
+fun retrofitWith(
+    url: String,
+    client: OkHttpClient = OkHttpClient(),
+    converterFactory: Converter.Factory = GsonConverterFactory.create()
+): Retrofit = Retrofit.Builder()
+    .client(client)
+    .addConverterFactory(converterFactory)
+    .baseUrl(url)
+    .build()
 
 

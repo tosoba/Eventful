@@ -1,6 +1,6 @@
 package com.example.coreandroid.mapper
 
-import com.example.core.model.Event
+import com.example.core.model.event.Event
 import com.example.coreandroid.model.EventUiModel
 
 val Event.ui: EventUiModel

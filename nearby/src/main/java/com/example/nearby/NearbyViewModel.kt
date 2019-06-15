@@ -1,18 +1,16 @@
 package com.example.nearby
 
-import androidx.lifecycle.ViewModel
 import com.example.core.Failure
 import com.example.core.IEventsRepository
 import com.example.core.Success
-import com.example.core.model.Event
-import com.example.coreandroid.arch.state.StateObservable
+import com.example.core.model.event.Event
 import com.example.coreandroid.arch.state.ViewStateStore
+import com.example.coreandroid.base.CoroutineViewModel
 import com.example.coreandroid.mapper.ui
 import com.example.coreandroid.util.reverseGeocode
 import com.google.android.gms.maps.model.LatLng
 import com.patloew.rxlocation.RxLocation
 import kotlinx.coroutines.*
-import kotlin.coroutines.CoroutineContext
 
 @ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi
@@ -20,14 +18,7 @@ class NearbyViewModel(
     private val repo: IEventsRepository,
     private val rxLocation: RxLocation,
     private val ioDispatcher: CoroutineDispatcher
-) : ViewModel(), CoroutineScope {
-
-    private val job: Job = Job()
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + job
-
-    private val viewStateStore = ViewStateStore(NearbyState.INITIAL)
-    val viewStateObservable: StateObservable<NearbyState> = viewStateStore
+) : CoroutineViewModel<NearbyState>(ViewStateStore(NearbyState.INITIAL)) {
 
     fun loadEvents(userLatLng: LatLng) {
         launch {
@@ -75,9 +66,5 @@ class NearbyViewModel(
         viewStateStore.dispatchStateTransition {
             copy(events = events.copyWithError(NearbyError.LocationUnavailable))
         }
-    }
-
-    override fun onCleared() {
-        job.cancel()
     }
 }
