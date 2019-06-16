@@ -7,6 +7,6 @@ data class Forecast(
     val hourly: Hourly,
     val latitude: Double,
     val longitude: Double,
-    val minutely: Minutely,
+    val minutely: Minutely?,
     val timezone: String
 )

@@ -36,7 +36,7 @@
             android:layout_gravity="bottom"
             android:background="?android:attr/windowBackground"
             app:layout_behavior="com.example.coreandroid.view.BottomNavLayoutBehavior"
-            app:menu="@menu/bottom_nav_menu"/>
+            app:menu="@menu/main_bottom_nav_menu"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/main_fab"

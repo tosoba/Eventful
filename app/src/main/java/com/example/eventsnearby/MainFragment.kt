@@ -71,14 +71,14 @@ class MainFragment : DaggerFragment(), SnackbarController {
 
         main_bottom_nav_view.setOnNavigationItemSelectedListener(bottomNavigationItemSelectedListener)
 
+        main_view_pager.adapter = mainViewPagerAdapter
+        main_view_pager.addOnPageChangeListener(viewPagerSwipedListener)
+        main_view_pager.offscreenPageLimit = 2
+
         main_fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show()
         }
-
-        main_view_pager.adapter = mainViewPagerAdapter
-        main_view_pager.addOnPageChangeListener(viewPagerSwipedListener)
-        main_view_pager.offscreenPageLimit = 2
 
         transition(viewModel.currentState.snackbarState)
     }

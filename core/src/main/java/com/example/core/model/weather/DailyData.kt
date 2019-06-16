@@ -35,7 +35,7 @@ data class DailyData(
     val time: Int,
     val uvIndex: Int,
     val uvIndexTime: Int,
-    val visibility: Int,
+    val visibility: Double,
     val windBearing: Int,
     val windGust: Double,
     val windGustTime: Int,

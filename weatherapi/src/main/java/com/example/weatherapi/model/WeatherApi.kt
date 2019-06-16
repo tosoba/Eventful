@@ -13,10 +13,10 @@ interface WeatherApi {
     fun loadForecast(
         @Path("latitude") latitude: Double,
         @Path("longitude") longitude: Double,
+        @Path("key") key: String = WeatherAuth.KEY,
         @Query("units") units: String = "si", //TODO: move this to settings
         @Query("lang") language: String = Locale.getDefault().language,
-        @Query("exclude") exclude: String = "flags",
-        @Path("key") key: String = WeatherAuth.KEY
+        @Query("exclude") exclude: String = "flags"
     ): Call<Forecast>
 
     companion object {

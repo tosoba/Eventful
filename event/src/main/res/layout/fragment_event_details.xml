@@ -6,17 +6,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="false"
-        tools:context=".WeatherFragment">
+        tools:context=".EventDetailsFragment">
 
     <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/weather_app_bar_layout"
+            android:id="@+id/event_details_app_bar_layout"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:fitsSystemWindows="false"
             android:theme="@style/AppTheme.AppBarOverlay">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
-                android:id="@+id/weather_toolbar_layout"
+                android:id="@+id/event_details_toolbar_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:contentScrim="?attr/colorPrimary"
@@ -33,7 +33,7 @@
                     app:layout_collapseParallaxMultiplier="0.7"/>
 
             <androidx.appcompat.widget.Toolbar
-                    android:id="@+id/weather_toolbar"
+                    android:id="@+id/event_details_toolbar"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
                     app:layout_collapseMode="pin"
@@ -46,14 +46,19 @@
     <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <TextView android:layout_width="match_parent" android:layout_height="500dp"
+                  android:text="TEST"/>
+
+    </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="15dp"
-            app:layout_anchor="@id/weather_app_bar_layout"
+            app:layout_anchor="@id/event_details_app_bar_layout"
             app:layout_anchorGravity="bottom|end"
             app:srcCompat="@android:drawable/ic_dialog_info"/>
 
