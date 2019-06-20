@@ -81,13 +81,14 @@ dependencies {
     implementation "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
 
     implementation "com.patloew.rxlocation:rxlocation:$rxLocationVersion"
+    implementation("io.nlopez.smartlocation:library:$smartLocationVersion") {
+        transitive = false
+    }
 
     implementation "com.google.android.gms:play-services-maps:$playServicesMapsVersion"
     implementation "com.google.android.gms:play-services-location:$playServicesLocationVersion"
 
-    implementation("io.nlopez.smartlocation:library:$smartLocationVersion") {
-        transitive = false
-    }
+    implementation "com.flickr4java:flickr4java:$flickrVersion"
 
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test:runner:$testRunnerVersion"

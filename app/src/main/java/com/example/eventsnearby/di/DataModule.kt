@@ -7,6 +7,8 @@ import com.example.eventsapi.EventsApi
 import com.example.repo.EventsRepository
 import com.example.repo.WeatherRepository
 import com.example.weatherapi.model.WeatherApi
+import com.flickr4java.flickr.Flickr
+import com.flickr4java.flickr.REST
 import dagger.Module
 import dagger.Provides
 import retrofit2.Retrofit
@@ -45,6 +47,10 @@ class DataModule {
     @Provides
     @Singleton
     fun weatherRepository(api: WeatherApi): IWeatherRepository = WeatherRepository(api)
+
+    @Provides
+    @Singleton
+    fun flickr(): Flickr = Flickr("13137d1d1b9498ebba88a45d22fe2c89", "5b5071455ab453f8", REST())
 
     companion object {
         private const val EVENTS_RETROFIT = "EVENTS_RETROFIT"
