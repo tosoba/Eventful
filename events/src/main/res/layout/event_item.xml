@@ -2,6 +2,7 @@
 <layout>
     <data>
         <variable name="event" type="com.example.coreandroid.model.EventUiModel"/>
+        <variable name="sliderAdapter" type="ss.com.bannerslider.adapters.SliderAdapter"/>
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -11,13 +12,19 @@
             android:layout_height="wrap_content"
             android:layout_margin="20dp">
 
-        <ImageView android:id="@+id/event_item_image_view"
-                   app:layout_constraintTop_toTopOf="parent"
-                   app:layout_constraintLeft_toLeftOf="parent"
-                   app:layout_constraintBottom_toBottomOf="parent"
-                   android:layout_width="100dp"
-                   android:layout_height="100dp"
-                   android:src="@drawable/event_placeholder"/>
+        <ss.com.bannerslider.Slider
+                android:id="@+id/event_images_slider"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                sliderAdapter="@{sliderAdapter}"
+                app:slider_interval="5000"
+                app:slider_loopSlides="true"
+                app:slider_defaultBanner="1"
+                app:slider_indicatorSize="12dp"
+                app:slider_emptyView="@layout/banner_slider_placeholder"/>
 
         <TextView android:id="@+id/event_item_title_text_view"
                   android:layout_width="0dp"
@@ -27,7 +34,7 @@
                   android:textSize="20sp"
                   android:textStyle="bold"
                   android:text="@{event.title}"
-                  app:layout_constraintLeft_toRightOf="@id/event_item_image_view"
+                  app:layout_constraintLeft_toRightOf="@id/event_images_slider"
                   app:layout_constraintTop_toTopOf="parent"
                   app:layout_constraintRight_toRightOf="parent"/>
 
@@ -39,7 +46,7 @@
                   android:maxLines="2"
                   android:ellipsize="end"
                   android:text="@{event.description}"
-                  app:layout_constraintLeft_toRightOf="@id/event_item_image_view"
+                  app:layout_constraintLeft_toRightOf="@id/event_images_slider"
                   app:layout_constraintRight_toRightOf="parent"
                   app:layout_constraintTop_toBottomOf="@id/event_item_title_text_view"/>
 
@@ -48,7 +55,7 @@
                   android:layout_height="wrap_content"
                   android:text="@{event.address}"
                   android:layout_marginLeft="10dp"
-                  app:layout_constraintLeft_toRightOf="@id/event_item_image_view"
+                  app:layout_constraintLeft_toRightOf="@id/event_images_slider"
                   app:layout_constraintRight_toRightOf="parent"
                   app:layout_constraintBottom_toBottomOf="parent"/>
 

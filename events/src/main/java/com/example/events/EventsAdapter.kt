@@ -7,6 +7,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.coreandroid.model.EventUiModel
+import com.example.coreandroid.util.BannerSliderAdapter
 import com.example.coreandroid.view.CoUpdatableRecyclerViewAdapter
 import com.example.events.databinding.EventItemBinding
 import kotlinx.coroutines.ObsoleteCoroutinesApi
@@ -23,13 +24,28 @@ class EventsAdapter(
     }
 ) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(
-        DataBindingUtil.inflate(LayoutInflater.from(parent.context), R.layout.event_item, parent, false)
+        DataBindingUtil.inflate<EventItemBinding>(
+            LayoutInflater.from(parent.context),
+            R.layout.event_item,
+            parent,
+            false
+        ).apply {
+            sliderAdapter = BannerSliderAdapter(emptyList())
+        }
     ).apply {
         itemView.setOnClickListener { binding.event?.let { viewEventsChannel.offer(EventClicked(it)) } }
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.binding.event = coDiffUtil.current[position]
+        val event = coDiffUtil.current[position]
+        holder.binding.event = event
+        if (event.photoUrls.isNotEmpty()) {
+            holder.binding.sliderAdapter = BannerSliderAdapter(event.photoUrls)
+        } else {
+            event.onPhotoUrlsAdded = {
+                holder.binding.sliderAdapter = BannerSliderAdapter(event.photoUrls)
+            }
+        }
     }
 
     class ViewHolder(val binding: EventItemBinding) : RecyclerView.ViewHolder(binding.root)

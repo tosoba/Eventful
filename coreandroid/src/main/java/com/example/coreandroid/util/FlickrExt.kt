@@ -1,16 +1,18 @@
 package com.example.coreandroid.util
 
 import com.flickr4java.flickr.Flickr
-import com.flickr4java.flickr.photos.GeoData
 import com.flickr4java.flickr.photos.Photo
+import com.flickr4java.flickr.photos.SearchParameters
 import com.google.android.gms.maps.model.LatLng
 
+//TODO: adjust search parameters so more fitting photos are returned
 fun Flickr.loadPhotosUrlsForLocation(
     latLng: LatLng, numberOfPhotos: Int, size: PhotoSize
-): List<String> = geoInterface.photosForLocation(
-    GeoData(latLng.longitude.toString(), latLng.latitude.toString(), "11"),
-    emptySet(), numberOfPhotos, 0
-).map { it.imageUrl(size) }
+): List<String> = photosInterface.search(SearchParameters().apply {
+    latitude = latLng.latitude.toString()
+    longitude = latLng.longitude.toString()
+    accuracy = Flickr.ACCURACY_CITY
+}, numberOfPhotos, 0).map { it.imageUrl(size) }
 
 fun Photo.imageUrl(size: PhotoSize): String =
     "https://farm$farm.staticflickr.com/$server/${id}_${secret}_${size.code}.jpg"

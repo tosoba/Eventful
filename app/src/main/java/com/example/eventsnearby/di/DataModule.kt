@@ -50,7 +50,7 @@ class DataModule {
 
     @Provides
     @Singleton
-    fun flickr(): Flickr = Flickr("13137d1d1b9498ebba88a45d22fe2c89", "5b5071455ab453f8", REST())
+    fun flickr(): Flickr = Flickr("788264798ee17aeec322c9930934dcd9", "08cd341dd13fba62", REST())
 
     companion object {
         private const val EVENTS_RETROFIT = "EVENTS_RETROFIT"
