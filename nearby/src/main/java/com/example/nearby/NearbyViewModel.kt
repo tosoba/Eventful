@@ -89,7 +89,7 @@ class NearbyViewModel(
                 async {
                     try {
                         Pair(it, flickr.callSuspending {
-                            loadPhotosUrlsForLocation(it.latLng!!, 5, PhotoSize.MEDIUM_640)
+                            loadPhotosUrlsForLocation(it.latLng!!, it.category, 5, PhotoSize.MEDIUM_640)
                         })
                     } catch (e: Exception) {
                         Log.e("Flickr", e.message ?: "Unknown exception")
