@@ -9,7 +9,7 @@ import com.example.coreandroid.base.LocationController
 import com.example.coreandroid.lifecycle.ConnectivityObserver
 import com.example.coreandroid.lifecycle.LocationAvailabilityObserver
 import com.example.coreandroid.util.LocationState
-import com.example.coreandroid.util.observe
+import com.example.coreandroid.util.observeUsing
 import com.example.coreandroid.util.plusAssign
 import com.google.android.material.navigation.NavigationView
 import com.markodevcic.peko.ActivityRotatingException
@@ -76,10 +76,12 @@ class MainActivity : DaggerAppCompatActivity(), DrawerLayoutHost, CoroutineScope
             requestPermission()
         }
 
-        viewModel.liveState.nonNull().map { it.locationState }.observe(this) {
-            if (it is LocationState.Disabled) locationAvailabilityObserver.start()
-            else locationAvailabilityObserver.stop()
-        }
+        viewModel.liveState.nonNull()
+            .map { state: MainState -> state.locationState }
+            .observeUsing(this) {
+                if (it is LocationState.Disabled) locationAvailabilityObserver.start()
+                else locationAvailabilityObserver.stop()
+            }
     }
 
     override fun onDestroy() {

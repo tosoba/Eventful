@@ -25,13 +25,13 @@ class MainViewModel(
     ConnectivityStateProvider, LocationStateProvider {
 
     override val isConnectedLive: LiveData<Boolean>
-        get() = viewStateStore.liveState.nonNull().map { it.isConnected }
+        get() = viewStateStore.liveState.nonNull().map { state: MainState -> state.isConnected }
 
     override val isConnected: Boolean
         get() = viewStateStore.currentState.isConnected
 
     override val locationStateLive: LiveData<LocationState>
-        get() = viewStateStore.liveState.nonNull().map { it.locationState }
+        get() = viewStateStore.liveState.nonNull().map { state: MainState -> state.locationState }
 
     override val locationState: LocationState
         get() = viewStateStore.currentState.locationState

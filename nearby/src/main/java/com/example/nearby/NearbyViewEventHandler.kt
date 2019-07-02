@@ -7,7 +7,7 @@ import com.example.coreandroid.base.LocationStateProvider
 import com.example.coreandroid.di.scope.FragmentScoped
 import com.example.coreandroid.model.EventUiModel
 import com.example.coreandroid.util.LocationState
-import com.example.coreandroid.util.observe
+import com.example.coreandroid.util.observeUsing
 import com.shopify.livedataktx.distinct
 import com.shopify.livedataktx.filter
 import com.shopify.livedataktx.map
@@ -73,12 +73,14 @@ class NearbyViewEventHandler @Inject constructor(
 
         viewModel.viewStateObservable.liveState
             .nonNull()
-            .filter {
-                it.events.lastLoadingFailed &&
-                        (it.events.lastLoadingStatus as PagedAsyncData.LoadingStatus.CompletedWithError).throwable is NearbyError
+            .filter { state: NearbyState ->
+                state.events.lastLoadingFailed &&
+                        (state.events.lastLoadingStatus as PagedAsyncData.LoadingStatus.CompletedWithError).throwable is NearbyError
             }
-            .map { (it.events.lastLoadingStatus as PagedAsyncData.LoadingStatus.CompletedWithError).throwable as NearbyError }
-            .observe(owner) {
+            .map { state: NearbyState ->
+                (state.events.lastLoadingStatus as PagedAsyncData.LoadingStatus.CompletedWithError).throwable as NearbyError
+            }
+            .observeUsing(owner) {
                 when (it) {
                     is NearbyError.NotConnected -> viewUpdatesChannel.offer(ShowNoConnectionMessage)
                     is NearbyError.LocationUnavailable -> viewUpdatesChannel.offer(ShowLocationUnavailableMessage)
@@ -87,7 +89,7 @@ class NearbyViewEventHandler @Inject constructor(
 
         connectivityStateProvider.isConnectedLive
             .distinct()
-            .observe(owner) {
+            .observeUsing(owner) {
                 if (it && events.emptyAndLastLoadingFailed) {
                     val locationState = locationStateProvider.locationState
                     if (locationState is LocationState.Found) {
@@ -102,7 +104,7 @@ class NearbyViewEventHandler @Inject constructor(
 
         locationStateProvider.locationStateLive
             .distinct()
-            .observe(owner) { locationState ->
+            .observeUsing(owner) { locationState ->
                 if (locationState is LocationState.Found && events.items.isEmpty()) {
                     if (connectivityStateProvider.isConnected) {
                         events.doIfEmptyAndLoadingNotInProgress {
@@ -130,7 +132,7 @@ class NearbyViewEventHandler @Inject constructor(
     private fun checkConditionsAndLoadEvents() {
         val locationState = locationStateProvider.locationState
         if (locationState !is LocationState.Found) {
-            viewModel.onLocationUnavailable()
+            if (locationState !is LocationState.Loading) viewModel.onLocationUnavailable()
             return
         }
 

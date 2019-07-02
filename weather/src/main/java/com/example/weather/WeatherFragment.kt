@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.Toolbar
 import com.example.coreandroid.util.FragmentArgument
-import com.example.coreandroid.util.observe
+import com.example.coreandroid.util.observeUsing
 import com.example.coreandroid.util.setupToolbarWithDrawerToggle
 import com.example.coreandroid.util.showBackNavArrow
 import com.google.android.gms.maps.model.LatLng
@@ -44,7 +44,7 @@ class WeatherFragment : DaggerFragment(), CoroutineScope {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.liveState.observe(this) {
+        viewModel.liveState.observeUsing(this) {
             it
         }
     }

@@ -8,6 +8,8 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.ViewCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
+import kotlin.math.max
+import kotlin.math.min
 
 class BottomNavLayoutBehavior(context: Context, attrs: AttributeSet) :
     CoordinatorLayout.Behavior<BottomNavigationView>(context, attrs) {
@@ -20,25 +22,16 @@ class BottomNavLayoutBehavior(context: Context, attrs: AttributeSet) :
     }
 
     override fun onStartNestedScroll(
-        coordinatorLayout: CoordinatorLayout,
-        child: BottomNavigationView,
-        directTargetChild: View,
-        target: View,
-        axes: Int,
-        type: Int
+        coordinatorLayout: CoordinatorLayout, child: BottomNavigationView,
+        directTargetChild: View, target: View, axes: Int, type: Int
     ): Boolean = axes == ViewCompat.SCROLL_AXIS_VERTICAL
 
     override fun onNestedPreScroll(
-        coordinatorLayout: CoordinatorLayout,
-        child: BottomNavigationView,
-        target: View,
-        dx: Int,
-        dy: Int,
-        consumed: IntArray,
-        type: Int
+        coordinatorLayout: CoordinatorLayout, child: BottomNavigationView,
+        target: View, dx: Int, dy: Int, consumed: IntArray, type: Int
     ) {
         super.onNestedPreScroll(coordinatorLayout, child, target, dx, dy, consumed, type)
-        child.translationY = Math.max(0.0f, Math.min(child.height.toFloat(), child.translationY + dy))
+        child.translationY = max(0.0f, min(child.height.toFloat(), child.translationY + dy))
     }
 
     private fun updateSnackbar(child: BottomNavigationView, snackbarLayout: Snackbar.SnackbarLayout) {
