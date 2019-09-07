@@ -7,11 +7,6 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.NestedScrollingChild
 import androidx.core.view.NestedScrollingChildHelper
 
-/**
- * This variation of CoordinatorLayout also serves as a nested scrolling child,
- * which supports passing nested scrolling operations to it's parent when it's
- * own nested scrolling is locked.
- */
 class NestedCoordinatorLayout : CoordinatorLayout, NestedScrollingChild {
 
     private val mChildHelper = NestedScrollingChildHelper(this)
