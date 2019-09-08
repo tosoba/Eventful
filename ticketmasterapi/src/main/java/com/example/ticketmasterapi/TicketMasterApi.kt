@@ -19,6 +19,7 @@ interface TicketMasterApi {
         @Query("unit") radiusUnit: RadiusUnit? = null,
         @Query("size") size: Int = 20,
         @Query("page") page: Int = 0,
-        @Query("geoPoint") geoPoint: GeoPoint? = null
+        @Query("geoPoint") geoPoint: GeoPoint? = null,
+        @Query("apikey") apiKey: String = TicketMasterAuth.key
     ): Call<EventSearchResponse>
 }

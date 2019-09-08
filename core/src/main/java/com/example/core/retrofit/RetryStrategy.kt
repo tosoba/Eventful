@@ -8,7 +8,3 @@ class WithDelay(val delay: Long, val unit: TimeUnit, attempts: Int = 1) : RetryS
 class WithVariableDelay(
     attempts: Int, val unit: TimeUnit, val getDelay: (Int) -> Long
 ) : RetryStrategy(attempts)
-
-fun test() {
-
-}
