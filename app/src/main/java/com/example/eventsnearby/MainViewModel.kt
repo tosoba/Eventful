@@ -25,44 +25,44 @@ class MainViewModel(
     ConnectivityStateProvider, LocationStateProvider {
 
     override val isConnectedLive: LiveData<Boolean>
-        get() = viewStateStore.liveState.nonNull().map { state: MainState -> state.isConnected }
+        get() = stateStore.liveState.nonNull().map { state: MainState -> state.isConnected }
 
     override val isConnected: Boolean
-        get() = viewStateStore.currentState.isConnected
+        get() = stateStore.currentState.isConnected
 
     override val locationStateLive: LiveData<LocationState>
-        get() = viewStateStore.liveState.nonNull().map { state: MainState -> state.locationState }
+        get() = stateStore.liveState.nonNull().map { state: MainState -> state.locationState }
 
     override val locationState: LocationState
-        get() = viewStateStore.currentState.locationState
+        get() = stateStore.currentState.locationState
 
     fun storeSnackbarState(state: SnackbarState) {
-        viewStateStore.dispatchStateTransition { copy(snackbarState = state) }
+        stateStore.transition { copy(snackbarState = state) }
     }
 
     fun loadLocation() {
         launch {
-            viewStateStore.dispatchStateTransition { copy(locationState = LocationState.Loading) }
+            stateStore.transition { copy(locationState = LocationState.Loading) }
             try {
                 smartLocation.location().run {
                     if (state().locationServicesEnabled()) {
                         val location = awaitOne()
-                        viewStateStore.dispatchStateTransition { copy(locationState = LocationState.Found(location.latLng)) }
+                        stateStore.transition { copy(locationState = LocationState.Found(location.latLng)) }
                     } else {
-                        viewStateStore.dispatchStateTransition { copy(locationState = LocationState.Disabled) }
+                        stateStore.transition { copy(locationState = LocationState.Disabled) }
                     }
                 }
             } catch (e: Exception) {
-                viewStateStore.dispatchStateTransition { copy(locationState = LocationState.Error(e)) }
+                stateStore.transition { copy(locationState = LocationState.Error(e)) }
             }
         }
     }
 
     fun onConnectionStateChanged(isConnected: Boolean) {
-        viewStateStore.dispatchStateTransition { copy(isConnected = isConnected) }
+        stateStore.transition { copy(isConnected = isConnected) }
     }
 
     fun onPermissionDenied() {
-        viewStateStore.dispatchStateTransition { copy(locationState = LocationState.PermissionDenied) }
+        stateStore.transition { copy(locationState = LocationState.PermissionDenied) }
     }
 }

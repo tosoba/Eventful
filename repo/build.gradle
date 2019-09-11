@@ -36,6 +36,7 @@ dependencies {
 
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
 
+    implementation project(':ticketmasterapi')
     implementation project(':weatherapi')
     implementation project(':eventsapi')
     implementation project(':core')

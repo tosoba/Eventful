@@ -10,7 +10,7 @@ import kotlinx.coroutines.Job
 import kotlin.coroutines.CoroutineContext
 
 abstract class CoroutineViewModel<State : Any>(
-    protected val viewStateStore: ViewStateStore<State>
+    protected val stateStore: ViewStateStore<State>
 ) : ViewModel(), CoroutineScope {
 
     private val job: Job = Job()
@@ -18,13 +18,13 @@ abstract class CoroutineViewModel<State : Any>(
         get() = Dispatchers.Main + job
 
     val viewStateObservable: StateObservable<State>
-        get() = viewStateStore
+        get() = stateStore
 
     val currentState: State
-        get() = viewStateStore.currentState
+        get() = stateStore.currentState
 
     val liveState: LiveData<State>
-        get() = viewStateStore.liveState
+        get() = stateStore.liveState
 
     override fun onCleared() {
         job.cancel()

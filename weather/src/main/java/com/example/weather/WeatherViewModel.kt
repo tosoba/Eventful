@@ -17,15 +17,15 @@ class WeatherViewModel(
 
     fun loadWeather(latlng: LatLng) {
         launch {
-            viewStateStore.dispatchStateTransition { copy(forecastState = ForecastState.Loading) }
+            stateStore.transition { copy(forecastState = ForecastState.Loading) }
             when (val result = withContext(ioDispatcher) {
                 repo.getForecast(lat = latlng.latitude, lon = latlng.longitude)
             }) {
-                is Success -> viewStateStore.dispatchStateTransition {
+                is Success -> stateStore.transition {
                     copy(forecastState = ForecastState.Found(result.data))
                 }
 
-                is Failure -> viewStateStore.dispatchStateTransition {
+                is Failure -> stateStore.transition {
                     copy(forecastState = ForecastState.Error(result.error))
                 }
             }

@@ -28,12 +28,12 @@ class NearbyViewModel(
 ) : CoroutineViewModel<NearbyState>(ViewStateStore(NearbyState.INITIAL)) {
 
     fun loadEvents(userLatLng: LatLng) = launch {
-        viewStateStore.dispatchStateTransition { copy(events = events.withLoadingInProgress) }
+        stateStore.transition { copy(events = events.withLoadingInProgress) }
         when (val result = withContext(ioDispatcher) {
             repo.getNearbyEvents(
                 lat = userLatLng.latitude,
                 lon = userLatLng.longitude,
-                offset = viewStateStore.currentState.events.offset
+                offset = stateStore.currentState.events.offset
             )
         }) {
             is Success -> {
@@ -43,25 +43,24 @@ class NearbyViewModel(
                     async { loadLocationsFor(uiEvents) },
                     async { loadPhotoUrlsFor(uiEvents) }
                 )
-                viewStateStore.dispatchStateTransition {
+                stateStore.transition {
                     copy(events = events.copyWithNewItems(uiEvents, newOffset, totalItems))
                 }
             }
             is Failure -> {
-                viewStateStore.dispatchStateTransition { copy(events = events.copyWithError(result.error)) }
+                stateStore.transition { copy(events = events.copyWithError(result.error)) }
             }
         }
     }
 
-
     fun onNotConnected() {
-        viewStateStore.dispatchStateTransition {
+        stateStore.transition {
             copy(events = events.copyWithError(NearbyError.NotConnected))
         }
     }
 
     fun onLocationUnavailable() {
-        viewStateStore.dispatchStateTransition {
+        stateStore.transition {
             copy(events = events.copyWithError(NearbyError.LocationUnavailable))
         }
     }

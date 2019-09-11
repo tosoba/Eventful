@@ -49,7 +49,7 @@ fun <T : Any> Response<T>.toSuccess(): NetworkResponse.Success<T>? = body()?.run
     NetworkResponse.Success(this)
 }
 
-suspend inline fun <T : Any, reified E : Any> Call<T>.awaitResponse(
+suspend inline fun <reified T : Any, reified E : Any> Call<T>.awaitResponse(
     retryStrategy: RetryStrategy? = null
 ): NetworkResponse<T, E> {
     val callWrapper: () -> NetworkResponse<T, E>? = {

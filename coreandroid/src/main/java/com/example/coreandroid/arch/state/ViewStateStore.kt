@@ -36,17 +36,17 @@ open class ViewStateStore<State : Any>(
     ) = liveSignal.observe(owner, Observer { executor(it) })
 
     @MainThread
-    fun dispatchStateTransition(transition: StateTransition<State>) {
+    fun transition(transition: StateTransition<State>) {
         mutableLiveState.value = transition(currentState)
     }
 
     @MainThread
-    fun dispatchStateTransition(nextState: State.() -> State) {
+    fun transition(nextState: State.() -> State) {
         mutableLiveState.value = currentState.nextState()
     }
 
     @MainThread
-    fun dispatchSignal(signal: Signal) {
+    fun signal(signal: Signal) {
         liveSignal.value = signal
     }
 }
