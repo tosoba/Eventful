@@ -11,6 +11,10 @@ dependencies {
 
     implementation "com.github.davidmoten:geo:0.7.1"
 
+    implementation "com.github.haroldadmin:NetworkResponseAdapter:2.1.0"
+
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
+
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
     api "com.google.dagger:dagger:$daggerVersion"
 

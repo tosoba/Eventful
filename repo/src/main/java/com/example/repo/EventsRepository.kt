@@ -1,19 +1,20 @@
 package com.example.repo
 
-import com.example.core.*
+import com.example.core.IEventsRepository
+import com.example.core.Resource
+import com.example.core.Result
+import com.example.core.mapSuccess
 import com.example.core.model.PagedResult
 import com.example.core.model.event.EventsResult
 import com.example.core.model.ticketmaster.IEvent
-import com.example.core.retrofit.awaitResponse
 import com.example.coreandroid.retrofit.awaitResult
 import com.example.eventsapi.EventsApi
 import com.example.eventsapi.util.EventsArea
 import com.example.eventsapi.util.EventsRadiusUnit
 import com.example.ticketmasterapi.TicketMasterApi
-import com.example.ticketmasterapi.model.EventSearchResponse
-import com.example.ticketmasterapi.model.TicketMasterErrorResponse
 import com.example.ticketmasterapi.queryparam.GeoPoint
 import com.example.ticketmasterapi.queryparam.RadiusUnit
+import com.haroldadmin.cnradapter.NetworkResponse
 
 class EventsRepository(
     private val api: EventsApi,
@@ -35,7 +36,7 @@ class EventsRepository(
         radius = DEFAULT_RADIUS,
         radiusUnit = RadiusUnit.KM,
         geoPoint = GeoPoint(lat, lon)
-    ).awaitResponse<EventSearchResponse, TicketMasterErrorResponse>()) {
+    ).await()) {
         is NetworkResponse.Success -> Resource.Success(
             PagedResult(
                 response.body.embedded.events as List<IEvent>,

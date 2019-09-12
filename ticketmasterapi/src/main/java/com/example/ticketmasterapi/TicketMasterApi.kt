@@ -1,9 +1,11 @@
 package com.example.ticketmasterapi
 
 import com.example.ticketmasterapi.model.EventSearchResponse
+import com.example.ticketmasterapi.model.TicketMasterErrorResponse
 import com.example.ticketmasterapi.queryparam.GeoPoint
 import com.example.ticketmasterapi.queryparam.RadiusUnit
-import retrofit2.Call
+import com.haroldadmin.cnradapter.NetworkResponse
+import kotlinx.coroutines.Deferred
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -21,7 +23,7 @@ interface TicketMasterApi {
         @Query("page") page: Int = 0,
         @Query("geoPoint") geoPoint: GeoPoint? = null,
         @Query("apikey") apiKey: String = TicketMasterAuth.key
-    ): Call<EventSearchResponse>
+    ): Deferred<NetworkResponse<EventSearchResponse, TicketMasterErrorResponse>>
 
     companion object {
         const val BASE_URL = "https://app.ticketmaster.com/discovery/v2/"

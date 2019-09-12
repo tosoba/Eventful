@@ -45,4 +45,6 @@ dependencies {
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test:runner:$testRunnerVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
+
+    implementation "com.github.haroldadmin:NetworkResponseAdapter:2.1.0"
 }
