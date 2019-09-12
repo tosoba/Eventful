@@ -32,7 +32,7 @@ class EventsRepository(
     override suspend fun nearbyEvents(
         lat: Double, lon: Double, offset: Int?
     ): Resource<PagedResult<IEvent>> = when (val response = ticketMasterApi.searchEvents(
-        radius = DEFAULT_RADIUS.toFloat(),
+        radius = DEFAULT_RADIUS,
         radiusUnit = RadiusUnit.KM,
         geoPoint = GeoPoint(lat, lon)
     ).awaitResponse<EventSearchResponse, TicketMasterErrorResponse>()) {

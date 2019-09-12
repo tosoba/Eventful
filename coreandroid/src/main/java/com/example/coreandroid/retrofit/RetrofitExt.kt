@@ -7,9 +7,9 @@ import com.example.core.Success
 import com.example.coreandroid.BuildConfig
 import com.google.gson.JsonParseException
 import kotlinx.coroutines.delay
-import okhttp3.OkHttpClient
-import retrofit2.*
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.Call
+import retrofit2.HttpException
+import retrofit2.Response
 import java.io.IOException
 import java.net.ConnectException
 import kotlin.coroutines.resume
@@ -108,12 +108,3 @@ suspend fun <T : Mappable<R>, R : Any> Call<T>.awaitMappableResult(): Result<R> 
     )
 }
 
-fun retrofitWith(
-    url: String,
-    client: OkHttpClient = OkHttpClient(),
-    converterFactory: Converter.Factory = GsonConverterFactory.create()
-): Retrofit = Retrofit.Builder()
-    .client(client)
-    .addConverterFactory(converterFactory)
-    .baseUrl(url)
-    .build()

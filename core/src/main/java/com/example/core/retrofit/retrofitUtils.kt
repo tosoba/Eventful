@@ -3,8 +3,12 @@ package com.example.core.retrofit
 import com.example.core.NetworkResponse
 import com.google.gson.Gson
 import kotlinx.coroutines.delay
+import okhttp3.OkHttpClient
 import retrofit2.Call
+import retrofit2.Converter
 import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -71,3 +75,13 @@ suspend inline fun <reified T : Any, reified E : Any> Call<T>.awaitResponse(
         )
     } ?: responseProvider(callWrapper).invoke()
 }
+
+fun retrofitWith(
+    url: String,
+    client: OkHttpClient = OkHttpClient(),
+    converterFactory: Converter.Factory = GsonConverterFactory.create()
+): Retrofit = Retrofit.Builder()
+    .client(client)
+    .addConverterFactory(converterFactory)
+    .baseUrl(url)
+    .build()

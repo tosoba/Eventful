@@ -15,11 +15,15 @@ interface TicketMasterApi {
         @Query("attractionId") attractionId: String? = null,
         @Query("venueId") venueId: String? = null,
         @Query("postalCode") postalCode: String? = null,
-        @Query("radius") radius: Float? = null,
+        @Query("radius") radius: Int? = null,
         @Query("unit") radiusUnit: RadiusUnit? = null,
         @Query("size") size: Int = 20,
         @Query("page") page: Int = 0,
         @Query("geoPoint") geoPoint: GeoPoint? = null,
         @Query("apikey") apiKey: String = TicketMasterAuth.key
     ): Call<EventSearchResponse>
+
+    companion object {
+        const val BASE_URL = "https://app.ticketmaster.com/discovery/v2/"
+    }
 }

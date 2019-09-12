@@ -5,21 +5,22 @@ import com.example.core.model.ticketmaster.LinkType
 import com.google.gson.annotations.SerializedName
 
 data class ExternalLinks(
-    val youtube: ExternalLink?,
-    val twitter: ExternalLink?,
+    val youtube: List<ExternalLink>?,
+    val twitter: List<ExternalLink>?,
     @SerializedName("itunes")
-    val iTunes: ExternalLink?,
-    val facebook: ExternalLink?,
-    val wiki: ExternalLink?,
-    val instagram: ExternalLink?,
+    val iTunes: List<ExternalLink>?,
+    val facebook: List<ExternalLink>?,
+    val wiki: List<ExternalLink>?,
+    val instagram: List<ExternalLink>?,
+    //TODO: this is discarded for now because it has an id instead of a url
     @SerializedName("musicbrainz")
-    val musicBrainz: ExternalLink?,
+    val musicBrainz: List<ExternalId>?,
     @SerializedName("homepage")
-    val homePage: ExternalLink?
+    val homePage: List<ExternalLink>?
 ) {
     val links: List<ILink>
         get() = this::class.members
-            .map { it.name to it.call() as ExternalLink? }
+            .map { it.name to it.call() as? ExternalLink? }
             .filter { it.second != null }
             .map { it.first to it.second!! }
             .map { (type, link) ->

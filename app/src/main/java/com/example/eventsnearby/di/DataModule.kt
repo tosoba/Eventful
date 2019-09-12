@@ -2,10 +2,11 @@ package com.example.eventsnearby.di
 
 import com.example.core.IEventsRepository
 import com.example.core.IWeatherRepository
-import com.example.coreandroid.retrofit.retrofitWith
+import com.example.core.retrofit.retrofitWith
 import com.example.eventsapi.EventsApi
 import com.example.repo.EventsRepository
 import com.example.repo.WeatherRepository
+import com.example.ticketmasterapi.TicketMasterApi
 import com.example.weatherapi.model.WeatherApi
 import com.flickr4java.flickr.Flickr
 import com.flickr4java.flickr.REST
@@ -21,7 +22,8 @@ class DataModule {
     @Provides
     @Singleton
     @Named(EVENTS_RETROFIT)
-    fun eventsRetrofit(): Retrofit = retrofitWith(url = EventsApi.BASE_URL)
+    fun eventsRetrofit(): Retrofit =
+        retrofitWith(url = EventsApi.BASE_URL)
 
     @Provides
     @Singleton
@@ -31,12 +33,15 @@ class DataModule {
 
     @Provides
     @Singleton
-    fun eventsRepository(api: EventsApi): IEventsRepository = EventsRepository(api)
+    fun eventsRepository(
+        api: EventsApi, ticketMasterApi: TicketMasterApi
+    ): IEventsRepository = EventsRepository(api, ticketMasterApi)
 
     @Provides
     @Singleton
     @Named(WEATHER_RETROFIT)
-    fun weatherRetrofit(): Retrofit = retrofitWith(url = WeatherApi.BASE_URL)
+    fun weatherRetrofit(): Retrofit =
+        retrofitWith(url = WeatherApi.BASE_URL)
 
     @Provides
     @Singleton

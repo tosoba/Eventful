@@ -2,6 +2,7 @@ package com.example.eventsnearby.di
 
 import android.app.Application
 import com.example.eventsnearby.EventfulApp
+import com.example.ticketmasterapi.TicketMasterApiModule
 import dagger.BindsInstance
 import dagger.Component
 import dagger.android.AndroidInjector
@@ -14,6 +15,7 @@ import javax.inject.Singleton
         UiModule::class,
         DispatcherModule::class,
         AppModule::class,
+        TicketMasterApiModule::class,
         DataModule::class,
         AndroidSupportInjectionModule::class
     ]

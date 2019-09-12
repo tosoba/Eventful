@@ -83,7 +83,9 @@ class NearbyViewEventHandler @Inject constructor(
             .observeUsing(owner) {
                 when (it) {
                     is NearbyError.NotConnected -> viewUpdatesChannel.offer(ShowNoConnectionMessage)
-                    is NearbyError.LocationUnavailable -> viewUpdatesChannel.offer(ShowLocationUnavailableMessage)
+                    is NearbyError.LocationUnavailable -> viewUpdatesChannel.offer(
+                        ShowLocationUnavailableMessage
+                    )
                 }
             }
 
@@ -109,6 +111,8 @@ class NearbyViewEventHandler @Inject constructor(
                     if (connectivityStateProvider.isConnected) {
                         events.doIfEmptyAndLoadingNotInProgress {
                             viewModel.loadEvents(locationState.latLng)
+                            //TODO: this is here just for testing
+                            viewModel.loadTicketMasterEvents(locationState.latLng)
                         }
                     } else {
                         viewUpdatesChannel.offer(ShowNoConnectionMessage)
@@ -143,6 +147,8 @@ class NearbyViewEventHandler @Inject constructor(
 
         events.doIfLoadingNotInProgressAndNotAllLoaded {
             viewModel.loadEvents(locationState.latLng)
+            //TODO: this is here just for testing
+            viewModel.loadTicketMasterEvents(locationState.latLng)
         }
     }
 }

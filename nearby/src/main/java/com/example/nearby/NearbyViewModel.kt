@@ -3,8 +3,11 @@ package com.example.nearby
 import android.util.Log
 import com.example.core.Failure
 import com.example.core.IEventsRepository
+import com.example.core.Resource
 import com.example.core.Success
+import com.example.core.model.PagedResult
 import com.example.core.model.event.Event
+import com.example.core.model.ticketmaster.IEvent
 import com.example.coreandroid.arch.state.ViewStateStore
 import com.example.coreandroid.base.CoroutineViewModel
 import com.example.coreandroid.mapper.ui
@@ -53,6 +56,20 @@ class NearbyViewModel(
         }
     }
 
+    fun loadTicketMasterEvents(userLatLng: LatLng) = launch {
+        when (val result = withContext(ioDispatcher) {
+            repo.nearbyEvents(userLatLng.latitude, userLatLng.longitude, null)
+        }) {
+            is Resource.Success -> {
+                val items = result.data.items
+            }
+
+            is Resource.Error<PagedResult<IEvent>, *> -> {
+
+            }
+        }
+    }
+
     fun onNotConnected() {
         stateStore.transition {
             copy(events = events.copyWithError(NearbyError.NotConnected))
@@ -88,7 +105,12 @@ class NearbyViewModel(
                 async {
                     try {
                         Pair(it, flickr.callSuspending {
-                            loadPhotosUrlsForLocation(it.latLng!!, it.category, 5, PhotoSize.MEDIUM_640)
+                            loadPhotosUrlsForLocation(
+                                it.latLng!!,
+                                it.category,
+                                5,
+                                PhotoSize.MEDIUM_640
+                            )
                         })
                     } catch (e: Exception) {
                         Log.e("Flickr", e.message ?: "Unknown exception")
