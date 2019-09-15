@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
-import com.example.coreandroid.model.EventUiModel
+import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.util.FragmentArgument
 import com.example.coreandroid.util.setupToolbarWithDrawerToggle
 import com.example.coreandroid.util.showBackNavArrow
@@ -16,7 +16,7 @@ import kotlinx.android.synthetic.main.fragment_event_details.view.*
 
 class EventDetailsFragment : Fragment() {
 
-    private var event: EventUiModel by FragmentArgument()
+    private var event: Event by FragmentArgument()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -31,12 +31,12 @@ class EventDetailsFragment : Fragment() {
 
     private fun Toolbar.setup() {
         setupToolbarWithDrawerToggle(this)
-        title = event.title
+        title = event.name
         showBackNavArrow()
     }
 
     companion object {
-        fun new(event: EventUiModel): EventDetailsFragment = EventDetailsFragment().apply {
+        fun new(event: Event): EventDetailsFragment = EventDetailsFragment().apply {
             this.event = event
         }
     }

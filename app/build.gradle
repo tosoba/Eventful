@@ -44,6 +44,8 @@ dependencies {
     implementation "androidx.vectordrawable:vectordrawable:$vectorDrawableVersion"
     implementation "androidx.legacy:legacy-support-v4:$legacySupportV4Version"
 
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0-alpha04"
+
     implementation 'com.ss.bannerslider:bannerslider:2.0.0'
 
     implementation project(':ticketmasterapi')
@@ -92,6 +94,8 @@ dependencies {
     implementation "com.google.android.gms:play-services-location:$playServicesLocationVersion"
 
     implementation "com.flickr4java:flickr4java:$flickrVersion"
+
+    implementation "com.github.haroldadmin:Vector:0.4.2"
 
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test:runner:$testRunnerVersion"

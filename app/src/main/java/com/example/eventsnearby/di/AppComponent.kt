@@ -13,7 +13,7 @@ import javax.inject.Singleton
 @Component(
     modules = [
         UiModule::class,
-        DispatcherModule::class,
+        ThreadingModule::class,
         AppModule::class,
         TicketMasterApiModule::class,
         DataModule::class,

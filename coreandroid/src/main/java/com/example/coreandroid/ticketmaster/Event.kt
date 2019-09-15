@@ -19,4 +19,19 @@ data class Event(
     override val kind: String?,
     override val venues: List<Venue>,
     override val attractions: List<Attraction>
-) : IEvent, Parcelable
+) : IEvent, Parcelable {
+    constructor(other: IEvent) : this(
+        other.id,
+        other.name,
+        other.url,
+        other.imageUrl,
+        other.distance,
+        other.salesStartDate,
+        other.salesEndDate,
+        other.startDate,
+        other.startTime,
+        other.kind,
+        other.venues.map { Venue(it) },
+        other.attractions.map { Attraction(it) }
+    )
+}

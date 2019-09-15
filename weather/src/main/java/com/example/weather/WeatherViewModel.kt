@@ -1,11 +1,12 @@
 package com.example.weather
 
+import androidx.lifecycle.viewModelScope
 import com.example.core.Failure
 import com.example.core.IWeatherRepository
 import com.example.core.Success
-import com.example.coreandroid.arch.state.ViewStateStore
-import com.example.coreandroid.base.CoroutineViewModel
+import com.example.coreandroid.arch.state.Loading
 import com.google.android.gms.maps.model.LatLng
+import com.haroldadmin.vector.VectorViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -13,20 +14,22 @@ import kotlinx.coroutines.withContext
 class WeatherViewModel(
     private val repo: IWeatherRepository,
     private val ioDispatcher: CoroutineDispatcher
-) : CoroutineViewModel<WeatherState>(ViewStateStore(WeatherState.INITIAL)) {
+) : VectorViewModel<WeatherState>(WeatherState.INITIAL) {
 
-    fun loadWeather(latlng: LatLng) {
-        launch {
-            stateStore.transition { copy(forecastState = ForecastState.Loading) }
+    fun loadWeather(latLng: LatLng) = viewModelScope.launch {
+        withState { state ->
+            if (state.forecast.status is Loading) return@withState
+
+            setState { copy(forecast = forecast.copyWithLoadingInProgress) }
             when (val result = withContext(ioDispatcher) {
-                repo.getForecast(lat = latlng.latitude, lon = latlng.longitude)
+                repo.getForecast(lat = latLng.latitude, lon = latLng.longitude)
             }) {
-                is Success -> stateStore.transition {
-                    copy(forecastState = ForecastState.Found(result.data))
+                is Success -> setState {
+                    copy(forecast = forecast.copyWithNewValue(result.data))
                 }
 
-                is Failure -> stateStore.transition {
-                    copy(forecastState = ForecastState.Error(result.error))
+                is Failure -> setState {
+                    copy(forecast = forecast.copyWithError(result.error))
                 }
             }
         }

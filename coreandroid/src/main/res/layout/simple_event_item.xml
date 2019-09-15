@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <data>
+
+        <variable
+                name="event"
+                type="com.example.coreandroid.ticketmaster.Event" />
+
+        <variable
+                name="eventClicked"
+                type="android.view.View.OnClickListener" />
+    </data>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:clickable="@{eventClicked != null}"
+            android:onClick="@{eventClicked}"
+            android:orientation="vertical"
+            android:weightSum="1">
+
+        <ImageView
+                event="@{event}"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight=".9" />
+
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight=".1"
+                android:text="@{event.name}" />
+
+    </LinearLayout>
+</layout>

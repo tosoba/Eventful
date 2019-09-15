@@ -22,7 +22,7 @@ class FragmentArgument<T : Any> : ReadWriteProperty<Fragment, T> {
     }
 
     override operator fun setValue(thisRef: Fragment, property: KProperty<*>, value: T) {
-        if (this.value != null) throw IllegalStateException("Argument value cannot be overridden once it is set.")
+        check(this.value == null) { "Argument value cannot be overridden once it is set." }
         if (thisRef.arguments == null) thisRef.arguments = Bundle()
 
         val args: Bundle = thisRef.arguments!!

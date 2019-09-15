@@ -41,6 +41,9 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
 
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0-alpha04"
+    implementation "androidx.lifecycle:lifecycle-extensions:2.2.0-alpha04"
+
     implementation "android.arch.lifecycle:runtime:$lifecycleVersion"
     implementation "android.arch.lifecycle:extensions:$lifecycleVersion"
     kapt "android.arch.lifecycle:compiler:$lifecycleVersion"
@@ -52,6 +55,8 @@ dependencies {
     kapt "com.google.dagger:dagger-android-processor:$daggerVersion"
 
     implementation "com.google.android.gms:play-services-maps:$playServicesMapsVersion"
+
+    implementation "com.github.haroldadmin:Vector:0.4.2"
 
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test:runner:$testRunnerVersion"

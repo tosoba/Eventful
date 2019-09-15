@@ -1,82 +1,117 @@
 package com.example.coreandroid.arch.state
 
-data class PagedAsyncData<T>(
+interface HoldsData<Value> {
+    val value: Value
+    val status: DataStatus
+    val copyWithLoadingInProgress: HoldsData<Value>
+    val loadingFailed: Boolean
+        get() = status is LoadingFailed<*>
+
+    fun <E> copyWithError(error: E): HoldsData<Value>
+}
+
+inline fun <Holder : HoldsData<Value>, Value> Holder.ifNotLoading(block: (Holder) -> Unit) {
+    if (status !is Loading) block(this)
+}
+
+inline fun <Holder : HoldsData<Value>, Value> Holder.ifLastLoadingFailed(block: (Holder) -> Unit) {
+    if (status is LoadingFailed<*>) block(this)
+}
+
+inline fun <Holder : HoldsData<Value>, Value> Holder.ifLastLoadingCompletedSuccessFully(block: (Holder) -> Unit) {
+    if (status is LoadedSuccessfully) block(this)
+}
+
+data class Data<Value>(
+    override val value: Value,
+    override val status: DataStatus = Initial
+) : HoldsData<Value> {
+
+    override val copyWithLoadingInProgress: Data<Value>
+        get() = copy(status = Loading)
+
+    override fun <E> copyWithError(error: E): Data<Value> = copy(
+        status = LoadingFailed(error)
+    )
+
+    fun copyWithNewValue(value: Value): Data<Value> = copy(
+        value = value,
+        status = LoadedSuccessfully
+    )
+}
+
+fun <Holder : HoldsData<Collection<Value>>, Value> Holder.isEmptyAndLastLoadingFailed(): Boolean =
+    loadingFailed && value.isEmpty()
+
+inline fun <Holder : HoldsData<Collection<Value>>, Value> Holder.ifEmptyAndIsNotLoading(block: (Holder) -> Unit) {
+    if (status !is Loading && value.isEmpty()) block(this)
+}
+
+inline fun <Holder : HoldsData<Collection<Item>>, Item> Holder.ifNotEmpty(block: (Holder) -> Unit) {
+    if (value.isNotEmpty()) block(this)
+}
+
+data class DataList<Value>(
+    override val value: Collection<Value> = emptyList(),
+    override val status: DataStatus = Initial
+) : HoldsData<Collection<Value>> {
+
+    override val copyWithLoadingInProgress: DataList<Value>
+        get() = copy(status = Loading)
+
+    override fun <E> copyWithError(error: E): DataList<Value> = copy(
+        status = LoadingFailed(error)
+    )
+
+    fun copyWithNewItems(newItems: Collection<Value>): DataList<Value> = copy(
+        value = value + newItems,
+        status = LoadedSuccessfully
+    )
+
+    fun copyWithNewItems(vararg newItems: Value): DataList<Value> = copy(
+        value = value + newItems,
+        status = LoadedSuccessfully
+    )
+}
+
+data class PagedDataList<Value>(
+    override val value: Collection<Value> = emptyList(),
+    override val status: DataStatus = Initial,
     val offset: Int = 0,
-    val items: List<T> = emptyList(),
-    val totalItems: Int = Integer.MAX_VALUE,
-    val lastLoadingStatus: LoadingStatus = LoadingStatus.Idle
-) {
-    val lastLoadingFailed: Boolean
-        get() = lastLoadingStatus is LoadingStatus.CompletedWithError
+    val totalItems: Int = Integer.MAX_VALUE
+) : HoldsData<Collection<Value>> {
 
-    val emptyAndLastLoadingFailed: Boolean
-        get() = lastLoadingFailed && items.isEmpty()
+    override val copyWithLoadingInProgress: PagedDataList<Value>
+        get() = copy(status = Loading)
 
-    val withLoadingInProgress: PagedAsyncData<T>
-        get() = copy(lastLoadingStatus = LoadingStatus.InProgress)
-
-    fun copyWithNewItems(
-        newItems: List<T>,
-        offset: Int
-    ): PagedAsyncData<T> = copy(
-        items = items + newItems,
-        offset = offset,
-        lastLoadingStatus = LoadingStatus.CompletedSuccessfully
+    override fun <E> copyWithError(error: E): PagedDataList<Value> = copy(
+        status = LoadingFailed(error)
     )
 
     fun copyWithNewItems(
-        newItems: List<T>,
-        offset: Int,
-        totalItems: Int
-    ): PagedAsyncData<T> = copy(
-        items = items + newItems,
+        newItems: Collection<Value>, offset: Int
+    ): PagedDataList<Value> = copy(
+        value = value + newItems,
         offset = offset,
-        lastLoadingStatus = LoadingStatus.CompletedSuccessfully,
+        status = LoadedSuccessfully
+    )
+
+    fun copyWithNewItems(
+        newItems: Collection<Value>, offset: Int, totalItems: Int
+    ): PagedDataList<Value> = copy(
+        value = value + newItems,
+        offset = offset,
+        status = LoadedSuccessfully,
         totalItems = totalItems
     )
 
-    fun copyWithError(throwable: Throwable?): PagedAsyncData<T> = copy(
-        lastLoadingStatus = LoadingStatus.CompletedWithError(throwable)
-    )
-
-    inline fun doIfEmptyAndLoadingNotInProgress(block: (PagedAsyncData<T>) -> Unit) {
-        if (lastLoadingStatus !is LoadingStatus.InProgress && items.isEmpty()) {
-            block(this)
-        }
-    }
-
-    inline fun doIfLoadingNotInProgressAndNotAllLoaded(block: (PagedAsyncData<T>) -> Unit) {
-        if (lastLoadingStatus !is LoadingStatus.InProgress && offset < totalItems) {
-            block(this)
-        }
-    }
-
-    inline fun doIfNotEmpty(block: (PagedAsyncData<T>) -> Unit) {
-        if (items.isNotEmpty()) block(this)
-    }
-
-    inline fun doIfLoadingNotInProgress(block: (PagedAsyncData<T>) -> Unit) {
-        if (lastLoadingStatus !is LoadingStatus.InProgress) {
-            block(this)
-        }
-    }
-
-    inline fun doIfLastLoadingCompletedWithError(block: (PagedAsyncData<T>) -> Unit) {
-        if (lastLoadingStatus is LoadingStatus.CompletedWithError) {
-            block(this)
-        }
-    }
-
-    inline fun doIfLastLoadingCompletedSuccessFully(block: (PagedAsyncData<T>) -> Unit) {
-        if (lastLoadingStatus is LoadingStatus.CompletedSuccessfully) {
-            block(this)
-        }
-    }
-
-    sealed class LoadingStatus {
-        object Idle : LoadingStatus()
-        object InProgress : LoadingStatus()
-        object CompletedSuccessfully : LoadingStatus()
-        data class CompletedWithError(val throwable: Throwable?) : LoadingStatus()
+    inline fun ifNotLoadingAndNotAllLoaded(block: (PagedDataList<Value>) -> Unit) {
+        if (status !is Loading && offset < totalItems) block(this)
     }
 }
+
+sealed class DataStatus
+object Initial : DataStatus()
+object Loading : DataStatus()
+object LoadedSuccessfully : DataStatus()
+data class LoadingFailed<E>(val error: E) : DataStatus()

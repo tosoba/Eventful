@@ -1,8 +1,9 @@
 package com.example.coreandroid.base
 
-import androidx.lifecycle.LiveData
+import kotlinx.coroutines.flow.Flow
+
 
 interface ConnectivityStateProvider {
-    val isConnectedLive: LiveData<Boolean>
+    val isConnectedFlow: Flow<Boolean>
     val isConnected: Boolean
 }

@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.FragmentPagerAdapter
+import androidx.viewpager.widget.PagerAdapter
 import com.example.coreandroid.base.SnackbarController
 import com.example.coreandroid.util.SnackbarState
 import com.example.coreandroid.util.setupToolbarWithDrawerToggle
@@ -29,13 +29,14 @@ import javax.inject.Inject
 @ObsoleteCoroutinesApi
 class MainFragment : DaggerFragment(), SnackbarController {
 
-    private val bottomNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
-        viewPagerItems[item.itemId]?.let {
-            main_view_pager?.currentItem = it
-            return@OnNavigationItemSelectedListener true
+    private val bottomNavigationItemSelectedListener =
+        BottomNavigationView.OnNavigationItemSelectedListener { item ->
+            viewPagerItems[item.itemId]?.let {
+                main_view_pager?.currentItem = it
+                return@OnNavigationItemSelectedListener true
+            }
+            false
         }
-        false
-    }
 
     private val viewPagerItems: BiMap<Int, Int> = HashBiMap.create<Int, Int>().apply {
         put(R.id.bottom_nav_nearby, 0)
@@ -49,7 +50,7 @@ class MainFragment : DaggerFragment(), SnackbarController {
         }
     }
 
-    private val mainViewPagerAdapter: FragmentPagerAdapter by lazy(LazyThreadSafetyMode.NONE) {
+    private val mainViewPagerAdapter: PagerAdapter by lazy(LazyThreadSafetyMode.NONE) {
         TitledFragmentsPagerAdapter(
             childFragmentManager, arrayOf(
                 "Nearby" to NearbyFragment(),
@@ -69,7 +70,9 @@ class MainFragment : DaggerFragment(), SnackbarController {
     ): View? = inflater.inflate(R.layout.fragment_main, container, false).apply {
         setupToolbarWithDrawerToggle(main_toolbar)
 
-        main_bottom_nav_view.setOnNavigationItemSelectedListener(bottomNavigationItemSelectedListener)
+        main_bottom_nav_view.setOnNavigationItemSelectedListener(
+            bottomNavigationItemSelectedListener
+        )
 
         main_view_pager.adapter = mainViewPagerAdapter
         main_view_pager.addOnPageChangeListener(viewPagerSwipedListener)
@@ -88,10 +91,11 @@ class MainFragment : DaggerFragment(), SnackbarController {
             if (newState == viewModel.currentState.snackbarState) return
 
             snackbar?.dismiss()
-            viewModel.storeSnackbarState(newState)
+            viewModel.snackbarState = newState
             when (newState) {
                 is SnackbarState.Loading -> {
-                    snackbar = Snackbar.make(it, newState.message, Snackbar.LENGTH_INDEFINITE).apply { show() }
+                    snackbar = Snackbar.make(it, newState.message, Snackbar.LENGTH_INDEFINITE)
+                        .apply(Snackbar::show)
                 }
             }
         }

@@ -6,8 +6,6 @@ import androidx.lifecycle.ViewModelProviders
 import com.example.core.IEventsRepository
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
-import com.flickr4java.flickr.Flickr
-import com.patloew.rxlocation.RxLocation
 import dagger.Module
 import dagger.Provides
 import dagger.android.ContributesAndroidInjector
@@ -38,10 +36,8 @@ abstract class NearbyModule {
         @ViewModelKey(NearbyViewModel::class)
         fun nearbyViewModel(
             repo: IEventsRepository,
-            rxLocation: RxLocation,
-            flickr: Flickr,
             ioDispatcher: CoroutineDispatcher
-        ): ViewModel = NearbyViewModel(repo, rxLocation, flickr, ioDispatcher)
+        ): ViewModel = NearbyViewModel(repo, ioDispatcher)
     }
 
     @Module

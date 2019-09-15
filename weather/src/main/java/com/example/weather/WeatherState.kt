@@ -1,16 +1,12 @@
 package com.example.weather
 
 import com.example.core.model.weather.Forecast
+import com.example.coreandroid.arch.state.Data
+import com.example.coreandroid.arch.state.Initial
+import com.haroldadmin.vector.VectorState
 
-data class WeatherState(val forecastState: ForecastState) {
+data class WeatherState(val forecast: Data<Forecast?>) : VectorState {
     companion object {
-        val INITIAL = WeatherState(ForecastState.Initial)
+        val INITIAL = WeatherState(Data(null, Initial))
     }
-}
-
-sealed class ForecastState {
-    object Initial : ForecastState()
-    object Loading : ForecastState()
-    class Error(val throwable: Throwable?) : ForecastState()
-    class Found(val forecast: Forecast) : ForecastState()
 }

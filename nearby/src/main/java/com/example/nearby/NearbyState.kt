@@ -1,14 +1,13 @@
 package com.example.nearby
 
-import com.example.coreandroid.arch.state.PagedAsyncData
-import com.example.coreandroid.model.EventUiModel
+import com.example.coreandroid.arch.state.PagedDataList
+import com.example.coreandroid.ticketmaster.Event
+import com.haroldadmin.vector.VectorState
 
 data class NearbyState(
-    val events: PagedAsyncData<EventUiModel>
-) {
+    val events: PagedDataList<Event>
+) : VectorState {
     companion object {
-        val INITIAL = NearbyState(
-            events = PagedAsyncData()
-        )
+        val INITIAL = NearbyState(events = PagedDataList())
     }
 }

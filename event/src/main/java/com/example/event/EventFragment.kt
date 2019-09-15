@@ -5,12 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentPagerAdapter
-import com.example.coreandroid.model.EventUiModel
+import androidx.viewpager.widget.PagerAdapter
+import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.util.FragmentArgument
 import com.example.coreandroid.view.TitledFragmentsPagerAdapter
 import com.example.coreandroid.view.ViewPagerPageSelectedListener
 import com.example.weather.WeatherFragment
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.google.common.collect.BiMap
@@ -20,13 +21,19 @@ import kotlinx.android.synthetic.main.fragment_event.view.*
 
 class EventFragment : Fragment() {
 
-    private var event: EventUiModel by FragmentArgument()
+    private var event: Event by FragmentArgument()
 
-    private val eventViewPagerAdapter: FragmentPagerAdapter by lazy(LazyThreadSafetyMode.NONE) {
+    private val eventViewPagerAdapter: PagerAdapter by lazy(LazyThreadSafetyMode.NONE) {
         TitledFragmentsPagerAdapter(
             childFragmentManager, arrayOf(
                 "Details" to EventDetailsFragment.new(event) as Fragment,
-                "Weather" to WeatherFragment.new(event.latLng!!) as Fragment
+                //TODO: handle no venue case
+                "Weather" to WeatherFragment.new(event.venues.first().run {
+                    LatLng(
+                        lat.toDouble(),
+                        lng.toDouble()
+                    )
+                }) as Fragment
             )
         )
     }
@@ -37,13 +44,14 @@ class EventFragment : Fragment() {
         }
     }
 
-    private val bottomNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
-        viewPagerItems[item.itemId]?.let {
-            event_view_pager?.currentItem = it
-            return@OnNavigationItemSelectedListener true
+    private val bottomNavigationItemSelectedListener =
+        BottomNavigationView.OnNavigationItemSelectedListener { item ->
+            viewPagerItems[item.itemId]?.let {
+                event_view_pager?.currentItem = it
+                return@OnNavigationItemSelectedListener true
+            }
+            false
         }
-        false
-    }
 
     private val viewPagerItems: BiMap<Int, Int> = HashBiMap.create<Int, Int>().apply {
         put(R.id.bottom_nav_event_details, 0)
@@ -58,7 +66,9 @@ class EventFragment : Fragment() {
                 .setAction("Action", null).show()
         }
 
-        event_bottom_nav_view.setOnNavigationItemSelectedListener(bottomNavigationItemSelectedListener)
+        event_bottom_nav_view.setOnNavigationItemSelectedListener(
+            bottomNavigationItemSelectedListener
+        )
 
         event_view_pager.adapter = eventViewPagerAdapter
         event_view_pager.addOnPageChangeListener(viewPagerSwipedListener)
@@ -67,7 +77,7 @@ class EventFragment : Fragment() {
 
 
     companion object {
-        fun new(event: EventUiModel): EventFragment = EventFragment().apply {
+        fun new(event: Event): EventFragment = EventFragment().apply {
             this.event = event
         }
     }

@@ -42,6 +42,8 @@ dependencies {
     implementation project(':coreandroid')
     implementation project(':weather')
 
+    implementation "com.github.haroldadmin:Vector:0.4.2"
+
     implementation "com.google.android.gms:play-services-maps:$playServicesMapsVersion"
 
     implementation "com.google.dagger:dagger-android:$daggerVersion"

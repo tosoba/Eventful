@@ -1,83 +1,80 @@
 package com.example.nearby
 
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.example.coreandroid.SimpleEventItemBindingModel_
+import com.example.coreandroid.base.InjectableVectorFragment
+import com.example.coreandroid.di.Dependencies
 import com.example.coreandroid.navigation.IFragmentProvider
-import com.example.coreandroid.util.SnackbarState
-import com.example.coreandroid.util.navigationFragment
-import com.example.coreandroid.util.snackbarController
-import com.example.events.EventClicked
-import com.example.events.EventListScrolledToEnd
-import com.example.events.EventsFragment
-import dagger.android.support.DaggerFragment
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.consumeEach
+import com.example.coreandroid.util.*
+import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
+import kotlinx.android.synthetic.main.fragment_nearby.*
+import kotlinx.android.synthetic.main.fragment_nearby.view.*
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
+import javax.inject.Named
 
 
-@ExperimentalCoroutinesApi
-@ObsoleteCoroutinesApi
-class NearbyFragment : DaggerFragment(), CoroutineScope {
-
-    private val supervisorJob = Job()
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + supervisorJob
+class NearbyFragment : InjectableVectorFragment() {
 
     @Inject
-    lateinit var fragmentProvider: IFragmentProvider
-
-    private val eventsFragment: EventsFragment by lazy(LazyThreadSafetyMode.NONE) {
-        childFragmentManager.findFragmentById(R.id.nearby_events_list_fragment) as EventsFragment
-    }
+    internal lateinit var fragmentProvider: IFragmentProvider
 
     @Inject
-    lateinit var eventHandler: NearbyViewEventHandler
+    internal lateinit var eventHandler: NearbyViewEventHandler
 
-    override fun onDestroy() {
-        launch {
-            eventHandler.viewEventsSendChannel.send(Lifecycle.OnDestroy)
+    @Inject
+    @field:Named(Dependencies.EPOXY_DIFFER)
+    internal lateinit var differ: Handler
+
+    @Inject
+    @field:Named(Dependencies.EPOXY_BUILDER)
+    internal lateinit var builder: Handler
+
+    private val epoxyController by lazy {
+        itemListController(
+            builder, differ, eventHandler.viewModel, NearbyState::events,
+            EndlessRecyclerViewScrollListener {
+                eventHandler.eventOccurred(Interaction.EventListScrolledToEnd)
+            },
+            {}
+        ) { event ->
+            SimpleEventItemBindingModel_()
+                .id(event.id)
+                .event(event)
+                .eventClicked { _ -> eventHandler.eventOccurred(Interaction.EventClicked(event)) }
         }
-        supervisorJob.cancel()
-        super.onDestroy()
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_nearby, container, false)
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        setupChannels()
-        launch {
-            eventHandler.viewEventsSendChannel.send(
-                Lifecycle.OnViewCreated(
-                    this@NearbyFragment,
-                    savedInstanceState != null
-                )
+    ): View? = inflater.inflate(R.layout.fragment_nearby, container, false).apply {
+        this.nearby_events_recycler_view.setController(epoxyController)
+        savedInstanceState?.let {
+            this.nearby_events_recycler_view.restoreScrollPosition(
+                savedInstanceState,
+                epoxyController
             )
         }
     }
 
-    private fun setupChannels() {
-        launch {
-            eventsFragment.viewEventsReceiveChannel.consumeEach {
-                when (it) {
-                    is EventClicked -> eventHandler.viewEventsSendChannel.send(Interaction.EventClicked(it.event))
-                    is EventListScrolledToEnd -> eventHandler.viewEventsSendChannel.send(Interaction.EventListScrolledToEnd)
-                }
-            }
-        }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        eventHandler.eventOccurred(
+            Lifecycle.OnViewCreated(savedInstanceState != null)
+        )
 
-        launch {
-            eventHandler.viewUpdatesReceiveChannel.consumeEach {
+        fragmentScope.launch {
+            eventHandler.updates.collect {
                 when (it) {
                     is UpdateEvents -> {
                         snackbarController?.transition(SnackbarState.Hidden)
-                        eventsFragment.updateEvents(it.events)
+                        epoxyController.setData(eventHandler.viewModel.currentState)
                     }
                     is ShowEvent -> {
                         navigationFragment?.showFragment(fragmentProvider.eventFragment(it.event))
@@ -96,6 +93,16 @@ class NearbyFragment : DaggerFragment(), CoroutineScope {
                 }
             }
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        nearby_events_recycler_view?.saveScrollPosition(outState)
+    }
+
+    override fun onDestroy() {
+        eventHandler.eventOccurred(Lifecycle.OnDestroy)
+        super.onDestroy()
     }
 }
 

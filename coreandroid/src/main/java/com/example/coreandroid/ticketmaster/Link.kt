@@ -6,4 +6,6 @@ import com.example.core.model.ticketmaster.LinkType
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class Link(override val url: String, override val type: LinkType) : ILink, Parcelable
+data class Link(override val url: String, override val type: LinkType) : ILink, Parcelable {
+    constructor(other: ILink) : this(other.url, other.type)
+}

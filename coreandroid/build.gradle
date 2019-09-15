@@ -2,6 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
+apply plugin: 'com.jakewharton.butterknife'
 
 android {
     compileSdkVersion 28
@@ -29,6 +30,10 @@ android {
     compileOptions {
         sourceCompatibility 1.8
         targetCompatibility 1.8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
     }
 
     dataBinding {
@@ -80,6 +85,12 @@ dependencies {
     implementation "com.patloew.rxlocation:rxlocation:$rxLocationVersion"
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-rx2:$coroutinesRx2Version"
+
+    implementation "com.github.haroldadmin:Vector:0.4.2"
+
+    implementation 'com.airbnb.android:epoxy:3.7.0'
+    implementation 'com.airbnb.android:epoxy-databinding:3.7.0'
+    kapt 'com.airbnb.android:epoxy-processor:3.7.0'
 
     implementation "com.flickr4java:flickr4java:$flickrVersion"
     implementation 'org.jsoup:jsoup:1.12.1'

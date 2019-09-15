@@ -1,31 +1,25 @@
 package com.example.nearby
 
-import androidx.lifecycle.LifecycleOwner
-import com.example.coreandroid.arch.state.PagedAsyncData
+import com.example.coreandroid.arch.state.*
 import com.example.coreandroid.base.ConnectivityStateProvider
 import com.example.coreandroid.base.LocationStateProvider
 import com.example.coreandroid.di.scope.FragmentScoped
-import com.example.coreandroid.model.EventUiModel
+import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.util.LocationState
-import com.example.coreandroid.util.observeUsing
-import com.shopify.livedataktx.distinct
-import com.shopify.livedataktx.filter
-import com.shopify.livedataktx.map
-import com.shopify.livedataktx.nonNull
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 
-@ObsoleteCoroutinesApi
-@ExperimentalCoroutinesApi
 @FragmentScoped
 class NearbyViewEventHandler @Inject constructor(
-    private val viewModel: NearbyViewModel,
+    val viewModel: NearbyViewModel,
     private val connectivityStateProvider: ConnectivityStateProvider,
     private val locationStateProvider: LocationStateProvider
 ) : CoroutineScope {
@@ -35,108 +29,106 @@ class NearbyViewEventHandler @Inject constructor(
 
     private val trackerJob = Job()
 
-    private val viewEventsChannel: Channel<NearbyViewEvent> = Channel()
-    val viewEventsSendChannel: SendChannel<NearbyViewEvent> = viewEventsChannel
+    private val viewUpdatesChannel: Channel<NearbyViewAction> =
+        Channel(capacity = Channel.UNLIMITED)
 
-    private val viewUpdatesChannel: Channel<NearbyViewAction> = Channel()
-    val viewUpdatesReceiveChannel: ReceiveChannel<NearbyViewAction> = viewUpdatesChannel
+    private val events: PagedDataList<Event> get() = viewModel.currentState.events
 
-    private val events: PagedAsyncData<EventUiModel> get() = viewModel.viewStateObservable.currentState.events
-
-    init {
-        launch {
-            viewEventsChannel.consumeEach {
-                when (it) {
-                    is Interaction.EventListScrolledToEnd -> checkConditionsAndLoadEvents()
-                    is Interaction.EventClicked -> onEventClicked(it.event)
-                    is Lifecycle.OnViewCreated -> onViewCreated(it.lifecycleOwner, it.wasRecreated)
-                    is Lifecycle.OnDestroy -> onDestroy()
+    private val eventsActionsFlow: Flow<NearbyViewAction?> by lazy {
+        viewModel.state.map { it.events }
+            .distinctUntilChanged()
+            .map {
+                when (it.status) {
+                    is LoadedSuccessfully -> UpdateEvents(it.value)
+                    is Loading -> ShowLoadingSnackbar
+                    is LoadingFailed<*> -> when ((it.status as LoadingFailed<*>).error as NearbyError) {
+                        is NearbyError.NotConnected -> ShowNoConnectionMessage
+                        is NearbyError.LocationUnavailable -> ShowLocationUnavailableMessage
+                    }
+                    else -> null
                 }
             }
-        }
     }
 
-    private fun onEventClicked(event: EventUiModel) {
-        viewUpdatesChannel.offer(ShowEvent(event))
-    }
-
-    private fun onViewCreated(owner: LifecycleOwner, wasRecreated: Boolean) {
-        viewModel.viewStateObservable.observe(owner) {
-            if (it.events.lastLoadingStatus == PagedAsyncData.LoadingStatus.CompletedSuccessfully) {
-                viewUpdatesChannel.offer(UpdateEvents(it.events.items))
-            }
-
-            if (it.events.lastLoadingStatus == PagedAsyncData.LoadingStatus.InProgress) {
-                viewUpdatesChannel.offer(ShowLoadingSnackbar)
-            }
-        }
-
-        viewModel.viewStateObservable.liveState
-            .nonNull()
-            .filter { state: NearbyState ->
-                state.events.lastLoadingFailed &&
-                        (state.events.lastLoadingStatus as PagedAsyncData.LoadingStatus.CompletedWithError).throwable is NearbyError
-            }
-            .map { state: NearbyState ->
-                (state.events.lastLoadingStatus as PagedAsyncData.LoadingStatus.CompletedWithError).throwable as NearbyError
-            }
-            .observeUsing(owner) {
-                when (it) {
-                    is NearbyError.NotConnected -> viewUpdatesChannel.offer(ShowNoConnectionMessage)
-                    is NearbyError.LocationUnavailable -> viewUpdatesChannel.offer(
-                        ShowLocationUnavailableMessage
-                    )
-                }
-            }
-
-        connectivityStateProvider.isConnectedLive
-            .distinct()
-            .observeUsing(owner) {
-                if (it && events.emptyAndLastLoadingFailed) {
-                    val locationState = locationStateProvider.locationState
-                    if (locationState is LocationState.Found) {
-                        events.doIfEmptyAndLoadingNotInProgress {
-                            viewModel.loadEvents(locationState.latLng)
-                        }
-                    } else {
-                        viewUpdatesChannel.offer(ShowLocationUnavailableMessage)
+    private val connectionStateActionsFlow: Flow<NearbyViewAction?> by lazy {
+        connectivityStateProvider.isConnectedFlow
+            .distinctUntilChanged()
+            .filter { it && events.isEmptyAndLastLoadingFailed() }
+            .onEach {
+                val locationState = locationStateProvider.locationState
+                if (locationState is LocationState.Found) {
+                    events.ifEmptyAndIsNotLoading {
+                        viewModel.loadEvents(locationState.latLng)
                     }
                 }
             }
+            .map {
+                if (locationStateProvider.locationState !is LocationState.Found) {
+                    ShowLocationUnavailableMessage
+                } else null
+            }
+    }
 
-        locationStateProvider.locationStateLive
-            .distinct()
-            .observeUsing(owner) { locationState ->
-                if (locationState is LocationState.Found && events.items.isEmpty()) {
-                    if (connectivityStateProvider.isConnected) {
-                        events.doIfEmptyAndLoadingNotInProgress {
-                            viewModel.loadEvents(locationState.latLng)
-                            //TODO: this is here just for testing
-                            viewModel.loadTicketMasterEvents(locationState.latLng)
-                        }
-                    } else {
-                        viewUpdatesChannel.offer(ShowNoConnectionMessage)
+    private val locationStateActionsFlow: Flow<NearbyViewAction?> by lazy {
+        locationStateProvider.locationStateFlow
+            .distinctUntilChanged()
+            .filter { events.isEmptyAndLastLoadingFailed() }
+            .onEach { locationState ->
+                if (locationState is LocationState.Found && connectivityStateProvider.isConnected) {
+                    events.ifEmptyAndIsNotLoading {
+                        viewModel.loadEvents(locationState.latLng)
                     }
+                }
+            }
+            .map { locationState ->
+                if (locationState is LocationState.Found && !connectivityStateProvider.isConnected) {
+                    ShowNoConnectionMessage
                 } else if (locationState is LocationState.Loading) {
-                    viewUpdatesChannel.offer(ShowLoadingSnackbar)
-                }
+                    ShowLoadingSnackbar
+                } else null
             }
+    }
 
-        if (!wasRecreated && events.items.isEmpty()) {
-            checkConditionsAndLoadEvents()
+    val updates: Flow<NearbyViewAction> by lazy {
+        flowOf(
+            eventsActionsFlow,
+            connectionStateActionsFlow,
+            locationStateActionsFlow,
+            viewUpdatesChannel.consumeAsFlow()
+        ).flattenMerge().filterNotNull()
+    }
+
+    private val eventProcessor = actor<NearbyViewEvent>(
+        context = coroutineContext,
+        capacity = Channel.UNLIMITED
+    ) {
+        consumeEach {
+            when (it) {
+                is Interaction.EventListScrolledToEnd -> loadEventsIfPossible()
+                is Interaction.EventClicked -> viewUpdatesChannel.offer(ShowEvent(it.event))
+                is Lifecycle.OnViewCreated -> onViewCreated(it.wasRecreated)
+                is Lifecycle.OnDestroy -> onDestroy()
+            }
         }
+    }
+
+    fun eventOccurred(event: NearbyViewEvent) = eventProcessor.offer(event)
+
+    private fun onViewCreated(wasRecreated: Boolean) {
+        if (!wasRecreated && events.value.isEmpty())
+            loadEventsIfPossible()
     }
 
     private fun onDestroy() {
-        viewEventsChannel.cancel()
+        eventProcessor.close()
         viewUpdatesChannel.cancel()
         trackerJob.cancel()
     }
 
-    private fun checkConditionsAndLoadEvents() {
+    private fun loadEventsIfPossible() {
         val locationState = locationStateProvider.locationState
         if (locationState !is LocationState.Found) {
-            if (locationState !is LocationState.Loading) viewModel.onLocationUnavailable()
+            viewModel.onLocationUnavailable()
             return
         }
 
@@ -145,10 +137,6 @@ class NearbyViewEventHandler @Inject constructor(
             return
         }
 
-        events.doIfLoadingNotInProgressAndNotAllLoaded {
-            viewModel.loadEvents(locationState.latLng)
-            //TODO: this is here just for testing
-            viewModel.loadTicketMasterEvents(locationState.latLng)
-        }
+        events.ifNotLoadingAndNotAllLoaded { viewModel.loadEvents(locationState.latLng) }
     }
 }

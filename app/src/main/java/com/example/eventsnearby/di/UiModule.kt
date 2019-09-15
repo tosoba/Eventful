@@ -24,4 +24,6 @@ class UiModule {
 
     @Provides
     fun fragmentProvider(): IFragmentProvider = FragmentProvider
+
+
 }

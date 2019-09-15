@@ -13,4 +13,14 @@ data class Venue(
     override val city: String,
     override val lat: Float,
     override val lng: Float
-) : IVenue, Parcelable
+) : IVenue, Parcelable {
+    constructor(other: IVenue) : this(
+        other.id,
+        other.name,
+        other.url,
+        other.address,
+        other.city,
+        other.lat,
+        other.lng
+    )
+}

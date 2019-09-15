@@ -9,7 +9,6 @@ import com.example.coreandroid.base.LocationController
 import com.example.coreandroid.lifecycle.ConnectivityObserver
 import com.example.coreandroid.lifecycle.LocationAvailabilityObserver
 import com.example.coreandroid.util.LocationState
-import com.example.coreandroid.util.observeUsing
 import com.example.coreandroid.util.plusAssign
 import com.google.android.material.navigation.NavigationView
 import com.markodevcic.peko.ActivityRotatingException
@@ -17,19 +16,21 @@ import com.markodevcic.peko.Peko
 import com.markodevcic.peko.PermissionRequestResult
 import com.markodevcic.peko.rationale.AlertDialogPermissionRationale
 import com.markodevcic.peko.requestPermissionsAsync
-import com.shopify.livedataktx.map
-import com.shopify.livedataktx.nonNull
 import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 
-class MainActivity : DaggerAppCompatActivity(), DrawerLayoutHost, CoroutineScope, LocationController {
+class MainActivity : DaggerAppCompatActivity(), DrawerLayoutHost, CoroutineScope,
+    LocationController {
 
     private val supervisorJob = CompletableDeferred<Any>()
     override val coroutineContext: CoroutineContext
@@ -37,13 +38,14 @@ class MainActivity : DaggerAppCompatActivity(), DrawerLayoutHost, CoroutineScope
 
     override val drawerLayout: DrawerLayout? get() = main_drawer_layout
 
-    private val drawerNavigationItemSelectedListener = NavigationView.OnNavigationItemSelectedListener { item ->
-        when (item.itemId) {
+    private val drawerNavigationItemSelectedListener =
+        NavigationView.OnNavigationItemSelectedListener { item ->
+            when (item.itemId) {
 
+            }
+            main_drawer_layout.closeDrawer(GravityCompat.END)
+            true
         }
-        main_drawer_layout.closeDrawer(GravityCompat.END)
-        true
-    }
 
     private val currentState: MainState
         get() = viewModel.currentState
@@ -52,9 +54,12 @@ class MainActivity : DaggerAppCompatActivity(), DrawerLayoutHost, CoroutineScope
         supportFragmentManager.findFragmentById(R.id.main_navigation_fragment) as? MainNavigationFragment
     }
 
-    private val locationAvailabilityObserver: LocationAvailabilityObserver by lazy(LazyThreadSafetyMode.NONE) {
+    private val locationAvailabilityObserver: LocationAvailabilityObserver by lazy(
+        LazyThreadSafetyMode.NONE
+    ) {
         LocationAvailabilityObserver(this) { available ->
-            if (available && currentState.locationDisabledOrUnknown) viewModel.loadLocation()
+            if (available && currentState.locationDisabledOrUnknown)
+                viewModel.loadLocation()
         }
     }
 
@@ -67,7 +72,7 @@ class MainActivity : DaggerAppCompatActivity(), DrawerLayoutHost, CoroutineScope
         main_drawer_nav_view.setNavigationItemSelectedListener(drawerNavigationItemSelectedListener)
 
         lifecycle += listOf(
-            ConnectivityObserver { viewModel.onConnectionStateChanged(it) },
+            ConnectivityObserver { viewModel.connected = it },
             locationAvailabilityObserver
         )
 
@@ -76,12 +81,12 @@ class MainActivity : DaggerAppCompatActivity(), DrawerLayoutHost, CoroutineScope
             requestPermission()
         }
 
-        viewModel.liveState.nonNull()
-            .map { state: MainState -> state.locationState }
-            .observeUsing(this) {
+        launch {
+            viewModel.state.filterNotNull().map { it.locationState }.collect {
                 if (it is LocationState.Disabled) locationAvailabilityObserver.start()
                 else locationAvailabilityObserver.stop()
             }
+        }
     }
 
     override fun onDestroy() {

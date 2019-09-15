@@ -1,14 +1,14 @@
-package com.example.coreandroid.view
+package com.example.coreandroid.util
 
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-
-class EndlessRecyclerViewScrollListener(
+class EndlessRecyclerOnScrollListener(
     private val visibleThreshold: Int = 5,
     private val minItemsBeforeLoadingMore: Int = 0,
-    private val loadMore: () -> Unit
+    private val onLoadMore: () -> Unit
 ) : RecyclerView.OnScrollListener() {
+
     private var previousItemCount = 0
     private var loading = true
 
@@ -25,10 +25,10 @@ class EndlessRecyclerViewScrollListener(
             previousItemCount = totalItemCount
         }
 
-        val firstVisibleItem =
-            (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+        val firstVisibleItem = (recyclerView.layoutManager as LinearLayoutManager)
+            .findFirstVisibleItemPosition()
         if (!loading && totalItemCount - visibleItemCount <= firstVisibleItem + visibleThreshold) {
-            loadMore()
+            onLoadMore()
             loading = true
         }
     }
