@@ -11,6 +11,7 @@ enum class LinkType(private val typeStr: String) {
     HOMEPAGE("homepage");
 
     companion object {
-        fun fromString(str: String): LinkType? = values().find { it.typeStr == str }
+        fun fromString(str: String): LinkType? = values()
+            .find { it.typeStr.toLowerCase() == str.toLowerCase() }
     }
 }
