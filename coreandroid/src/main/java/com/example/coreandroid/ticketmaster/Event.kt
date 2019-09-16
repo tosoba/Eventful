@@ -34,4 +34,10 @@ data class Event(
         other.venues.map { Venue(it) },
         other.attractions.map { Attraction(it) }
     )
+
+    //TODO: prices!
+    //TODO: map all classifications and make a horizontal chip list out of it
+
+    val formattedAddress: String
+        get() = venues.firstOrNull()?.run { "$address, $city" } ?: "Unknown address"
 }
