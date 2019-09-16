@@ -5,8 +5,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.epoxy.*
-import com.example.coreandroid.arch.state.HoldsData
-import com.example.coreandroid.arch.state.LoadingFailed
 import com.example.coreandroid.reloadControl
 import com.haroldadmin.vector.VectorFragment
 import com.haroldadmin.vector.VectorState

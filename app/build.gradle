@@ -49,8 +49,7 @@ dependencies {
     implementation 'com.ss.bannerslider:bannerslider:2.0.0'
 
     implementation project(':ticketmasterapi')
-    implementation project(':eventsapi')
-    implementation project(':weatherapi')
+    implementation project(':darkskyapi')
     implementation project(':core')
     implementation project(':coreandroid')
     implementation project(':event')

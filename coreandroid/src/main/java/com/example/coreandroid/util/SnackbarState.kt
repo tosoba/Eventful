@@ -1,7 +1,6 @@
 package com.example.coreandroid.util
 
 sealed class SnackbarState {
-    class Loading(val message: String = "Loading in progress") : SnackbarState()
-    class Info(val text: String) : SnackbarState()
+    class Text(val text: String = "Loading in progress") : SnackbarState()
     object Hidden : SnackbarState()
 }

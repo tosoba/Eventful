@@ -7,8 +7,8 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.Toolbar
 import com.example.coreandroid.base.InjectableVectorFragment
 import com.example.coreandroid.util.FragmentArgument
-import com.example.coreandroid.util.setupToolbarWithDrawerToggle
-import com.example.coreandroid.util.showBackNavArrow
+import com.example.coreandroid.util.ext.setupToolbarWithDrawerToggle
+import com.example.coreandroid.util.ext.showBackNavArrow
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.android.synthetic.main.fragment_weather.*
 import kotlinx.android.synthetic.main.fragment_weather.view.*

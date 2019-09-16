@@ -10,7 +10,12 @@ import com.example.coreandroid.SimpleEventItemBindingModel_
 import com.example.coreandroid.base.InjectableVectorFragment
 import com.example.coreandroid.di.Dependencies
 import com.example.coreandroid.navigation.IFragmentProvider
-import com.example.coreandroid.util.*
+import com.example.coreandroid.util.SnackbarState
+import com.example.coreandroid.util.ext.navigationFragment
+import com.example.coreandroid.util.ext.restoreScrollPosition
+import com.example.coreandroid.util.ext.saveScrollPosition
+import com.example.coreandroid.util.ext.snackbarController
+import com.example.coreandroid.util.itemListController
 import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
 import kotlinx.android.synthetic.main.fragment_nearby.*
 import kotlinx.android.synthetic.main.fragment_nearby.view.*
@@ -57,8 +62,7 @@ class NearbyFragment : InjectableVectorFragment() {
         this.nearby_events_recycler_view.setController(epoxyController)
         savedInstanceState?.let {
             this.nearby_events_recycler_view.restoreScrollPosition(
-                savedInstanceState,
-                epoxyController
+                savedInstanceState, epoxyController
             )
         }
     }
@@ -88,7 +92,7 @@ class NearbyFragment : InjectableVectorFragment() {
                         Log.e("LOC", "Location unavailable.")
                     }
                     is ShowLoadingSnackbar -> {
-                        snackbarController?.transition(SnackbarState.Loading())
+                        snackbarController?.transition(SnackbarState.Text())
                     }
                 }
             }

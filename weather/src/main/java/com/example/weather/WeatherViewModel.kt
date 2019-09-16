@@ -1,10 +1,10 @@
 package com.example.weather
 
 import androidx.lifecycle.viewModelScope
-import com.example.core.Failure
 import com.example.core.IWeatherRepository
-import com.example.core.Success
-import com.example.coreandroid.arch.state.Loading
+import com.example.core.Resource
+import com.example.core.model.weather.Forecast
+import com.example.coreandroid.util.Loading
 import com.google.android.gms.maps.model.LatLng
 import com.haroldadmin.vector.VectorViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -24,11 +24,11 @@ class WeatherViewModel(
             when (val result = withContext(ioDispatcher) {
                 repo.getForecast(lat = latLng.latitude, lon = latLng.longitude)
             }) {
-                is Success -> setState {
+                is Resource.Success -> setState {
                     copy(forecast = forecast.copyWithNewValue(result.data))
                 }
 
-                is Failure -> setState {
+                is Resource.Error<Forecast, *> -> setState {
                     copy(forecast = forecast.copyWithError(result.error))
                 }
             }

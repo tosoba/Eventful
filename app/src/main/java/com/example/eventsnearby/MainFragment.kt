@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.viewpager.widget.PagerAdapter
 import com.example.coreandroid.base.SnackbarController
 import com.example.coreandroid.util.SnackbarState
-import com.example.coreandroid.util.setupToolbarWithDrawerToggle
+import com.example.coreandroid.util.ext.setupToolbarWithDrawerToggle
 import com.example.coreandroid.view.TitledFragmentsPagerAdapter
 import com.example.coreandroid.view.ViewPagerPageSelectedListener
 import com.example.favourites.FavouritesFragment
@@ -93,8 +93,8 @@ class MainFragment : DaggerFragment(), SnackbarController {
             snackbar?.dismiss()
             viewModel.snackbarState = newState
             when (newState) {
-                is SnackbarState.Loading -> {
-                    snackbar = Snackbar.make(it, newState.message, Snackbar.LENGTH_INDEFINITE)
+                is SnackbarState.Text -> {
+                    snackbar = Snackbar.make(it, newState.text, Snackbar.LENGTH_INDEFINITE)
                         .apply(Snackbar::show)
                 }
             }

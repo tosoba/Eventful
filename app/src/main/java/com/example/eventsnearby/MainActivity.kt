@@ -9,7 +9,7 @@ import com.example.coreandroid.base.LocationController
 import com.example.coreandroid.lifecycle.ConnectivityObserver
 import com.example.coreandroid.lifecycle.LocationAvailabilityObserver
 import com.example.coreandroid.util.LocationState
-import com.example.coreandroid.util.plusAssign
+import com.example.coreandroid.util.ext.plusAssign
 import com.google.android.material.navigation.NavigationView
 import com.markodevcic.peko.ActivityRotatingException
 import com.markodevcic.peko.Peko

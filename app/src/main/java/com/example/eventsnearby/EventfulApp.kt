@@ -6,8 +6,8 @@ import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import com.example.coreandroid.util.BannerSliderImageLoadingService
-import com.example.coreandroid.util.registerFragmentLifecycleCallbacks
+import com.example.coreandroid.util.ext.registerFragmentLifecycleCallbacks
+import com.example.coreandroid.view.BannerSliderImageLoadingService
 import com.example.eventsnearby.di.DaggerAppComponent
 import dagger.android.AndroidInjector
 import dagger.android.DaggerApplication
@@ -29,7 +29,7 @@ class EventfulApp : DaggerApplication() {
         Slider.init(BannerSliderImageLoadingService)
 //        registerLifecycleCallbacks()
         RxJavaPlugins.setErrorHandler {
-            Log.e("Rx error", it?.message ?: "Unknown message")
+            Log.e("Rx error", it?.message ?: "Unknown text")
         }
     }
 

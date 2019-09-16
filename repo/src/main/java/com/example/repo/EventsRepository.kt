@@ -2,33 +2,16 @@ package com.example.repo
 
 import com.example.core.IEventsRepository
 import com.example.core.Resource
-import com.example.core.Result
-import com.example.core.mapSuccess
 import com.example.core.model.PagedResult
-import com.example.core.model.event.EventsResult
 import com.example.core.model.ticketmaster.IEvent
-import com.example.coreandroid.retrofit.awaitResult
-import com.example.eventsapi.EventsApi
-import com.example.eventsapi.util.EventsArea
-import com.example.eventsapi.util.EventsRadiusUnit
 import com.example.ticketmasterapi.TicketMasterApi
 import com.example.ticketmasterapi.queryparam.GeoPoint
 import com.example.ticketmasterapi.queryparam.RadiusUnit
 import com.haroldadmin.cnradapter.NetworkResponse
 
 class EventsRepository(
-    private val api: EventsApi,
     private val ticketMasterApi: TicketMasterApi
 ) : IEventsRepository {
-
-    override suspend fun getNearbyEvents(
-        lat: Double, lon: Double, offset: Int?
-    ): Result<EventsResult> = api.loadNearbyEvents(
-        withinString = EventsArea(DEFAULT_RADIUS, DEFAULT_UNIT, lat, lon).toString(),
-        offset = offset
-    ).awaitResult().mapSuccess {
-        EventsResult(it.results, it.results.size + (offset ?: 0), it.count)
-    }
 
     override suspend fun nearbyEvents(
         lat: Double, lon: Double, offset: Int?
@@ -50,6 +33,5 @@ class EventsRepository(
 
     companion object {
         private const val DEFAULT_RADIUS = 10
-        private val DEFAULT_UNIT = EventsRadiusUnit.KILOMETERS
     }
 }

@@ -1,11 +1,10 @@
 package com.example.nearby
 
-import com.example.coreandroid.arch.state.*
 import com.example.coreandroid.base.ConnectivityStateProvider
 import com.example.coreandroid.base.LocationStateProvider
 import com.example.coreandroid.di.scope.FragmentScoped
 import com.example.coreandroid.ticketmaster.Event
-import com.example.coreandroid.util.LocationState
+import com.example.coreandroid.util.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

@@ -5,8 +5,8 @@ import com.example.coreandroid.base.ConnectivityStateProvider
 import com.example.coreandroid.base.LocationStateProvider
 import com.example.coreandroid.util.LocationState
 import com.example.coreandroid.util.SnackbarState
-import com.example.coreandroid.util.awaitOne
-import com.example.coreandroid.util.latLng
+import com.example.coreandroid.util.ext.awaitOne
+import com.example.coreandroid.util.ext.latLng
 import com.haroldadmin.vector.VectorViewModel
 import io.nlopez.smartlocation.SmartLocation
 import kotlinx.coroutines.flow.Flow

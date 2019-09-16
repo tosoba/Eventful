@@ -7,6 +7,8 @@ import androidx.appcompat.widget.AppCompatImageButton
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import kotlin.math.max
+import kotlin.math.min
 
 
 class ActionBarDrawerToggleEnd(
@@ -61,7 +63,7 @@ class ActionBarDrawerToggleEnd(
     }
 
     override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
-        setPosition(Math.min(1f, Math.max(0f, slideOffset)))
+        setPosition(min(1f, max(0f, slideOffset)))
     }
 
     override fun onDrawerOpened(drawerView: View) {

@@ -19,9 +19,7 @@ class BottomFabLayoutBehavior(context: Context?, attrs: AttributeSet?) :
     }
 
     override fun onDependentViewChanged(
-        parent: CoordinatorLayout,
-        child: FloatingActionButton,
-        dependency: View
+        parent: CoordinatorLayout, child: FloatingActionButton, dependency: View
     ): Boolean = updateButton(child, dependency)
 
     private fun updateButton(child: View, dependency: View): Boolean = if (dependency is Snackbar.SnackbarLayout) {
