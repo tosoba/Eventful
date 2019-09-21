@@ -16,9 +16,10 @@ data class Event(
     override val salesEndDate: Date?,
     override val startDate: Date?,
     override val startTime: String?,
-    override val kind: String?,
+    override val kinds: List<String>,
     override val venues: List<Venue>,
-    override val attractions: List<Attraction>
+    override val attractions: List<Attraction>,
+    override val priceRanges: List<PriceRange>?
 ) : IEvent, Parcelable {
     constructor(other: IEvent) : this(
         other.id,
@@ -30,14 +31,18 @@ data class Event(
         other.salesEndDate,
         other.startDate,
         other.startTime,
-        other.kind,
+        other.kinds,
         other.venues.map { Venue(it) },
-        other.attractions.map { Attraction(it) }
+        other.attractions.map { Attraction(it) },
+        other.priceRanges?.map { PriceRange(it) }
     )
-
-    //TODO: prices!
-    //TODO: map all classifications and make a horizontal chip list out of it
 
     val formattedAddress: String
         get() = venues.firstOrNull()?.run { "$address, $city" } ?: "Unknown address"
+
+    val formattedPriceRange: String
+        get() = priceRanges?.firstOrNull()?.run {
+            if (min != max) "$min - $max"
+            else min.toString()
+        } ?: "? $"
 }

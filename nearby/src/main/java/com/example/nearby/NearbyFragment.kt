@@ -6,10 +6,13 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.coreandroid.SimpleEventItemBindingModel_
+import com.example.coreandroid.EventInfoBindingModel_
+import com.example.coreandroid.EventKindBindingModel_
+import com.example.coreandroid.EventThumbnailBindingModel_
 import com.example.coreandroid.base.InjectableVectorFragment
 import com.example.coreandroid.di.Dependencies
 import com.example.coreandroid.navigation.IFragmentProvider
+import com.example.coreandroid.util.NestedScrollingCarouselModel
 import com.example.coreandroid.util.SnackbarState
 import com.example.coreandroid.util.ext.navigationFragment
 import com.example.coreandroid.util.ext.restoreScrollPosition
@@ -17,6 +20,7 @@ import com.example.coreandroid.util.ext.saveScrollPosition
 import com.example.coreandroid.util.ext.snackbarController
 import com.example.coreandroid.util.itemListController
 import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
+import com.example.coreandroid.view.epoxy.EventItem
 import kotlinx.android.synthetic.main.fragment_nearby.*
 import kotlinx.android.synthetic.main.fragment_nearby.view.*
 import kotlinx.coroutines.flow.collect
@@ -31,7 +35,7 @@ class NearbyFragment : InjectableVectorFragment() {
     internal lateinit var fragmentProvider: IFragmentProvider
 
     @Inject
-    internal lateinit var eventHandler: NearbyViewEventHandler
+    internal lateinit var handler: NearbyViewEventHandler
 
     @Inject
     @field:Named(Dependencies.EPOXY_DIFFER)
@@ -43,16 +47,25 @@ class NearbyFragment : InjectableVectorFragment() {
 
     private val epoxyController by lazy {
         itemListController(
-            builder, differ, eventHandler.viewModel, NearbyState::events,
+            builder, differ, handler.viewModel, NearbyState::events,
             EndlessRecyclerViewScrollListener {
-                eventHandler.eventOccurred(Interaction.EventListScrolledToEnd)
+                handler.eventOccurred(Interaction.EventListScrolledToEnd)
             },
             {}
         ) { event ->
-            SimpleEventItemBindingModel_()
-                .id(event.id)
-                .event(event)
-                .eventClicked { _ -> eventHandler.eventOccurred(Interaction.EventClicked(event)) }
+            EventItem(
+                View.OnClickListener { handler.eventOccurred(Interaction.EventClicked(event)) },
+                EventThumbnailBindingModel_().id(event.id + "t")
+                    .event(event),
+                EventInfoBindingModel_().id(event.id + "b")
+                    .event(event),
+                NestedScrollingCarouselModel()
+                    .id(event.id + "c")
+                    .models(event.kinds.mapIndexed { index: Int, kind: String ->
+                        EventKindBindingModel_().id("${event.id}k$index")
+                            .kind(kind)
+                    })
+            )
         }
     }
 
@@ -69,16 +82,16 @@ class NearbyFragment : InjectableVectorFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        eventHandler.eventOccurred(
+        handler.eventOccurred(
             Lifecycle.OnViewCreated(savedInstanceState != null)
         )
 
         fragmentScope.launch {
-            eventHandler.updates.collect {
+            handler.updates.collect {
                 when (it) {
                     is UpdateEvents -> {
                         snackbarController?.transition(SnackbarState.Hidden)
-                        epoxyController.setData(eventHandler.viewModel.currentState)
+                        epoxyController.setData(handler.viewModel.currentState)
                     }
                     is ShowEvent -> {
                         navigationFragment?.showFragment(fragmentProvider.eventFragment(it.event))
@@ -105,7 +118,7 @@ class NearbyFragment : InjectableVectorFragment() {
     }
 
     override fun onDestroy() {
-        eventHandler.eventOccurred(Lifecycle.OnDestroy)
+        handler.eventOccurred(Lifecycle.OnDestroy)
         super.onDestroy()
     }
 }

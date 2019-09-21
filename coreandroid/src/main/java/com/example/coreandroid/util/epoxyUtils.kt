@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.epoxy.*
+import com.example.coreandroid.R
 import com.example.coreandroid.reloadControl
 import com.haroldadmin.vector.VectorFragment
 import com.haroldadmin.vector.VectorState
@@ -91,12 +92,8 @@ inline fun EpoxyController.infiniteCarousel(
     noinline onLoadMore: () -> Unit, modelInitializer: CarouselModelBuilder.() -> Unit
 ) {
     InfiniteNestedScrollingCarouselModel(
-        visibleThreshold,
-        minItemsBeforeLoadingMore,
-        onLoadMore
-    )
-        .apply(modelInitializer)
-        .addTo(this)
+        visibleThreshold, minItemsBeforeLoadingMore, onLoadMore
+    ).apply(modelInitializer).addTo(this)
 }
 
 inline fun <T> CarouselModelBuilder.withModelsFrom(
@@ -149,5 +146,46 @@ fun <S : VectorState, A : VectorViewModel<S>, L : HoldsData<Collection<I>>, I> V
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
         onScrollListener?.let { recyclerView.addOnScrollListener(it) }
+    }
+}
+
+class Column(
+    models: Collection<EpoxyModel<*>>,
+    private val clicked: View.OnClickListener? = null
+) : EpoxyModelGroup(R.layout.column, models) {
+
+    constructor(
+        clicked: View.OnClickListener? = null,
+        vararg models: EpoxyModel<*>
+    ) : this(models.toList(), clicked)
+
+    constructor(
+        vararg models: EpoxyModel<*>
+    ) : this(models.toList(), null)
+
+
+    override fun bind(holder: ModelGroupHolder) {
+        super.bind(holder)
+        clicked?.let { holder.rootView.setOnClickListener(it) }
+    }
+}
+
+class Row(
+    models: Collection<EpoxyModel<*>>,
+    private val clicked: View.OnClickListener? = null
+) : EpoxyModelGroup(R.layout.row, models) {
+
+    constructor(
+        clicked: View.OnClickListener? = null,
+        vararg models: EpoxyModel<*>
+    ) : this(models.toList(), clicked)
+
+    constructor(
+        vararg models: EpoxyModel<*>
+    ) : this(models.toList(), null)
+
+    override fun bind(holder: ModelGroupHolder) {
+        super.bind(holder)
+        clicked?.let { holder.rootView.setOnClickListener(it) }
     }
 }

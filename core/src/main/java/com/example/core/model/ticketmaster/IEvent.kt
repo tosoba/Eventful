@@ -12,7 +12,8 @@ interface IEvent {
     val salesEndDate: Date?
     val startDate: Date?
     val startTime: String?
-    val kind: String?
+    val kinds: List<String>
     val venues: List<IVenue>
     val attractions: List<IAttraction>
+    val priceRanges: List<IPriceRange>?
 }

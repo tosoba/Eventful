@@ -4,7 +4,7 @@ import com.example.core.model.ticketmaster.IAttraction
 import com.example.core.model.ticketmaster.IEvent
 import com.example.core.model.ticketmaster.IVenue
 import com.example.ticketmasterapi.imageUrl
-import com.example.ticketmasterapi.kind
+import com.example.ticketmasterapi.kinds
 import com.google.gson.annotations.SerializedName
 import java.util.*
 
@@ -12,6 +12,7 @@ data class Event(
     @SerializedName("_embedded")
     val embedded: EmbeddedAttractionsAndVenues,
     val classifications: List<Classification>,
+    override val priceRanges: List<PriceRange>?,
     val dates: Dates,
     override val id: String,
     val images: List<Image>,
@@ -27,7 +28,7 @@ data class Event(
     override val salesEndDate: Date? get() = sales.public.endDateTime
     override val startDate: Date? get() = dates.start.dateTime
     override val startTime: String? get() = dates.start.localTime
-    override val kind: String? get() = classifications.kind
+    override val kinds: List<String> get() = classifications.kinds
     override val venues: List<IVenue> get() = embedded.venues
     override val attractions: List<IAttraction> get() = embedded.attractions
 }

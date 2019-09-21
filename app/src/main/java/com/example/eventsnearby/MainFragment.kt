@@ -20,13 +20,9 @@ import com.google.common.collect.HashBiMap
 import dagger.android.support.DaggerFragment
 import kotlinx.android.synthetic.main.fragment_main.*
 import kotlinx.android.synthetic.main.fragment_main.view.*
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.ObsoleteCoroutinesApi
 import javax.inject.Inject
 
 
-@ExperimentalCoroutinesApi
-@ObsoleteCoroutinesApi
 class MainFragment : DaggerFragment(), SnackbarController {
 
     private val bottomNavigationItemSelectedListener =
