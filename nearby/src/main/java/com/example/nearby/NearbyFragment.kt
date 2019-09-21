@@ -6,13 +6,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.coreandroid.EventInfoBindingModel_
-import com.example.coreandroid.EventKindBindingModel_
-import com.example.coreandroid.EventThumbnailBindingModel_
 import com.example.coreandroid.base.InjectableVectorFragment
 import com.example.coreandroid.di.Dependencies
 import com.example.coreandroid.navigation.IFragmentProvider
-import com.example.coreandroid.util.NestedScrollingCarouselModel
 import com.example.coreandroid.util.SnackbarState
 import com.example.coreandroid.util.ext.navigationFragment
 import com.example.coreandroid.util.ext.restoreScrollPosition
@@ -20,7 +16,7 @@ import com.example.coreandroid.util.ext.saveScrollPosition
 import com.example.coreandroid.util.ext.snackbarController
 import com.example.coreandroid.util.itemListController
 import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
-import com.example.coreandroid.view.epoxy.EventItem
+import com.example.coreandroid.view.epoxy.listItem
 import kotlinx.android.synthetic.main.fragment_nearby.*
 import kotlinx.android.synthetic.main.fragment_nearby.view.*
 import kotlinx.coroutines.flow.collect
@@ -53,19 +49,9 @@ class NearbyFragment : InjectableVectorFragment() {
             },
             {}
         ) { event ->
-            EventItem(
-                View.OnClickListener { handler.eventOccurred(Interaction.EventClicked(event)) },
-                EventThumbnailBindingModel_().id(event.id + "t")
-                    .event(event),
-                EventInfoBindingModel_().id(event.id + "b")
-                    .event(event),
-                NestedScrollingCarouselModel()
-                    .id(event.id + "c")
-                    .models(event.kinds.mapIndexed { index: Int, kind: String ->
-                        EventKindBindingModel_().id("${event.id}k$index")
-                            .kind(kind)
-                    })
-            )
+            event.listItem(View.OnClickListener {
+                handler.eventOccurred(Interaction.EventClicked(event))
+            })
         }
     }
 

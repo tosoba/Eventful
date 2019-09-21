@@ -3,6 +3,8 @@
 
     <data>
 
+        <import type="android.view.View" />
+
         <variable
                 name="event"
                 type="com.example.coreandroid.ticketmaster.Event" />
@@ -29,9 +31,10 @@
                 android:layout_height="wrap_content"
                 android:background="@color/blueText"
                 android:padding="5dp"
-                android:text='@{event.startTime ?? "No info"}'
+                android:text="@{event.formattedStartTime}"
                 android:textAlignment="center"
                 android:textColor="#fff"
+                android:visibility="@{event.startTime == null ? View.GONE : View.VISIBLE}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="@id/event_image_view"
                 app:layout_constraintRight_toRightOf="@id/event_image_view" />

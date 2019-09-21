@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@android:color/white"
         android:fitsSystemWindows="true">
 
     <androidx.viewpager.widget.ViewPager
+            android:id="@+id/event_view_pager"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            android:id="@+id/event_view_pager"
-            tools:context=".EventFragment"/>
+            tools:context=".EventFragment" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/event_bottom_nav_view"
@@ -21,7 +21,7 @@
             android:layout_gravity="bottom"
             android:background="?android:attr/windowBackground"
             app:layout_behavior="com.example.coreandroid.view.BottomNavLayoutBehavior"
-            app:menu="@menu/event_bottom_nav_menu"/>
+            app:menu="@menu/event_bottom_nav_menu" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/event_fab"
@@ -33,7 +33,7 @@
             app:layout_anchorGravity="top|end"
             app:layout_behavior="com.example.coreandroid.view.BottomFabLayoutBehavior"
             app:srcCompat="@android:drawable/ic_dialog_email"
-            app:useCompatPadding="true"/>
+            app:useCompatPadding="true" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

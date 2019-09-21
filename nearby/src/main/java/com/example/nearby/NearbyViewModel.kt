@@ -20,13 +20,12 @@ class NearbyViewModel(
 
     fun loadEvents(userLatLng: LatLng) = viewModelScope.launch {
         withState { state ->
-            if (state.events.status is Loading) {
+            if (state.events.status is Loading || state.events.offset >= state.events.totalItems)
                 return@withState
-            }
 
             setState { copy(events = events.copyWithLoadingInProgress) }
             when (val result = withContext(ioDispatcher) {
-                repo.nearbyEvents(userLatLng.latitude, userLatLng.longitude, null)
+                repo.nearbyEvents(userLatLng.latitude, userLatLng.longitude, state.events.offset)
             }) {
                 is Resource.Success -> {
                     setState {

@@ -42,7 +42,7 @@ abstract class BaseNavigationFragment : Fragment() {
                 android.R.anim.fade_in,
                 android.R.anim.fade_out
             )
-            replace(backStackNavigationContainerId, fragment)
+            add(backStackNavigationContainerId, fragment)
             if (addToBackStack) addToBackStack(null)
             commit()
         }

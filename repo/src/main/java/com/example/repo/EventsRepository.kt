@@ -18,7 +18,8 @@ class EventsRepository(
     ): Resource<PagedResult<IEvent>> = when (val response = ticketMasterApi.searchEvents(
         radius = DEFAULT_RADIUS,
         radiusUnit = RadiusUnit.KM,
-        geoPoint = GeoPoint(lat, lon)
+        geoPoint = GeoPoint(lat, lon),
+        page = offset
     ).await()) {
         is NetworkResponse.Success -> Resource.Success(
             PagedResult(

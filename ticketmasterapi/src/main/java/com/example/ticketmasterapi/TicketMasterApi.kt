@@ -20,7 +20,7 @@ interface TicketMasterApi {
         @Query("radius") radius: Int? = null,
         @Query("unit") radiusUnit: RadiusUnit? = null,
         @Query("size") size: Int = 20,
-        @Query("page") page: Int = 0,
+        @Query("page") page: Int? = null,
         @Query("geoPoint") geoPoint: GeoPoint? = null,
         @Query("apikey") apiKey: String = TicketMasterAuth.key
     ): Deferred<NetworkResponse<EventSearchResponse, TicketMasterErrorResponse>>
