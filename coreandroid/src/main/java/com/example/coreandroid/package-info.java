@@ -3,7 +3,9 @@
                 R2.layout.reload_control,
                 R2.layout.event_info,
                 R2.layout.event_kind,
-                R2.layout.event_thumbnail
+                R2.layout.event_thumbnail,
+                R2.layout.loading_indicator,
+                R2.layout.loading_more_indicator
         }
 )
 package com.example.coreandroid;

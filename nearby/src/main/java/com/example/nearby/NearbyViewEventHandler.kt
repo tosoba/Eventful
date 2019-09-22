@@ -1,5 +1,6 @@
 package com.example.nearby
 
+import android.content.Context
 import com.example.coreandroid.base.ConnectivityStateProvider
 import com.example.coreandroid.base.LocationStateProvider
 import com.example.coreandroid.di.scope.FragmentScoped
@@ -18,6 +19,7 @@ import kotlin.coroutines.CoroutineContext
 
 @FragmentScoped
 class NearbyViewEventHandler @Inject constructor(
+    private val appContext: Context,
     val viewModel: NearbyViewModel,
     private val connectivityStateProvider: ConnectivityStateProvider,
     private val locationStateProvider: LocationStateProvider
@@ -38,11 +40,17 @@ class NearbyViewEventHandler @Inject constructor(
             .distinctUntilChanged()
             .map {
                 when (it.status) {
-                    is LoadedSuccessfully -> UpdateEvents(it.value)
-                    is Loading -> ShowLoadingSnackbar
+                    is LoadedSuccessfully, Loading -> InvalidateList
                     is LoadingFailed<*> -> when ((it.status as LoadingFailed<*>).error as NearbyError) {
-                        is NearbyError.NotConnected -> ShowNoConnectionMessage
-                        is NearbyError.LocationUnavailable -> ShowLocationUnavailableMessage
+                        is NearbyError.NotConnected -> ShowSnackbarWithMsg(
+                            appContext.getString(R.string.no_connection)
+                        )
+                        is NearbyError.LocationUnavailable -> ShowSnackbarWithMsg(
+                            appContext.getString(R.string.unable_to_retrieve_location)
+                        )
+                        NearbyError.LocationNotLoadedYet -> ShowSnackbarWithMsg(
+                            appContext.getString(R.string.retrieving_location)
+                        )
                     }
                     else -> null
                 }
@@ -56,14 +64,13 @@ class NearbyViewEventHandler @Inject constructor(
             .onEach {
                 val locationState = locationStateProvider.locationState
                 if (locationState is LocationState.Found) {
-                    events.ifEmptyAndIsNotLoading {
-                        viewModel.loadEvents(locationState.latLng)
-                    }
+                    events.ifEmptyAndIsNotLoading { viewModel.loadEvents(locationState.latLng) }
                 }
             }
             .map {
-                if (locationStateProvider.locationState !is LocationState.Found) {
-                    ShowLocationUnavailableMessage
+                val locationState = locationStateProvider.locationState
+                if (locationState !is LocationState.Found && locationState !is LocationState.Loading) {
+                    ShowSnackbarWithMsg(appContext.getString(R.string.unable_to_retrieve_location))
                 } else null
             }
     }
@@ -74,16 +81,14 @@ class NearbyViewEventHandler @Inject constructor(
             .filter { events.isEmptyAndLastLoadingFailed() }
             .onEach { locationState ->
                 if (locationState is LocationState.Found && connectivityStateProvider.isConnected) {
-                    events.ifEmptyAndIsNotLoading {
-                        viewModel.loadEvents(locationState.latLng)
-                    }
+                    events.ifEmptyAndIsNotLoading { viewModel.loadEvents(locationState.latLng) }
                 }
             }
             .map { locationState ->
                 if (locationState is LocationState.Found && !connectivityStateProvider.isConnected) {
-                    ShowNoConnectionMessage
+                    ShowSnackbarWithMsg(appContext.getString(R.string.no_connection))
                 } else if (locationState is LocationState.Loading) {
-                    ShowLoadingSnackbar
+                    ShowSnackbarWithMsg(appContext.getString(R.string.retrieving_location))
                 } else null
             }
     }
@@ -103,7 +108,7 @@ class NearbyViewEventHandler @Inject constructor(
     ) {
         consumeEach {
             when (it) {
-                is Interaction.EventListScrolledToEnd -> loadEventsIfPossible()
+                is Interaction.EventListScrolledToEnd, Interaction.ReloadClicked -> loadEventsIfPossible()
                 is Interaction.EventClicked -> viewUpdatesChannel.offer(ShowEvent(it.event))
                 is Lifecycle.OnViewCreated -> onViewCreated(it.wasRecreated)
                 is Lifecycle.OnDestroy -> onDestroy()
@@ -114,8 +119,7 @@ class NearbyViewEventHandler @Inject constructor(
     fun eventOccurred(event: NearbyViewEvent) = eventProcessor.offer(event)
 
     private fun onViewCreated(wasRecreated: Boolean) {
-        if (!wasRecreated && events.value.isEmpty())
-            loadEventsIfPossible()
+        if (!wasRecreated && events.value.isEmpty()) loadEventsIfPossible()
     }
 
     private fun onDestroy() {
@@ -125,14 +129,17 @@ class NearbyViewEventHandler @Inject constructor(
     }
 
     private fun loadEventsIfPossible() {
-        val locationState = locationStateProvider.locationState
-        if (locationState !is LocationState.Found) {
-            viewModel.onLocationUnavailable()
+        if (!connectivityStateProvider.isConnected) {
+            viewModel.onNotConnected()
             return
         }
 
-        if (!connectivityStateProvider.isConnected) {
-            viewModel.onNotConnected()
+        val locationState = locationStateProvider.locationState
+        if (locationState is LocationState.Loading) {
+            viewModel.onLocationNotLoadedYet()
+            return
+        } else if (locationState !is LocationState.Found) {
+            viewModel.onLocationUnavailable()
             return
         }
 

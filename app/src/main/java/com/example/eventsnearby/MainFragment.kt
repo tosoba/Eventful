@@ -86,12 +86,19 @@ class MainFragment : DaggerFragment(), SnackbarController {
         main_fab?.let {
             if (newState == viewModel.currentState.snackbarState) return
 
-            snackbar?.dismiss()
             viewModel.snackbarState = newState
             when (newState) {
                 is SnackbarState.Text -> {
-                    snackbar = Snackbar.make(it, newState.text, Snackbar.LENGTH_INDEFINITE)
-                        .apply(Snackbar::show)
+                    if (snackbar?.isShown != false && viewModel.currentState.snackbarState is SnackbarState.Text) {
+                        snackbar?.setText(newState.text)
+                    } else {
+                        snackbar = Snackbar.make(it, newState.text, Snackbar.LENGTH_INDEFINITE)
+                            .apply(Snackbar::show)
+                    }
+                }
+                is SnackbarState.Hidden -> {
+                    snackbar?.dismiss()
+                    snackbar = null
                 }
             }
         }

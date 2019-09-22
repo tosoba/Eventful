@@ -6,6 +6,7 @@ sealed class NearbyViewEvent
 
 sealed class Interaction : NearbyViewEvent() {
     object EventListScrolledToEnd : Interaction()
+    object ReloadClicked : Interaction()
     data class EventClicked(val event: Event) : Interaction()
 }
 

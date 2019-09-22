@@ -50,6 +50,9 @@ class NearbyViewModel(
         copy(events = events.copyWithError(NearbyError.NotConnected))
     }
 
+    fun onLocationNotLoadedYet() = setState {
+        copy(events = events.copyWithError(NearbyError.LocationNotLoadedYet))
+    }
 
     fun onLocationUnavailable() = setState {
         copy(events = events.copyWithError(NearbyError.LocationUnavailable))

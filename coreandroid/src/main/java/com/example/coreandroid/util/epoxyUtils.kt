@@ -6,6 +6,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.epoxy.*
 import com.example.coreandroid.R
+import com.example.coreandroid.loadingIndicator
+import com.example.coreandroid.loadingMoreIndicator
 import com.example.coreandroid.reloadControl
 import com.haroldadmin.vector.VectorFragment
 import com.haroldadmin.vector.VectorState
@@ -119,8 +121,10 @@ inline fun <T, R> CarouselModelBuilder.withModelsFrom(
 fun <S : VectorState, A : VectorViewModel<S>, L : HoldsData<Collection<I>>, I> VectorFragment.itemListController(
     modelBuildingHandler: Handler, diffingHandler: Handler,
     viewModel: A, prop: KProperty1<S, L>,
+    reloadClicked: () -> Unit,
     onScrollListener: RecyclerView.OnScrollListener? = null,
-    reloadClicked: () -> Unit, buildItem: (I) -> EpoxyModel<*>
+    showLoadingIndicator: Boolean = true,
+    buildItem: (I) -> EpoxyModel<*>
 ) = object : TypedEpoxyController<S>(modelBuildingHandler, diffingHandler) {
 
     override fun buildModels(data: S) {
@@ -129,6 +133,9 @@ fun <S : VectorState, A : VectorViewModel<S>, L : HoldsData<Collection<I>>, I> V
         withState(viewModel) { state ->
             val items = prop.get(state)
             if (items.value.isEmpty()) when (items.status) {
+                is Loading -> if (showLoadingIndicator) loadingIndicator {
+                    id("loading-indicator-items")
+                }
                 is LoadingFailed<*> -> reloadControl {
                     id("reload-control")
                     onReloadClicked(View.OnClickListener { reloadClicked() })
@@ -136,8 +143,10 @@ fun <S : VectorState, A : VectorViewModel<S>, L : HoldsData<Collection<I>>, I> V
                 }
             } else {
                 items.value.forEach {
-                    buildItem(it).spanSizeOverride { _, _, _ -> 1 }
-                        .addTo(this)
+                    buildItem(it).spanSizeOverride { _, _, _ -> 1 }.addTo(this)
+                }
+                if (items.status is Loading && showLoadingIndicator) loadingMoreIndicator {
+                    id("loading-indicator-more-items")
                 }
             }
         }

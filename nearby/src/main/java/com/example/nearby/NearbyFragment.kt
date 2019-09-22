@@ -2,7 +2,6 @@ package com.example.nearby
 
 import android.os.Bundle
 import android.os.Handler
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -44,10 +43,10 @@ class NearbyFragment : InjectableVectorFragment() {
     private val epoxyController by lazy {
         itemListController(
             builder, differ, handler.viewModel, NearbyState::events,
+            { handler.eventOccurred(Interaction.ReloadClicked) },
             EndlessRecyclerViewScrollListener {
                 handler.eventOccurred(Interaction.EventListScrolledToEnd)
-            },
-            {}
+            }
         ) { event ->
             event.listItem(View.OnClickListener {
                 handler.eventOccurred(Interaction.EventClicked(event))
@@ -75,23 +74,15 @@ class NearbyFragment : InjectableVectorFragment() {
         fragmentScope.launch {
             handler.updates.collect {
                 when (it) {
-                    is UpdateEvents -> {
+                    is InvalidateList -> {
                         snackbarController?.transition(SnackbarState.Hidden)
                         epoxyController.setData(handler.viewModel.currentState)
                     }
                     is ShowEvent -> {
                         navigationFragment?.showFragment(fragmentProvider.eventFragment(it.event))
                     }
-                    is ShowNoConnectionMessage -> {
-                        //TODO
-                        Log.e("CON", "No connection.")
-                    }
-                    is ShowLocationUnavailableMessage -> {
-                        //TODO
-                        Log.e("LOC", "Location unavailable.")
-                    }
-                    is ShowLoadingSnackbar -> {
-                        snackbarController?.transition(SnackbarState.Text())
+                    is ShowSnackbarWithMsg -> {
+                        snackbarController?.transition(SnackbarState.Text(it.msg))
                     }
                 }
             }

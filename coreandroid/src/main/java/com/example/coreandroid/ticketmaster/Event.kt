@@ -51,6 +51,7 @@ data class Event(
         get() = startTime?.substringBeforeLast(':')
 
     companion object {
-        private val Double.stringNoDecimal: String get() = toString().substringBeforeLast(",")
+        private val Double.stringNoDecimal: String
+            get() = toString().substringBeforeLast(",")
     }
 }
