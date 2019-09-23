@@ -75,7 +75,7 @@ class NearbyFragment : InjectableVectorFragment() {
             handler.updates.collect {
                 when (it) {
                     is InvalidateList -> {
-                        snackbarController?.transition(SnackbarState.Hidden)
+                        if (it.hideSnackbar) snackbarController?.transition(SnackbarState.Hidden)
                         epoxyController.setData(handler.viewModel.currentState)
                     }
                     is ShowEvent -> {

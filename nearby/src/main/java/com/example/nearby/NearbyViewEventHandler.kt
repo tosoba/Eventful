@@ -13,6 +13,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.*
+import java.io.IOException
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -40,19 +41,28 @@ class NearbyViewEventHandler @Inject constructor(
             .distinctUntilChanged()
             .map {
                 when (it.status) {
-                    is LoadedSuccessfully, Loading -> InvalidateList
-                    is LoadingFailed<*> -> when ((it.status as LoadingFailed<*>).error as NearbyError) {
-                        is NearbyError.NotConnected -> ShowSnackbarWithMsg(
-                            appContext.getString(R.string.no_connection)
-                        )
-                        is NearbyError.LocationUnavailable -> ShowSnackbarWithMsg(
-                            appContext.getString(R.string.unable_to_retrieve_location)
-                        )
-                        NearbyError.LocationNotLoadedYet -> ShowSnackbarWithMsg(
-                            appContext.getString(R.string.retrieving_location)
-                        )
+                    is LoadedSuccessfully, Loading -> InvalidateList(true)
+                    is LoadingFailed<*> -> {
+                        when ((it.status as LoadingFailed<*>).error as? NearbyError) {
+                            is NearbyError.NotConnected -> ShowSnackbarWithMsg(
+                                appContext.getString(R.string.no_connection)
+                            )
+                            is NearbyError.LocationUnavailable -> ShowSnackbarWithMsg(
+                                appContext.getString(R.string.unable_to_retrieve_location)
+                            )
+                            NearbyError.LocationNotLoadedYet -> ShowSnackbarWithMsg(
+                                appContext.getString(R.string.retrieving_location)
+                            )
+                            null -> {
+                                if ((it.status as LoadingFailed<*>).error is IOException) {
+                                    ShowSnackbarWithMsg(
+                                        appContext.getString(R.string.no_connection)
+                                    )
+                                } else null
+                            }
+                        }
                     }
-                    else -> null
+                    is Initial -> null
                 }
             }
     }
@@ -60,11 +70,11 @@ class NearbyViewEventHandler @Inject constructor(
     private val connectionStateActionsFlow: Flow<NearbyViewAction?> by lazy {
         connectivityStateProvider.isConnectedFlow
             .distinctUntilChanged()
-            .filter { it && events.isEmptyAndLastLoadingFailed() }
+            .filter { it && events.loadingFailed }
             .onEach {
                 val locationState = locationStateProvider.locationState
-                if (locationState is LocationState.Found) {
-                    events.ifEmptyAndIsNotLoading { viewModel.loadEvents(locationState.latLng) }
+                if (locationState is LocationState.Found) events.ifEmptyAndIsNotLoading {
+                    viewModel.loadEvents(locationState.latLng)
                 }
             }
             .map {
@@ -78,10 +88,10 @@ class NearbyViewEventHandler @Inject constructor(
     private val locationStateActionsFlow: Flow<NearbyViewAction?> by lazy {
         locationStateProvider.locationStateFlow
             .distinctUntilChanged()
-            .filter { events.isEmptyAndLastLoadingFailed() }
+            .filter { events.loadingFailed }
             .onEach { locationState ->
-                if (locationState is LocationState.Found && connectivityStateProvider.isConnected) {
-                    events.ifEmptyAndIsNotLoading { viewModel.loadEvents(locationState.latLng) }
+                if (locationState is LocationState.Found) events.ifEmptyAndIsNotLoading {
+                    viewModel.loadEvents(locationState.latLng)
                 }
             }
             .map { locationState ->
@@ -131,7 +141,6 @@ class NearbyViewEventHandler @Inject constructor(
     private fun loadEventsIfPossible() {
         if (!connectivityStateProvider.isConnected) {
             viewModel.onNotConnected()
-            return
         }
 
         val locationState = locationStateProvider.locationState

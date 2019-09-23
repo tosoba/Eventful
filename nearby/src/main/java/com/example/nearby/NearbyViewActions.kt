@@ -4,7 +4,7 @@ import com.example.coreandroid.ticketmaster.Event
 
 sealed class NearbyViewAction
 
-object InvalidateList : NearbyViewAction()
+data class InvalidateList(val hideSnackbar: Boolean) : NearbyViewAction()
 
 data class ShowEvent(val event: Event) : NearbyViewAction()
 

@@ -16,6 +16,7 @@ import javax.inject.Singleton
         UiModule::class,
         ThreadingModule::class,
         AppModule::class,
+        NetworkModule::class,
         TicketMasterApiModule::class,
         DarkSkyApiModule::class,
         DataModule::class,
