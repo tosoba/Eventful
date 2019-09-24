@@ -40,10 +40,10 @@ class NearbyViewEventHandler @Inject constructor(
         viewModel.state.map { it.events }
             .distinctUntilChanged()
             .map {
-                when (it.status) {
+                when (val status = it.status) {
                     is LoadedSuccessfully, Loading -> InvalidateList(true)
-                    is LoadingFailed<*> -> {
-                        when ((it.status as LoadingFailed<*>).error as? NearbyError) {
+                    is LoadingFailed<*> -> when (val error = status.error) {
+                        is NearbyError -> when (error) {
                             is NearbyError.NotConnected -> ShowSnackbarWithMsg(
                                 appContext.getString(R.string.no_connection)
                             )
@@ -53,14 +53,11 @@ class NearbyViewEventHandler @Inject constructor(
                             NearbyError.LocationNotLoadedYet -> ShowSnackbarWithMsg(
                                 appContext.getString(R.string.retrieving_location)
                             )
-                            null -> {
-                                if ((it.status as LoadingFailed<*>).error is IOException) {
-                                    ShowSnackbarWithMsg(
-                                        appContext.getString(R.string.no_connection)
-                                    )
-                                } else null
-                            }
                         }
+                        is IOException -> ShowSnackbarWithMsg(
+                            appContext.getString(R.string.no_connection)
+                        )
+                        else -> null
                     }
                     is Initial -> null
                 }
