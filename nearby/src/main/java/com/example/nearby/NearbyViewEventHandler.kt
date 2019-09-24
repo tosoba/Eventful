@@ -45,20 +45,23 @@ class NearbyViewEventHandler @Inject constructor(
                     is LoadingFailed<*> -> when (val error = status.error) {
                         is NearbyError -> when (error) {
                             is NearbyError.NotConnected -> ShowSnackbarAndInvalidateList(
-                                appContext.getString(R.string.no_connection)
+                                appContext.getString(R.string.no_connection), true
                             )
                             is NearbyError.LocationUnavailable -> ShowSnackbarAndInvalidateList(
-                                appContext.getString(R.string.unable_to_retrieve_location)
+                                appContext.getString(R.string.unable_to_retrieve_location), true
                             )
                             is NearbyError.LocationNotLoadedYet -> ShowSnackbarAndInvalidateList(
-                                appContext.getString(R.string.retrieving_location)
+                                appContext.getString(R.string.retrieving_location), true
                             )
                         }
                         is NetworkResponse.ServerError<*> -> {
                             if (error.code in 503..504)
-                                ShowSnackbarAndInvalidateList(appContext.getString(R.string.no_connection))
+                                ShowSnackbarAndInvalidateList(
+                                    appContext.getString(R.string.no_connection),
+                                    true
+                                )
                             else
-                                ShowSnackbarAndInvalidateList("Unknown network error")
+                                ShowSnackbarAndInvalidateList("Unknown network error", true)
                         }
                         else -> null
                     }
@@ -80,7 +83,10 @@ class NearbyViewEventHandler @Inject constructor(
             .map {
                 val locationState = locationStateProvider.locationState
                 if (locationState !is LocationState.Found && locationState !is LocationState.Loading) {
-                    ShowSnackbarAndInvalidateList(appContext.getString(R.string.unable_to_retrieve_location))
+                    ShowSnackbarAndInvalidateList(
+                        appContext.getString(R.string.unable_to_retrieve_location),
+                        true
+                    )
                 } else null
             }
     }
@@ -96,9 +102,15 @@ class NearbyViewEventHandler @Inject constructor(
             }
             .map { locationState ->
                 if (locationState is LocationState.Found && !connectivityStateProvider.isConnected) {
-                    ShowSnackbarAndInvalidateList(appContext.getString(R.string.no_connection))
+                    ShowSnackbarAndInvalidateList(
+                        appContext.getString(R.string.no_connection),
+                        true
+                    )
                 } else if (locationState is LocationState.Loading) {
-                    ShowSnackbarAndInvalidateList(appContext.getString(R.string.retrieving_location))
+                    ShowSnackbarAndInvalidateList(
+                        appContext.getString(R.string.retrieving_location),
+                        false
+                    )
                 } else null
             }
     }
@@ -139,6 +151,11 @@ class NearbyViewEventHandler @Inject constructor(
     }
 
     private fun loadEventsIfPossible() {
+        if (!connectivityStateProvider.isConnected && events.loadingFailed) {
+            viewModel.onNotConnected()
+            return
+        }
+
         val locationState = locationStateProvider.locationState
         if (locationState is LocationState.Loading) {
             viewModel.onLocationNotLoadedYet()

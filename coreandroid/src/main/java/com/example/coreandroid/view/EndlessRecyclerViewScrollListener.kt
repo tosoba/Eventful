@@ -12,6 +12,10 @@ class EndlessRecyclerViewScrollListener(
     private var previousItemCount = 0
     private var loading = true
 
+    fun onLoadingError() {
+        loading = false
+    }
+
     override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
         super.onScrolled(recyclerView, dx, dy)
 

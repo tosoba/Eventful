@@ -90,7 +90,10 @@ class MainFragment : DaggerFragment(), SnackbarController {
             viewModel.snackbarState = newState
             when (newState) {
                 is SnackbarState.Text -> {
-                    if (snackbar?.isShown != false && viewModel.currentState.snackbarState is SnackbarState.Text) {
+                    if (snackbar != null
+                        && snackbar?.isShown != false
+                        && viewModel.currentState.snackbarState is SnackbarState.Text
+                    ) {
                         snackbar?.setText(newState.text)
                     } else {
                         snackbar = Snackbar.make(it, newState.text, Snackbar.LENGTH_INDEFINITE)

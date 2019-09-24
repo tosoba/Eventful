@@ -40,13 +40,17 @@ class NearbyFragment : InjectableVectorFragment() {
     @field:Named(Dependencies.EPOXY_BUILDER)
     internal lateinit var builder: Handler
 
+    private val eventsScrollListener: EndlessRecyclerViewScrollListener by lazy {
+        EndlessRecyclerViewScrollListener {
+            handler.eventOccurred(Interaction.EventListScrolledToEnd)
+        }
+    }
+
     private val epoxyController by lazy {
         itemListController(
             builder, differ, handler.viewModel, NearbyState::events,
             { handler.eventOccurred(Interaction.ReloadClicked) },
-            EndlessRecyclerViewScrollListener {
-                handler.eventOccurred(Interaction.EventListScrolledToEnd)
-            }
+            eventsScrollListener
         ) { event ->
             event.listItem(View.OnClickListener {
                 handler.eventOccurred(Interaction.EventClicked(event))
@@ -84,6 +88,7 @@ class NearbyFragment : InjectableVectorFragment() {
                     is ShowSnackbarAndInvalidateList -> {
                         snackbarController?.transition(SnackbarState.Text(it.msg))
                         epoxyController.setData(handler.viewModel.currentState)
+                        if (it.errorOccurred) eventsScrollListener.onLoadingError()
                     }
                 }
             }
