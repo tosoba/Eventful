@@ -27,20 +27,18 @@ class NearbyViewModel(
             when (val result = withContext(ioDispatcher) {
                 repo.nearbyEvents(userLatLng.latitude, userLatLng.longitude, state.events.offset)
             }) {
-                is Resource.Success -> {
-                    setState {
-                        copy(
-                            events = events.copyWithNewItems(
-                                result.data.items.map { Event(it) },
-                                result.data.currentPage + 1,
-                                result.data.totalPages
-                            )
+                is Resource.Success -> setState {
+                    copy(
+                        events = events.copyWithNewItems(
+                            result.data.items.map { Event(it) },
+                            result.data.currentPage + 1,
+                            result.data.totalPages
                         )
-                    }
+                    )
                 }
 
-                is Resource.Error<PagedResult<IEvent>, *> -> {
-                    setState { copy(events = events.copyWithError(result.error)) }
+                is Resource.Error<PagedResult<IEvent>, *> -> setState {
+                    copy(events = events.copyWithError(result.error))
                 }
             }
         }

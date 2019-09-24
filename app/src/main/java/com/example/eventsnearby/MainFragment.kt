@@ -76,7 +76,8 @@ class MainFragment : DaggerFragment(), SnackbarController {
 
         main_fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
+                .setAction("Action", null)
+                .show()
         }
 
         transition(viewModel.currentState.snackbarState)

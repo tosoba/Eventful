@@ -28,7 +28,7 @@ class EventsRepository(
                 response.body.page.totalPages
             )
         )
-        is NetworkResponse.ServerError -> Resource.Error(response.body)
+        is NetworkResponse.ServerError -> Resource.Error(response)
         is NetworkResponse.NetworkError -> Resource.Error(response.error)
     }
 
