@@ -139,10 +139,6 @@ class NearbyViewEventHandler @Inject constructor(
     }
 
     private fun loadEventsIfPossible() {
-        if (!connectivityStateProvider.isConnected) {
-            viewModel.onNotConnected()
-        }
-
         val locationState = locationStateProvider.locationState
         if (locationState is LocationState.Loading) {
             viewModel.onLocationNotLoadedYet()

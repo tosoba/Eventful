@@ -71,7 +71,6 @@ class NearbyFragment : InjectableVectorFragment() {
             Lifecycle.OnViewCreated(savedInstanceState != null)
         )
 
-        //TODO: maybe add some debouncing in Snackbar transitions -> try to use an actor for that maybe?
         fragmentScope.launch {
             handler.updates.collect {
                 when (it) {
