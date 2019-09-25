@@ -5,6 +5,8 @@ import com.example.core.Resource
 import com.example.core.model.PagedResult
 import com.example.core.model.ticketmaster.IEvent
 import com.example.ticketmasterapi.TicketMasterApi
+import com.example.ticketmasterapi.model.EventSearchResponse
+import com.example.ticketmasterapi.model.TicketMasterErrorResponse
 import com.example.ticketmasterapi.queryparam.GeoPoint
 import com.example.ticketmasterapi.queryparam.RadiusUnit
 import com.haroldadmin.cnradapter.NetworkResponse
@@ -15,22 +17,31 @@ class EventsRepository(
 
     override suspend fun nearbyEvents(
         lat: Double, lon: Double, offset: Int?
-    ): Resource<PagedResult<IEvent>> = when (val response = ticketMasterApi.searchEvents(
+    ): Resource<PagedResult<IEvent>> = ticketMasterApi.searchEvents(
         radius = DEFAULT_RADIUS,
         radiusUnit = RadiusUnit.KM,
         geoPoint = GeoPoint(lat, lon),
         page = offset
-    ).await()) {
-        is NetworkResponse.Success -> Resource.Success(
-            PagedResult(
-                response.body.embedded.events as List<IEvent>,
-                response.body.page.number,
-                response.body.page.totalPages
+    ).await().asResource
+
+    override suspend fun searchEvents(
+        searchText: String
+    ): Resource<PagedResult<IEvent>> = ticketMasterApi.searchEvents(searchText)
+        .await()
+        .asResource
+
+    private val NetworkResponse<EventSearchResponse, TicketMasterErrorResponse>.asResource: Resource<PagedResult<IEvent>>
+        get() = when (this) {
+            is NetworkResponse.Success -> Resource.Success(
+                PagedResult(
+                    body.embedded.events as List<IEvent>,
+                    body.page.number,
+                    body.page.totalPages
+                )
             )
-        )
-        is NetworkResponse.ServerError -> Resource.Error(response)
-        is NetworkResponse.NetworkError -> Resource.Error(response.error)
-    }
+            is NetworkResponse.ServerError -> Resource.Error(this)
+            is NetworkResponse.NetworkError -> Resource.Error(error)
+        }
 
     companion object {
         private const val DEFAULT_RADIUS = 10

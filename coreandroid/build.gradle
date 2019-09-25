@@ -76,6 +76,9 @@ dependencies {
 
     implementation "com.shopify:livedata-ktx:$liveDataKtxVersion"
 
+    implementation "com.google.android.gms:play-services-maps:$playServicesMapsVersion"
+    implementation "com.google.android.gms:play-services-location:$playServicesLocationVersion"
+
     implementation "com.google.dagger:dagger-android:$daggerVersion"
     implementation "com.google.dagger:dagger-android-support:$daggerVersion"
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"

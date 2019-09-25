@@ -8,6 +8,7 @@ import com.example.coreandroid.base.LocationStateProvider
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.ActivityScoped
 import com.example.nearby.NearbyModule
+import com.example.search.SearchModule
 import com.example.weather.WeatherModule
 import dagger.Binds
 import dagger.Module
@@ -26,6 +27,7 @@ abstract class MainActivityModule {
         modules = [
             SubProviders::class,
             NearbyModule::class,
+            SearchModule::class,
             WeatherModule::class,
             MainFragmentModule::class
         ]

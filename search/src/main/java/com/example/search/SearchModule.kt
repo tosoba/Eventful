@@ -1,9 +1,9 @@
-package com.example.nearby
+package com.example.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
-import com.example.core.model.usecase.GetEvents
+import com.example.core.model.usecase.SearchEvents
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
 import dagger.Module
@@ -12,13 +12,12 @@ import dagger.android.ContributesAndroidInjector
 import dagger.multibindings.IntoMap
 import kotlinx.coroutines.CoroutineDispatcher
 
-
 @Module(
     includes = [
-        NearbyModule.Providers::class
+        SearchModule.Providers::class
     ]
 )
-abstract class NearbyModule {
+abstract class SearchModule {
 
     @FragmentScoped
     @ContributesAndroidInjector(
@@ -26,27 +25,27 @@ abstract class NearbyModule {
             SubProviders::class
         ]
     )
-    abstract fun nearbyFragment(): NearbyFragment
+    abstract fun searchFragment(): SearchFragment
 
     @Module
     class Providers {
 
         @Provides
         @IntoMap
-        @ViewModelKey(NearbyViewModel::class)
-        fun nearbyViewModel(
-            getEvents: GetEvents,
+        @ViewModelKey(SearchViewModel::class)
+        fun searchViewModel(
+            searchEvents: SearchEvents,
             ioDispatcher: CoroutineDispatcher
-        ): ViewModel = NearbyViewModel(getEvents, ioDispatcher)
+        ): ViewModel = SearchViewModel(searchEvents, ioDispatcher)
     }
 
     @Module
     class SubProviders {
 
         @Provides
-        fun nearbyViewModel(
+        fun searchViewModel(
             factory: ViewModelProvider.Factory,
-            target: NearbyFragment
-        ): NearbyViewModel = ViewModelProviders.of(target, factory).get(NearbyViewModel::class.java)
+            target: SearchFragment
+        ): SearchViewModel = ViewModelProviders.of(target, factory).get(SearchViewModel::class.java)
     }
 }
