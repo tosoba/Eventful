@@ -49,8 +49,7 @@ class NearbyFragment : InjectableVectorFragment() {
     private val epoxyController by lazy {
         itemListController(
             builder, differ, handler.viewModel, NearbyState::events,
-            { handler.eventOccurred(Interaction.ReloadClicked) },
-            eventsScrollListener
+            onScrollListener = eventsScrollListener
         ) { event ->
             event.listItem(View.OnClickListener {
                 handler.eventOccurred(Interaction.EventClicked(event))

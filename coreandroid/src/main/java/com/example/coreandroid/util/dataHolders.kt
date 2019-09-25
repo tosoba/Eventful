@@ -115,3 +115,7 @@ object Initial : DataStatus()
 object Loading : DataStatus()
 object LoadedSuccessfully : DataStatus()
 data class LoadingFailed<E>(val error: E) : DataStatus()
+
+interface HasFailureMessage {
+    val message: String
+}

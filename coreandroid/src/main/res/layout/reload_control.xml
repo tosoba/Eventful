@@ -24,6 +24,7 @@
                 android:layout_width="35dp"
                 android:layout_height="35dp"
                 android:layout_margin="5dp"
+                android:visibility="@{onReloadClicked != null ? View.VISIBLE : View.GONE}"
                 android:clickable="@{onReloadClicked != null}"
                 android:onClick="@{onReloadClicked}"
                 android:src="@drawable/reload" />

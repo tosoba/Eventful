@@ -126,7 +126,7 @@ class NearbyViewEventHandler @Inject constructor(
     ) {
         consumeEach {
             when (it) {
-                is Interaction.EventListScrolledToEnd, Interaction.ReloadClicked -> loadEventsIfPossible()
+                is Interaction.EventListScrolledToEnd -> loadEventsIfPossible()
                 is Interaction.EventClicked -> viewUpdatesChannel.offer(ShowEvent(it.event))
                 is Lifecycle.OnViewCreated -> onViewCreated(it.wasRecreated)
                 is Lifecycle.OnDestroy -> onDestroy()

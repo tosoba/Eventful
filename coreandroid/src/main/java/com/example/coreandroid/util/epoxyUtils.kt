@@ -121,7 +121,7 @@ inline fun <T, R> CarouselModelBuilder.withModelsFrom(
 fun <S : VectorState, A : VectorViewModel<S>, L : HoldsData<Collection<I>>, I> VectorFragment.itemListController(
     modelBuildingHandler: Handler, diffingHandler: Handler,
     viewModel: A, prop: KProperty1<S, L>,
-    reloadClicked: () -> Unit,
+    reloadClicked: (() -> Unit)? = null,
     onScrollListener: RecyclerView.OnScrollListener? = null,
     showLoadingIndicator: Boolean = true,
     buildItem: (I) -> EpoxyModel<*>
@@ -132,14 +132,14 @@ fun <S : VectorState, A : VectorViewModel<S>, L : HoldsData<Collection<I>>, I> V
 
         withState(viewModel) { state ->
             val items = prop.get(state)
-            if (items.value.isEmpty()) when (items.status) {
+            if (items.value.isEmpty()) when (val status = items.status) {
                 is Loading -> if (showLoadingIndicator) loadingIndicator {
                     id("loading-indicator-items")
                 }
                 is LoadingFailed<*> -> reloadControl {
                     id("reload-control")
-                    onReloadClicked(View.OnClickListener { reloadClicked() })
-                    message("Error occurred lmao") //TODO: error msg
+                    reloadClicked?.let { onReloadClicked(View.OnClickListener { it() }) }
+                    (status.error as? HasFailureMessage)?.let { message(it.message) }
                 }
             } else {
                 items.value.forEach {
