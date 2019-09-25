@@ -2,7 +2,6 @@ package com.example.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import com.example.core.model.usecase.SearchEvents
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
@@ -46,6 +45,6 @@ abstract class SearchModule {
         fun searchViewModel(
             factory: ViewModelProvider.Factory,
             target: SearchFragment
-        ): SearchViewModel = ViewModelProviders.of(target, factory).get(SearchViewModel::class.java)
+        ): SearchViewModel = ViewModelProvider(target, factory).get(SearchViewModel::class.java)
     }
 }

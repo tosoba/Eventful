@@ -2,7 +2,6 @@ package com.example.eventsnearby
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import com.example.coreandroid.base.ConnectivityStateProvider
 import com.example.coreandroid.base.LocationStateProvider
 import com.example.coreandroid.di.ViewModelKey
@@ -58,6 +57,6 @@ abstract class MainActivityModule {
         fun mainViewModel(
             factory: ViewModelProvider.Factory,
             target: MainActivity
-        ): MainViewModel = ViewModelProviders.of(target, factory).get(MainViewModel::class.java)
+        ): MainViewModel = ViewModelProvider(target, factory).get(MainViewModel::class.java)
     }
 }

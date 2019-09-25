@@ -2,7 +2,6 @@ package com.example.nearby
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import com.example.core.model.usecase.GetEvents
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
@@ -47,6 +46,6 @@ abstract class NearbyModule {
         fun nearbyViewModel(
             factory: ViewModelProvider.Factory,
             target: NearbyFragment
-        ): NearbyViewModel = ViewModelProviders.of(target, factory).get(NearbyViewModel::class.java)
+        ): NearbyViewModel = ViewModelProvider(target, factory).get(NearbyViewModel::class.java)
     }
 }

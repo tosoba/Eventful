@@ -2,7 +2,6 @@ package com.example.weather
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import com.example.core.IWeatherRepository
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
@@ -42,6 +41,6 @@ abstract class WeatherModule {
         fun weatherViewModel(
             factory: ViewModelProvider.Factory,
             target: WeatherFragment
-        ): WeatherViewModel = ViewModelProviders.of(target, factory).get(WeatherViewModel::class.java)
+        ): WeatherViewModel = ViewModelProvider(target, factory).get(WeatherViewModel::class.java)
     }
 }
