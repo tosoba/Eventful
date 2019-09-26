@@ -126,7 +126,7 @@ class NearbyViewEventHandler @Inject constructor(
     ) {
         consumeEach {
             when (it) {
-                is Interaction.EventListScrolledToEnd -> loadEventsIfPossible()
+                is Interaction.EventListScrolledToEnd -> tryLoadEvents()
                 is Interaction.EventClicked -> viewUpdatesChannel.offer(ShowEvent(it.event))
                 is Lifecycle.OnViewCreated -> onViewCreated(it.wasRecreated)
                 is Lifecycle.OnDestroy -> onDestroy()
@@ -145,7 +145,7 @@ class NearbyViewEventHandler @Inject constructor(
     fun eventOccurred(event: NearbyViewEvent) = eventProcessor.offer(event)
 
     private fun onViewCreated(wasRecreated: Boolean) {
-        if (!wasRecreated && events.value.isEmpty()) loadEventsIfPossible()
+        if (!wasRecreated && events.value.isEmpty()) tryLoadEvents()
     }
 
     private fun onDestroy() {
@@ -154,14 +154,14 @@ class NearbyViewEventHandler @Inject constructor(
         trackerJob.cancel()
     }
 
-    private fun loadEventsIfPossible() {
+    private fun tryLoadEvents() {
         if (!connectivityStateProvider.isConnected && loadingEventsFailedWithNetworkError) {
             viewModel.onNotConnected()
             return
         }
 
         val locationState = locationStateProvider.locationState
-        if (locationState is LocationState.Loading) {
+        if (locationState is LocationState.Loading || locationState is LocationState.Unknown) {
             viewModel.onLocationNotLoadedYet()
             return
         } else if (locationState !is LocationState.Found) {
@@ -169,6 +169,6 @@ class NearbyViewEventHandler @Inject constructor(
             return
         }
 
-        events.ifNotLoadingAndNotAllLoaded { viewModel.loadEvents(locationState.latLng) }
+        viewModel.loadEvents(locationState.latLng)
     }
 }

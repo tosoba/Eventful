@@ -11,6 +11,7 @@ import com.example.coreandroid.util.Loading
 import com.example.coreandroid.util.PagedDataList
 import com.haroldadmin.vector.VectorViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -19,28 +20,38 @@ class SearchViewModel(
     private val ioDispatcher: CoroutineDispatcher
 ) : VectorViewModel<SearchState>(SearchState.INITIAL) {
 
-    fun search(searchText: String) = viewModelScope.launch {
-        withState { state ->
-            if (searchText.isBlank() || searchText.length < 3 || searchText == state.searchText)
-                return@withState
+    private var searchJob: Job? = null
 
-            setState { copy(events = events.copyWithLoadingInProgress, searchText = searchText) }
-            when (val result = withContext(ioDispatcher) {
-                searchEvents(state.searchText)
-            }) {
-                is Resource.Success -> setState {
+    fun search(searchText: String, retry: Boolean = false) {
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            withState { state ->
+                if (searchText.isBlank() || searchText.length < 3 || (searchText == state.searchText && !retry))
+                    return@withState
+
+                setState {
                     copy(
-                        events = PagedDataList(
-                            result.data.items.map { Event(it) },
-                            LoadedSuccessfully,
-                            result.data.currentPage + 1,
-                            result.data.totalPages
-                        )
+                        events = events.copyWithLoadingInProgress,
+                        searchText = searchText
                     )
                 }
+                when (val result = withContext(ioDispatcher) {
+                    searchEvents(state.searchText)
+                }) {
+                    is Resource.Success -> setState {
+                        copy(
+                            events = PagedDataList(
+                                result.data.items.map { Event(it) },
+                                LoadedSuccessfully,
+                                result.data.currentPage + 1,
+                                result.data.totalPages
+                            )
+                        )
+                    }
 
-                is Resource.Error<PagedResult<IEvent>, *> -> setState {
-                    copy(events = events.copyWithError(result.error))
+                    is Resource.Error<PagedResult<IEvent>, *> -> setState {
+                        copy(events = events.copyWithError(result.error))
+                    }
                 }
             }
         }
@@ -70,5 +81,14 @@ class SearchViewModel(
                 }
             }
         }
+    }
+
+    fun onNotConnected() = setState {
+        copy(events = events.copyWithError(SearchError.NotConnected))
+    }
+
+    override fun onCleared() {
+        searchJob?.cancel()
+        super.onCleared()
     }
 }

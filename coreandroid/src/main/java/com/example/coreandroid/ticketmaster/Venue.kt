@@ -8,8 +8,8 @@ import kotlinx.android.parcel.Parcelize
 data class Venue(
     override val id: String,
     override val name: String,
-    override val url: String,
-    override val address: String,
+    override val url: String?,
+    override val address: String?,
     override val city: String,
     override val lat: Float,
     override val lng: Float

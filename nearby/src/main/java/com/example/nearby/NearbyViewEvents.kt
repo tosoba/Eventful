@@ -13,4 +13,3 @@ sealed class Lifecycle : NearbyViewEvent() {
     data class OnViewCreated(val wasRecreated: Boolean) : Lifecycle()
     object OnDestroy : Lifecycle()
 }
-

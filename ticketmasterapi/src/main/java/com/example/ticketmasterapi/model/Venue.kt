@@ -10,7 +10,7 @@ data class Venue(
     val _city: City,
     val country: Country,
     override val id: String,
-    override val url: String,
+    override val url: String?,
     val locale: String,
     val location: Location,
     val markets: List<Market>,
@@ -20,7 +20,7 @@ data class Venue(
     val timezone: String,
     val type: String
 ) : IVenue {
-    override val address: String get() = _address.line1
+    override val address: String? get() = _address.line1
     override val city: String get() = _city.name
     override val lat: Float get() = location.latitude.toFloat()
     override val lng: Float get() = location.longitude.toFloat()

@@ -22,6 +22,15 @@ android {
         }
     }
 
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
     dataBinding {
         enabled = true
     }
@@ -46,6 +55,14 @@ dependencies {
     implementation "com.google.dagger:dagger-android-support:$daggerVersion"
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
     kapt "com.google.dagger:dagger-android-processor:$daggerVersion"
+
+    implementation 'com.github.satoshun.coroutinebinding:coroutinebinding-appcompat:1.0.0-rc2'
+    implementation 'com.github.satoshun.coroutinebinding:coroutinebinding-core:1.0.0-rc2'
+    implementation 'com.github.satoshun.coroutinebinding:coroutinebinding:1.0.0-rc2'
+
+    implementation 'com.airbnb.android:epoxy:3.7.0'
+    implementation 'com.airbnb.android:epoxy-databinding:3.7.0'
+    kapt 'com.airbnb.android:epoxy-processor:3.7.0'
 
     implementation "com.github.haroldadmin:Vector:0.4.2"
 

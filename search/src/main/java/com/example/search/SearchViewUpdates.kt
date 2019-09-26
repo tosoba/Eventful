@@ -1,0 +1,12 @@
+package com.example.search
+
+import com.example.coreandroid.ticketmaster.Event
+
+sealed class SearchViewUpdate
+
+data class InvalidateList(val hideSnackbar: Boolean) : SearchViewUpdate()
+
+data class ShowEvent(val event: Event) : SearchViewUpdate()
+
+data class ShowSnackbarAndInvalidateList(val msg: String, val errorOccurred: Boolean) :
+    SearchViewUpdate()

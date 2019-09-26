@@ -30,6 +30,7 @@
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
+        <!-- TODO: animate long texts by sliding them sideways -->
         <TextView
                 android:id="@+id/event_name_text_view"
                 android:layout_width="0dp"
@@ -50,6 +51,7 @@
                 android:id="@+id/event_address_text_view"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:maxLines="1"
                 android:paddingBottom="5dp"
                 android:text="@{event.formattedAddress}"
                 android:textColor="@color/blueText"

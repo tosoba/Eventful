@@ -103,6 +103,7 @@ class MainFragment : DaggerFragment(), SnackbarController, MenuController {
         outState.putInt(KEY_LAST_SELECTED_POSITION, lastSelectedPage)
     }
 
+    //TODO: split SnackbarState between fragments all ViewPager fragments
     override fun transition(newState: SnackbarState) {
         main_fab?.let {
             if (newState == viewModel.currentState.snackbarState) return

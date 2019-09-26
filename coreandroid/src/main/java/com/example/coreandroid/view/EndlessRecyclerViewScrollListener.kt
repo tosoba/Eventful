@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 
 class EndlessRecyclerViewScrollListener(
     private val visibleThreshold: Int = 5,
-    private val minItemsBeforeLoadingMore: Int = 0,
+    private val minItemsBeforeLoadingMore: Int = 10,
     private val loadMore: () -> Unit
 ) : RecyclerView.OnScrollListener() {
     private var previousItemCount = 0

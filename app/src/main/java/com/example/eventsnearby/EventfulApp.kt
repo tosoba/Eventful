@@ -29,7 +29,7 @@ class EventfulApp : DaggerApplication() {
         Slider.init(BannerSliderImageLoadingService)
 //        registerLifecycleCallbacks()
         RxJavaPlugins.setErrorHandler {
-            Log.e("Rx error", it?.message ?: "Unknown text")
+            Log.e("Rx error", it?.message ?: "Unknown searchText")
         }
     }
 
