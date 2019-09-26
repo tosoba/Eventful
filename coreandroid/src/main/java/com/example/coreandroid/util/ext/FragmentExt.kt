@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import com.example.coreandroid.R
 import com.example.coreandroid.base.BaseNavigationFragment
 import com.example.coreandroid.base.DrawerLayoutHost
+import com.example.coreandroid.base.MenuController
 import com.example.coreandroid.base.SnackbarController
 import com.example.coreandroid.view.ActionBarDrawerToggleEnd
 
@@ -21,6 +22,9 @@ val Fragment.navigationFragment: BaseNavigationFragment?
 val Fragment.snackbarController: SnackbarController?
     get() = findAncestorFragmentOfType()
 
+val Fragment.menuController: MenuController?
+    get() = findAncestorFragmentOfType()
+
 private inline fun <reified T> Fragment.findAncestorFragmentOfType(): T? {
     var ancestorFragment = parentFragment
     while (ancestorFragment != null) {
@@ -32,6 +36,7 @@ private inline fun <reified T> Fragment.findAncestorFragmentOfType(): T? {
 
 fun Fragment.setupToolbarWithDrawerToggle(toolbar: Toolbar) {
     appCompatActivity.setSupportActionBar(toolbar)
+    appCompatActivity.supportActionBar?.setDisplayShowTitleEnabled(false)
 
     ActionBarDrawerToggleEnd(
         activity!!,

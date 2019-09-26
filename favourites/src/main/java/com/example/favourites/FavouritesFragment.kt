@@ -1,10 +1,9 @@
 package com.example.favourites
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.fragment.app.Fragment
+import com.example.coreandroid.util.ext.menuController
 
 
 class FavouritesFragment : Fragment() {
@@ -16,5 +15,8 @@ class FavouritesFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_favourites, container, false)
     }
 
-
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        menuController?.menuView?.menu?.clear()
+    }
 }

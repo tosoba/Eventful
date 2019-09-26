@@ -21,7 +21,8 @@ class SearchViewModel(
 
     fun search(searchText: String) = viewModelScope.launch {
         withState { state ->
-            if (searchText.isBlank() || searchText == state.searchText) return@withState
+            if (searchText.isBlank() || searchText.length < 3 || searchText == state.searchText)
+                return@withState
 
             setState { copy(events = events.copyWithLoadingInProgress, searchText = searchText) }
             when (val result = withContext(ioDispatcher) {

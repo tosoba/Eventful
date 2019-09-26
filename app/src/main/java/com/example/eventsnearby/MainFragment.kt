@@ -4,7 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.viewpager.widget.PagerAdapter
+import androidx.appcompat.widget.ActionMenuView
+import com.example.coreandroid.base.MenuController
 import com.example.coreandroid.base.SnackbarController
 import com.example.coreandroid.util.SnackbarState
 import com.example.coreandroid.util.ext.setupToolbarWithDrawerToggle
@@ -23,15 +24,14 @@ import kotlinx.android.synthetic.main.fragment_main.view.*
 import javax.inject.Inject
 
 
-class MainFragment : DaggerFragment(), SnackbarController {
+class MainFragment : DaggerFragment(), SnackbarController, MenuController {
 
     private val bottomNavigationItemSelectedListener =
         BottomNavigationView.OnNavigationItemSelectedListener { item ->
             viewPagerItems[item.itemId]?.let {
                 main_view_pager?.currentItem = it
                 return@OnNavigationItemSelectedListener true
-            }
-            false
+            } ?: false
         }
 
     private val viewPagerItems: BiMap<Int, Int> = HashBiMap.create<Int, Int>().apply {
@@ -43,10 +43,11 @@ class MainFragment : DaggerFragment(), SnackbarController {
     private val viewPagerSwipedListener = object : ViewPagerPageSelectedListener {
         override fun onPageSelected(position: Int) {
             main_bottom_nav_view.selectedItemId = viewPagerItems.inverse()[position]!!
+            invalidateOptionsMenu()
         }
     }
 
-    private val mainViewPagerAdapter: PagerAdapter by lazy(LazyThreadSafetyMode.NONE) {
+    private val mainViewPagerAdapter: TitledFragmentsPagerAdapter by lazy(LazyThreadSafetyMode.NONE) {
         TitledFragmentsPagerAdapter(
             childFragmentManager, arrayOf(
                 "Nearby" to NearbyFragment(),
@@ -60,6 +61,13 @@ class MainFragment : DaggerFragment(), SnackbarController {
 
     @Inject
     lateinit var viewModel: MainViewModel
+
+    override val menuView: ActionMenuView? get() = main_action_menu_view
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -81,6 +89,10 @@ class MainFragment : DaggerFragment(), SnackbarController {
         }
 
         transition(viewModel.currentState.snackbarState)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
     }
 
     override fun transition(newState: SnackbarState) {
@@ -106,5 +118,11 @@ class MainFragment : DaggerFragment(), SnackbarController {
                 }
             }
         }
+    }
+
+    private fun invalidateOptionsMenu() {
+        mainViewPagerAdapter.previousFragment?.setHasOptionsMenu(false)
+        mainViewPagerAdapter.currentFragment?.setHasOptionsMenu(true)
+        activity?.invalidateOptionsMenu()
     }
 }

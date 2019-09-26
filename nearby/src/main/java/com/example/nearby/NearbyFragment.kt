@@ -2,17 +2,12 @@ package com.example.nearby
 
 import android.os.Bundle
 import android.os.Handler
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import com.example.coreandroid.base.InjectableVectorFragment
 import com.example.coreandroid.di.Dependencies
 import com.example.coreandroid.navigation.IFragmentProvider
 import com.example.coreandroid.util.SnackbarState
-import com.example.coreandroid.util.ext.navigationFragment
-import com.example.coreandroid.util.ext.restoreScrollPosition
-import com.example.coreandroid.util.ext.saveScrollPosition
-import com.example.coreandroid.util.ext.snackbarController
+import com.example.coreandroid.util.ext.*
 import com.example.coreandroid.util.itemListController
 import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
 import com.example.coreandroid.view.epoxy.listItem
@@ -92,6 +87,11 @@ class NearbyFragment : InjectableVectorFragment() {
                 }
             }
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        menuController?.menuView?.menu?.clear()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
