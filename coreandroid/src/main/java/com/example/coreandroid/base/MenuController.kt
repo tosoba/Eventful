@@ -6,4 +6,6 @@ import androidx.fragment.app.Fragment
 interface MenuController {
     val menuView: ActionMenuView?
     fun shouldSetHasOptionsMenu(fragment: Fragment): Boolean
+    fun hideTitle()
+    fun showTitle()
 }

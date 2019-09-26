@@ -137,6 +137,14 @@ class MainFragment : DaggerFragment(), SnackbarController, MenuController {
         else -> -1
     }
 
+    override fun showTitle() {
+        app_name_text_view?.visibility = View.VISIBLE
+    }
+
+    override fun hideTitle() {
+        app_name_text_view?.visibility = View.GONE
+    }
+
     private fun invalidateOptionsMenu() {
         mainViewPagerAdapter.previousFragment?.setHasOptionsMenu(false)
         mainViewPagerAdapter.currentFragment?.setHasOptionsMenu(true)
