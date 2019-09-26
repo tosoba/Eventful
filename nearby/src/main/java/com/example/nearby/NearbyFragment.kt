@@ -65,6 +65,8 @@ class NearbyFragment : InjectableVectorFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setHasOptionsMenuIfVisible()
+
         handler.eventOccurred(
             Lifecycle.OnViewCreated(savedInstanceState != null)
         )

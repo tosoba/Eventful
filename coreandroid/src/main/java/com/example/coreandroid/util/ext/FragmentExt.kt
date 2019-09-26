@@ -34,6 +34,13 @@ private inline fun <reified T> Fragment.findAncestorFragmentOfType(): T? {
     return null
 }
 
+fun Fragment.setHasOptionsMenuIfVisible() {
+    if (menuController?.shouldSetHasOptionsMenu(this) == true) {
+        setHasOptionsMenu(true)
+        activity?.invalidateOptionsMenu()
+    }
+}
+
 fun Fragment.setupToolbarWithDrawerToggle(toolbar: Toolbar) {
     appCompatActivity.setSupportActionBar(toolbar)
     appCompatActivity.supportActionBar?.setDisplayShowTitleEnabled(false)

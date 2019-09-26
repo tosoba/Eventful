@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.ActionMenuView
+import androidx.fragment.app.Fragment
 import com.example.coreandroid.base.MenuController
 import com.example.coreandroid.base.SnackbarController
 import com.example.coreandroid.util.SnackbarState
@@ -40,10 +41,13 @@ class MainFragment : DaggerFragment(), SnackbarController, MenuController {
         put(R.id.bottom_nav_favourites, 2)
     }
 
+    private var lastSelectedPage: Int = 0
+
     private val viewPagerSwipedListener = object : ViewPagerPageSelectedListener {
         override fun onPageSelected(position: Int) {
             main_bottom_nav_view.selectedItemId = viewPagerItems.inverse()[position]!!
             invalidateOptionsMenu()
+            lastSelectedPage = position
         }
     }
 
@@ -67,6 +71,9 @@ class MainFragment : DaggerFragment(), SnackbarController, MenuController {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
+        savedInstanceState?.let {
+            lastSelectedPage = it.getInt(KEY_LAST_SELECTED_POSITION)
+        }
     }
 
     override fun onCreateView(
@@ -91,8 +98,9 @@ class MainFragment : DaggerFragment(), SnackbarController, MenuController {
         transition(viewModel.currentState.snackbarState)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt(KEY_LAST_SELECTED_POSITION, lastSelectedPage)
     }
 
     override fun transition(newState: SnackbarState) {
@@ -120,9 +128,22 @@ class MainFragment : DaggerFragment(), SnackbarController, MenuController {
         }
     }
 
+    override fun shouldSetHasOptionsMenu(
+        fragment: Fragment
+    ): Boolean = lastSelectedPage == when (fragment) {
+        is NearbyFragment -> 0
+        is SearchFragment -> 1
+        is FavouritesFragment -> 2
+        else -> -1
+    }
+
     private fun invalidateOptionsMenu() {
         mainViewPagerAdapter.previousFragment?.setHasOptionsMenu(false)
         mainViewPagerAdapter.currentFragment?.setHasOptionsMenu(true)
         activity?.invalidateOptionsMenu()
+    }
+
+    companion object {
+        private const val KEY_LAST_SELECTED_POSITION = "KEY_LAST_SELECTED_POSITION"
     }
 }
