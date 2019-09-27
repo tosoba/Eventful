@@ -1,9 +1,11 @@
 package com.example.search
 
+import android.app.SearchManager
 import android.os.Bundle
 import android.os.Handler
 import android.view.*
 import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContextCompat.getSystemService
 import com.example.coreandroid.base.InjectableVectorFragment
 import com.example.coreandroid.di.Dependencies
 import com.example.coreandroid.navigation.IFragmentProvider
@@ -98,6 +100,10 @@ class SearchFragment : InjectableVectorFragment() {
             inflater.inflate(R.menu.search_menu, menuView.menu)
             (menuView.menu.findItem(R.id.search_action)?.actionView as? SearchView)?.let { searchView ->
                 searchView.maxWidth = Integer.MAX_VALUE
+                val searchManager = getSystemService<SearchManager>(
+                    requireContext(), SearchManager::class.java
+                )
+                searchView.setSearchableInfo(searchManager?.getSearchableInfo(activity?.componentName))
                 fragmentScope.launch {
                     searchView.queryTextChange()
                         .consumeAsFlow()
@@ -109,7 +115,6 @@ class SearchFragment : InjectableVectorFragment() {
                         }
                 }
             }
-
         }
 
         super.onCreateOptionsMenu(menu, inflater)
