@@ -2,7 +2,9 @@ package com.example.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.core.model.usecase.SearchEvents
+import com.example.core.usecase.GetSeachSuggestions
+import com.example.core.usecase.InsertSuggestion
+import com.example.core.usecase.SearchEvents
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
 import dagger.Module
@@ -34,8 +36,12 @@ abstract class SearchModule {
         @ViewModelKey(SearchViewModel::class)
         fun searchViewModel(
             searchEvents: SearchEvents,
+            getSeachSuggestions: GetSeachSuggestions,
+            insertSuggestion: InsertSuggestion,
             ioDispatcher: CoroutineDispatcher
-        ): ViewModel = SearchViewModel(searchEvents, ioDispatcher)
+        ): ViewModel = SearchViewModel(
+            searchEvents, getSeachSuggestions, insertSuggestion, ioDispatcher
+        )
     }
 
     @Module

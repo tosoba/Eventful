@@ -1,10 +1,7 @@
 package com.example.eventsnearby
 
 import android.Manifest
-import android.app.SearchManager
-import android.content.Intent
 import android.os.Bundle
-import android.provider.SearchRecentSuggestions
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.example.coreandroid.base.DrawerLayoutHost
@@ -98,13 +95,6 @@ class MainActivity : DaggerAppCompatActivity(), DrawerLayoutHost, CoroutineScope
         super.onDestroy()
     }
 
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        when (intent?.action) {
-            Intent.ACTION_SEARCH -> handleSearchIntent(intent)
-        }
-    }
-
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return true
@@ -136,19 +126,6 @@ class MainActivity : DaggerAppCompatActivity(), DrawerLayoutHost, CoroutineScope
             viewModel.onPermissionDenied()
         } else {
             viewModel.loadLocation()
-        }
-    }
-
-    private fun handleSearchIntent(intent: Intent) {
-        val query = intent.getStringExtra(SearchManager.QUERY)
-        if (query.isNullOrBlank()) return
-
-        SearchRecentSuggestions(
-            this,
-            EventSearchSuggestionProvider.AUTHORITY,
-            EventSearchSuggestionProvider.MODE
-        ).run {
-            saveRecentQuery(query, null)
         }
     }
 }

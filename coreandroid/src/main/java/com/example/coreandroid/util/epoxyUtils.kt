@@ -5,10 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.epoxy.*
-import com.example.coreandroid.R
-import com.example.coreandroid.loadingIndicator
-import com.example.coreandroid.loadingMoreIndicator
-import com.example.coreandroid.reloadControl
+import com.example.coreandroid.*
+import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
 import com.haroldadmin.vector.VectorFragment
 import com.haroldadmin.vector.VectorState
 import com.haroldadmin.vector.VectorViewModel
@@ -68,18 +66,16 @@ open class NestedScrollingCarouselModel : CarouselModel_() {
 
 class InfiniteNestedScrollingCarouselModel(
     private val visibleThreshold: Int = 5,
-    private val minItemsBeforeLoadingMore: Int = 0,
+    private val minItemsBeforeLoadingMore: Int = 10,
     private val onLoadMore: () -> Unit
 ) : NestedScrollingCarouselModel() {
 
     override fun buildView(parent: ViewGroup): Carousel = super.buildView(parent).apply {
         addOnScrollListener(
-            EndlessRecyclerOnScrollListener(
-                visibleThreshold,
-                minItemsBeforeLoadingMore
-            ) {
+            EndlessRecyclerViewScrollListener(visibleThreshold, minItemsBeforeLoadingMore) {
                 this@InfiniteNestedScrollingCarouselModel.onLoadMore()
-            })
+            }
+        )
     }
 }
 
@@ -124,6 +120,7 @@ fun <S : VectorState, A : VectorViewModel<S>, L : HoldsData<Collection<I>>, I> V
     reloadClicked: (() -> Unit)? = null,
     onScrollListener: RecyclerView.OnScrollListener? = null,
     showLoadingIndicator: Boolean = true,
+    emptyText: String? = null,
     buildItem: (I) -> EpoxyModel<*>
 ) = object : TypedEpoxyController<S>(modelBuildingHandler, diffingHandler) {
 
@@ -135,6 +132,12 @@ fun <S : VectorState, A : VectorViewModel<S>, L : HoldsData<Collection<I>>, I> V
             if (items.value.isEmpty()) when (val status = items.status) {
                 is Loading -> if (showLoadingIndicator) loadingIndicator {
                     id("loading-indicator-items")
+                }
+                is LoadedSuccessfully -> {
+                    if (emptyText != null && emptyText.isNotBlank()) noItemsText {
+                        id("empty-text")
+                        text(emptyText)
+                    }
                 }
                 is LoadingFailed<*> -> reloadControl {
                     id("reload-control")

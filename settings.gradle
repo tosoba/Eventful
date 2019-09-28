@@ -1,1 +1,1 @@
-include ':app', ':coreandroid', ':nearby', ':search', ':favourites', ':core', ':repo', ':event', ':weather', ':darkskyapi', ':ticketmasterapi'
+include ':app', ':coreandroid', ':nearby', ':search', ':favourites', ':core', ':repo', ':event', ':weather', ':darkskyapi', ':ticketmasterapi', ':db'

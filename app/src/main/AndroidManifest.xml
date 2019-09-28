@@ -16,10 +16,6 @@
             android:theme="@style/AppTheme.NoActionBar"
             tools:ignore="GoogleAppIndexingWarning">
 
-        <provider
-                android:name="com.example.eventsnearby.EventSearchSuggestionProvider"
-                android:authorities="com.example.eventsnearby.EventSearchSuggestionProvider" />
-
         <activity
                 android:name=".MainActivity"
                 android:label="@string/app_name"

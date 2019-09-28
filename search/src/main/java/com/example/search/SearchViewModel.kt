@@ -4,7 +4,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.core.Resource
 import com.example.core.model.PagedResult
 import com.example.core.model.ticketmaster.IEvent
-import com.example.core.model.usecase.SearchEvents
+import com.example.core.usecase.GetSeachSuggestions
+import com.example.core.usecase.InsertSuggestion
+import com.example.core.usecase.SearchEvents
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.util.LoadedSuccessfully
 import com.example.coreandroid.util.Loading
@@ -17,6 +19,8 @@ import kotlinx.coroutines.withContext
 
 class SearchViewModel(
     private val searchEvents: SearchEvents,
+    private val getSearchSuggestions: GetSeachSuggestions,
+    private val insertSuggestion: InsertSuggestion,
     private val ioDispatcher: CoroutineDispatcher
 ) : VectorViewModel<SearchState>(SearchState.INITIAL) {
 
@@ -26,8 +30,7 @@ class SearchViewModel(
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
             withState { state ->
-                if (searchText.isBlank() || searchText.length < 3 || (searchText == state.searchText && !retry))
-                    return@withState
+                if (searchText == state.searchText && !retry) return@withState
 
                 setState {
                     copy(
@@ -36,7 +39,7 @@ class SearchViewModel(
                     )
                 }
                 when (val result = withContext(ioDispatcher) {
-                    searchEvents(state.searchText)
+                    searchEvents(searchText)
                 }) {
                     is Resource.Success -> setState {
                         copy(
@@ -83,12 +86,30 @@ class SearchViewModel(
         }
     }
 
+    private var suggestionsJob: Job? = null
+
+    fun loadSearchSuggestions(searchText: String) {
+        suggestionsJob?.cancel()
+        suggestionsJob = viewModelScope.launch {
+            setState {
+                copy(searchSuggestions = getSearchSuggestions(searchText))
+            }
+        }
+    }
+
+    fun insertNewSuggestion(searchText: String) {
+        if (searchText.isNotBlank() && searchText.length > 3) viewModelScope.launch {
+            insertSuggestion(searchText)
+        }
+    }
+
     fun onNotConnected() = setState {
         copy(events = events.copyWithError(SearchError.NotConnected))
     }
 
     override fun onCleared() {
         searchJob?.cancel()
+        suggestionsJob?.cancel()
         super.onCleared()
     }
 }

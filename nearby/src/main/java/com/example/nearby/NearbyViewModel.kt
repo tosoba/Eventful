@@ -4,7 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.core.Resource
 import com.example.core.model.PagedResult
 import com.example.core.model.ticketmaster.IEvent
-import com.example.core.model.usecase.GetEvents
+import com.example.core.usecase.GetEvents
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.util.Loading
 import com.google.android.gms.maps.model.LatLng

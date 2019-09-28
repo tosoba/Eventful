@@ -26,10 +26,9 @@ class NearbyViewEventHandler @Inject constructor(
     private val locationStateProvider: LocationStateProvider
 ) : CoroutineScope {
 
+    private val trackerJob = Job()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + trackerJob
-
-    private val trackerJob = Job()
 
     private val viewUpdatesChannel: Channel<NearbyViewUpdate> =
         Channel(capacity = Channel.UNLIMITED)

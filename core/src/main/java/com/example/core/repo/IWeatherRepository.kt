@@ -1,5 +1,6 @@
-package com.example.core
+package com.example.core.repo
 
+import com.example.core.Resource
 import com.example.core.model.weather.Forecast
 
 interface IWeatherRepository {

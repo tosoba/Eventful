@@ -2,7 +2,7 @@ package com.example.nearby
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.core.model.usecase.GetEvents
+import com.example.core.usecase.GetEvents
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
 import dagger.Module

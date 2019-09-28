@@ -52,6 +52,7 @@ dependencies {
     implementation project(':darkskyapi')
     implementation project(':core')
     implementation project(':coreandroid')
+    implementation project(':db')
     implementation project(':event')
     implementation project(':favourites')
     implementation project(':nearby')
@@ -88,6 +89,10 @@ dependencies {
     implementation("io.nlopez.smartlocation:library:$smartLocationVersion") {
         transitive = false
     }
+
+    implementation 'androidx.room:room-runtime:2.2.0-rc01'
+    kapt 'androidx.room:room-compiler:2.2.0-rc01'
+    implementation 'androidx.room:room-ktx:2.2.0-rc01'
 
     implementation "com.google.android.gms:play-services-maps:$playServicesMapsVersion"
     implementation "com.google.android.gms:play-services-location:$playServicesLocationVersion"

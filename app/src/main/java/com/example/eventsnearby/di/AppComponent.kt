@@ -1,6 +1,7 @@
 package com.example.eventsnearby.di
 
 import android.app.Application
+import com.example.db.DbModule
 import com.example.eventsnearby.EventfulApp
 import com.example.ticketmasterapi.TicketMasterApiModule
 import com.example.weatherapi.model.DarkSkyApiModule
@@ -19,6 +20,7 @@ import javax.inject.Singleton
         NetworkModule::class,
         TicketMasterApiModule::class,
         DarkSkyApiModule::class,
+        DbModule::class,
         DataModule::class,
         AndroidSupportInjectionModule::class
     ]

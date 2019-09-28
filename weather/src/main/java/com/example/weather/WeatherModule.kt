@@ -2,7 +2,7 @@ package com.example.weather
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.core.IWeatherRepository
+import com.example.core.repo.IWeatherRepository
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
 import dagger.Module

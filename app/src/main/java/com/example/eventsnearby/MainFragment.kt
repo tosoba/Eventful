@@ -64,7 +64,7 @@ class MainFragment : DaggerFragment(), SnackbarController, MenuController {
     private var snackbar: Snackbar? = null
 
     @Inject
-    lateinit var viewModel: MainViewModel
+    internal lateinit var viewModel: MainViewModel
 
     override val menuView: ActionMenuView? get() = main_action_menu_view
 

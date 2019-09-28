@@ -1,6 +1,7 @@
 package com.example.search
 
 import android.content.Context
+import android.database.MatrixCursor
 import com.example.coreandroid.base.ConnectivityStateProvider
 import com.example.coreandroid.di.scope.FragmentScoped
 import com.example.coreandroid.ticketmaster.Event
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
+
 @FragmentScoped
 class SearchViewEventHandler @Inject constructor(
     private val appContext: Context,
@@ -23,15 +25,27 @@ class SearchViewEventHandler @Inject constructor(
     private val connectivityStateProvider: ConnectivityStateProvider
 ) : CoroutineScope {
 
+    private val trackerJob = Job()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + trackerJob
-
-    private val trackerJob = Job()
 
     private val viewUpdatesChannel: Channel<SearchViewUpdate> =
         Channel(capacity = Channel.UNLIMITED)
 
     private val events: PagedDataList<Event> get() = viewModel.currentState.events
+
+    private val searchSuggestionsFlow: Flow<SearchViewUpdate?> by lazy {
+        viewModel.state.map { it.searchSuggestions }
+            .filter { it.isNotEmpty() }
+            .distinctUntilChanged()
+            .map { suggestions ->
+                UpdateSearchSuggestions(MatrixCursor(SearchSuggestionsAdapter.COLUMN_NAMES).apply {
+                    suggestions.filter { viewModel.currentState.searchText != it.searchText }
+                        .distinctBy { it.searchText }
+                        .forEach { addRow(arrayOf(it.id, it.searchText, it.timestampMs)) }
+                })
+            }
+    }
 
     private val eventsActionsFlow: Flow<SearchViewUpdate?> by lazy {
         viewModel.state.map { it.events }
@@ -74,6 +88,7 @@ class SearchViewEventHandler @Inject constructor(
 
     val updates: Flow<SearchViewUpdate> by lazy {
         flowOf(
+            searchSuggestionsFlow,
             eventsActionsFlow,
             connectionStateActionsFlow,
             viewUpdatesChannel.consumeAsFlow()
@@ -86,7 +101,7 @@ class SearchViewEventHandler @Inject constructor(
     ) {
         consumeEach {
             when (it) {
-                is Interaction.SearchTextChanged -> trySearch(it.searchText)
+                is Interaction.SearchTextChanged -> search(it.searchText)
                 is Interaction.EventListScrolledToEnd -> trySearchForMore()
                 is Interaction.EventClicked -> viewUpdatesChannel.offer(ShowEvent(it.event))
                 is Lifecycle.OnDestroy -> onDestroy()
@@ -104,8 +119,10 @@ class SearchViewEventHandler @Inject constructor(
 
     fun eventOccurred(event: SearchViewEvent) = eventProcessor.offer(event)
 
-    private fun trySearch(searchText: String) = checkConnectionAndRun {
-        viewModel.search(searchText)
+    private fun search(searchText: String) {
+        viewModel.insertNewSuggestion(searchText)
+        viewModel.loadSearchSuggestions(searchText)
+        checkConnectionAndRun { viewModel.search(searchText) }
     }
 
     private fun trySearchForMore() = checkConnectionAndRun { viewModel.searchMore() }

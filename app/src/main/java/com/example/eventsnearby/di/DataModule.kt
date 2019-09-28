@@ -1,7 +1,8 @@
 package com.example.eventsnearby.di
 
-import com.example.core.IEventsRepository
-import com.example.core.IWeatherRepository
+import com.example.core.repo.IEventsRepository
+import com.example.core.repo.IWeatherRepository
+import com.example.db.dao.SearchSuggestionDao
 import com.example.repo.EventsRepository
 import com.example.repo.WeatherRepository
 import com.example.ticketmasterapi.TicketMasterApi
@@ -18,8 +19,9 @@ class DataModule {
     @Provides
     @Singleton
     fun eventsRepository(
-        ticketMasterApi: TicketMasterApi
-    ): IEventsRepository = EventsRepository(ticketMasterApi)
+        ticketMasterApi: TicketMasterApi,
+        searchSuggestionDao: SearchSuggestionDao
+    ): IEventsRepository = EventsRepository(ticketMasterApi, searchSuggestionDao)
 
     @Provides
     @Singleton

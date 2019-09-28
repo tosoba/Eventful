@@ -1,9 +1,9 @@
 package com.example.weather
 
 import androidx.lifecycle.viewModelScope
-import com.example.core.IWeatherRepository
 import com.example.core.Resource
 import com.example.core.model.weather.Forecast
+import com.example.core.repo.IWeatherRepository
 import com.example.coreandroid.util.Loading
 import com.google.android.gms.maps.model.LatLng
 import com.haroldadmin.vector.VectorViewModel
