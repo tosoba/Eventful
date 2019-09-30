@@ -1,6 +1,7 @@
 package com.example.db.entity
 
 import androidx.room.Entity
+import com.example.core.model.ticketmaster.IVenue
 import com.example.db.Tables
 
 @Entity(tableName = Tables.VENUE, primaryKeys = ["id"])
@@ -12,4 +13,8 @@ data class VenueEntity(
     val city: String,
     val lat: Float,
     val lng: Float
-)
+) {
+    constructor(other: IVenue) : this(
+        other.id, other.name, other.url, other.address, other.city, other.lat, other.lng
+    )
+}

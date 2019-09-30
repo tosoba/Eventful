@@ -1,6 +1,8 @@
 package com.example.db.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
+import com.example.core.model.ticketmaster.IAttraction
 import com.example.db.Tables
 
 @Entity(tableName = Tables.ATTRACTION, primaryKeys = ["id"])
@@ -9,6 +11,15 @@ data class AttractionEntity(
     val name: String?,
     val url: String,
     val links: List<LinkEntity>,
-    val imageUrl: String?,
+    @ColumnInfo(name = "image_url") val imageUrl: String?,
     val kind: String?
-)
+) {
+    constructor(other: IAttraction) : this(
+        other.id,
+        other.name,
+        other.url,
+        other.links.map { LinkEntity(it) },
+        other.imageUrl,
+        other.kind
+    )
+}
