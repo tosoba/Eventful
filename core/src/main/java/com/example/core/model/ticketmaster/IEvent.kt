@@ -8,6 +8,7 @@ interface IEvent {
     val url: String
     val imageUrl: String
     val distance: Float?
+    val info: String?
     val salesStartDate: Date?
     val salesEndDate: Date?
     val startDate: Date?

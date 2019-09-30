@@ -6,7 +6,7 @@ import androidx.room.ForeignKey
 import com.example.db.Tables
 
 @Entity(
-    tableName = Tables.EVENT_ATTRACTION_JOIN,
+    tableName = Tables.EVENT_VENUE_JOIN,
     primaryKeys = ["event_id", "venue_id"],
     foreignKeys = [
         ForeignKey(

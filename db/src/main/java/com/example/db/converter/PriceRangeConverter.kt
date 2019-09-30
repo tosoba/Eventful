@@ -6,7 +6,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.util.Collections.emptyList
 
-object PriceRangeConverter {
+class PriceRangeConverter {
 
     @TypeConverter
     fun storedStringToMyObjects(

@@ -17,6 +17,7 @@ data class Event(
     override val id: String,
     val images: List<Image>,
     val locale: String,
+    override val info: String?,
     override val name: String,
     override val distance: Float?,
     val sales: Sales,
