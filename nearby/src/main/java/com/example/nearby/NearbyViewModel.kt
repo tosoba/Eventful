@@ -4,7 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.core.Resource
 import com.example.core.model.PagedResult
 import com.example.core.model.ticketmaster.IEvent
-import com.example.core.usecase.GetEvents
+import com.example.core.usecase.GetNearbyEvents
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.util.Loading
 import com.google.android.gms.maps.model.LatLng
@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class NearbyViewModel(
-    private val getEvents: GetEvents,
+    private val getNearbyEvents: GetNearbyEvents,
     private val ioDispatcher: CoroutineDispatcher
 ) : VectorViewModel<NearbyState>(NearbyState.INITIAL) {
 
@@ -25,7 +25,7 @@ class NearbyViewModel(
 
             setState { copy(events = events.copyWithLoadingInProgress) }
             when (val result = withContext(ioDispatcher) {
-                getEvents(userLatLng.latitude, userLatLng.longitude, state.events.offset)
+                getNearbyEvents(userLatLng.latitude, userLatLng.longitude, state.events.offset)
             }) {
                 is Resource.Success -> setState {
                     copy(

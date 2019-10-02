@@ -14,6 +14,7 @@ import com.example.ticketmasterapi.model.TicketMasterErrorResponse
 import com.example.ticketmasterapi.queryparam.GeoPoint
 import com.example.ticketmasterapi.queryparam.RadiusUnit
 import com.haroldadmin.cnradapter.NetworkResponse
+import kotlinx.coroutines.flow.Flow
 
 class EventsRepository(
     private val ticketMasterApi: TicketMasterApi,
@@ -37,6 +38,8 @@ class EventsRepository(
         .asResource
 
     override suspend fun saveEvent(event: IEvent): Boolean = eventDao.insertEvent(event)
+
+    override fun getSavedEvents(): Flow<List<IEvent>> = eventDao.getEventsFlow()
 
     override suspend fun getSearchSuggestions(
         searchText: String

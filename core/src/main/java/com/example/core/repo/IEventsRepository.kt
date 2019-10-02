@@ -4,6 +4,7 @@ import com.example.core.Resource
 import com.example.core.model.PagedResult
 import com.example.core.model.search.SearchSuggestion
 import com.example.core.model.ticketmaster.IEvent
+import kotlinx.coroutines.flow.Flow
 
 interface IEventsRepository {
 
@@ -18,4 +19,6 @@ interface IEventsRepository {
     suspend fun saveSuggestion(searchText: String)
 
     suspend fun saveEvent(event: IEvent): Boolean
+
+    fun getSavedEvents(): Flow<List<IEvent>>
 }

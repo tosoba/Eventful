@@ -1,11 +1,8 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
-buildscript { 
-    ext.kotlin_version = '1.3.50'
-
+buildscript {
     ext {
-        kotlinVersion = '1.3.21'
-
+        kotlinVersion = '1.3.50'
         appCompatVersion = '1.1.0-alpha04'
         coreKtxVersion = '1.1.0-alpha05'
         constraintLayoutVersion = '1.1.3'
@@ -29,7 +26,7 @@ buildscript {
 
         liveDataKtxVersion = '1.0.1'
         lifecycleVersion = '1.1.1'
-        coroutinesVersion = '1.1.1'
+        coroutinesVersion = '1.3.2'
         coroutinesRx2Version = '1.2.1'
         playServicesMapsVersion = '16.1.0'
         playServicesLocationVersion = '16.0.0'
@@ -54,7 +51,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "org.jetbrains.kotlin:kotlin-android-extensions:$kotlinVersion"
         classpath 'com.jakewharton:butterknife-gradle-plugin:10.1.0'
-    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version" }
+    }
 }
 
 allprojects {

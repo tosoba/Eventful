@@ -5,6 +5,7 @@ import com.example.core.model.ticketmaster.IEvent
 import com.example.db.Tables
 import com.example.db.entity.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 @Dao
 interface EventDao {
@@ -39,7 +40,7 @@ interface EventDao {
     } else false
 
     @Query("SELECT * FROM ${Tables.EVENT}")
-    suspend fun getEvents(): Flow<List<EventEntity>>
+    fun getEvents(): Flow<List<EventEntity>>
 
     @Query("SELECT * FROM ${Tables.EVENT_ATTRACTION_JOIN} WHERE event_id IN (:eventIds)")
     suspend fun getEventsAttractionsIds(eventIds: List<String>): List<EventAttractionJoinEntity>
@@ -53,16 +54,31 @@ interface EventDao {
     @Query("SELECT * FROM ${Tables.ATTRACTION} WHERE id IN (:ids)")
     fun getAttractions(ids: List<String>): List<AttractionEntity>
 
-//    @Transaction
-//    suspend fun getEventsFlow(): Flow<List<FullEventEntity>> {
-//        getEvents()
-//            .map { eventEntities ->
-//                val eventIds = eventEntities.map { it.id }
-//                val eventVenueJoins = getEventsVenuesIds(eventIds)
-//                val eventAttractionJoins = getEventsAttractionsIds(eventIds)
-//
-//            }
-//    }
+    @Transaction
+    fun getEventsFlow(): Flow<List<FullEventEntity>> = getEvents()
+        .map { eventEntities ->
+            val eventIds = eventEntities.map { it.id }
+            val eventVenueJoins = getEventsVenuesIds(eventIds)
+            val groupedVenueIds = eventVenueJoins.groupBy({ it.eventId }, { it.venueId })
+            val eventAttractionJoins = getEventsAttractionsIds(eventIds)
+            val groupedAttractionIds = eventAttractionJoins
+                .groupBy({ it.eventId }, { it.attractionId })
+            val venues = getVenues(eventVenueJoins.map { it.venueId })
+                .map { it.id to it }
+                .toMap()
+            val attractions = getAttractions(eventAttractionJoins.map { it.attractionId })
+                .map { it.id to it }
+                .toMap()
+            eventEntities.map { eventEntity ->
+                FullEventEntity(
+                    event = eventEntity,
+                    attractions = groupedAttractionIds[eventEntity.id]?.mapNotNull { attractions[it] }
+                        ?: emptyList(),
+                    venues = groupedVenueIds[eventEntity.id]?.mapNotNull { venues[it] }
+                        ?: emptyList()
+                )
+            }
+        }
 
     @Query("DELETE FROM ${Tables.EVENT} WHERE id = :id")
     suspend fun deleteEvent(id: String)
