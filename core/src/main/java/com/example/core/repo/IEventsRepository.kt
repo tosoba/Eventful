@@ -15,5 +15,7 @@ interface IEventsRepository {
 
     suspend fun getSearchSuggestions(searchText: String): List<SearchSuggestion>
 
-    suspend fun insertSuggestion(searchText: String)
+    suspend fun saveSuggestion(searchText: String)
+
+    suspend fun saveEvent(event: IEvent): Boolean
 }

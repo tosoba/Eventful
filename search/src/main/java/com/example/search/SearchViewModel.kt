@@ -5,7 +5,7 @@ import com.example.core.Resource
 import com.example.core.model.PagedResult
 import com.example.core.model.ticketmaster.IEvent
 import com.example.core.usecase.GetSeachSuggestions
-import com.example.core.usecase.InsertSuggestion
+import com.example.core.usecase.SaveSuggestion
 import com.example.core.usecase.SearchEvents
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.util.LoadedSuccessfully
@@ -20,7 +20,7 @@ import kotlinx.coroutines.withContext
 class SearchViewModel(
     private val searchEvents: SearchEvents,
     private val getSearchSuggestions: GetSeachSuggestions,
-    private val insertSuggestion: InsertSuggestion,
+    private val saveSuggestion: SaveSuggestion,
     private val ioDispatcher: CoroutineDispatcher
 ) : VectorViewModel<SearchState>(SearchState.INITIAL) {
 
@@ -99,7 +99,7 @@ class SearchViewModel(
 
     fun insertNewSuggestion(searchText: String) {
         if (searchText.isNotBlank() && searchText.length > 3) viewModelScope.launch {
-            insertSuggestion(searchText)
+            saveSuggestion(searchText)
         }
     }
 

@@ -7,13 +7,13 @@ import com.example.db.Tables
 
 @Entity(tableName = Tables.ATTRACTION, primaryKeys = ["id"])
 data class AttractionEntity(
-    val id: String,
-    val name: String?,
-    val url: String,
-    val links: List<LinkEntity>,
-    @ColumnInfo(name = "image_url") val imageUrl: String?,
-    val kind: String?
-) {
+    override val id: String,
+    override val name: String?,
+    override val url: String,
+    override val links: List<LinkEntity>,
+    @ColumnInfo(name = "image_url") override val imageUrl: String?,
+    override val kind: String?
+) : IAttraction {
     constructor(other: IAttraction) : this(
         other.id,
         other.name,

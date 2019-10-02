@@ -9,9 +9,11 @@ import java.util.*
 @Entity(tableName = Tables.EVENT, primaryKeys = ["id"])
 data class EventEntity(
     val id: String,
+    val name: String,
     val url: String,
     @ColumnInfo(name = "image_url") val imageUrl: String,
     val distance: Float?,
+    val info: String?,
     @ColumnInfo(name = "sales_start_date") val salesStartDate: Date?,
     @ColumnInfo(name = "sales_end_date") val salesEndDate: Date?,
     @ColumnInfo(name = "start_date") val startDate: Date?,
@@ -21,9 +23,11 @@ data class EventEntity(
 ) {
     constructor(other: IEvent) : this(
         other.id,
+        other.name,
         other.url,
         other.imageUrl,
         other.distance,
+        other.info,
         other.salesStartDate,
         other.salesEndDate,
         other.startDate,

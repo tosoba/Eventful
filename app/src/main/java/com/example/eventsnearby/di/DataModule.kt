@@ -2,6 +2,7 @@ package com.example.eventsnearby.di
 
 import com.example.core.repo.IEventsRepository
 import com.example.core.repo.IWeatherRepository
+import com.example.db.dao.EventDao
 import com.example.db.dao.SearchSuggestionDao
 import com.example.repo.EventsRepository
 import com.example.repo.WeatherRepository
@@ -13,15 +14,16 @@ import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
 
-@Module
+@Module //TODO: move this into the repo module
 class DataModule {
 
     @Provides
     @Singleton
     fun eventsRepository(
         ticketMasterApi: TicketMasterApi,
-        searchSuggestionDao: SearchSuggestionDao
-    ): IEventsRepository = EventsRepository(ticketMasterApi, searchSuggestionDao)
+        searchSuggestionDao: SearchSuggestionDao,
+        eventDao: EventDao
+    ): IEventsRepository = EventsRepository(ticketMasterApi, searchSuggestionDao, eventDao)
 
     @Provides
     @Singleton

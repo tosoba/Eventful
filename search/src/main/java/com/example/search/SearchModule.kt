@@ -3,7 +3,7 @@ package com.example.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.core.usecase.GetSeachSuggestions
-import com.example.core.usecase.InsertSuggestion
+import com.example.core.usecase.SaveSuggestion
 import com.example.core.usecase.SearchEvents
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
@@ -37,10 +37,10 @@ abstract class SearchModule {
         fun searchViewModel(
             searchEvents: SearchEvents,
             getSeachSuggestions: GetSeachSuggestions,
-            insertSuggestion: InsertSuggestion,
+            saveSuggestion: SaveSuggestion,
             ioDispatcher: CoroutineDispatcher
         ): ViewModel = SearchViewModel(
-            searchEvents, getSeachSuggestions, insertSuggestion, ioDispatcher
+            searchEvents, getSeachSuggestions, saveSuggestion, ioDispatcher
         )
     }
 

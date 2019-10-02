@@ -5,6 +5,7 @@ import com.example.core.model.PagedResult
 import com.example.core.model.search.SearchSuggestion
 import com.example.core.model.ticketmaster.IEvent
 import com.example.core.repo.IEventsRepository
+import com.example.db.dao.EventDao
 import com.example.db.dao.SearchSuggestionDao
 import com.example.db.entity.SearchSuggestionEntity
 import com.example.ticketmasterapi.TicketMasterApi
@@ -16,7 +17,8 @@ import com.haroldadmin.cnradapter.NetworkResponse
 
 class EventsRepository(
     private val ticketMasterApi: TicketMasterApi,
-    private val searchSuggestionDao: SearchSuggestionDao
+    private val searchSuggestionDao: SearchSuggestionDao,
+    private val eventDao: EventDao
 ) : IEventsRepository {
 
     override suspend fun getNearbyEvents(
@@ -34,12 +36,14 @@ class EventsRepository(
         .await()
         .asResource
 
+    override suspend fun saveEvent(event: IEvent): Boolean = eventDao.insertEvent(event)
+
     override suspend fun getSearchSuggestions(
         searchText: String
     ): List<SearchSuggestion> = searchSuggestionDao.getSearchSuggestions(searchText)
         .map { SearchSuggestion(it.id, it.searchText, it.timestampMs) }
 
-    override suspend fun insertSuggestion(searchText: String) {
+    override suspend fun saveSuggestion(searchText: String) {
         searchSuggestionDao.upsertSuggestion(
             SearchSuggestionEntity(searchText, System.currentTimeMillis())
         )
