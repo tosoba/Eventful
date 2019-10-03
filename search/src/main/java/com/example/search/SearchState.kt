@@ -11,6 +11,7 @@ data class SearchState(
     val events: PagedDataList<Event>
 ) : VectorState {
     companion object {
-        val INITIAL = SearchState("", emptyList(), PagedDataList())
+        val INITIAL: SearchState
+            get() = SearchState("", emptyList(), PagedDataList())
     }
 }

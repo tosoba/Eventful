@@ -19,7 +19,8 @@ data class EventEntity(
     @ColumnInfo(name = "start_date") val startDate: Date?,
     @ColumnInfo(name = "start_time") val startTime: String?,
     val kinds: List<String>,
-    @ColumnInfo(name = "price_ranges") val priceRanges: List<PriceRangeEntity>?
+    @ColumnInfo(name = "price_ranges") val priceRanges: List<PriceRangeEntity>?,
+    @ColumnInfo(name = "date_saved") val dateSaved: Date
 ) {
     constructor(other: IEvent) : this(
         other.id,
@@ -33,6 +34,7 @@ data class EventEntity(
         other.startDate,
         other.startTime,
         other.kinds,
-        other.priceRanges?.map { PriceRangeEntity(it) }
+        other.priceRanges?.map { PriceRangeEntity(it) },
+        Date()
     )
 }

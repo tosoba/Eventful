@@ -6,13 +6,15 @@ import com.example.db.Tables
 import com.example.db.entity.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.util.*
 
 @Dao
 interface EventDao {
+
     @Query("SELECT * FROM ${Tables.EVENT} WHERE id = :id")
     suspend fun getEvent(id: String): EventEntity?
 
-    @Insert(onConflict = OnConflictStrategy.ABORT)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertEvent(event: EventEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -39,8 +41,11 @@ interface EventDao {
         true
     } else false
 
-    @Query("SELECT * FROM ${Tables.EVENT}")
-    fun getEvents(): Flow<List<EventEntity>>
+    @Query("SELECT * FROM ${Tables.EVENT} ORDER BY date_saved DESC LIMIT 20")
+    fun getEventsFlow(): Flow<List<EventEntity>>
+
+    @Query("SELECT * FROM ${Tables.EVENT} WHERE date_saved > :minDate ORDER BY date_saved DESC LIMIT 20")
+    suspend fun getEvents(minDate: Date): List<EventEntity>
 
     @Query("SELECT * FROM ${Tables.EVENT_ATTRACTION_JOIN} WHERE event_id IN (:eventIds)")
     suspend fun getEventsAttractionsIds(eventIds: List<String>): List<EventAttractionJoinEntity>
@@ -55,8 +60,18 @@ interface EventDao {
     fun getAttractions(ids: List<String>): List<AttractionEntity>
 
     @Transaction
-    fun getEventsFlow(): Flow<List<FullEventEntity>> = getEvents()
-        .map { eventEntities ->
+    suspend fun getFullEvents(
+        minDate: Date
+    ): List<FullEventEntity> = toFullEvents(getEvents(minDate))
+
+    @Transaction
+    fun getFullEventsFlow(): Flow<List<FullEventEntity>> = getEventsFlow().map { toFullEvents(it) }
+
+    @Query("DELETE FROM ${Tables.EVENT} WHERE id = :id")
+    suspend fun deleteEvent(id: String)
+
+    companion object {
+        suspend fun EventDao.toFullEvents(eventEntities: List<EventEntity>): List<FullEventEntity> {
             val eventIds = eventEntities.map { it.id }
             val eventVenueJoins = getEventsVenuesIds(eventIds)
             val groupedVenueIds = eventVenueJoins.groupBy({ it.eventId }, { it.venueId })
@@ -69,7 +84,7 @@ interface EventDao {
             val attractions = getAttractions(eventAttractionJoins.map { it.attractionId })
                 .map { it.id to it }
                 .toMap()
-            eventEntities.map { eventEntity ->
+            return eventEntities.map { eventEntity ->
                 FullEventEntity(
                     event = eventEntity,
                     attractions = groupedAttractionIds[eventEntity.id]?.mapNotNull { attractions[it] }
@@ -79,7 +94,5 @@ interface EventDao {
                 )
             }
         }
-
-    @Query("DELETE FROM ${Tables.EVENT} WHERE id = :id")
-    suspend fun deleteEvent(id: String)
+    }
 }

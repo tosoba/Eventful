@@ -8,6 +8,7 @@ data class NearbyState(
     val events: PagedDataList<Event>
 ) : VectorState {
     companion object {
-        val INITIAL = NearbyState(events = PagedDataList())
+        val INITIAL: NearbyState
+            get() = NearbyState(events = PagedDataList())
     }
 }

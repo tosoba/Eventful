@@ -13,6 +13,7 @@ data class MainState(
         get() = locationState is LocationState.Disabled || locationState is LocationState.Unknown
 
     companion object {
-        val INITIAL = MainState(false, SnackbarState.Hidden, LocationState.Unknown)
+        val INITIAL: MainState
+            get() = MainState(false, SnackbarState.Hidden, LocationState.Unknown)
     }
 }
