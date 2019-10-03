@@ -41,8 +41,8 @@ interface EventDao {
         true
     } else false
 
-    @Query("SELECT * FROM ${Tables.EVENT} ORDER BY date_saved DESC LIMIT 20")
-    fun getEventsFlow(): Flow<List<EventEntity>>
+    @Query("SELECT * FROM ${Tables.EVENT} ORDER BY date_saved DESC LIMIT :limit")
+    fun getEventsFlow(limit: Int): Flow<List<EventEntity>>
 
     @Query("SELECT * FROM ${Tables.EVENT} WHERE date_saved > :minDate ORDER BY date_saved DESC LIMIT 20")
     suspend fun getEvents(minDate: Date): List<EventEntity>
@@ -60,39 +60,32 @@ interface EventDao {
     fun getAttractions(ids: List<String>): List<AttractionEntity>
 
     @Transaction
-    suspend fun getFullEvents(
-        minDate: Date
-    ): List<FullEventEntity> = toFullEvents(getEvents(minDate))
-
-    @Transaction
-    fun getFullEventsFlow(): Flow<List<FullEventEntity>> = getEventsFlow().map { toFullEvents(it) }
+    fun getFullEventsFlow(
+        limit: Int
+    ): Flow<List<FullEventEntity>> = getEventsFlow(limit).map { eventEntities ->
+        val eventIds = eventEntities.map { it.id }
+        val eventVenueJoins = getEventsVenuesIds(eventIds)
+        val groupedVenueIds = eventVenueJoins.groupBy({ it.eventId }, { it.venueId })
+        val eventAttractionJoins = getEventsAttractionsIds(eventIds)
+        val groupedAttractionIds = eventAttractionJoins
+            .groupBy({ it.eventId }, { it.attractionId })
+        val venues = getVenues(eventVenueJoins.map { it.venueId })
+            .map { it.id to it }
+            .toMap()
+        val attractions = getAttractions(eventAttractionJoins.map { it.attractionId })
+            .map { it.id to it }
+            .toMap()
+        eventEntities.map { eventEntity ->
+            FullEventEntity(
+                event = eventEntity,
+                attractions = groupedAttractionIds[eventEntity.id]?.mapNotNull { attractions[it] }
+                    ?: emptyList(),
+                venues = groupedVenueIds[eventEntity.id]?.mapNotNull { venues[it] }
+                    ?: emptyList()
+            )
+        }
+    }
 
     @Query("DELETE FROM ${Tables.EVENT} WHERE id = :id")
     suspend fun deleteEvent(id: String)
-
-    companion object {
-        suspend fun EventDao.toFullEvents(eventEntities: List<EventEntity>): List<FullEventEntity> {
-            val eventIds = eventEntities.map { it.id }
-            val eventVenueJoins = getEventsVenuesIds(eventIds)
-            val groupedVenueIds = eventVenueJoins.groupBy({ it.eventId }, { it.venueId })
-            val eventAttractionJoins = getEventsAttractionsIds(eventIds)
-            val groupedAttractionIds = eventAttractionJoins
-                .groupBy({ it.eventId }, { it.attractionId })
-            val venues = getVenues(eventVenueJoins.map { it.venueId })
-                .map { it.id to it }
-                .toMap()
-            val attractions = getAttractions(eventAttractionJoins.map { it.attractionId })
-                .map { it.id to it }
-                .toMap()
-            return eventEntities.map { eventEntity ->
-                FullEventEntity(
-                    event = eventEntity,
-                    attractions = groupedAttractionIds[eventEntity.id]?.mapNotNull { attractions[it] }
-                        ?: emptyList(),
-                    venues = groupedVenueIds[eventEntity.id]?.mapNotNull { venues[it] }
-                        ?: emptyList()
-                )
-            }
-        }
-    }
 }

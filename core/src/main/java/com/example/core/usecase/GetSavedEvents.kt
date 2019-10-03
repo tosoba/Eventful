@@ -6,5 +6,5 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class GetSavedEvents @Inject constructor(private val eventsRepository: IEventsRepository) {
-    operator fun invoke(): Flow<List<IEvent>> = eventsRepository.getSavedEvents()
+    operator fun invoke(limit: Int): Flow<List<IEvent>> = eventsRepository.getSavedEventsFlow(limit)
 }

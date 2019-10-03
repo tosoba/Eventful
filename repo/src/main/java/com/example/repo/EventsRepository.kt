@@ -39,7 +39,9 @@ class EventsRepository(
 
     override suspend fun saveEvent(event: IEvent): Boolean = eventDao.insertEvent(event)
 
-    override fun getSavedEvents(): Flow<List<IEvent>> = eventDao.getFullEventsFlow()
+    override fun getSavedEventsFlow(
+        limit: Int
+    ): Flow<List<IEvent>> = eventDao.getFullEventsFlow(limit)
 
     override suspend fun getSearchSuggestions(
         searchText: String
