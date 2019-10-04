@@ -3,6 +3,8 @@ package com.example.favourites
 import androidx.lifecycle.viewModelScope
 import com.example.core.usecase.GetSavedEvents
 import com.example.coreandroid.ticketmaster.Event
+import com.example.coreandroid.util.DataList
+import com.example.coreandroid.util.LoadedSuccessfully
 import com.haroldadmin.vector.VectorViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
@@ -28,11 +30,15 @@ class FavouritesViewModel(
 
     private fun getEvents(): Job = viewModelScope.launch {
         withState { state ->
+            setState { copy(events = events.copyWithLoadingInProgress) }
             getSavedEvents(state.limit + limitIncrement).collect {
                 setState {
                     copy(
-                        events = events.copyWithNewItems(it.map { Event(it) }),
-                        limit = limit + limitIncrement
+                        events = DataList(
+                            value = it.map { Event(it) },
+                            status = LoadedSuccessfully
+                        ),
+                        limit = it.size
                     )
                 }
             }

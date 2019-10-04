@@ -6,7 +6,6 @@ import com.example.db.Tables
 import com.example.db.entity.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import java.util.*
 
 @Dao
 interface EventDao {
@@ -43,9 +42,6 @@ interface EventDao {
 
     @Query("SELECT * FROM ${Tables.EVENT} ORDER BY date_saved DESC LIMIT :limit")
     fun getEventsFlow(limit: Int): Flow<List<EventEntity>>
-
-    @Query("SELECT * FROM ${Tables.EVENT} WHERE date_saved > :minDate ORDER BY date_saved DESC LIMIT 20")
-    suspend fun getEvents(minDate: Date): List<EventEntity>
 
     @Query("SELECT * FROM ${Tables.EVENT_ATTRACTION_JOIN} WHERE event_id IN (:eventIds)")
     suspend fun getEventsAttractionsIds(eventIds: List<String>): List<EventAttractionJoinEntity>
