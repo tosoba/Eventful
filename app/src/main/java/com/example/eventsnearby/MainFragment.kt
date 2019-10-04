@@ -48,6 +48,9 @@ class MainFragment : DaggerFragment(), SnackbarController, MenuController {
             main_bottom_nav_view.selectedItemId = viewPagerItems.inverse()[position]!!
             invalidateOptionsMenu()
             lastSelectedPage = position
+            updateSnackbar(
+                lastSelectedPage, viewModel.currentState.snackbarState.getValue(lastSelectedPage)
+            )
         }
     }
 
@@ -95,7 +98,9 @@ class MainFragment : DaggerFragment(), SnackbarController, MenuController {
                 .show()
         }
 
-        transition(viewModel.currentState.snackbarState)
+        viewModel.currentState.snackbarState[lastSelectedPage]?.let {
+            updateSnackbar(lastSelectedPage, it)
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -103,21 +108,32 @@ class MainFragment : DaggerFragment(), SnackbarController, MenuController {
         outState.putInt(KEY_LAST_SELECTED_POSITION, lastSelectedPage)
     }
 
-    //TODO: split SnackbarState between fragments all ViewPager fragments
-    override fun transition(newState: SnackbarState) {
-        main_fab?.let {
-            if (newState == viewModel.currentState.snackbarState) return
+    override fun transitionTo(newState: SnackbarState, fragment: Fragment) {
+        val stateIndex = when (fragment) {
+            is NearbyFragment -> 0
+            is SearchFragment -> 1
+            is FavouritesFragment -> 2
+            else -> return
+        }
 
-            viewModel.snackbarState = newState
-            when (newState) {
+        if (stateIndex != lastSelectedPage || newState == viewModel.currentState.snackbarState[stateIndex])
+            return
+
+        viewModel.updateSnackbarState(stateIndex, newState)
+        updateSnackbar(stateIndex, newState)
+    }
+
+    private fun updateSnackbar(stateIndex: Int, snackbarState: SnackbarState) {
+        main_fab?.let {
+            when (snackbarState) {
                 is SnackbarState.Text -> {
                     if (snackbar != null
                         && snackbar?.isShown != false
-                        && viewModel.currentState.snackbarState is SnackbarState.Text
+                        && viewModel.currentState.snackbarState[stateIndex] is SnackbarState.Text
                     ) {
-                        snackbar?.setText(newState.text)
+                        snackbar?.setText(snackbarState.text)
                     } else {
-                        snackbar = Snackbar.make(it, newState.text, Snackbar.LENGTH_INDEFINITE)
+                        snackbar = Snackbar.make(it, snackbarState.text, Snackbar.LENGTH_INDEFINITE)
                             .apply(Snackbar::show)
                     }
                 }

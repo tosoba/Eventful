@@ -33,9 +33,13 @@ class MainViewModel(
         set(value) = setState { copy(isConnected = value) }
         get() = currentState.isConnected
 
-    var snackbarState: SnackbarState
-        set(value) = setState { copy(snackbarState = value) }
-        get() = currentState.snackbarState
+    fun updateSnackbarState(index: Int, newState: SnackbarState) {
+        setState {
+            copy(snackbarState = snackbarState + (index to newState))
+        }
+    }
+
+    fun snackbarStateFor(index: Int): SnackbarState = currentState.snackbarState.getValue(index)
 
     fun loadLocation() = viewModelScope.launch {
         setState { copy(locationState = LocationState.Loading) }

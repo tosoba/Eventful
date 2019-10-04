@@ -6,7 +6,7 @@ import com.haroldadmin.vector.VectorState
 
 data class MainState(
     val isConnected: Boolean,
-    val snackbarState: SnackbarState,
+    val snackbarState: Map<Int, SnackbarState>,
     val locationState: LocationState
 ) : VectorState {
     val locationDisabledOrUnknown: Boolean
@@ -14,6 +14,10 @@ data class MainState(
 
     companion object {
         val INITIAL: MainState
-            get() = MainState(false, SnackbarState.Hidden, LocationState.Unknown)
+            get() = MainState(
+                false,
+                (0..2).map { it to SnackbarState.Hidden }.toMap(),
+                LocationState.Unknown
+            )
     }
 }
