@@ -68,44 +68,30 @@ class NearbyViewEventHandler @Inject constructor(
             }
     }
 
-    private val connectionStateActionsFlow: Flow<NearbyViewUpdate?> by lazy {
+    private val loadingConditionsFlow: Flow<NearbyViewUpdate?> by lazy {
         connectivityStateProvider.isConnectedFlow
-            .distinctUntilChanged()
-            .filter { it && events.loadingFailed }
-            .onEach {
-                val locationState = locationStateProvider.locationState
-                if (locationState is LocationState.Found) events.ifEmptyAndIsNotLoading {
-                    viewModel.loadEvents(locationState.latLng)
-                }
-            }
-            .map {
-                val locationState = locationStateProvider.locationState
-                if (locationState !is LocationState.Found && locationState !is LocationState.Loading) {
-                    ShowSnackbarAndInvalidateList(
-                        appContext.getString(R.string.unable_to_retrieve_location), true
-                    )
-                } else null
-            }
-    }
-
-    private val locationStateActionsFlow: Flow<NearbyViewUpdate?> by lazy {
-        locationStateProvider.locationStateFlow
+            .combine(locationStateProvider.locationStateFlow) { connected, locationState -> connected to locationState }
             .distinctUntilChanged()
             .filter { events.loadingFailed }
-            .onEach { locationState ->
+            .onEach { (_, locationState) ->
                 if (locationState is LocationState.Found) events.ifEmptyAndIsNotLoading {
                     viewModel.loadEvents(locationState.latLng)
                 }
             }
-            .map { locationState ->
-                if (locationState is LocationState.Found && !connectivityStateProvider.isConnected) {
+            .map { (connected, locationState) ->
+                if (locationState is LocationState.Found && !connected) {
                     ShowSnackbarAndInvalidateList(
                         appContext.getString(R.string.no_connection), true
                     )
                 } else if (locationState is LocationState.Loading) {
-                    ShowSnackbarAndInvalidateList(
-                        appContext.getString(R.string.retrieving_location), false
-                    )
+                    val sb = StringBuilder(appContext.getString(R.string.retrieving_location))
+                    if (!connected) sb.append(" ${appContext.getString(R.string.no_connection)}")
+                    ShowSnackbarAndInvalidateList(sb.toString(), false)
+                } else if (locationState !is LocationState.Found && locationState !is LocationState.Loading) {
+                    val sb =
+                        StringBuilder(appContext.getString(R.string.unable_to_retrieve_location))
+                    if (!connected) sb.append(" ${appContext.getString(R.string.no_connection)}")
+                    ShowSnackbarAndInvalidateList(sb.toString(), true)
                 } else null
             }
     }
@@ -113,8 +99,7 @@ class NearbyViewEventHandler @Inject constructor(
     val updates: Flow<NearbyViewUpdate> by lazy {
         flowOf(
             eventsActionsFlow,
-            connectionStateActionsFlow,
-            locationStateActionsFlow,
+            loadingConditionsFlow,
             viewUpdatesChannel.consumeAsFlow()
         ).flattenMerge().filterNotNull()
     }

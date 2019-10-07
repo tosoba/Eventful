@@ -4,7 +4,7 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="retrieving_location">Retrieving location…</string>
-    <string name="no_connection">No connection</string>
-    <string name="unable_to_retrieve_location">Unable to retrieve location</string>
-    <string name="unknown_network_error">Unknown network error</string>
+    <string name="no_connection">No connection.</string>
+    <string name="unable_to_retrieve_location">Unable to retrieve location.</string>
+    <string name="unknown_network_error">Unknown network error.</string>
 </resources>
