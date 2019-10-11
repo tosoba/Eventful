@@ -18,8 +18,8 @@ data class Event(
     override val startDate: Date?,
     override val startTime: String?,
     override val kinds: List<String>,
-    override val venues: List<Venue>,
-    override val attractions: List<Attraction>,
+    override val venues: List<Venue>?,
+    override val attractions: List<Attraction>?,
     override val priceRanges: List<PriceRange>?
 ) : IEvent, Parcelable {
 
@@ -35,13 +35,13 @@ data class Event(
         other.startDate,
         other.startTime,
         other.kinds,
-        other.venues.map { Venue(it) },
-        other.attractions.map { Attraction(it) },
+        other.venues?.map { Venue(it) },
+        other.attractions?.map { Attraction(it) },
         other.priceRanges?.map { PriceRange(it) }
     )
 
     val formattedAddress: String
-        get() = venues.firstOrNull()?.run { "$address, $city" } ?: "Unknown address"
+        get() = venues?.firstOrNull()?.run { "$address, $city" } ?: "Unknown address"
 
     val formattedPriceRange: String
         get() = priceRanges?.firstOrNull()?.run {

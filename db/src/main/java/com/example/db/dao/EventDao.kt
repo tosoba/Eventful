@@ -31,12 +31,16 @@ interface EventDao {
     @Transaction
     suspend fun insertEvent(event: IEvent): Boolean = if (getEvent(event.id) == null) {
         insertEvent(EventEntity(event))
-        insertVenues(event.venues.map { VenueEntity(it) })
-        joinEventsVenues(event.venues.map { EventVenueJoinEntity(event.id, it.id) })
-        insertAttractions(event.attractions.map { AttractionEntity(it) })
-        joinEventsAttractions(event.attractions.map {
-            EventAttractionJoinEntity(event.id, it.id)
-        })
+        event.venues?.let { venues ->
+            insertVenues(venues.map { VenueEntity(it) })
+            joinEventsVenues(venues.map { EventVenueJoinEntity(event.id, it.id) })
+        }
+        event.attractions?.let { attractions ->
+            insertAttractions(attractions.map { AttractionEntity(it) })
+            joinEventsAttractions(attractions.map {
+                EventAttractionJoinEntity(event.id, it.id)
+            })
+        }
         true
     } else false
 

@@ -18,11 +18,11 @@ class NearbyViewModel(
     private val ioDispatcher: CoroutineDispatcher
 ) : VectorViewModel<NearbyState>(NearbyState.INITIAL) {
 
-    fun loadEvents(userLatLng: LatLng) = viewModelScope.launch {
-        withState { state ->
-            if (state.events.status is Loading || state.events.offset >= state.events.totalItems)
-                return@withState
+    fun loadEvents(userLatLng: LatLng) = withState { state ->
+        if (state.events.status is Loading || state.events.offset >= state.events.totalItems)
+            return@withState
 
+        viewModelScope.launch {
             setState { copy(events = events.copyWithLoadingInProgress) }
             when (val result = withContext(ioDispatcher) {
                 getNearbyEvents(userLatLng.latitude, userLatLng.longitude, state.events.offset)
@@ -30,7 +30,7 @@ class NearbyViewModel(
                 is Resource.Success -> setState {
                     copy(
                         events = events.copyWithNewItems(
-                            result.data.items.map { Event(it) },
+                            result.data.items.map { Event(it) }.distinctBy { it.name },
                             result.data.currentPage + 1,
                             result.data.totalPages
                         )

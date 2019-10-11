@@ -6,8 +6,8 @@ import java.util.*
 
 data class FullEventEntity(
     val event: EventEntity,
-    override val attractions: List<AttractionEntity>,
-    override val venues: List<VenueEntity>
+    override val attractions: List<AttractionEntity>?,
+    override val venues: List<VenueEntity>?
 ) : IEvent {
     override val id: String get() = event.id
     override val name: String get() = event.name

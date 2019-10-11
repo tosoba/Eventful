@@ -30,6 +30,6 @@ data class Event(
     override val startDate: Date? get() = dates.start.dateTime
     override val startTime: String? get() = dates.start.localTime
     override val kinds: List<String> get() = classifications.kinds
-    override val venues: List<IVenue> get() = embedded.venues
-    override val attractions: List<IAttraction> get() = embedded.attractions
+    override val venues: List<IVenue>? get() = embedded.venues
+    override val attractions: List<IAttraction>? get() = embedded.attractions
 }

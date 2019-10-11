@@ -14,7 +14,7 @@ interface IEvent {
     val startDate: Date?
     val startTime: String?
     val kinds: List<String>
-    val venues: List<IVenue>
-    val attractions: List<IAttraction>
+    val venues: List<IVenue>?
+    val attractions: List<IAttraction>?
     val priceRanges: List<IPriceRange>?
 }

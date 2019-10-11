@@ -27,14 +27,15 @@ class EventFragment : Fragment() {
         TitledFragmentsPagerAdapter(
             childFragmentManager, arrayOf(
                 "Details" to EventDetailsFragment.new(event) as Fragment,
-                //TODO: handle no venue case
-                "Weather" to WeatherFragment.new(event.venues.first().run {
-                    LatLng(
-                        lat.toDouble(),
-                        lng.toDouble()
-                    )
-                }) as Fragment
-            )
+                event.venues?.firstOrNull()?.run {
+                    "Weather" to WeatherFragment.new(event.venues?.first().run {
+                        LatLng(
+                            lat.toDouble(),
+                            lng.toDouble()
+                        )
+                    }) as Fragment
+                }
+            ).filterNotNull().toTypedArray()
         )
     }
 
