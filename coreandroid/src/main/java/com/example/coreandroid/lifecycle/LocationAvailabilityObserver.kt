@@ -17,13 +17,17 @@ class LocationAvailabilityObserver(
     private val onError: (Throwable) -> Unit
 ) : LifecycleObserver {
 
-    constructor(context: Context, onChanged: (Boolean) -> Unit) : this(context, onChanged, { onChanged(false) })
+    constructor(context: Context, onChanged: (Boolean) -> Unit) : this(
+        context,
+        onChanged,
+        { onChanged(false) }
+    )
 
     private var disposable: Disposable? = null
 
     fun start() {
         stop()
-        disposable = Observable.interval(10, TimeUnit.SECONDS)
+        disposable = Observable.interval(15, TimeUnit.SECONDS)
             .subscribeOn(Schedulers.io())
             .startWith(0)
             .map { context.isLocationAvailable }

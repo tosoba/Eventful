@@ -1,6 +1,6 @@
 package com.example.eventsnearby
 
-import com.example.coreandroid.util.LocationState
+import com.example.core.model.app.LocationState
 import com.example.coreandroid.util.SnackbarState
 import com.haroldadmin.vector.VectorState
 

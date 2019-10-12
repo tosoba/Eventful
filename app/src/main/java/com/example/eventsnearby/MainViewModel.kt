@@ -1,22 +1,20 @@
 package com.example.eventsnearby
 
 import androidx.lifecycle.viewModelScope
+import com.example.core.model.app.LocationState
+import com.example.core.usecase.GetLocation
 import com.example.coreandroid.base.ConnectivityStateProvider
 import com.example.coreandroid.base.LocationStateProvider
-import com.example.coreandroid.util.LocationState
 import com.example.coreandroid.util.SnackbarState
-import com.example.coreandroid.util.ext.awaitOne
-import com.example.coreandroid.util.ext.latLng
 import com.haroldadmin.vector.VectorViewModel
-import io.nlopez.smartlocation.SmartLocation
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 
-class MainViewModel(
-    private val smartLocation: SmartLocation
-) : VectorViewModel<MainState>(MainState.INITIAL),
+class MainViewModel(private val getLocation: GetLocation) :
+    VectorViewModel<MainState>(MainState.INITIAL),
     ConnectivityStateProvider, LocationStateProvider {
 
     override val isConnectedFlow: Flow<Boolean>
@@ -41,19 +39,10 @@ class MainViewModel(
 
     fun snackbarStateFor(index: Int): SnackbarState = currentState.snackbarState.getValue(index)
 
-    fun loadLocation() = viewModelScope.launch {
-        setState { copy(locationState = LocationState.Loading) }
-        try {
-            smartLocation.location().run {
-                if (state().locationServicesEnabled()) {
-                    val location = awaitOne()
-                    setState { copy(locationState = LocationState.Found(location.latLng)) }
-                } else {
-                    setState { copy(locationState = LocationState.Disabled) }
-                }
-            }
-        } catch (e: Exception) {
-            setState { copy(locationState = LocationState.Error(e)) }
+    fun loadLocation() = withState {
+        if (it.locationState is LocationState.Loading) return@withState
+        viewModelScope.launch {
+            getLocation().collect { setState { copy(locationState = it) } }
         }
     }
 

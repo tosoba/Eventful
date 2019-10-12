@@ -2,6 +2,7 @@ package com.example.eventsnearby
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.core.usecase.GetLocation
 import com.example.coreandroid.base.ConnectivityStateProvider
 import com.example.coreandroid.base.LocationStateProvider
 import com.example.coreandroid.di.ViewModelKey
@@ -15,7 +16,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.android.ContributesAndroidInjector
 import dagger.multibindings.IntoMap
-import io.nlopez.smartlocation.SmartLocation
 
 @Module(
     includes = [MainActivityModule.Providers::class]
@@ -47,9 +47,7 @@ abstract class MainActivityModule {
         @Provides
         @IntoMap
         @ViewModelKey(MainViewModel::class)
-        fun mainViewModel(
-            smartLocation: SmartLocation
-        ): ViewModel = MainViewModel(smartLocation)
+        fun mainViewModel(getLocation: GetLocation): ViewModel = MainViewModel(getLocation)
     }
 
     @Module
@@ -57,8 +55,7 @@ abstract class MainActivityModule {
 
         @Provides
         fun mainViewModel(
-            factory: ViewModelProvider.Factory,
-            target: MainActivity
+            factory: ViewModelProvider.Factory, target: MainActivity
         ): MainViewModel = ViewModelProvider(target, factory).get(MainViewModel::class.java)
     }
 }

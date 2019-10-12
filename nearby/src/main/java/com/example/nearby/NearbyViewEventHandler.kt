@@ -1,6 +1,7 @@
 package com.example.nearby
 
 import android.content.Context
+import com.example.core.model.app.LocationState
 import com.example.coreandroid.base.ConnectivityStateProvider
 import com.example.coreandroid.base.LocationStateProvider
 import com.example.coreandroid.di.scope.FragmentScoped

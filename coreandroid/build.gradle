@@ -84,7 +84,6 @@ dependencies {
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
     kapt "com.google.dagger:dagger-android-processor:$daggerVersion"
 
-    implementation "io.nlopez.smartlocation:library:$smartLocationVersion"
     implementation "com.patloew.rxlocation:rxlocation:$rxLocationVersion"
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-rx2:$coroutinesRx2Version"

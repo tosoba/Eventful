@@ -1,6 +1,4 @@
-package com.example.coreandroid.util
-
-import com.google.android.gms.maps.model.LatLng
+package com.example.core.model.app
 
 sealed class LocationState {
     object Unknown : LocationState()
@@ -10,3 +8,5 @@ sealed class LocationState {
     class Error(val throwable: Throwable) : LocationState()
     class Found(val latLng: LatLng) : LocationState()
 }
+
+class FailedToFindLocationException : Throwable()

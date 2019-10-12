@@ -22,7 +22,6 @@ buildscript {
         rxJavaVersion = '2.2.8'
         rxLocationVersion = '1.0.5'
         reactiveNetworkVersion = '3.0.2'
-        smartLocationVersion = '3.3.3'
 
         liveDataKtxVersion = '1.0.1'
         lifecycleVersion = '1.1.1'
