@@ -52,6 +52,8 @@ class NearbyFragment : InjectableVectorFragment() {
         }
     }
 
+    private var actionMode: ActionMode? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_nearby, container, false).apply {

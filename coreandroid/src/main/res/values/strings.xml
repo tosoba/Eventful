@@ -7,4 +7,6 @@
     <string name="no_connection">No connection.</string>
     <string name="unable_to_retrieve_location">Unable to retrieve location.</string>
     <string name="unknown_network_error">Unknown network error.</string>
+
+    <string name="favourite">favourite</string>
 </resources>
