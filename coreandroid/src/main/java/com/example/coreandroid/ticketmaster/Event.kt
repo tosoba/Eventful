@@ -57,3 +57,5 @@ data class Event(
             get() = toString().substringBeforeLast(",")
     }
 }
+
+data class SelectableEvent(val event: Event, val selected: Boolean = false)
