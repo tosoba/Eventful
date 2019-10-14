@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.ActionMenuView
 import androidx.fragment.app.Fragment
+import com.example.coreandroid.base.ActionModeController
 import com.example.coreandroid.base.MenuController
 import com.example.coreandroid.base.SnackbarController
 import com.example.coreandroid.util.SnackbarState
@@ -163,8 +164,14 @@ class MainFragment : DaggerFragment(), SnackbarController, MenuController {
     }
 
     private fun invalidateOptionsMenu() {
-        mainViewPagerAdapter.previousFragment?.setHasOptionsMenu(false)
-        mainViewPagerAdapter.currentFragment?.setHasOptionsMenu(true)
+        mainViewPagerAdapter.previousFragment?.run {
+            setHasOptionsMenu(false)
+            (this as? ActionModeController)?.finishActionMode()
+        }
+        mainViewPagerAdapter.currentFragment?.run {
+            setHasOptionsMenu(true)
+            (this as? ActionModeController)?.startActionMode()
+        }
         activity?.invalidateOptionsMenu()
     }
 

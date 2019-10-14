@@ -3,6 +3,7 @@ package com.example.nearby
 import android.os.Bundle
 import android.os.Handler
 import android.view.*
+import com.example.coreandroid.base.ActionModeController
 import com.example.coreandroid.base.InjectableVectorFragment
 import com.example.coreandroid.di.Dependencies
 import com.example.coreandroid.navigation.IFragmentProvider
@@ -20,7 +21,7 @@ import javax.inject.Inject
 import javax.inject.Named
 
 
-class NearbyFragment : InjectableVectorFragment() {
+class NearbyFragment : InjectableVectorFragment(), ActionModeController {
 
     @Inject
     internal lateinit var fragmentProvider: IFragmentProvider
@@ -89,7 +90,7 @@ class NearbyFragment : InjectableVectorFragment() {
                             SnackbarState.Hidden, this@NearbyFragment
                         )
                         epoxyController.setData(handler.viewModel.currentState)
-                        updateActionModeOnInvalidate()
+                        handleActionMode()
                     }
                     is ShowEvent -> {
                         navigationFragment?.showFragment(fragmentProvider.eventFragment(it.event))
@@ -121,12 +122,21 @@ class NearbyFragment : InjectableVectorFragment() {
         super.onDestroy()
     }
 
-    private fun updateActionModeOnInvalidate() {
-        val numberOfSelected = handler.viewModel.currentState.events.value
+    override fun finishActionMode() {
+        actionMode?.finish()
+        actionMode = null
+    }
+
+    override fun startActionMode() {
+        handleActionMode()
+    }
+
+    private fun handleActionMode() {
+        val numberOfSelectedEvents = handler.viewModel.currentState.events.value
             .filter { selectable -> selectable.selected }
             .size
 
-        if (actionMode == null && numberOfSelected > 0) {
+        if (actionMode == null && numberOfSelectedEvents > 0) {
             actionMode = activity?.startActionMode(
                 ToolbarActionModeCallback(
                     R.menu.nearby_events_selection_menu,
@@ -143,13 +153,10 @@ class NearbyFragment : InjectableVectorFragment() {
                         }
                     )
                 )
-            )?.apply { title = "$numberOfSelected selected" }
+            )?.apply { title = "$numberOfSelectedEvents selected" }
         } else if (actionMode != null) {
-            if (numberOfSelected > 0) actionMode?.title = "$numberOfSelected selected"
-            else {
-                actionMode?.finish()
-                actionMode = null
-            }
+            if (numberOfSelectedEvents > 0) actionMode?.title = "$numberOfSelectedEvents selected"
+            else finishActionMode()
         }
     }
 }
