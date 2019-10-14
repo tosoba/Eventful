@@ -7,6 +7,7 @@ import com.example.core.model.app.LatLng
 import com.example.core.model.ticketmaster.IEvent
 import com.example.core.usecase.GetNearbyEvents
 import com.example.coreandroid.ticketmaster.Event
+import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.Loading
 import com.haroldadmin.vector.VectorViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -30,7 +31,8 @@ class NearbyViewModel(
                 is Resource.Success -> setState {
                     copy(
                         events = events.copyWithNewItems(
-                            result.data.items.map { Event(it) }.distinctBy { it.name },
+                            //TODO: make distinctBy work on (Paged)DataList (to prevent duplicates between pages)
+                            result.data.items.map { Selectable(Event(it)) }.distinctBy { it.item.name },
                             result.data.currentPage + 1,
                             result.data.totalPages
                         )

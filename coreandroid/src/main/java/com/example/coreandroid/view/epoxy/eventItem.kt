@@ -11,7 +11,7 @@ import com.example.coreandroid.EventKindBindingModel_
 import com.example.coreandroid.EventThumbnailBindingModel_
 import com.example.coreandroid.R
 import com.example.coreandroid.ticketmaster.Event
-import com.example.coreandroid.ticketmaster.SelectableEvent
+import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.NestedScrollingCarouselModel
 
 open class EventItem(
@@ -41,6 +41,7 @@ fun Event.listItem(clicked: View.OnClickListener) = EventItem(
 )
 
 class SelectableEventItem(
+    private val selectableEvent: Selectable<Event>,
     clicked: View.OnClickListener,
     private val longClicked: View.OnLongClickListener,
     thumbnail: EventThumbnailBindingModel_,
@@ -54,26 +55,27 @@ class SelectableEventItem(
 
     override fun bind(holder: ModelGroupHolder) {
         super.bind(holder)
-        holder.rootView.setBackgroundColor(
+        if (selectableEvent.selected) holder.rootView.setBackgroundColor(
             ContextCompat.getColor(holder.rootView.context, R.color.lightGrayText)
         )
     }
 }
 
-fun SelectableEvent.listItem(
+fun Selectable<Event>.listItem(
     clicked: View.OnClickListener,
     longClicked: View.OnLongClickListener
 ) = SelectableEventItem(
+    this,
     clicked,
     longClicked,
-    EventThumbnailBindingModel_().id("${event.id}t")
-        .event(event),
-    EventInfoBindingModel_().id("${event.id}b")
-        .event(event),
+    EventThumbnailBindingModel_().id("${item.id}t")
+        .event(item),
+    EventInfoBindingModel_().id("${item.id}b")
+        .event(item),
     NestedScrollingCarouselModel()
-        .id("${event.id}t")
-        .models(event.kinds.mapIndexed { index: Int, kind: String ->
-            EventKindBindingModel_().id("${event.id}k$index")
+        .id("${item.id}t")
+        .models(item.kinds.mapIndexed { index: Int, kind: String ->
+            EventKindBindingModel_().id("${item.id}k$index")
                 .kind(kind)
         })
 )

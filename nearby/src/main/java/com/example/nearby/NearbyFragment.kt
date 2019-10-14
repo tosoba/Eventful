@@ -45,10 +45,13 @@ class NearbyFragment : InjectableVectorFragment() {
         itemListController(
             builder, differ, handler.viewModel, NearbyState::events,
             onScrollListener = eventsScrollListener
-        ) { event ->
-            event.listItem(View.OnClickListener {
-                handler.eventOccurred(Interaction.EventClicked(event))
-            })
+        ) { selectable ->
+            selectable.listItem(
+                clicked = View.OnClickListener {
+                    handler.eventOccurred(Interaction.EventClicked(selectable.item))
+                },
+                longClicked = View.OnLongClickListener { true }
+            )
         }
     }
 

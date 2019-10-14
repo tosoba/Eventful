@@ -6,6 +6,7 @@ import com.example.coreandroid.base.ConnectivityStateProvider
 import com.example.coreandroid.base.LocationStateProvider
 import com.example.coreandroid.di.scope.FragmentScoped
 import com.example.coreandroid.ticketmaster.Event
+import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.*
 import com.haroldadmin.cnradapter.NetworkResponse
 import kotlinx.coroutines.CoroutineScope
@@ -34,7 +35,7 @@ class NearbyViewEventHandler @Inject constructor(
     private val viewUpdatesChannel: Channel<NearbyViewUpdate> =
         Channel(capacity = Channel.UNLIMITED)
 
-    private val events: PagedDataList<Event> get() = viewModel.currentState.events
+    private val events: PagedDataList<Selectable<Event>> get() = viewModel.currentState.events
 
     private val eventsActionsFlow: Flow<NearbyViewUpdate?> by lazy {
         viewModel.state.map { it.events }

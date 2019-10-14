@@ -58,4 +58,4 @@ data class Event(
     }
 }
 
-data class SelectableEvent(val event: Event, val selected: Boolean = false)
+data class Selectable<T>(val item: T, val selected: Boolean = false)
