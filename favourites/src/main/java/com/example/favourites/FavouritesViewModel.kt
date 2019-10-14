@@ -1,6 +1,5 @@
 package com.example.favourites
 
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.example.core.usecase.GetSavedEvents
 import com.example.coreandroid.ticketmaster.Event
@@ -10,7 +9,6 @@ import com.haroldadmin.vector.VectorViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.onEach
 
 class FavouritesViewModel(
     private val getSavedEvents: GetSavedEvents,
@@ -19,15 +17,28 @@ class FavouritesViewModel(
 
     private val limitIncrement: Int = 20
 
-    private var getSavedEventsJob: Job? = null
+    private var getSavedEventsJob: Job
 
     init {
-//        getEvents()
-        viewModelScope.launch {
+        getSavedEventsJob = getEvents(limitIncrement)
+    }
+
+    fun loadMoreEvents() {
+        getSavedEventsJob.cancel()
+        withState { state -> getSavedEventsJob = getEvents(state.limit + limitIncrement) }
+    }
+
+    override fun onCleared() {
+        getSavedEventsJob.cancel()
+        super.onCleared()
+    }
+
+    private fun getEvents(limit: Int): Job {
+        setState { copy(events = events.copyWithLoadingInProgress) }
+        return viewModelScope.launch {
             withContext(ioDispatcher) {
-                getSavedEvents(limitIncrement)
+                getSavedEvents(limit)
                     .flowOn(Dispatchers.IO)
-                    .onEach { Log.e("VM", it.toString()) }
                     .collect {
                         setState {
                             copy(
@@ -39,40 +50,6 @@ class FavouritesViewModel(
                             )
                         }
                     }
-            }
-        }
-    }
-
-    fun loadMoreEvents() {
-        getSavedEventsJob?.cancel()
-//        getSavedEventsJob = getEvents()
-    }
-
-    override fun onCleared() {
-        getSavedEventsJob?.cancel()
-        super.onCleared()
-    }
-
-    private fun getEvents() {
-        setState { copy(events = events.copyWithLoadingInProgress) }
-        viewModelScope.launch {
-            withState { state ->
-                withContext(ioDispatcher) {
-
-                    getSavedEvents(state.limit + limitIncrement)
-                        .onEach { Log.e("VM", it.toString()) }
-                        .collect {
-                            setState {
-                                copy(
-                                    events = DataList(
-                                        value = it.map { Event(it) },
-                                        status = LoadedSuccessfully
-                                    ),
-                                    limit = it.size
-                                )
-                            }
-                        }
-                }
             }
         }
     }
