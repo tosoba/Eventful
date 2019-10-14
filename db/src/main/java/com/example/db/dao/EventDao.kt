@@ -99,29 +99,31 @@ interface EventDao {
     @Transaction
     fun getFullEventsFlow(
         limit: Int
-    ): Flow<List<FullEventEntity>> = getEventsFlow(limit).map { eventEntities ->
-        val eventIds = eventEntities.map { it.id }
-        val eventVenueJoins = getEventsVenuesIds(eventIds)
-        val groupedVenueIds = eventVenueJoins.groupBy({ it.eventId }, { it.venueId })
-        val eventAttractionJoins = getEventsAttractionsIds(eventIds)
-        val groupedAttractionIds = eventAttractionJoins
-            .groupBy({ it.eventId }, { it.attractionId })
-        val venues = getVenues(eventVenueJoins.map { it.venueId })
-            .map { it.id to it }
-            .toMap()
-        val attractions = getAttractions(eventAttractionJoins.map { it.attractionId })
-            .map { it.id to it }
-            .toMap()
-        eventEntities.map { eventEntity ->
-            FullEventEntity(
-                event = eventEntity,
-                attractions = groupedAttractionIds[eventEntity.id]?.mapNotNull { attractions[it] }
-                    ?: emptyList(),
-                venues = groupedVenueIds[eventEntity.id]?.mapNotNull { venues[it] }
-                    ?: emptyList()
-            )
+    ): Flow<List<FullEventEntity>> = getEventsFlow(limit)
+        .map { eventEntities ->
+            val eventIds = eventEntities.map { it.id }
+            val eventVenueJoins = getEventsVenuesIds(eventIds)
+            val groupedVenueIds = eventVenueJoins.groupBy({ it.eventId }, { it.venueId })
+            val eventAttractionJoins = getEventsAttractionsIds(eventIds)
+            val groupedAttractionIds = eventAttractionJoins
+                .groupBy({ it.eventId }, { it.attractionId })
+            val venues = getVenues(eventVenueJoins.map { it.venueId })
+                .map { it.id to it }
+                .toMap()
+            val attractions = getAttractions(eventAttractionJoins.map { it.attractionId })
+                .map { it.id to it }
+                .toMap()
+
+            eventEntities.map { eventEntity ->
+                FullEventEntity(
+                    event = eventEntity,
+                    attractions = groupedAttractionIds[eventEntity.id]?.mapNotNull { attractions[it] }
+                        ?: emptyList(),
+                    venues = groupedVenueIds[eventEntity.id]?.mapNotNull { venues[it] }
+                        ?: emptyList()
+                )
+            }
         }
-    }
 
     @Query("DELETE FROM ${Tables.EVENT} WHERE id = :id")
     suspend fun deleteEvent(id: String)

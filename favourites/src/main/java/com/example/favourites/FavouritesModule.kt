@@ -9,6 +9,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.android.ContributesAndroidInjector
 import dagger.multibindings.IntoMap
+import kotlinx.coroutines.CoroutineDispatcher
 
 @Module(
     includes = [
@@ -32,8 +33,9 @@ abstract class FavouritesModule {
         @IntoMap
         @ViewModelKey(FavouritesViewModel::class)
         fun favouritesViewModel(
-            getSavedEvents: GetSavedEvents
-        ): ViewModel = FavouritesViewModel(getSavedEvents)
+            getSavedEvents: GetSavedEvents,
+            ioDispatcher: CoroutineDispatcher
+        ): ViewModel = FavouritesViewModel(getSavedEvents, ioDispatcher)
     }
 
     @Module

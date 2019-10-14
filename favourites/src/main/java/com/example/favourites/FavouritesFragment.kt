@@ -2,6 +2,7 @@ package com.example.favourites
 
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.view.*
 import com.example.coreandroid.base.InjectableVectorFragment
 import com.example.coreandroid.di.Dependencies
@@ -13,6 +14,7 @@ import com.example.coreandroid.view.epoxy.listItem
 import kotlinx.android.synthetic.main.fragment_favourites.*
 import kotlinx.android.synthetic.main.fragment_favourites.view.*
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
@@ -65,7 +67,9 @@ class FavouritesFragment : InjectableVectorFragment() {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenuIfVisible()
         fragmentScope.launch {
-            viewModel.state.collect { epoxyController.setData(it) }
+            viewModel.state
+                .onEach { Log.e("FAV", it.toString()) }
+                .collect { epoxyController.setData(it) }
         }
     }
 
