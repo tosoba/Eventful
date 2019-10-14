@@ -1,9 +1,9 @@
 package com.example.core.usecase
 
 import com.example.core.model.ticketmaster.IEvent
-import com.example.core.repo.IEventsRepository
+import com.example.core.repo.IEventRepository
 import javax.inject.Inject
 
-class SaveEvent @Inject constructor(private val eventsRepo: IEventsRepository) {
-    suspend operator fun invoke(event: IEvent): Boolean = eventsRepo.saveEvent(event)
+class SaveEvent @Inject constructor(private val eventRepo: IEventRepository) {
+    suspend operator fun invoke(event: IEvent): Boolean = eventRepo.saveEvent(event)
 }

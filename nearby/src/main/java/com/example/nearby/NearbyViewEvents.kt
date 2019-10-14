@@ -9,6 +9,7 @@ sealed class Interaction : NearbyViewEvent() {
     data class EventClicked(val event: Event) : Interaction()
     data class EventLongClicked(val event: Event) : Interaction()
     object ClearSelectionClicked : Interaction()
+    data class AddToFavouritesClicked(val events: List<Event>) : Interaction()
 }
 
 sealed class Lifecycle : NearbyViewEvent() {

@@ -3,6 +3,7 @@ package com.example.nearby
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.core.usecase.GetNearbyEvents
+import com.example.core.usecase.SaveEvents
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
 import dagger.Module
@@ -35,8 +36,9 @@ abstract class NearbyModule {
         @ViewModelKey(NearbyViewModel::class)
         fun nearbyViewModel(
             getNearbyEvents: GetNearbyEvents,
+            saveEvents: SaveEvents,
             ioDispatcher: CoroutineDispatcher
-        ): ViewModel = NearbyViewModel(getNearbyEvents, ioDispatcher)
+        ): ViewModel = NearbyViewModel(getNearbyEvents, saveEvents, ioDispatcher)
     }
 
     @Module

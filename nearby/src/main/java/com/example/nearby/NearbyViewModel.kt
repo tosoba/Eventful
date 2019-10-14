@@ -6,6 +6,7 @@ import com.example.core.model.PagedResult
 import com.example.core.model.app.LatLng
 import com.example.core.model.ticketmaster.IEvent
 import com.example.core.usecase.GetNearbyEvents
+import com.example.core.usecase.SaveEvents
 import com.example.core.util.replace
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable
@@ -17,6 +18,7 @@ import kotlinx.coroutines.withContext
 
 class NearbyViewModel(
     private val getNearbyEvents: GetNearbyEvents,
+    private val saveEvents: SaveEvents,
     private val ioDispatcher: CoroutineDispatcher
 ) : VectorViewModel<NearbyState>(NearbyState.INITIAL) {
 
@@ -44,6 +46,12 @@ class NearbyViewModel(
                     copy(events = events.copyWithError(result.error))
                 }
             }
+        }
+    }
+
+    fun addEventsToFavourites(events: List<Event>) = viewModelScope.launch {
+        withContext(ioDispatcher) {
+            saveEvents(events)
         }
     }
 

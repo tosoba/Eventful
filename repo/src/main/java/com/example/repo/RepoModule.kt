@@ -2,7 +2,7 @@ package com.example.repo
 
 import android.content.Context
 import com.example.core.repo.IAppRepository
-import com.example.core.repo.IEventsRepository
+import com.example.core.repo.IEventRepository
 import com.example.core.repo.IWeatherRepository
 import com.example.db.dao.EventDao
 import com.example.db.dao.SearchSuggestionDao
@@ -29,7 +29,7 @@ class RepoModule {
         ticketMasterApi: TicketMasterApi,
         searchSuggestionDao: SearchSuggestionDao,
         eventDao: EventDao
-    ): IEventsRepository = EventsRepository(ticketMasterApi, searchSuggestionDao, eventDao)
+    ): IEventRepository = EventRepository(ticketMasterApi, searchSuggestionDao, eventDao)
 
     @Provides
     @Singleton

@@ -4,7 +4,7 @@ import com.example.core.Resource
 import com.example.core.model.PagedResult
 import com.example.core.model.search.SearchSuggestion
 import com.example.core.model.ticketmaster.IEvent
-import com.example.core.repo.IEventsRepository
+import com.example.core.repo.IEventRepository
 import com.example.db.dao.EventDao
 import com.example.db.dao.SearchSuggestionDao
 import com.example.db.entity.SearchSuggestionEntity
@@ -16,11 +16,11 @@ import com.example.ticketmasterapi.queryparam.RadiusUnit
 import com.haroldadmin.cnradapter.NetworkResponse
 import kotlinx.coroutines.flow.Flow
 
-class EventsRepository(
+class EventRepository(
     private val ticketMasterApi: TicketMasterApi,
     private val searchSuggestionDao: SearchSuggestionDao,
     private val eventDao: EventDao
-) : IEventsRepository {
+) : IEventRepository {
 
     override suspend fun getNearbyEvents(
         lat: Double, lon: Double, offset: Int?
@@ -38,6 +38,8 @@ class EventsRepository(
         .asResource
 
     override suspend fun saveEvent(event: IEvent): Boolean = eventDao.insertEvent(event)
+
+    override suspend fun saveEvents(events: List<IEvent>) = eventDao.insertFullEvents(events)
 
     override fun getSavedEventsFlow(
         limit: Int

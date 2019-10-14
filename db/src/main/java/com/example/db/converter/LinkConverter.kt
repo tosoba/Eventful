@@ -9,11 +9,13 @@ import java.util.*
 class LinkConverter {
 
     @TypeConverter
-    fun storedStringToMyObjects(
+    fun stringToLinkList(
         data: String?
     ): List<LinkEntity> = if (data == null) Collections.emptyList()
     else Gson().fromJson(data, object : TypeToken<List<LinkEntity>>() {}.type)
 
     @TypeConverter
-    fun myObjectsToStoredString(myObjects: List<LinkEntity>): String = Gson().toJson(myObjects)
+    fun linkListToString(
+        links: List<LinkEntity>?
+    ): String? = if (links == null || links.isEmpty()) null else Gson().toJson(links)
 }

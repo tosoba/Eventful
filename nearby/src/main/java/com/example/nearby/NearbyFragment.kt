@@ -132,7 +132,11 @@ class NearbyFragment : InjectableVectorFragment() {
                     R.menu.nearby_events_selection_menu,
                     mapOf(
                         R.id.nearby_action_add_favourite to {
-
+                            handler.eventOccurred(Interaction.AddToFavouritesClicked(
+                                handler.viewModel.currentState.events.value
+                                    .filter { selectable -> selectable.selected }
+                                    .map { it.item }
+                            ))
                         },
                         R.id.nearby_action_clear_selection to {
                             handler.eventOccurred(Interaction.ClearSelectionClicked)

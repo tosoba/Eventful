@@ -13,8 +13,14 @@ interface EventDao {
     @Query("SELECT * FROM ${Tables.EVENT} WHERE id = :id")
     suspend fun getEvent(id: String): EventEntity?
 
+    @Query("SELECT * FROM ${Tables.EVENT} WHERE id IN (:ids)")
+    suspend fun getEvents(ids: List<String>): List<EventEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertEvent(event: EventEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertEvents(events: List<EventEntity>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertVenues(venues: List<VenueEntity>)
@@ -27,6 +33,37 @@ interface EventDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun joinEventsVenues(entities: List<EventVenueJoinEntity>)
+
+    @Transaction
+    suspend fun insertFullEvents(events: List<IEvent>) {
+        val existingIds = getEvents(events.map { it.id }).map { it.id }.toSet()
+        val eventsToInsert = events.filter { !existingIds.contains(it.id) }
+        if (eventsToInsert.isEmpty()) return
+
+        val venues: ArrayList<VenueEntity> = ArrayList()
+        val eventVenueJoinEntities: ArrayList<EventVenueJoinEntity> = ArrayList()
+        val attractions: ArrayList<AttractionEntity> = ArrayList()
+        val eventAttractionJoinEntities: ArrayList<EventAttractionJoinEntity> = ArrayList()
+        eventsToInsert.forEach { event ->
+            event.venues?.let { eventVenues ->
+                venues.addAll(eventVenues.map { VenueEntity(it) })
+                eventVenueJoinEntities.addAll(eventVenues.map {
+                    EventVenueJoinEntity(event.id, it.id)
+                })
+            }
+
+            event.attractions?.let { eventAttractions ->
+                attractions.addAll(eventAttractions.map { AttractionEntity(it) })
+                eventAttractionJoinEntities.addAll(eventAttractions.map {
+                    EventAttractionJoinEntity(event.id, it.id)
+                })
+            }
+        }
+
+        insertEvents(eventsToInsert.map { EventEntity(it) })
+        if (venues.isNotEmpty()) insertVenues(venues)
+        if (attractions.isNotEmpty()) insertAttractions(attractions)
+    }
 
     @Transaction
     suspend fun insertEvent(event: IEvent): Boolean = if (getEvent(event.id) == null) {

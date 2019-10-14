@@ -9,7 +9,7 @@ data class Attraction(
     override val id: String,
     override val name: String?,
     override val url: String,
-    override val links: List<Link>,
+    override val links: List<Link>?,
     override val imageUrl: String?,
     override val kind: String?
 ) : IAttraction, Parcelable {
@@ -17,7 +17,7 @@ data class Attraction(
         other.id,
         other.name,
         other.url,
-        other.links.map { Link(it) },
+        other.links?.map { Link(it) },
         other.imageUrl,
         other.kind
     )

@@ -6,7 +6,7 @@ import com.example.core.model.search.SearchSuggestion
 import com.example.core.model.ticketmaster.IEvent
 import kotlinx.coroutines.flow.Flow
 
-interface IEventsRepository {
+interface IEventRepository {
 
     suspend fun getNearbyEvents(
         lat: Double, lon: Double, offset: Int?
@@ -19,6 +19,8 @@ interface IEventsRepository {
     suspend fun saveSuggestion(searchText: String)
 
     suspend fun saveEvent(event: IEvent): Boolean
+
+    suspend fun saveEvents(events: List<IEvent>)
 
     fun getSavedEventsFlow(limit: Int): Flow<List<IEvent>>
 }

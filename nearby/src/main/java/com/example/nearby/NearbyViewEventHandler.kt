@@ -116,6 +116,7 @@ class NearbyViewEventHandler @Inject constructor(
                 is Interaction.EventClicked -> viewUpdatesChannel.offer(ShowEvent(it.event))
                 is Interaction.EventLongClicked -> viewModel.toggleEventSelection(it.event)
                 is Interaction.ClearSelectionClicked -> viewModel.clearSelection()
+                is Interaction.AddToFavouritesClicked -> viewModel.addEventsToFavourites(it.events)
                 is Lifecycle.OnViewCreated -> onViewCreated(it.wasRecreated)
                 is Lifecycle.OnDestroy -> onDestroy()
             }
