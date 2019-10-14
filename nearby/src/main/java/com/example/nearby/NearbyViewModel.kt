@@ -47,6 +47,10 @@ class NearbyViewModel(
         }
     }
 
+    fun clearSelection() = setState {
+        copy(events = events.copy(value = events.value.map { it.copy(selected = false) }))
+    }
+
     fun toggleEventSelection(event: Event) = setState {
         copy(events = events.copy(value = events.value.replace(
             { matched -> Selectable(event, !matched.selected) },

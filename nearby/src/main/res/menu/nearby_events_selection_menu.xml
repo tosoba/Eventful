@@ -7,4 +7,11 @@
             android:orderInCategory="100"
             android:title="@string/favourite"
             app:showAsAction="always" />
+
+    <item
+            android:id="@+id/nearby_action_clear_selection"
+            android:icon="@drawable/clear"
+            android:orderInCategory="100"
+            android:title="@string/clear"
+            app:showAsAction="ifRoom" />
 </menu>

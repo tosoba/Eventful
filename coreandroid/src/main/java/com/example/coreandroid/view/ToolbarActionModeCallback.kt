@@ -1,9 +1,9 @@
 package com.example.coreandroid.view
 
+import android.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
 import androidx.annotation.MenuRes
-import androidx.appcompat.view.ActionMode
 
 class ToolbarActionModeCallback(
     @MenuRes private val menuId: Int,

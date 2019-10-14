@@ -115,6 +115,7 @@ class NearbyViewEventHandler @Inject constructor(
                 is Interaction.EventListScrolledToEnd -> tryLoadEvents()
                 is Interaction.EventClicked -> viewUpdatesChannel.offer(ShowEvent(it.event))
                 is Interaction.EventLongClicked -> viewModel.toggleEventSelection(it.event)
+                is Interaction.ClearSelectionClicked -> viewModel.clearSelection()
                 is Lifecycle.OnViewCreated -> onViewCreated(it.wasRecreated)
                 is Lifecycle.OnDestroy -> onDestroy()
             }
@@ -129,7 +130,9 @@ class NearbyViewEventHandler @Inject constructor(
                     || status.error is NetworkResponse.NetworkError
         }
 
-    fun eventOccurred(event: NearbyViewEvent) = eventProcessor.offer(event)
+    fun eventOccurred(event: NearbyViewEvent) {
+        eventProcessor.offer(event)
+    }
 
     private fun onViewCreated(wasRecreated: Boolean) {
         if (!wasRecreated && events.value.isEmpty()) tryLoadEvents()

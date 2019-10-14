@@ -10,6 +10,7 @@ import com.example.coreandroid.util.SnackbarState
 import com.example.coreandroid.util.ext.*
 import com.example.coreandroid.util.itemListController
 import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
+import com.example.coreandroid.view.ToolbarActionModeCallback
 import com.example.coreandroid.view.epoxy.listItem
 import kotlinx.android.synthetic.main.fragment_nearby.*
 import kotlinx.android.synthetic.main.fragment_nearby.view.*
@@ -85,18 +86,17 @@ class NearbyFragment : InjectableVectorFragment() {
                 when (it) {
                     is InvalidateList -> {
                         if (it.hideSnackbar) snackbarController?.transitionTo(
-                            SnackbarState.Hidden,
-                            this@NearbyFragment
+                            SnackbarState.Hidden, this@NearbyFragment
                         )
                         epoxyController.setData(handler.viewModel.currentState)
+                        updateActionModeOnInvalidate()
                     }
                     is ShowEvent -> {
                         navigationFragment?.showFragment(fragmentProvider.eventFragment(it.event))
                     }
                     is ShowSnackbarAndInvalidateList -> {
                         snackbarController?.transitionTo(
-                            SnackbarState.Text(it.msg),
-                            this@NearbyFragment
+                            SnackbarState.Text(it.msg), this@NearbyFragment
                         )
                         epoxyController.setData(handler.viewModel.currentState)
                         if (it.errorOccurred) eventsScrollListener.onLoadingError()
@@ -120,5 +120,32 @@ class NearbyFragment : InjectableVectorFragment() {
         handler.eventOccurred(Lifecycle.OnDestroy)
         super.onDestroy()
     }
-}
 
+    private fun updateActionModeOnInvalidate() {
+        val numberOfSelected = handler.viewModel.currentState.events.value
+            .filter { selectable -> selectable.selected }
+            .size
+
+        if (actionMode == null && numberOfSelected > 0) {
+            actionMode = activity?.startActionMode(
+                ToolbarActionModeCallback(
+                    R.menu.nearby_events_selection_menu,
+                    mapOf(
+                        R.id.nearby_action_add_favourite to {
+
+                        },
+                        R.id.nearby_action_clear_selection to {
+                            handler.eventOccurred(Interaction.ClearSelectionClicked)
+                        }
+                    )
+                )
+            )?.apply { title = "$numberOfSelected selected" }
+        } else if (actionMode != null) {
+            if (numberOfSelected > 0) actionMode?.title = "$numberOfSelected selected"
+            else {
+                actionMode?.finish()
+                actionMode = null
+            }
+        }
+    }
+}
