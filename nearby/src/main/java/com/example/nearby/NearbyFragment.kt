@@ -50,7 +50,10 @@ class NearbyFragment : InjectableVectorFragment() {
                 clicked = View.OnClickListener {
                     handler.eventOccurred(Interaction.EventClicked(selectable.item))
                 },
-                longClicked = View.OnLongClickListener { true }
+                longClicked = View.OnLongClickListener {
+                    handler.eventOccurred(Interaction.EventLongClicked(selectable.item))
+                    true
+                }
             )
         }
     }

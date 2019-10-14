@@ -7,6 +7,7 @@ sealed class NearbyViewEvent
 sealed class Interaction : NearbyViewEvent() {
     object EventListScrolledToEnd : Interaction()
     data class EventClicked(val event: Event) : Interaction()
+    data class EventLongClicked(val event: Event) : Interaction()
 }
 
 sealed class Lifecycle : NearbyViewEvent() {

@@ -6,6 +6,7 @@ import com.example.core.model.PagedResult
 import com.example.core.model.app.LatLng
 import com.example.core.model.ticketmaster.IEvent
 import com.example.core.usecase.GetNearbyEvents
+import com.example.core.util.replace
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.Loading
@@ -44,6 +45,13 @@ class NearbyViewModel(
                 }
             }
         }
+    }
+
+    fun toggleEventSelection(event: Event) = setState {
+        copy(events = events.copy(value = events.value.replace(
+            { matched -> Selectable(event, !matched.selected) },
+            { it.item.id == event.id }
+        )))
     }
 
     fun onNotConnected() = setState {

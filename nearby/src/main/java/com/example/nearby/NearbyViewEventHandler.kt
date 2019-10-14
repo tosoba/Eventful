@@ -114,6 +114,7 @@ class NearbyViewEventHandler @Inject constructor(
             when (it) {
                 is Interaction.EventListScrolledToEnd -> tryLoadEvents()
                 is Interaction.EventClicked -> viewUpdatesChannel.offer(ShowEvent(it.event))
+                is Interaction.EventLongClicked -> viewModel.toggleEventSelection(it.event)
                 is Lifecycle.OnViewCreated -> onViewCreated(it.wasRecreated)
                 is Lifecycle.OnDestroy -> onDestroy()
             }
