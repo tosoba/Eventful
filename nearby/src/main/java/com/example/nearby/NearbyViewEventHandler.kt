@@ -98,11 +98,20 @@ class NearbyViewEventHandler @Inject constructor(
             }
     }
 
+    private val signalsFlow: Flow<NearbyViewUpdate?> by lazy {
+        viewModel.signalsChannel.consumeAsFlow().map { signal ->
+            when (signal) {
+                is NearbySignal.FavouritesSaved -> FinishActionModeWithMsg("Favourites saved.")
+            }
+        }
+    }
+
     val updates: Flow<NearbyViewUpdate> by lazy {
         flowOf(
             eventsActionsFlow,
             loadingConditionsFlow,
-            viewUpdatesChannel.consumeAsFlow()
+            viewUpdatesChannel.consumeAsFlow(),
+            signalsFlow
         ).flattenMerge().filterNotNull()
     }
 
@@ -116,7 +125,7 @@ class NearbyViewEventHandler @Inject constructor(
                 is Interaction.EventClicked -> viewUpdatesChannel.offer(ShowEvent(it.event))
                 is Interaction.EventLongClicked -> viewModel.toggleEventSelection(it.event)
                 is Interaction.ClearSelectionClicked -> viewModel.clearSelection()
-                is Interaction.AddToFavouritesClicked -> viewModel.addEventsToFavourites(it.events)
+                is Interaction.AddToFavouritesClicked -> viewModel.addEventsToFavourites()
                 is Lifecycle.OnViewCreated -> onViewCreated(it.wasRecreated)
                 is Lifecycle.OnDestroy -> onDestroy()
             }

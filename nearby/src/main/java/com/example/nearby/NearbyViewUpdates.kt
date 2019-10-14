@@ -10,3 +10,5 @@ data class ShowEvent(val event: Event) : NearbyViewUpdate()
 
 data class ShowSnackbarAndInvalidateList(val msg: String, val errorOccurred: Boolean) :
     NearbyViewUpdate()
+
+data class FinishActionModeWithMsg(val msg: String) : NearbyViewUpdate()

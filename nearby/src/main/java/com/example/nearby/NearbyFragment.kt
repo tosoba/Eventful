@@ -3,6 +3,7 @@ package com.example.nearby
 import android.os.Bundle
 import android.os.Handler
 import android.view.*
+import android.widget.Toast
 import com.example.coreandroid.base.ActionModeController
 import com.example.coreandroid.base.InjectableVectorFragment
 import com.example.coreandroid.di.Dependencies
@@ -102,6 +103,10 @@ class NearbyFragment : InjectableVectorFragment(), ActionModeController {
                         epoxyController.setData(handler.viewModel.currentState)
                         if (it.errorOccurred) eventsScrollListener.onLoadingError()
                     }
+                    is FinishActionModeWithMsg -> {
+                        finishActionMode()
+                        Toast.makeText(context, it.msg, Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         }
@@ -142,11 +147,7 @@ class NearbyFragment : InjectableVectorFragment(), ActionModeController {
                     R.menu.nearby_events_selection_menu,
                     mapOf(
                         R.id.nearby_action_add_favourite to {
-                            handler.eventOccurred(Interaction.AddToFavouritesClicked(
-                                handler.viewModel.currentState.events.value
-                                    .filter { selectable -> selectable.selected }
-                                    .map { it.item }
-                            ))
+                            handler.eventOccurred(Interaction.AddToFavouritesClicked)
                         },
                         R.id.nearby_action_clear_selection to {
                             handler.eventOccurred(Interaction.ClearSelectionClicked)

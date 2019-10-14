@@ -13,6 +13,7 @@ import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.Loading
 import com.haroldadmin.vector.VectorViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -21,6 +22,8 @@ class NearbyViewModel(
     private val saveEvents: SaveEvents,
     private val ioDispatcher: CoroutineDispatcher
 ) : VectorViewModel<NearbyState>(NearbyState.INITIAL) {
+
+    val signalsChannel: Channel<NearbySignal> = Channel()
 
     fun loadEvents(userLatLng: LatLng) = withState { state ->
         if (state.events.status is Loading || state.events.offset >= state.events.totalItems)
@@ -49,9 +52,13 @@ class NearbyViewModel(
         }
     }
 
-    fun addEventsToFavourites(events: List<Event>) = viewModelScope.launch {
-        withContext(ioDispatcher) {
-            saveEvents(events)
+    fun addEventsToFavourites() = withState { state ->
+        viewModelScope.launch {
+            withContext(ioDispatcher) {
+                saveEvents(state.events.value.filter { it.selected }.map { it.item })
+                clearSelection()
+                signalsChannel.send(NearbySignal.FavouritesSaved)
+            }
         }
     }
 
