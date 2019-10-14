@@ -47,6 +47,7 @@ class NearbyFragment : InjectableVectorFragment() {
             onScrollListener = eventsScrollListener
         ) { selectable ->
             selectable.listItem(
+                selected = selectable.selected,
                 clicked = View.OnClickListener {
                     handler.eventOccurred(Interaction.EventClicked(selectable.item))
                 },

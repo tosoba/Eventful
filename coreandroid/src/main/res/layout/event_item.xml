@@ -7,10 +7,15 @@
         android:paddingTop="15dp">
 
     <ViewStub
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    <ViewStub
             android:id="@+id/event_thumbnail"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginRight="5dp"
+            android:background="@android:color/transparent"
             android:inflatedId="@+id/event_thumbnail"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
@@ -21,6 +26,7 @@
             android:id="@+id/event_info"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:background="@android:color/transparent"
             android:inflatedId="@+id/event_info"
             app:layout_constraintBottom_toTopOf="@id/event_kinds"
             app:layout_constraintLeft_toRightOf="@id/event_thumbnail"
@@ -32,6 +38,7 @@
             android:id="@+id/event_kinds"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
             android:inflatedId="@+id/event_kinds"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toRightOf="@id/event_thumbnail"
