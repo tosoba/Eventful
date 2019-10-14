@@ -40,21 +40,21 @@ data class Data<Value>(
     )
 }
 
-fun <Holder : HoldsData<Collection<Value>>, Value> Holder.isEmptyAndLastLoadingFailed(): Boolean =
+fun <Holder : HoldsData<List<Value>>, Value> Holder.isEmptyAndLastLoadingFailed(): Boolean =
     loadingFailed && value.isEmpty()
 
-inline fun <Holder : HoldsData<Collection<Value>>, Value> Holder.ifEmptyAndIsNotLoading(block: (Holder) -> Unit) {
+inline fun <Holder : HoldsData<List<Value>>, Value> Holder.ifEmptyAndIsNotLoading(block: (Holder) -> Unit) {
     if (status !is Loading && value.isEmpty()) block(this)
 }
 
-inline fun <Holder : HoldsData<Collection<Item>>, Item> Holder.ifNotEmpty(block: (Holder) -> Unit) {
+inline fun <Holder : HoldsData<List<Item>>, Item> Holder.ifNotEmpty(block: (Holder) -> Unit) {
     if (value.isNotEmpty()) block(this)
 }
 
 data class DataList<Value>(
-    override val value: Collection<Value> = emptyList(),
+    override val value: List<Value> = emptyList(),
     override val status: DataStatus = Initial
-) : HoldsData<Collection<Value>> {
+) : HoldsData<List<Value>> {
 
     override val copyWithLoadingInProgress: DataList<Value>
         get() = copy(status = Loading)
@@ -63,7 +63,7 @@ data class DataList<Value>(
         status = LoadingFailed(error)
     )
 
-    fun copyWithNewItems(newItems: Collection<Value>): DataList<Value> = copy(
+    fun copyWithNewItems(newItems: List<Value>): DataList<Value> = copy(
         value = value + newItems,
         status = LoadedSuccessfully
     )
@@ -75,11 +75,11 @@ data class DataList<Value>(
 }
 
 data class PagedDataList<Value>(
-    override val value: Collection<Value> = emptyList(),
+    override val value: List<Value> = emptyList(),
     override val status: DataStatus = Initial,
     val offset: Int = 0,
     val totalItems: Int = Integer.MAX_VALUE
-) : HoldsData<Collection<Value>> {
+) : HoldsData<List<Value>> {
 
     override val copyWithLoadingInProgress: PagedDataList<Value>
         get() = copy(status = Loading)
@@ -89,7 +89,7 @@ data class PagedDataList<Value>(
     )
 
     fun copyWithNewItems(
-        newItems: Collection<Value>, offset: Int
+        newItems: List<Value>, offset: Int
     ): PagedDataList<Value> = copy(
         value = value + newItems,
         offset = offset,
@@ -97,7 +97,7 @@ data class PagedDataList<Value>(
     )
 
     fun copyWithNewItems(
-        newItems: Collection<Value>, offset: Int, totalItems: Int
+        newItems: List<Value>, offset: Int, totalItems: Int
     ): PagedDataList<Value> = copy(
         value = value + newItems,
         offset = offset,
