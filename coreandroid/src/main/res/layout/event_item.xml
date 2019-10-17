@@ -2,13 +2,25 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:paddingLeft="15dp"
-        android:paddingTop="15dp">
+        android:layout_height="150dp">
 
     <ViewStub
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
+
+    <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/event_left_vertical_guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="15dp" />
+
+    <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/event_top_horizontal_guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_begin="15dp" />
 
     <ViewStub
             android:id="@+id/event_thumbnail"
@@ -18,8 +30,8 @@
             android:background="@android:color/transparent"
             android:inflatedId="@+id/event_thumbnail"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="@id/event_left_vertical_guideline"
+            app:layout_constraintTop_toTopOf="@id/event_top_horizontal_guideline"
             app:layout_constraintWidth_percent=".3" />
 
     <ViewStub
@@ -31,7 +43,7 @@
             app:layout_constraintBottom_toTopOf="@id/event_kinds"
             app:layout_constraintLeft_toRightOf="@id/event_thumbnail"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toTopOf="@id/event_top_horizontal_guideline"
             app:layout_constraintWidth_percent=".65" />
 
     <ViewStub

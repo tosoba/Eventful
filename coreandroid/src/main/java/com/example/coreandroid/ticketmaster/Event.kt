@@ -45,7 +45,7 @@ data class Event(
 
     val formattedPriceRange: String
         get() = priceRanges?.firstOrNull()?.run {
-            if (min != max) "${min.stringNoDecimal} - ${min.stringNoDecimal}$currency"
+            if (min.toInt() != max.toInt()) "${min.stringNoDecimal} - ${max.stringNoDecimal}$currency"
             else "${min.stringNoDecimal}$currency"
         } ?: "Unknown pricing"
 
@@ -54,7 +54,7 @@ data class Event(
 
     companion object {
         private val Double.stringNoDecimal: String
-            get() = toString().substringBeforeLast(",")
+            get() = toString().substringBeforeLast(".")
     }
 }
 
