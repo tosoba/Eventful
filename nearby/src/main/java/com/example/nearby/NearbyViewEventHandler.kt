@@ -32,8 +32,9 @@ class NearbyViewEventHandler @Inject constructor(
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + trackerJob
 
-    private val viewUpdatesChannel: Channel<NearbyViewUpdate> =
-        Channel(capacity = Channel.UNLIMITED)
+    private val viewUpdatesChannel: Channel<NearbyViewUpdate> = Channel(
+        capacity = Channel.UNLIMITED
+    )
 
     private val events: PagedDataList<Selectable<Event>> get() = viewModel.currentState.events
 
@@ -99,7 +100,7 @@ class NearbyViewEventHandler @Inject constructor(
     }
 
     private val signalsFlow: Flow<NearbyViewUpdate?> by lazy {
-        viewModel.signalsChannel.consumeAsFlow().map { signal ->
+        viewModel.signalsChannel.asFlow().map { signal ->
             when (signal) {
                 is NearbySignal.FavouritesSaved -> FinishActionModeWithMsg("Favourites saved.")
             }

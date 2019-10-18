@@ -13,7 +13,8 @@ import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.Loading
 import com.haroldadmin.vector.VectorViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.BroadcastChannel
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -23,7 +24,7 @@ class NearbyViewModel(
     private val ioDispatcher: CoroutineDispatcher
 ) : VectorViewModel<NearbyState>(NearbyState.INITIAL) {
 
-    val signalsChannel: Channel<NearbySignal> = Channel()
+    val signalsChannel: BroadcastChannel<NearbySignal> = ConflatedBroadcastChannel()
 
     fun loadEvents(userLatLng: LatLng) = withState { state ->
         if (state.events.status is Loading || state.events.offset >= state.events.totalItems)
