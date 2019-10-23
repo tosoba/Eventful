@@ -11,35 +11,23 @@ import dagger.android.ContributesAndroidInjector
 import dagger.multibindings.IntoMap
 import kotlinx.coroutines.CoroutineDispatcher
 
-@Module(
-    includes = [
-        FavouritesModule.Providers::class
-    ]
-)
+@Module
 abstract class FavouritesModule {
 
     @FragmentScoped
-    @ContributesAndroidInjector(
-        modules = [
-            SubProviders::class
-        ]
-    )
+    @ContributesAndroidInjector(modules = [ModuleProvides::class])
     abstract fun favouritesFragment(): FavouritesFragment
 
     @Module
-    class Providers {
+    class ModuleProvides {
 
         @Provides
         @IntoMap
         @ViewModelKey(FavouritesViewModel::class)
-        fun favouritesViewModel(
+        fun favouritesViewModelBase(
             getSavedEvents: GetSavedEvents,
             ioDispatcher: CoroutineDispatcher
         ): ViewModel = FavouritesViewModel(getSavedEvents, ioDispatcher)
-    }
-
-    @Module
-    class SubProviders {
 
         @Provides
         fun favouritesViewModel(

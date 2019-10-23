@@ -13,36 +13,24 @@ import dagger.multibindings.IntoMap
 import kotlinx.coroutines.CoroutineDispatcher
 
 
-@Module(
-    includes = [
-        NearbyModule.Providers::class
-    ]
-)
+@Module
 abstract class NearbyModule {
 
     @FragmentScoped
-    @ContributesAndroidInjector(
-        modules = [
-            SubProviders::class
-        ]
-    )
+    @ContributesAndroidInjector(modules = [ModuleProvides::class])
     abstract fun nearbyFragment(): NearbyFragment
 
     @Module
-    class Providers {
+    class ModuleProvides {
 
         @Provides
         @IntoMap
         @ViewModelKey(NearbyViewModel::class)
-        fun nearbyViewModel(
+        fun nearbyViewModelBase(
             getNearbyEvents: GetNearbyEvents,
             saveEvents: SaveEvents,
             ioDispatcher: CoroutineDispatcher
         ): ViewModel = NearbyViewModel(getNearbyEvents, saveEvents, ioDispatcher)
-    }
-
-    @Module
-    class SubProviders {
 
         @Provides
         fun nearbyViewModel(

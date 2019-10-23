@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.*
 import android.widget.Toast
-import com.example.coreandroid.base.ActionModeController
 import com.example.coreandroid.base.InjectableVectorFragment
 import com.example.coreandroid.di.Dependencies
 import com.example.coreandroid.navigation.IFragmentProvider
@@ -22,7 +21,7 @@ import javax.inject.Inject
 import javax.inject.Named
 
 
-class NearbyFragment : InjectableVectorFragment(), ActionModeController {
+class NearbyFragment : InjectableVectorFragment() {
 
     @Inject
     internal lateinit var fragmentProvider: IFragmentProvider
@@ -91,7 +90,7 @@ class NearbyFragment : InjectableVectorFragment(), ActionModeController {
                             SnackbarState.Hidden, this@NearbyFragment
                         )
                         epoxyController.setData(handler.viewModel.currentState)
-                        handleActionMode()
+                        updateActionMode()
                     }
                     is ShowEvent -> {
                         navigationFragment?.showFragment(fragmentProvider.eventFragment(it.event))
@@ -110,11 +109,9 @@ class NearbyFragment : InjectableVectorFragment(), ActionModeController {
                     is FragmentSelectedStateChanged -> {
                         setHasOptionsMenu(it.isSelected)
                         if (it.isSelected) {
-                            startActionMode()
+                            updateActionMode()
                             activity?.invalidateOptionsMenu()
-                        } else {
-                            finishActionMode()
-                        }
+                        } else finishActionMode()
                     }
                 }
             }
@@ -136,16 +133,12 @@ class NearbyFragment : InjectableVectorFragment(), ActionModeController {
         super.onDestroy()
     }
 
-    override fun finishActionMode() {
+    private fun finishActionMode() {
         actionMode?.finish()
         actionMode = null
     }
 
-    override fun startActionMode() {
-        handleActionMode()
-    }
-
-    private fun handleActionMode() {
+    private fun updateActionMode() {
         val numberOfSelectedEvents = handler.viewModel.currentState.events.value
             .filter { selectable -> selectable.selected }
             .size

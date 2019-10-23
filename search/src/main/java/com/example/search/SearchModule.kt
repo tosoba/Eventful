@@ -13,28 +13,20 @@ import dagger.android.ContributesAndroidInjector
 import dagger.multibindings.IntoMap
 import kotlinx.coroutines.CoroutineDispatcher
 
-@Module(
-    includes = [
-        SearchModule.Providers::class
-    ]
-)
+@Module
 abstract class SearchModule {
 
     @FragmentScoped
-    @ContributesAndroidInjector(
-        modules = [
-            SubProviders::class
-        ]
-    )
+    @ContributesAndroidInjector(modules = [ModuleProvides::class])
     abstract fun searchFragment(): SearchFragment
 
     @Module
-    class Providers {
+    class ModuleProvides {
 
         @Provides
         @IntoMap
         @ViewModelKey(SearchViewModel::class)
-        fun searchViewModel(
+        fun searchViewModelBase(
             searchEvents: SearchEvents,
             getSeachSuggestions: GetSeachSuggestions,
             saveSuggestion: SaveSuggestion,
@@ -42,10 +34,6 @@ abstract class SearchModule {
         ): ViewModel = SearchViewModel(
             searchEvents, getSeachSuggestions, saveSuggestion, ioDispatcher
         )
-    }
-
-    @Module
-    class SubProviders {
 
         @Provides
         fun searchViewModel(
