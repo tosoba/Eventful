@@ -15,6 +15,7 @@ import com.example.ticketmasterapi.queryparam.GeoPoint
 import com.example.ticketmasterapi.queryparam.RadiusUnit
 import com.haroldadmin.cnradapter.NetworkResponse
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 class EventRepository(
     private val ticketMasterApi: TicketMasterApi,
@@ -55,6 +56,9 @@ class EventRepository(
             SearchSuggestionEntity(searchText, System.currentTimeMillis())
         )
     }
+
+    override fun isEventSavedFlow(id: String): Flow<Boolean> = eventDao.getEventFlow(id)
+        .map { it != null }
 
     private val NetworkResponse<EventSearchResponse, TicketMasterErrorResponse>.asResource: Resource<PagedResult<IEvent>>
         get() = when (this) {

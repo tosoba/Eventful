@@ -23,4 +23,6 @@ interface IEventRepository {
     suspend fun saveEvents(events: List<IEvent>)
 
     fun getSavedEventsFlow(limit: Int): Flow<List<IEvent>>
+
+    fun isEventSavedFlow(id: String): Flow<Boolean>
 }

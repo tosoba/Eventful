@@ -13,6 +13,9 @@ interface EventDao {
     @Query("SELECT * FROM ${Tables.EVENT} WHERE id = :id")
     suspend fun getEvent(id: String): EventEntity?
 
+    @Query("SELECT * FROM ${Tables.EVENT} WHERE id = :id")
+    fun getEventFlow(id: String): Flow<EventEntity?>
+
     @Query("SELECT * FROM ${Tables.EVENT} WHERE id IN (:ids)")
     suspend fun getEvents(ids: List<String>): List<EventEntity>
 
