@@ -13,3 +13,5 @@ data class ShowSnackbarAndInvalidateList(val msg: String, val errorOccurred: Boo
     SearchViewUpdate()
 
 data class UpdateSearchSuggestions(val cursor: Cursor) : SearchViewUpdate()
+
+data class FragmentSelectedStateChanged(val isSelected: Boolean) : SearchViewUpdate()

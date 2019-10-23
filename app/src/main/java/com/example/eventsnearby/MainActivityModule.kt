@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.core.usecase.GetLocation
 import com.example.coreandroid.base.ConnectivityStateProvider
 import com.example.coreandroid.base.LocationStateProvider
+import com.example.coreandroid.base.MainFragmentSelectedStateProvider
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.ActivityScoped
 import com.example.event.EventModule
@@ -42,6 +43,9 @@ abstract class MainActivityModule {
 
     @Binds
     abstract fun locationStateProvider(mainViewModel: MainViewModel): LocationStateProvider
+
+    @Binds
+    abstract fun mainFragmentSelectedStateProvider(mainViewModel: MainViewModel): MainFragmentSelectedStateProvider
 
     @Module
     class Providers {

@@ -12,3 +12,5 @@ data class ShowSnackbarAndInvalidateList(val msg: String, val errorOccurred: Boo
     NearbyViewUpdate()
 
 data class FinishActionModeWithMsg(val msg: String) : NearbyViewUpdate()
+
+data class FragmentSelectedStateChanged(val isSelected: Boolean) : NearbyViewUpdate()

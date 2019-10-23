@@ -99,6 +99,10 @@ class SearchFragment : InjectableVectorFragment() {
                         if (it.errorOccurred) eventsScrollListener.onLoadingError()
                     }
                     is UpdateSearchSuggestions -> searchSuggestionsAdapter.swapCursor(it.cursor)
+                    is FragmentSelectedStateChanged -> {
+                        setHasOptionsMenu(it.isSelected)
+                        if (it.isSelected) activity?.invalidateOptionsMenu()
+                    }
                 }
             }
         }

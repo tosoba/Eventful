@@ -3,6 +3,7 @@ package com.example.search
 import android.content.Context
 import android.database.MatrixCursor
 import com.example.coreandroid.base.ConnectivityStateProvider
+import com.example.coreandroid.base.MainFragmentSelectedStateProvider
 import com.example.coreandroid.di.scope.FragmentScoped
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.util.*
@@ -22,7 +23,8 @@ import kotlin.coroutines.CoroutineContext
 class SearchViewEventHandler @Inject constructor(
     private val appContext: Context,
     val viewModel: SearchViewModel,
-    private val connectivityStateProvider: ConnectivityStateProvider
+    private val connectivityStateProvider: ConnectivityStateProvider,
+    private val mainFragmentSelectedStateProvider: MainFragmentSelectedStateProvider
 ) : CoroutineScope {
 
     private val trackerJob = Job()
@@ -86,12 +88,18 @@ class SearchViewEventHandler @Inject constructor(
             .map { null }
     }
 
+    private val selectedStateActionsFlow: Flow<SearchViewUpdate?> by lazy {
+        mainFragmentSelectedStateProvider.isSelectedFlow(SearchFragment::class.java)
+            .map { FragmentSelectedStateChanged(it) }
+    }
+
     val updates: Flow<SearchViewUpdate> by lazy {
         flowOf(
             searchSuggestionsFlow,
             eventsActionsFlow,
             connectionStateActionsFlow,
-            viewUpdatesChannel.consumeAsFlow()
+            viewUpdatesChannel.consumeAsFlow(),
+            selectedStateActionsFlow
         ).flattenMerge().filterNotNull()
     }
 

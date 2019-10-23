@@ -7,6 +7,7 @@ import com.haroldadmin.vector.VectorState
 data class MainState(
     val isConnected: Boolean,
     val snackbarState: Map<Int, SnackbarState>,
+    val selectedFragmentIndex: Int,
     val locationState: LocationState
 ) : VectorState {
     val locationDisabledOrUnknown: Boolean
@@ -15,9 +16,10 @@ data class MainState(
     companion object {
         val INITIAL: MainState
             get() = MainState(
-                false,
-                (0..2).map { it to SnackbarState.Hidden }.toMap(),
-                LocationState.Unknown
+                isConnected = false,
+                snackbarState = (0..2).map { it to SnackbarState.Hidden }.toMap(),
+                selectedFragmentIndex = 0,
+                locationState = LocationState.Unknown
             )
     }
 }

@@ -107,6 +107,15 @@ class NearbyFragment : InjectableVectorFragment(), ActionModeController {
                         finishActionMode()
                         Toast.makeText(context, it.msg, Toast.LENGTH_SHORT).show()
                     }
+                    is FragmentSelectedStateChanged -> {
+                        setHasOptionsMenu(it.isSelected)
+                        if (it.isSelected) {
+                            startActionMode()
+                            activity?.invalidateOptionsMenu()
+                        } else {
+                            finishActionMode()
+                        }
+                    }
                 }
             }
         }

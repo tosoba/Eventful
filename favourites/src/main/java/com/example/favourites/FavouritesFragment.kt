@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.*
 import com.example.coreandroid.base.InjectableVectorFragment
+import com.example.coreandroid.base.MainFragmentSelectedStateProvider
 import com.example.coreandroid.di.Dependencies
 import com.example.coreandroid.navigation.IFragmentProvider
 import com.example.coreandroid.util.ext.*
@@ -33,6 +34,9 @@ class FavouritesFragment : InjectableVectorFragment() {
 
     @Inject
     internal lateinit var viewModel: FavouritesViewModel
+
+    @Inject
+    internal lateinit var mainFragmentSelectedStateProvider: MainFragmentSelectedStateProvider
 
     private val eventsScrollListener: EndlessRecyclerViewScrollListener by lazy {
         EndlessRecyclerViewScrollListener { viewModel.loadMoreEvents() }
@@ -64,7 +68,15 @@ class FavouritesFragment : InjectableVectorFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenuIfVisible()
+
         fragmentScope.launch { viewModel.state.collect { epoxyController.setData(it) } }
+        fragmentScope.launch {
+            mainFragmentSelectedStateProvider.isSelectedFlow(FavouritesFragment::class.java)
+                .collect {
+                    setHasOptionsMenu(it)
+                    if (it) activity?.invalidateOptionsMenu()
+                }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

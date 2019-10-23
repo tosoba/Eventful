@@ -4,6 +4,7 @@ import android.content.Context
 import com.example.core.model.app.LocationState
 import com.example.coreandroid.base.ConnectivityStateProvider
 import com.example.coreandroid.base.LocationStateProvider
+import com.example.coreandroid.base.MainFragmentSelectedStateProvider
 import com.example.coreandroid.di.scope.FragmentScoped
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable
@@ -25,7 +26,8 @@ class NearbyViewEventHandler @Inject constructor(
     private val appContext: Context,
     val viewModel: NearbyViewModel,
     private val connectivityStateProvider: ConnectivityStateProvider,
-    private val locationStateProvider: LocationStateProvider
+    private val locationStateProvider: LocationStateProvider,
+    private val mainFragmentSelectedStateProvider: MainFragmentSelectedStateProvider
 ) : CoroutineScope {
 
     private val trackerJob = Job()
@@ -99,6 +101,11 @@ class NearbyViewEventHandler @Inject constructor(
             }
     }
 
+    private val selectedStateActionsFlow: Flow<NearbyViewUpdate?> by lazy {
+        mainFragmentSelectedStateProvider.isSelectedFlow(NearbyFragment::class.java)
+            .map { FragmentSelectedStateChanged(it) }
+    }
+
     private val signalsFlow: Flow<NearbyViewUpdate?> by lazy {
         viewModel.signalsFlow.map { signal ->
             when (signal) {
@@ -112,7 +119,8 @@ class NearbyViewEventHandler @Inject constructor(
             eventsActionsFlow,
             loadingConditionsFlow,
             viewUpdatesChannel.consumeAsFlow(),
-            signalsFlow
+            signalsFlow,
+            selectedStateActionsFlow
         ).flattenMerge().filterNotNull()
     }
 
