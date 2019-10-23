@@ -41,16 +41,11 @@ class MainFragment : DaggerFragment(), SnackbarController, MenuController {
         put(R.id.bottom_nav_favourites, 2)
     }
 
-    private var lastSelectedPage: Int = 0
-
     private val viewPagerSwipedListener = object : ViewPagerPageSelectedListener {
         override fun onPageSelected(position: Int) {
             main_bottom_nav_view.selectedItemId = viewPagerItems.inverse()[position]!!
             viewModel.selectedFragmentIndex = position
-            lastSelectedPage = position
-            updateSnackbar(
-                lastSelectedPage, viewModel.currentState.snackbarState.getValue(lastSelectedPage)
-            )
+            updateSnackbar(position, viewModel.currentState.snackbarState.getValue(position))
         }
     }
 
@@ -74,9 +69,6 @@ class MainFragment : DaggerFragment(), SnackbarController, MenuController {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-        savedInstanceState?.let {
-            lastSelectedPage = it.getInt(KEY_LAST_SELECTED_POSITION)
-        }
     }
 
     override fun onCreateView(
@@ -98,14 +90,9 @@ class MainFragment : DaggerFragment(), SnackbarController, MenuController {
                 .show()
         }
 
-        viewModel.currentState.snackbarState[lastSelectedPage]?.let {
-            updateSnackbar(lastSelectedPage, it)
+        with(viewModel.currentState) {
+            snackbarState[selectedFragmentIndex]?.let { updateSnackbar(selectedFragmentIndex, it) }
         }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putInt(KEY_LAST_SELECTED_POSITION, lastSelectedPage)
     }
 
     override fun transitionTo(newState: SnackbarState, fragment: Fragment) {
@@ -116,7 +103,7 @@ class MainFragment : DaggerFragment(), SnackbarController, MenuController {
             else -> return
         }
 
-        if (stateIndex != lastSelectedPage || newState == viewModel.currentState.snackbarState[stateIndex])
+        if (stateIndex != viewModel.selectedFragmentIndex || newState == viewModel.currentState.snackbarState[stateIndex])
             return
 
         viewModel.updateSnackbarState(stateIndex, newState)
@@ -147,7 +134,7 @@ class MainFragment : DaggerFragment(), SnackbarController, MenuController {
 
     override fun shouldSetHasOptionsMenu(
         fragment: Fragment
-    ): Boolean = lastSelectedPage == when (fragment) {
+    ): Boolean = viewModel.selectedFragmentIndex == when (fragment) {
         is NearbyFragment -> 0
         is SearchFragment -> 1
         is FavouritesFragment -> 2
@@ -160,9 +147,5 @@ class MainFragment : DaggerFragment(), SnackbarController, MenuController {
 
     override fun hideTitle() {
         app_name_text_view?.visibility = View.GONE
-    }
-
-    companion object {
-        private const val KEY_LAST_SELECTED_POSITION = "KEY_LAST_SELECTED_POSITION"
     }
 }

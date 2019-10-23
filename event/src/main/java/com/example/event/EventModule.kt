@@ -12,7 +12,7 @@ import dagger.Provides
 import dagger.android.ContributesAndroidInjector
 import dagger.multibindings.IntoMap
 
-@Module(includes = [EventModule.Providers::class])
+@Module
 abstract class EventModule {
 
     @FragmentScoped
@@ -20,18 +20,12 @@ abstract class EventModule {
     abstract fun eventFragment(): EventFragment
 
     @Module
-    class Providers {
-
-
-    }
-
-    @Module
     class SubProviders {
 
         @Provides
         @IntoMap
         @ViewModelKey(EventViewModel::class)
-        fun eventViewModelVM(
+        fun eventViewModelBase(
             initialState: EventState, isEventSaved: IsEventSaved
         ): ViewModel = EventViewModel(initialState, isEventSaved)
 
