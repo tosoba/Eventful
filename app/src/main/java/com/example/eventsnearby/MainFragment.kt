@@ -57,7 +57,7 @@ class MainFragment : DaggerFragment(), SnackbarController, MenuController {
 
     private val mainViewPagerAdapter: TitledFragmentsPagerAdapter by lazy(LazyThreadSafetyMode.NONE) {
         TitledFragmentsPagerAdapter(
-            childFragmentManager, arrayOf(
+            childFragmentManager, listOf(
                 "Nearby" to NearbyFragment(),
                 "Search" to SearchFragment(),
                 "Favourites" to FavouritesFragment()

@@ -100,7 +100,7 @@ class NearbyViewEventHandler @Inject constructor(
     }
 
     private val signalsFlow: Flow<NearbyViewUpdate?> by lazy {
-        viewModel.signalsChannel.asFlow().map { signal ->
+        viewModel.signalsFlow.map { signal ->
             when (signal) {
                 is NearbySignal.FavouritesSaved -> FinishActionModeWithMsg("Favourites saved.")
             }

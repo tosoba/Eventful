@@ -16,10 +16,10 @@ class WeatherViewModel(
     private val ioDispatcher: CoroutineDispatcher
 ) : VectorViewModel<WeatherState>(WeatherState.INITIAL) {
 
-    fun loadWeather(latLng: LatLng) = viewModelScope.launch {
-        withState { state ->
-            if (state.forecast.status is Loading) return@withState
+    fun loadWeather(latLng: LatLng) = withState { state ->
+        if (state.forecast.status is Loading) return@withState
 
+        viewModelScope.launch {
             setState { copy(forecast = forecast.copyWithLoadingInProgress) }
             when (val result = withContext(ioDispatcher) {
                 repo.getForecast(lat = latLng.latitude, lon = latLng.longitude)

@@ -25,17 +25,14 @@ class EventFragment : Fragment() {
 
     private val eventViewPagerAdapter: PagerAdapter by lazy(LazyThreadSafetyMode.NONE) {
         TitledFragmentsPagerAdapter(
-            childFragmentManager, arrayOf(
+            childFragmentManager, listOfNotNull(
                 "Details" to EventDetailsFragment.new(event) as Fragment,
                 event.venues?.firstOrNull()?.run {
-                    "Weather" to WeatherFragment.new(event.venues?.first().run {
-                        LatLng(
-                            lat.toDouble(),
-                            lng.toDouble()
-                        )
-                    }) as Fragment
+                    "Weather" to WeatherFragment.new(
+                        LatLng(lat.toDouble(), lng.toDouble())
+                    ) as Fragment
                 }
-            ).filterNotNull().toTypedArray()
+            )
         )
     }
 

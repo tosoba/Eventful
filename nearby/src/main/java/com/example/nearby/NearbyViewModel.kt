@@ -15,6 +15,8 @@ import com.haroldadmin.vector.VectorViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -24,7 +26,8 @@ class NearbyViewModel(
     private val ioDispatcher: CoroutineDispatcher
 ) : VectorViewModel<NearbyState>(NearbyState.INITIAL) {
 
-    val signalsChannel: BroadcastChannel<NearbySignal> = ConflatedBroadcastChannel()
+    private val signalsChannel: BroadcastChannel<NearbySignal> = ConflatedBroadcastChannel()
+    val signalsFlow: Flow<NearbySignal> get() = signalsChannel.asFlow()
 
     fun loadEvents(userLatLng: LatLng) = withState { state ->
         if (state.events.status is Loading || state.events.offset >= state.events.totalItems)

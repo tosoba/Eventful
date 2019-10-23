@@ -7,7 +7,7 @@ import androidx.fragment.app.FragmentStatePagerAdapter
 
 class TitledFragmentsPagerAdapter(
     fragmentManager: FragmentManager,
-    private val titledFragments: Array<Pair<String, Fragment>>
+    private val titledFragments: List<Pair<String, Fragment>>
 ) : FragmentStatePagerAdapter(fragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 
     var previousFragment: Fragment? = null
