@@ -7,6 +7,7 @@ import com.example.coreandroid.base.ConnectivityStateProvider
 import com.example.coreandroid.base.LocationStateProvider
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.ActivityScoped
+import com.example.event.EventModule
 import com.example.favourites.FavouritesModule
 import com.example.nearby.NearbyModule
 import com.example.search.SearchModule
@@ -29,6 +30,7 @@ abstract class MainActivityModule {
             NearbyModule::class,
             SearchModule::class,
             FavouritesModule::class,
+            EventModule::class,
             WeatherModule::class,
             MainFragmentModule::class
         ]
