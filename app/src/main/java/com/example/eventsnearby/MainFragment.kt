@@ -116,11 +116,13 @@ class MainFragment : DaggerFragment(), SnackbarController, MenuController {
                 is SnackbarState.Text -> {
                     if (snackbar != null
                         && snackbar?.isShown != false
+                        && snackbar?.duration == Snackbar.LENGTH_INDEFINITE
                         && viewModel.currentState.snackbarState[stateIndex] is SnackbarState.Text
                     ) {
                         snackbar?.setText(snackbarState.text)
                     } else {
-                        snackbar = Snackbar.make(it, snackbarState.text, Snackbar.LENGTH_INDEFINITE)
+                        snackbar?.dismiss()
+                        snackbar = Snackbar.make(it, snackbarState.text, snackbarState.length)
                             .apply(Snackbar::show)
                     }
                 }

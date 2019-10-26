@@ -2,7 +2,9 @@ package com.example.event
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.core.usecase.DeleteEvent
 import com.example.core.usecase.IsEventSaved
+import com.example.core.usecase.SaveEvent
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
 import com.example.coreandroid.util.Data
@@ -16,18 +18,21 @@ import dagger.multibindings.IntoMap
 abstract class EventModule {
 
     @FragmentScoped
-    @ContributesAndroidInjector(modules = [SubProviders::class])
+    @ContributesAndroidInjector(modules = [ModuleProvides::class])
     abstract fun eventFragment(): EventFragment
 
     @Module
-    class SubProviders {
+    class ModuleProvides {
 
         @Provides
         @IntoMap
         @ViewModelKey(EventViewModel::class)
         fun eventViewModelBase(
-            initialState: EventState, isEventSaved: IsEventSaved
-        ): ViewModel = EventViewModel(initialState, isEventSaved)
+            initialState: EventState,
+            isEventSaved: IsEventSaved,
+            saveEvent: SaveEvent,
+            deleteEvent: DeleteEvent
+        ): ViewModel = EventViewModel(initialState, isEventSaved, saveEvent, deleteEvent)
 
         @Provides
         fun eventInitialState(

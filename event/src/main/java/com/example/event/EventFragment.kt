@@ -1,29 +1,28 @@
 package com.example.event
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.PagerAdapter
 import com.example.coreandroid.base.InjectableVectorFragment
 import com.example.coreandroid.ticketmaster.Event
-import com.example.coreandroid.util.FragmentArgument
-import com.example.coreandroid.util.LoadedSuccessfully
+import com.example.coreandroid.util.*
 import com.example.coreandroid.view.TitledFragmentsPagerAdapter
 import com.example.coreandroid.view.ViewPagerPageSelectedListener
 import com.example.weather.WeatherFragment
+import com.github.satoshun.coroutinebinding.view.clicks
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
 import kotlinx.android.synthetic.main.fragment_event.*
 import kotlinx.android.synthetic.main.fragment_event.view.*
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -68,12 +67,16 @@ class EventFragment : InjectableVectorFragment() {
     @Inject
     internal lateinit var viewModel: EventViewModel
 
+    private var snackbar: Snackbar? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_event, container, false).apply {
-        event_fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
+        fragmentScope.launch {
+            event_fab.clicks()
+                .consumeAsFlow()
+                .debounce(200)
+                .collect { viewModel.toggleEventFavourite() }
         }
 
         event_bottom_nav_view.setOnNavigationItemSelectedListener(
@@ -89,13 +92,70 @@ class EventFragment : InjectableVectorFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         fragmentScope.launch {
-            viewModel.state.filter { it.isFavourite.status is LoadedSuccessfully }
-                .map { it.isFavourite.value }
-                .collect {
-                    //TODO: show hide fab depending on it
-                    Log.e("SAVED", it.toString())
+            viewModel.state.map { it.isFavourite }
+                .scan(emptyList<Data<Boolean>>()) { previousStates, value ->
+                    if (previousStates.size < 3) previousStates + value
+                    else listOf(previousStates[1], previousStates[2], value)
+                }
+                .drop(1)
+                .collect { states ->
+                    val (isFavourite, status) = states.last()
+                    when (status) {
+                        is Initial, Loading -> {
+                            event_fab?.hide()
+                        }
+                        is LoadedSuccessfully -> {
+                            event_fab?.updateDrawableAndShow(isFavourite)
+                            if (states.dropLast(1).filter { it.status is LoadedSuccessfully }.any()) updateSnackbar(
+                                SnackbarState.Text(
+                                    text = if (isFavourite) "Event: ${event.name} was added to favourites"
+                                    else "Event: ${event.name} was removed from favourites",
+                                    length = Snackbar.LENGTH_SHORT
+                                )
+                            )
+                        }
+                        is LoadingFailed<*> -> {
+                            event_fab?.updateDrawableAndShow(isFavourite)
+                            updateSnackbar(
+                                SnackbarState.Text(
+                                    text = """Error occurred when trying to 
+                                    |${if (isFavourite) "remove" else "add"} event: ${event.name} 
+                                    |to favourites""".trimMargin(),
+                                    length = Snackbar.LENGTH_SHORT
+                                )
+                            )
+                        }
+                    }
                 }
         }
+    }
+
+    private fun updateSnackbar(snackbarState: SnackbarState) {
+        event_fab?.let {
+            snackbar = when (snackbarState) {
+                is SnackbarState.Text -> {
+                    snackbar?.dismiss()
+                    Snackbar.make(it, snackbarState.text, snackbarState.length)
+                        .apply(Snackbar::show)
+                }
+                is SnackbarState.Hidden -> {
+                    snackbar?.dismiss()
+                    null
+                }
+            }
+        }
+    }
+
+    private fun FloatingActionButton.updateDrawableAndShow(isFavourite: Boolean) {
+        context?.let {
+            setImageDrawable(
+                ContextCompat.getDrawable(
+                    it,
+                    if (isFavourite) R.drawable.delete else R.drawable.favourite
+                )
+            )
+        }
+        show()
     }
 
     companion object {

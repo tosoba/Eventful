@@ -46,6 +46,8 @@ class EventRepository(
         limit: Int
     ): Flow<List<IEvent>> = eventDao.getFullEventsFlow(limit)
 
+    override suspend fun deleteEvent(event: IEvent) = eventDao.deleteEvent(event.id)
+
     override suspend fun getSearchSuggestions(
         searchText: String
     ): List<SearchSuggestion> = searchSuggestionDao.getSearchSuggestions(searchText)
