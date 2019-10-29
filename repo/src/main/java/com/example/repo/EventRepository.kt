@@ -42,9 +42,7 @@ class EventRepository(
 
     override suspend fun saveEvents(events: List<IEvent>) = eventDao.insertFullEvents(events)
 
-    override fun getSavedEventsFlow(
-        limit: Int
-    ): Flow<List<IEvent>> = eventDao.getFullEventsFlow(limit)
+    override fun getSavedEventsFlow(limit: Int): Flow<List<IEvent>> = eventDao.getEventsFlow(limit)
 
     override suspend fun deleteEvent(event: IEvent) = eventDao.deleteEvent(event.id)
 

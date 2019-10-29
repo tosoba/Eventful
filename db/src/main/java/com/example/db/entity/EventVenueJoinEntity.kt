@@ -3,6 +3,7 @@ package com.example.db.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import com.example.db.Tables
 
 @Entity(
@@ -21,6 +22,10 @@ import com.example.db.Tables
             parentColumns = ["id"],
             onDelete = ForeignKey.CASCADE
         )
+    ],
+    indices = [
+        Index(value = ["event_id"], name = "event_venue_join_event_id_idx"),
+        Index(value = ["venue_id"], name = "event_venue_join_venue_id_idx")
     ]
 )
 data class EventVenueJoinEntity(
