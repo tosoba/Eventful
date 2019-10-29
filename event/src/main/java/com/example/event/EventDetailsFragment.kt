@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.example.coreandroid.ticketmaster.Event
-import com.example.coreandroid.util.FragmentArgument
+import com.example.coreandroid.util.delegate.FragmentArgument
 import com.example.coreandroid.util.ext.setupToolbarWithDrawerToggle
 import com.example.coreandroid.util.ext.showBackNavArrow
 import kotlinx.android.synthetic.main.fragment_event_details.*

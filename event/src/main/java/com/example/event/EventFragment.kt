@@ -10,6 +10,7 @@ import androidx.viewpager.widget.PagerAdapter
 import com.example.coreandroid.base.InjectableVectorFragment
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.util.*
+import com.example.coreandroid.util.delegate.FragmentArgument
 import com.example.coreandroid.view.TitledFragmentsPagerAdapter
 import com.example.coreandroid.view.ViewPagerPageSelectedListener
 import com.example.weather.WeatherFragment
@@ -33,13 +34,11 @@ class EventFragment : InjectableVectorFragment() {
 
     private val eventViewPagerAdapter: PagerAdapter by lazy(LazyThreadSafetyMode.NONE) {
         TitledFragmentsPagerAdapter(
-            childFragmentManager, listOfNotNull(
+            childFragmentManager, listOf(
                 "Details" to EventDetailsFragment.new(event) as Fragment,
-                event.venues?.firstOrNull()?.run {
-                    "Weather" to WeatherFragment.new(
-                        LatLng(lat.toDouble(), lng.toDouble())
-                    ) as Fragment
-                }
+                "Weather" to WeatherFragment.new(
+                    event.venues?.firstOrNull()?.run { LatLng(lat.toDouble(), lng.toDouble()) }
+                ) as Fragment
             )
         )
     }

@@ -63,8 +63,14 @@ interface EventDao {
         }
 
         insertEvents(eventsToInsert.map { EventEntity(it) })
-        if (venues.isNotEmpty()) insertVenues(venues)
-        if (attractions.isNotEmpty()) insertAttractions(attractions)
+        if (venues.isNotEmpty()) {
+            insertVenues(venues)
+            joinEventsVenues(eventVenueJoinEntities)
+        }
+        if (attractions.isNotEmpty()) {
+            insertAttractions(attractions)
+            joinEventsAttractions(eventAttractionJoinEntities)
+        }
     }
 
     @Transaction
