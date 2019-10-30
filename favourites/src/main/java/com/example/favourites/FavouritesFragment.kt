@@ -39,7 +39,7 @@ class FavouritesFragment : InjectableVectorFragment() {
     internal lateinit var mainFragmentSelectedStateProvider: MainFragmentSelectedStateProvider
 
     private val eventsScrollListener: EndlessRecyclerViewScrollListener by lazy {
-        EndlessRecyclerViewScrollListener { viewModel.loadMoreEvents() }
+        EndlessRecyclerViewScrollListener(loadMore = viewModel::loadMoreEvents)
     }
 
     private val epoxyController by lazy {
