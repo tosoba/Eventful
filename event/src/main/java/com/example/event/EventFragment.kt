@@ -15,7 +15,6 @@ import com.example.coreandroid.view.TitledFragmentsPagerAdapter
 import com.example.coreandroid.view.ViewPagerPageSelectedListener
 import com.example.weather.WeatherFragment
 import com.github.satoshun.coroutinebinding.view.clicks
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
@@ -37,7 +36,7 @@ class EventFragment : InjectableVectorFragment() {
             childFragmentManager, listOf(
                 "Details" to EventDetailsFragment.new(event) as Fragment,
                 "Weather" to WeatherFragment.new(
-                    event.venues?.firstOrNull()?.run { LatLng(lat.toDouble(), lng.toDouble()) }
+                    event.venues?.firstOrNull()?.run { latLng }
                 ) as Fragment
             )
         )

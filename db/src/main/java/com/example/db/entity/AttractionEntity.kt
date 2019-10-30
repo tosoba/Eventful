@@ -9,7 +9,7 @@ import com.example.db.Tables
 data class AttractionEntity(
     override val id: String,
     override val name: String?,
-    override val url: String,
+    override val url: String?,
     override val links: List<LinkEntity>?,
     @ColumnInfo(name = "image_url") override val imageUrl: String?,
     override val kind: String?

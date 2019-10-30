@@ -2,17 +2,18 @@ package com.example.coreandroid.ticketmaster
 
 import android.os.Parcelable
 import com.example.core.model.ticketmaster.IVenue
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class Venue(
     override val id: String,
-    override val name: String,
+    override val name: String?,
     override val url: String?,
     override val address: String?,
-    override val city: String,
-    override val lat: Float,
-    override val lng: Float
+    override val city: String?,
+    override val lat: Double?,
+    override val lng: Double?
 ) : IVenue, Parcelable {
     constructor(other: IVenue) : this(
         other.id,
@@ -23,4 +24,6 @@ data class Venue(
         other.lat,
         other.lng
     )
+
+    val latLng: LatLng? get() = if (lat != null && lng != null) LatLng(lat, lng) else null
 }
