@@ -5,6 +5,7 @@ import com.example.core.usecase.GetSavedEvents
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.util.DataList
 import com.example.coreandroid.util.LoadedSuccessfully
+import com.example.coreandroid.util.Loading
 import com.haroldadmin.vector.VectorViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
@@ -19,15 +20,12 @@ class FavouritesViewModel(
 
     private val limitIncrement: Int = 20
 
-    private var getSavedEventsJob: Job
+    private var getSavedEventsJob: Job = getEvents(limitIncrement)
 
-    init {
-        getSavedEventsJob = getEvents(limitIncrement)
-    }
-
-    fun loadMoreEvents() {
+    fun loadMoreEvents() = withState { (events, limit) ->
+        if (events.status is Loading) return@withState
         getSavedEventsJob.cancel()
-        withState { state -> getSavedEventsJob = getEvents(state.limit + limitIncrement) }
+        getSavedEventsJob = getEvents(limit + limitIncrement)
     }
 
     override fun onCleared() {
