@@ -18,8 +18,6 @@ class FavouritesViewModel(
     private val ioDispatcher: CoroutineDispatcher
 ) : VectorViewModel<FavouritesState>(FavouritesState.INITIAL) {
 
-    private val limitIncrement: Int = 20
-
     private var getSavedEventsJob: Job = getEvents(limitIncrement)
 
     fun loadMoreEvents() = withState { (events, limit) ->
@@ -37,19 +35,22 @@ class FavouritesViewModel(
         setState { copy(events = events.copyWithLoadingInProgress) }
         return viewModelScope.launch {
             withContext(ioDispatcher) {
-                getSavedEvents(limit)
-                    .collect {
-                        setState {
-                            copy(
-                                events = DataList(
-                                    value = it.map { Event(it) },
-                                    status = LoadedSuccessfully
-                                ),
-                                limit = it.size
-                            )
-                        }
+                getSavedEvents(limit).collect {
+                    setState {
+                        copy(
+                            events = DataList(
+                                value = it.map { Event(it) },
+                                status = LoadedSuccessfully
+                            ),
+                            limit = it.size
+                        )
                     }
+                }
             }
         }
+    }
+
+    companion object {
+        const val limitIncrement: Int = 20
     }
 }
