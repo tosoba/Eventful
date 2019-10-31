@@ -6,9 +6,11 @@ import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.util.DataList
 import com.example.coreandroid.util.LoadedSuccessfully
 import com.haroldadmin.vector.VectorViewModel
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class FavouritesViewModel(
     private val getSavedEvents: GetSavedEvents,
@@ -38,7 +40,6 @@ class FavouritesViewModel(
         return viewModelScope.launch {
             withContext(ioDispatcher) {
                 getSavedEvents(limit)
-                    .flowOn(Dispatchers.IO)
                     .collect {
                         setState {
                             copy(
