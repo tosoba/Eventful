@@ -35,9 +35,7 @@ class EventFragment : InjectableVectorFragment() {
         TitledFragmentsPagerAdapter(
             childFragmentManager, listOf(
                 "Details" to EventDetailsFragment.new(event) as Fragment,
-                "Weather" to WeatherFragment.new(
-                    event.venues?.firstOrNull()?.run { latLng }
-                ) as Fragment
+                "Weather" to WeatherFragment.new(event.venues?.firstOrNull()?.latLng) as Fragment
             )
         )
     }
