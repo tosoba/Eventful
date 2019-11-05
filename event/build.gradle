@@ -22,6 +22,10 @@ android {
         }
     }
 
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
     dataBinding {
         enabled = true
     }
@@ -45,6 +49,10 @@ dependencies {
     implementation project(':core')
     implementation project(':coreandroid')
     implementation project(':weather')
+
+    implementation 'com.airbnb.android:epoxy:3.7.0'
+    implementation 'com.airbnb.android:epoxy-databinding:3.7.0'
+    kapt 'com.airbnb.android:epoxy-processor:3.7.0'
 
     implementation "com.github.haroldadmin:Vector:0.4.2"
 

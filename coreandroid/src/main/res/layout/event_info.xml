@@ -7,11 +7,16 @@
         <variable
                 name="event"
                 type="com.example.coreandroid.ticketmaster.Event" />
+
+        <variable
+                name="margin"
+                type="Integer" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_margin="@{margin != null ? margin : 0}">
 
         <TextView
                 android:id="@+id/event_price_text_view"

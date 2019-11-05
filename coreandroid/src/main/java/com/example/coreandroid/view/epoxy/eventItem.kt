@@ -31,12 +31,7 @@ fun Event.listItem(clicked: View.OnClickListener) = EventItem(
         .event(this),
     EventInfoBindingModel_().id("${id}i")
         .event(this),
-    NestedScrollingCarouselModel()
-        .id("${id}c")
-        .models(kinds.mapIndexed { index: Int, kind: String ->
-            EventKindBindingModel_().id("${id}k$index")
-                .kind(kind)
-        })
+    kindsCarousel
 )
 
 class SelectableEventItem(
@@ -67,10 +62,13 @@ fun Selectable<Event>.listItem(
         .event(item),
     EventInfoBindingModel_().id("${item.id}i")
         .event(item),
-    NestedScrollingCarouselModel()
-        .id("${item.id}c")
-        .models(item.kinds.mapIndexed { index: Int, kind: String ->
-            EventKindBindingModel_().id("${item.id}k$index")
+    item.kindsCarousel
+)
+
+val Event.kindsCarousel: CarouselModel_
+    get() = NestedScrollingCarouselModel()
+        .id("${id}c")
+        .models(kinds.mapIndexed { index: Int, kind: String ->
+            EventKindBindingModel_().id("${id}k$index")
                 .kind(kind)
         })
-)

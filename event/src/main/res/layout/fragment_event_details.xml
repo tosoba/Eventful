@@ -53,17 +53,14 @@
 
         </com.google.android.material.appbar.AppBarLayout>
 
-        <androidx.core.widget.NestedScrollView
+        <com.airbnb.epoxy.EpoxyRecyclerView
+                android:id="@+id/event_details_recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-            <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="500dp"
-                    android:text="TEST" />
-
-        </androidx.core.widget.NestedScrollView>
+                android:fadeScrollbars="false"
+                android:scrollbars="vertical"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
 
         <TextView
                 android:layout_width="wrap_content"
