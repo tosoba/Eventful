@@ -41,10 +41,12 @@ fun Fragment.setHasOptionsMenuIfVisible() {
     }
 }
 
-fun Fragment.setupToolbarWithDrawerToggle(toolbar: Toolbar) {
+fun Fragment.setupToolbar(toolbar: Toolbar) {
     appCompatActivity.setSupportActionBar(toolbar)
     appCompatActivity.supportActionBar?.setDisplayShowTitleEnabled(false)
+}
 
+fun Fragment.setupToolbarWithDrawerToggle(toolbar: Toolbar) {
     ActionBarDrawerToggleEnd(
         activity!!,
         drawerLayoutHost.drawerLayout!!,

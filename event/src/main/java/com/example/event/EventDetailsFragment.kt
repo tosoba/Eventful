@@ -4,12 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.widget.Toolbar
 import androidx.databinding.DataBindingUtil
 import com.example.coreandroid.description
 import com.example.coreandroid.eventInfo
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.util.delegate.FragmentArgument
+import com.example.coreandroid.util.ext.setupToolbar
 import com.example.coreandroid.util.ext.setupToolbarWithDrawerToggle
 import com.example.coreandroid.util.ext.showBackNavArrow
 import com.example.coreandroid.util.ext.toPx
@@ -26,6 +26,7 @@ class EventDetailsFragment : VectorFragment() {
 
     private val epoxyController by lazy(LazyThreadSafetyMode.NONE) {
         simpleController {
+            event.kindsCarousel.addTo(this)
             eventInfo {
                 id("${event.id}i")
                 event(event)
@@ -36,7 +37,6 @@ class EventDetailsFragment : VectorFragment() {
                 text(event.info ?: "No details available")
                 margin(requireContext().toPx(15f).toInt())
             }
-            event.kindsCarousel.addTo(this)
         }
     }
 
@@ -46,8 +46,8 @@ class EventDetailsFragment : VectorFragment() {
         inflater, R.layout.fragment_event_details, container, false
     ).apply {
         event = this@EventDetailsFragment.event
-        eventDetailsToolbar.setup()
         eventDetailsRecyclerView.setController(epoxyController)
+        setupToolbarWithDrawerToggle(eventDetailsToolbar)
     }.root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -55,15 +55,13 @@ class EventDetailsFragment : VectorFragment() {
         epoxyController.requestModelBuild()
     }
 
-    override fun setUserVisibleHint(isVisibleToUser: Boolean) {
-        super.setUserVisibleHint(isVisibleToUser)
-        if (isVisibleToUser && view != null) event_details_toolbar.setup()
-    }
-
-    private fun Toolbar.setup() {
-        setupToolbarWithDrawerToggle(this)
-        title = event.name
-        showBackNavArrow()
+    override fun onResume() {
+        super.onResume()
+        event_details_toolbar?.let {
+            setupToolbar(it)
+            showBackNavArrow()
+            it.title = event.name
+        }
     }
 
     companion object {

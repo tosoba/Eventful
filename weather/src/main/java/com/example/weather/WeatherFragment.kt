@@ -4,9 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.widget.Toolbar
 import com.example.coreandroid.base.InjectableVectorFragment
 import com.example.coreandroid.util.delegate.NullableFragmentArgument
+import com.example.coreandroid.util.ext.setupToolbar
 import com.example.coreandroid.util.ext.setupToolbarWithDrawerToggle
 import com.example.coreandroid.util.ext.showBackNavArrow
 import com.google.android.gms.maps.model.LatLng
@@ -31,17 +31,15 @@ class WeatherFragment : InjectableVectorFragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_weather, container, false).apply {
         //TODO: if latLng == null show some error that no venue is available for event...
-        weather_toolbar.setup()
+        setupToolbarWithDrawerToggle(weather_toolbar)
     }
 
-    override fun setUserVisibleHint(isVisibleToUser: Boolean) {
-        super.setUserVisibleHint(isVisibleToUser)
-        if (isVisibleToUser && view != null) weather_toolbar.setup()
-    }
-
-    private fun Toolbar.setup() {
-        setupToolbarWithDrawerToggle(this)
-        showBackNavArrow()
+    override fun onResume() {
+        super.onResume()
+        weather_toolbar?.let {
+            setupToolbar(it)
+            showBackNavArrow()
+        }
     }
 
     companion object {
