@@ -25,6 +25,15 @@ android {
     dataBinding {
         enabled = true
     }
+
+    sourceSets {
+        androidTest {
+            java.srcDir project(':coreandroid').file("src/androidTest/java")
+        }
+        test {
+            java.srcDir project(':coreandroid').file("src/test/java")
+        }
+    }
 }
 
 dependencies {

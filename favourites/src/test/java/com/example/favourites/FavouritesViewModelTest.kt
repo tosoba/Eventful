@@ -1,33 +1,37 @@
 package com.example.favourites
 
 import com.example.core.usecase.GetSavedEvents
+import com.example.coreandroid.rules.MainDispatcherRule
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.util.LoadedSuccessfully
 import com.example.coreandroid.util.Loading
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
 internal class FavouritesViewModelTest {
 
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
+
+    private val testDispatcher = TestCoroutineDispatcher()
+
     private val initialEventsSize = 20
     private val afterLoadMoreSize = 30
-    private val mainThreadSurrogate = newSingleThreadContext("Main Thread")
-    private val testDispatcher = TestCoroutineDispatcher()
 
     private fun getEvents(size: Int) = (1..size).map {
         Event(
@@ -35,16 +39,6 @@ internal class FavouritesViewModelTest {
             null, null, null, null, null, null,
             emptyList(), null, null, null
         )
-    }
-
-    @Before
-    fun setup() {
-        Dispatchers.setMain(mainThreadSurrogate)
-    }
-
-    @After
-    fun after() {
-        Dispatchers.resetMain()
     }
 
     @Test
