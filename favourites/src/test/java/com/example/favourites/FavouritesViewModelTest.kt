@@ -1,10 +1,10 @@
 package com.example.favourites
 
 import com.example.core.usecase.GetSavedEvents
-import com.example.coreandroid.rules.MainDispatcherRule
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.util.LoadedSuccessfully
 import com.example.coreandroid.util.Loading
+import com.example.test.rule.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk

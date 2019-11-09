@@ -1,4 +1,4 @@
-package com.example.coreandroid.rules
+package com.example.test.rule
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
