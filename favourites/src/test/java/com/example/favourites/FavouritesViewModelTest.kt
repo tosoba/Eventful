@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Rule
 import org.junit.Test
 
@@ -33,23 +32,17 @@ internal class FavouritesViewModelTest {
     private val initialEventsSize = 20
     private val afterLoadMoreSize = 30
 
-    private fun getEvents(size: Int) = (1..size).map {
-        Event(
-            "", "", "", "",
-            null, null, null, null, null, null,
-            emptyList(), null, null, null
-        )
-    }
+    private fun getEvents(size: Int): List<Event> = (1..size).map { mockk<Event>(relaxed = true) }
 
     @Test
-    fun `GivenFavouritesViewModel WhenInitialized ThenShouldGetSavedEvents`() {
+    fun `GivenFavouritesVM WhenInitialized ThenShouldGetSavedEvents`() {
         val getSavedEvents: GetSavedEvents = mockk(relaxed = true)
         FavouritesViewModel(getSavedEvents, testDispatcher)
         coVerify { getSavedEvents.invoke(any()) }
     }
 
     @Test
-    fun `GivenFavouritesViewModel WhenInitializedAndGetSavedEventsReturnsSuccessfully ThenEventsAreStored`() =
+    fun `GivenFavouritesVM WhenInitializedAndGetSavedEventsReturnsSuccessfully ThenEventsAreStored`() =
         runBlocking {
             val getSavedEvents: GetSavedEvents = mockk {
                 coEvery { this@mockk.invoke(FavouritesViewModel.limitIncrement) } returns flowOf(
@@ -62,76 +55,78 @@ internal class FavouritesViewModelTest {
         }
 
     @Test
-    fun `GivenFavouritesViewModel WhenThereAreNoMoreEventsToLoad SameEventsAreReturned`() =
-        runBlockingTest {
-            val getSavedEvents: GetSavedEvents = mockk {
-                coEvery { this@mockk.invoke(FavouritesViewModel.limitIncrement) } returns flowOf(
-                    getEvents(initialEventsSize)
-                )
-                coEvery { this@mockk.invoke(FavouritesViewModel.limitIncrement + initialEventsSize) } returns flowOf(
-                    getEvents(initialEventsSize)
-                )
-            }
-            // wait till initial loading completes
-            val viewModel = FavouritesViewModel(getSavedEvents, testDispatcher)
-            viewModel.state.first { it.events.status is LoadedSuccessfully }
-
-            val states = mutableListOf<FavouritesState>()
-            launch {
-                viewModel.state.take(3).collect { states.add(it) }
-            }
-
-            //load more events
-            viewModel.loadMoreEvents()
-            coVerify { getSavedEvents.invoke(any()) }
-            val loadingState = states[1]
-            assert(
-                loadingState.events.status is Loading
-                        && loadingState.events.value.size == initialEventsSize
-                        && loadingState.limit == initialEventsSize
+    fun `GivenFavouritesVM WhenThereAreNoMoreEventsToLoad SameEventsAreReturned`() = runBlocking {
+        val getSavedEvents: GetSavedEvents = mockk {
+            coEvery { this@mockk.invoke(FavouritesViewModel.limitIncrement) } returns flowOf(
+                getEvents(initialEventsSize)
             )
-            val loadedMoreState = states.last()
-            assert(
-                loadedMoreState.events.status is LoadedSuccessfully
-                        && loadedMoreState.events.value.size == initialEventsSize
-                        && loadedMoreState.limit == initialEventsSize
+            coEvery { this@mockk.invoke(FavouritesViewModel.limitIncrement + initialEventsSize) } returns flowOf(
+                getEvents(initialEventsSize)
             )
         }
+        // wait till initial loading completes
+        val viewModel = FavouritesViewModel(getSavedEvents, testDispatcher)
+        viewModel.state.first { it.events.status is LoadedSuccessfully }
+
+        val states = mutableListOf<FavouritesState>()
+        val loadingJob = launch {
+            viewModel.state.take(2).collect { states.add(it) }
+        }
+
+        //load more events
+        viewModel.loadMoreEvents()
+        coVerify { getSavedEvents.invoke(any()) }
+        loadingJob.join()
+
+        val loadingState = states[0]
+        assert(
+            loadingState.events.status is Loading
+                    && loadingState.events.value.size == initialEventsSize
+                    && loadingState.limit == initialEventsSize
+        )
+        val loadedMoreSuccessfullyState = states.last()
+        assert(
+            loadedMoreSuccessfullyState.events.status is LoadedSuccessfully
+                    && loadedMoreSuccessfullyState.events.value.size == initialEventsSize
+                    && loadedMoreSuccessfullyState.limit == initialEventsSize
+        )
+    }
 
     @Test
-    fun `GivenFavouritesViewModel WhenThereAreMoreEventsToLoad MoreEventsAreReturned`() =
-        runBlockingTest {
-            val getSavedEvents: GetSavedEvents = mockk {
-                coEvery { this@mockk.invoke(FavouritesViewModel.limitIncrement) } returns flowOf(
-                    getEvents(initialEventsSize)
-                )
-                coEvery { this@mockk.invoke(FavouritesViewModel.limitIncrement + initialEventsSize) } returns flowOf(
-                    getEvents(afterLoadMoreSize)
-                )
-            }
-            // wait till initial loading completes
-            val viewModel = FavouritesViewModel(getSavedEvents, testDispatcher)
-            viewModel.state.first { it.events.status is LoadedSuccessfully }
-
-            val states = mutableListOf<FavouritesState>()
-            launch {
-                viewModel.state.take(3).collect { states.add(it) }
-            }
-
-            //load more events
-            viewModel.loadMoreEvents()
-            coVerify { getSavedEvents.invoke(any()) }
-            val loadingState = states[1]
-            assert(
-                loadingState.events.status is Loading
-                        && loadingState.events.value.size == initialEventsSize
-                        && loadingState.limit == initialEventsSize
+    fun `GivenFavouritesVM WhenThereAreMoreEventsToLoad MoreEventsAreReturned`() = runBlocking {
+        val getSavedEvents: GetSavedEvents = mockk {
+            coEvery { this@mockk.invoke(FavouritesViewModel.limitIncrement) } returns flowOf(
+                getEvents(initialEventsSize)
             )
-            val loadedMoreState = states.last()
-            assert(
-                loadedMoreState.events.status is LoadedSuccessfully
-                        && loadedMoreState.events.value.size == afterLoadMoreSize
-                        && loadedMoreState.limit == afterLoadMoreSize
+            coEvery { this@mockk.invoke(FavouritesViewModel.limitIncrement + initialEventsSize) } returns flowOf(
+                getEvents(afterLoadMoreSize)
             )
         }
+        // wait till initial loading completes
+        val viewModel = FavouritesViewModel(getSavedEvents, testDispatcher)
+        viewModel.state.first { it.events.status is LoadedSuccessfully }
+
+        val states = mutableListOf<FavouritesState>()
+        val loadingJob = launch {
+            viewModel.state.take(2).collect { states.add(it) }
+        }
+
+        //load more events
+        viewModel.loadMoreEvents()
+        coVerify { getSavedEvents.invoke(any()) }
+        loadingJob.join()
+
+        val loadingState = states[0]
+        assert(
+            loadingState.events.status is Loading
+                    && loadingState.events.value.size == initialEventsSize
+                    && loadingState.limit == initialEventsSize
+        )
+        val loadedMoreState = states.last()
+        assert(
+            loadedMoreState.events.status is LoadedSuccessfully
+                    && loadedMoreState.events.value.size == afterLoadMoreSize
+                    && loadedMoreState.limit == afterLoadMoreSize
+        )
+    }
 }
