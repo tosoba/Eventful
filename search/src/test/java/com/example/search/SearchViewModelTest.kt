@@ -1,8 +1,11 @@
 package com.example.search
 
+import com.example.core.usecase.SaveSuggestion
 import com.example.coreandroid.util.Initial
 import com.example.coreandroid.util.LoadingFailed
 import com.example.test.rule.MainDispatcherRule
+import io.mockk.called
+import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
@@ -57,5 +60,38 @@ internal class SearchViewModelTest {
             val (_, _, events) = states.last()
             val (value, status, _, _) = events
             assert(value.isEmpty() && status is LoadingFailed<*> && status.error == SearchError.NotConnected)
+        }
+
+    @Test
+    fun `GivenSearchVMAndValidSearchText WhenSaveSuggestionIsCalled SuggestionIsSaved`() =
+        runBlocking {
+            val saveSuggestion = mockk<SaveSuggestion>(relaxed = true)
+            val vm = SearchViewModel(
+                mockk(relaxed = true),
+                mockk(relaxed = true),
+                saveSuggestion,
+                testDispatcher
+            )
+            val validSearchText = "suggestion"
+
+            vm.insertNewSuggestion(validSearchText)
+
+            coVerify { saveSuggestion(validSearchText) }
+        }
+
+    @Test
+    fun `GivenSearchVMAndInvalidSearchText WhenSaveSuggestionIsCalled SuggestionIsNotSaved`() =
+        runBlocking {
+            val saveSuggestion = mockk<SaveSuggestion>(relaxed = true)
+            val vm = SearchViewModel(
+                mockk(relaxed = true),
+                mockk(relaxed = true),
+                saveSuggestion,
+                testDispatcher
+            )
+            val invalidSearchText = "inv"
+
+            vm.insertNewSuggestion(invalidSearchText)
+            coVerify { saveSuggestion(invalidSearchText) wasNot called }
         }
 }
