@@ -1,6 +1,8 @@
 package com.example.search
 
+import com.example.core.usecase.GetSeachSuggestions
 import com.example.core.usecase.SaveSuggestion
+import com.example.core.usecase.SearchEvents
 import com.example.coreandroid.util.Initial
 import com.example.coreandroid.util.LoadingFailed
 import com.example.test.rule.MainDispatcherRule
@@ -26,19 +28,23 @@ internal class SearchViewModelTest {
 
     private val testDispatcher = TestCoroutineDispatcher()
 
-    private val viewModelWithRelaxedUseCases: SearchViewModel
-        get() = SearchViewModel(
-            mockk(relaxed = true),
-            mockk(relaxed = true),
-            mockk(relaxed = true),
-            testDispatcher
-        )
+    private fun searchViewModelWith(
+        searchEvents: SearchEvents? = null,
+        getSearchSuggestions: GetSeachSuggestions? = null,
+        saveSuggestion: SaveSuggestion? = null
+    ): SearchViewModel = SearchViewModel(
+        searchEvents ?: mockk(relaxed = true),
+        getSearchSuggestions ?: mockk(relaxed = true),
+        saveSuggestion ?: mockk(relaxed = true),
+        testDispatcher
+    )
 
     @Test
     fun `GivenSearchVM WhenInitialized StateIsInitial`() = runBlocking {
-        val vm = viewModelWithRelaxedUseCases
+        val viewModel = searchViewModelWith()
         val states = mutableListOf<SearchState>()
-        vm.state.take(1).collect { states.add(it) }
+
+        viewModel.state.take(1).collect { states.add(it) }
         val (_, _, events) = states.last()
         val (value, status, _, _) = events
         assert(value.isEmpty() && status is Initial)
@@ -47,14 +53,13 @@ internal class SearchViewModelTest {
     @Test
     fun `GivenSearchVM WhenNoEventsLoadedAndOnNotConnected StateStatusIsLoadingError`() =
         runBlocking {
-            val vm = viewModelWithRelaxedUseCases
+            val viewModel = searchViewModelWith()
 
             val states = mutableListOf<SearchState>()
             val loadingJob = launch {
-                vm.state.take(2).collect { states.add(it) }
+                viewModel.state.take(2).collect { states.add(it) }
             }
-
-            vm.onNotConnected()
+            viewModel.onNotConnected()
             loadingJob.join()
 
             val (_, _, events) = states.last()
@@ -66,15 +71,10 @@ internal class SearchViewModelTest {
     fun `GivenSearchVMAndValidSearchText WhenSaveSuggestionIsCalled SuggestionIsSaved`() =
         runBlocking {
             val saveSuggestion = mockk<SaveSuggestion>(relaxed = true)
-            val vm = SearchViewModel(
-                mockk(relaxed = true),
-                mockk(relaxed = true),
-                saveSuggestion,
-                testDispatcher
-            )
+            val viewModel = searchViewModelWith(saveSuggestion = saveSuggestion)
             val validSearchText = "suggestion"
 
-            vm.insertNewSuggestion(validSearchText)
+            viewModel.insertNewSuggestion(validSearchText)
 
             coVerify { saveSuggestion(validSearchText) }
         }
@@ -83,15 +83,18 @@ internal class SearchViewModelTest {
     fun `GivenSearchVMAndInvalidSearchText WhenSaveSuggestionIsCalled SuggestionIsNotSaved`() =
         runBlocking {
             val saveSuggestion = mockk<SaveSuggestion>(relaxed = true)
-            val vm = SearchViewModel(
-                mockk(relaxed = true),
-                mockk(relaxed = true),
-                saveSuggestion,
-                testDispatcher
-            )
+            val viewModel = searchViewModelWith(saveSuggestion = saveSuggestion)
+            val blankSearchText = ""
             val invalidSearchText = "inv"
 
-            vm.insertNewSuggestion(invalidSearchText)
-            coVerify { saveSuggestion(invalidSearchText) wasNot called }
+            viewModel.insertNewSuggestion(blankSearchText)
+            viewModel.insertNewSuggestion(invalidSearchText)
+
+            coVerify {
+                listOf(
+                    saveSuggestion(blankSearchText),
+                    saveSuggestion(invalidSearchText)
+                ) wasNot called
+            }
         }
 }

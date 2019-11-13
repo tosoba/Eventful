@@ -38,6 +38,7 @@ internal class FavouritesViewModelTest {
     fun `GivenFavouritesVM WhenInitialized ThenShouldGetSavedEvents`() {
         val getSavedEvents: GetSavedEvents = mockk(relaxed = true)
         FavouritesViewModel(getSavedEvents, testDispatcher)
+
         coVerify { getSavedEvents.invoke(any()) }
     }
 
@@ -50,6 +51,7 @@ internal class FavouritesViewModelTest {
                 )
             }
             val viewModel = FavouritesViewModel(getSavedEvents, testDispatcher)
+
             val (savedEvents, limit) = viewModel.state.first { it.events.status is LoadedSuccessfully }
             assert(savedEvents.value.size == initialEventsSize && limit == initialEventsSize)
         }
@@ -73,7 +75,7 @@ internal class FavouritesViewModelTest {
             viewModel.state.take(2).collect { states.add(it) }
         }
 
-        //load more events
+        // load more events
         viewModel.loadMoreEvents()
         coVerify { getSavedEvents.invoke(any()) }
         loadingJob.join()
