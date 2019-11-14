@@ -1,5 +1,6 @@
 package com.example.search
 
+import com.example.core.model.search.SearchSuggestion
 import com.example.core.usecase.GetSeachSuggestions
 import com.example.core.usecase.SaveSuggestion
 import com.example.core.usecase.SearchEvents
@@ -7,13 +8,12 @@ import com.example.coreandroid.util.Initial
 import com.example.coreandroid.util.LoadingFailed
 import com.example.test.rule.MainDispatcherRule
 import io.mockk.called
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.Rule
@@ -42,10 +42,8 @@ internal class SearchViewModelTest {
     @Test
     fun `GivenSearchVM WhenInitialized StateIsInitial`() = runBlocking {
         val viewModel = searchViewModelWith()
-        val states = mutableListOf<SearchState>()
 
-        viewModel.state.take(1).collect { states.add(it) }
-        val (_, _, events) = states.last()
+        val (_, _, events) = viewModel.state.first()
         val (value, status, _, _) = events
         assert(value.isEmpty() && status is Initial)
     }
@@ -55,14 +53,9 @@ internal class SearchViewModelTest {
         runBlocking {
             val viewModel = searchViewModelWith()
 
-            val states = mutableListOf<SearchState>()
-            val loadingJob = launch {
-                viewModel.state.take(2).collect { states.add(it) }
-            }
             viewModel.onNotConnected()
-            loadingJob.join()
 
-            val (_, _, events) = states.last()
+            val (_, _, events) = viewModel.state.first { it.events.status !is Initial }
             val (value, status, _, _) = events
             assert(value.isEmpty() && status is LoadingFailed<*> && status.error == SearchError.NotConnected)
         }
@@ -96,5 +89,24 @@ internal class SearchViewModelTest {
                     saveSuggestion(invalidSearchText)
                 ) wasNot called
             }
+        }
+
+    @Test
+    fun `GivenSearchVMAndSearchText WhenGetSuggestionsIsCalled SuggestionsAreLoaded`() =
+        runBlocking {
+            val searchText = "search"
+            val numberOfReturnedSuggestions = 10
+            val getSearchSuggestions = mockk<GetSeachSuggestions> {
+                coEvery { this@mockk.invoke(searchText) } returns (1..numberOfReturnedSuggestions).map { mockk<SearchSuggestion>() }
+            }
+            val viewModel = searchViewModelWith(getSearchSuggestions = getSearchSuggestions)
+
+            viewModel.loadSearchSuggestions(searchText)
+
+            coVerify { getSearchSuggestions(searchText) }
+            val suggestions = viewModel.state
+                .first { it.searchSuggestions.isNotEmpty() }
+                .searchSuggestions
+            assert(suggestions.size == numberOfReturnedSuggestions)
         }
 }
