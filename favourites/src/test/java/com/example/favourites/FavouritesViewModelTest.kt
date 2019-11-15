@@ -1,10 +1,10 @@
 package com.example.favourites
 
 import com.example.core.usecase.GetSavedEvents
-import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.util.LoadedSuccessfully
 import com.example.coreandroid.util.Loading
 import com.example.test.rule.MainDispatcherRule
+import com.example.test.rule.getEvents
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -32,8 +32,6 @@ internal class FavouritesViewModelTest {
     private val initialEventsSize = 20
     private val afterLoadMoreSize = 30
 
-    private fun getEvents(size: Int): List<Event> = (1..size).map { mockk<Event>(relaxed = true) }
-
     @Test
     fun `GivenFavouritesVM WhenInitialized ThenShouldGetSavedEvents`() {
         val getSavedEvents: GetSavedEvents = mockk(relaxed = true)
@@ -46,7 +44,7 @@ internal class FavouritesViewModelTest {
     fun `GivenFavouritesVM WhenInitializedAndGetSavedEventsReturnsSuccessfully ThenEventsAreStored`() =
         runBlocking {
             val getSavedEvents: GetSavedEvents = mockk {
-                coEvery { this@mockk.invoke(FavouritesViewModel.limitIncrement) } returns flowOf(
+                coEvery { this@mockk(FavouritesViewModel.limitIncrement) } returns flowOf(
                     getEvents(initialEventsSize)
                 )
             }
@@ -59,10 +57,10 @@ internal class FavouritesViewModelTest {
     @Test
     fun `GivenFavouritesVM WhenThereAreNoMoreEventsToLoad SameEventsAreReturned`() = runBlocking {
         val getSavedEvents: GetSavedEvents = mockk {
-            coEvery { this@mockk.invoke(FavouritesViewModel.limitIncrement) } returns flowOf(
+            coEvery { this@mockk(FavouritesViewModel.limitIncrement) } returns flowOf(
                 getEvents(initialEventsSize)
             )
-            coEvery { this@mockk.invoke(FavouritesViewModel.limitIncrement + initialEventsSize) } returns flowOf(
+            coEvery { this@mockk(FavouritesViewModel.limitIncrement + initialEventsSize) } returns flowOf(
                 getEvents(initialEventsSize)
             )
         }
@@ -97,10 +95,10 @@ internal class FavouritesViewModelTest {
     @Test
     fun `GivenFavouritesVM WhenThereAreMoreEventsToLoad MoreEventsAreReturned`() = runBlocking {
         val getSavedEvents: GetSavedEvents = mockk {
-            coEvery { this@mockk.invoke(FavouritesViewModel.limitIncrement) } returns flowOf(
+            coEvery { this@mockk(FavouritesViewModel.limitIncrement) } returns flowOf(
                 getEvents(initialEventsSize)
             )
-            coEvery { this@mockk.invoke(FavouritesViewModel.limitIncrement + initialEventsSize) } returns flowOf(
+            coEvery { this@mockk(FavouritesViewModel.limitIncrement + initialEventsSize) } returns flowOf(
                 getEvents(afterLoadMoreSize)
             )
         }

@@ -21,8 +21,9 @@ class SearchViewModel(
     private val searchEvents: SearchEvents,
     private val getSearchSuggestions: GetSeachSuggestions,
     private val saveSuggestion: SaveSuggestion,
-    private val ioDispatcher: CoroutineDispatcher
-) : VectorViewModel<SearchState>(SearchState.INITIAL) {
+    private val ioDispatcher: CoroutineDispatcher,
+    initialState: SearchState = SearchState.INITIAL
+) : VectorViewModel<SearchState>(initialState) {
 
     private var searchJob: Job? = null
 
