@@ -7,10 +7,7 @@ import com.example.core.model.ticketmaster.IEvent
 import com.example.core.usecase.GetSeachSuggestions
 import com.example.core.usecase.SaveSuggestion
 import com.example.core.usecase.SearchEvents
-import com.example.coreandroid.util.Initial
-import com.example.coreandroid.util.LoadedSuccessfully
-import com.example.coreandroid.util.LoadingFailed
-import com.example.coreandroid.util.takeWhileInclusive
+import com.example.coreandroid.util.*
 import com.example.test.rule.MainDispatcherRule
 import com.example.test.rule.getEvents
 import io.mockk.called
@@ -159,13 +156,20 @@ internal class SearchViewModelTest {
             job.join()
 
             coVerify { searchEvents(searchText) }
-            val (_, _, eventsDataList) = states.last()
-            val (events, status, offset, totalPages) = eventsDataList
+            val (_, _, loadingEventsDataList) = states[states.size - 2]
+            val (eventsWhenLoading, statusWhenLoading, offsetWhenLoading, _) = loadingEventsDataList
             assert(
-                events.size == 20
-                        && status is LoadedSuccessfully
-                        && offset == expectedCurrentPage + 1
-                        && totalPages == expectedTotalPages
+                eventsWhenLoading.isEmpty()
+                        && statusWhenLoading is Loading
+                        && offsetWhenLoading == 0
+            )
+            val (_, _, loadedEventsDataList) = states.last()
+            val (eventsWhenLoaded, statusWhenLoaded, offsetWhenLoaded, totalPagesWhenLoaded) = loadedEventsDataList
+            assert(
+                eventsWhenLoaded.size == 20
+                        && statusWhenLoaded is LoadedSuccessfully
+                        && offsetWhenLoaded == expectedCurrentPage + 1
+                        && totalPagesWhenLoaded == expectedTotalPages
             )
         }
 }
