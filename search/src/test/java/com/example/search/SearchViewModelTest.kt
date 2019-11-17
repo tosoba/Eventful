@@ -7,7 +7,10 @@ import com.example.core.model.ticketmaster.IEvent
 import com.example.core.usecase.GetSeachSuggestions
 import com.example.core.usecase.SaveSuggestion
 import com.example.core.usecase.SearchEvents
-import com.example.coreandroid.util.*
+import com.example.coreandroid.util.Initial
+import com.example.coreandroid.util.LoadedSuccessfully
+import com.example.coreandroid.util.LoadingFailed
+import com.example.coreandroid.util.takeWhileInclusive
 import com.example.test.rule.MainDispatcherRule
 import com.example.test.rule.getEvents
 import io.mockk.called
@@ -109,10 +112,10 @@ internal class SearchViewModelTest {
 
             viewModel.loadSearchSuggestions(searchText)
 
-            coVerify { getSearchSuggestions(searchText) }
             val suggestions = viewModel.state
                 .first { it.searchSuggestions.isNotEmpty() }
                 .searchSuggestions
+            coVerify { getSearchSuggestions(searchText) }
             assert(suggestions.size == numberOfReturnedSuggestions)
         }
 
@@ -129,7 +132,7 @@ internal class SearchViewModelTest {
     }
 
     @Test
-    fun `GivenSearchVMAndSearchText WhenSearchReturnsSuccessfully ResultsAreStoredInState`() =
+    fun `GivenSearchVMAndSearchText WhenSearchReturnsSuccess ResultsAreStoredInState`() =
         runBlocking {
             val searchText = "search"
             val expectedEventsSize = 20
@@ -156,13 +159,6 @@ internal class SearchViewModelTest {
             job.join()
 
             coVerify { searchEvents(searchText) }
-            val (_, _, loadingEventsDataList) = states[states.size - 2]
-            val (eventsWhenLoading, statusWhenLoading, offsetWhenLoading, _) = loadingEventsDataList
-            assert(
-                eventsWhenLoading.isEmpty()
-                        && statusWhenLoading is Loading
-                        && offsetWhenLoading == 0
-            )
             val (_, _, loadedEventsDataList) = states.last()
             val (eventsWhenLoaded, statusWhenLoaded, offsetWhenLoaded, totalPagesWhenLoaded) = loadedEventsDataList
             assert(
@@ -172,4 +168,33 @@ internal class SearchViewModelTest {
                         && totalPagesWhenLoaded == expectedTotalPages
             )
         }
+
+    @Test
+    fun `GivenSearchVMAndSearchText WhenSearchReturnsError ErrorIsStoredInState`() = runBlocking {
+        val searchText = "search"
+        val error = Any()
+        val searchEvents = mockk<SearchEvents> {
+            coEvery { this@mockk(searchText) } returns Resource.Error(error)
+        }
+        val viewModel = searchViewModelWith(searchEvents = searchEvents)
+
+        val states = mutableListOf<SearchState>()
+        val job = launch {
+            viewModel.state
+                .takeWhileInclusive { (_, _, events) -> events.status !is LoadingFailed<*> }
+                .collect { states.add(it) }
+        }
+        viewModel.search(searchText)
+        job.join()
+
+        coVerify { searchEvents(searchText) }
+        val (_, _, loadedEventsDataList) = states.last()
+        val (eventsWhenLoaded, statusWhenLoaded, offsetWhenLoaded, _) = loadedEventsDataList
+        assert(
+            eventsWhenLoaded.isEmpty()
+                    && statusWhenLoaded is LoadingFailed<*>
+                    && offsetWhenLoaded == 0 &&
+                    statusWhenLoaded.error == error
+        )
+    }
 }
