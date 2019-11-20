@@ -27,45 +27,43 @@ class SearchViewModel(
 
     private var searchJob: Job? = null
 
-    fun search(searchText: String, retry: Boolean = false) {
+    fun search(searchText: String, retry: Boolean = false) = withState { state ->
+        if (searchText == state.searchText && !retry) return@withState
+
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
-            withState { state ->
-                if (searchText == state.searchText && !retry) return@withState
-
-                setState {
+            setState {
+                copy(
+                    events = events.copyWithLoadingInProgress,
+                    searchText = searchText
+                )
+            }
+            when (val result = withContext(ioDispatcher) {
+                searchEvents(searchText)
+            }) {
+                is Resource.Success -> setState {
                     copy(
-                        events = events.copyWithLoadingInProgress,
-                        searchText = searchText
+                        events = PagedDataList(
+                            result.data.items.map { Event(it) },
+                            LoadedSuccessfully,
+                            result.data.currentPage + 1,
+                            result.data.totalPages
+                        )
                     )
                 }
-                when (val result = withContext(ioDispatcher) {
-                    searchEvents(searchText)
-                }) {
-                    is Resource.Success -> setState {
-                        copy(
-                            events = PagedDataList(
-                                result.data.items.map { Event(it) },
-                                LoadedSuccessfully,
-                                result.data.currentPage + 1,
-                                result.data.totalPages
-                            )
-                        )
-                    }
 
-                    is Resource.Error<PagedResult<IEvent>, *> -> setState {
-                        copy(events = events.copyWithError(result.error))
-                    }
+                is Resource.Error<PagedResult<IEvent>, *> -> setState {
+                    copy(events = events.copyWithError(result.error))
                 }
             }
         }
     }
 
-    fun searchMore() = viewModelScope.launch {
-        withState { state ->
-            if (state.events.status is Loading || state.events.offset >= state.events.totalItems)
-                return@withState
+    fun searchMore() = withState { state ->
+        if (state.events.status is Loading || state.events.offset >= state.events.totalItems)
+            return@withState
 
+        viewModelScope.launch {
             setState { copy(events = events.copyWithLoadingInProgress) }
             when (val result = withContext(ioDispatcher) {
                 searchEvents(state.searchText)
