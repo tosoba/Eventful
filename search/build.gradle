@@ -56,9 +56,9 @@ dependencies {
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
     kapt "com.google.dagger:dagger-android-processor:$daggerVersion"
 
-    implementation 'com.github.satoshun.coroutinebinding:coroutinebinding-appcompat:1.0.0-rc2'
-    implementation 'com.github.satoshun.coroutinebinding:coroutinebinding-core:1.0.0-rc2'
-    implementation 'com.github.satoshun.coroutinebinding:coroutinebinding:1.0.0-rc2'
+    implementation "io.github.reactivecircus.flowbinding:flowbinding-android:$flowBindingVersion"
+    implementation "io.github.reactivecircus.flowbinding:flowbinding-appcompat:$flowBindingVersion"
+    implementation "io.github.reactivecircus.flowbinding:flowbinding-core:$flowBindingVersion"
 
     implementation "com.airbnb.android:epoxy:$epoxyVersion"
     implementation "com.airbnb.android:epoxy-databinding:$epoxyVersion"

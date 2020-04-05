@@ -1,11 +1,9 @@
 package com.example.nearby
 
 import android.os.Bundle
-import android.os.Handler
 import android.view.*
 import android.widget.Toast
-import com.example.coreandroid.base.InjectableVectorFragment
-import com.example.coreandroid.di.Dependencies
+import com.example.coreandroid.base.InjectableEpoxyFragment
 import com.example.coreandroid.navigation.IFragmentProvider
 import com.example.coreandroid.util.SnackbarState
 import com.example.coreandroid.util.ext.*
@@ -18,24 +16,15 @@ import kotlinx.android.synthetic.main.fragment_nearby.view.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Named
 
 
-class NearbyFragment : InjectableVectorFragment() {
+class NearbyFragment : InjectableEpoxyFragment() {
 
     @Inject
     internal lateinit var fragmentProvider: IFragmentProvider
 
     @Inject
     internal lateinit var handler: NearbyViewEventHandler
-
-    @Inject
-    @field:Named(Dependencies.EPOXY_DIFFER)
-    internal lateinit var differ: Handler
-
-    @Inject
-    @field:Named(Dependencies.EPOXY_BUILDER)
-    internal lateinit var builder: Handler
 
     private val eventsScrollListener: EndlessRecyclerViewScrollListener by lazy {
         EndlessRecyclerViewScrollListener {
@@ -45,7 +34,7 @@ class NearbyFragment : InjectableVectorFragment() {
 
     private val epoxyController by lazy {
         itemListController(
-            builder, differ, handler.viewModel, NearbyState::events,
+            handler.viewModel, NearbyState::events,
             onScrollListener = eventsScrollListener
         ) { selectable ->
             selectable.listItem(
@@ -76,7 +65,6 @@ class NearbyFragment : InjectableVectorFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setHasOptionsMenuIfVisible()
 
         handler.eventOccurred(
             Lifecycle.OnViewCreated(savedInstanceState != null)
@@ -116,6 +104,17 @@ class NearbyFragment : InjectableVectorFragment() {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        setHasOptionsMenu(true)
+        activity?.invalidateOptionsMenu()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        setHasOptionsMenu(false)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

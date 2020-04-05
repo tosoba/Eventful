@@ -31,10 +31,10 @@ class SearchViewEventHandler @Inject constructor(
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + trackerJob
 
-    private val viewUpdatesChannel: Channel<SearchViewUpdate> =
-        Channel(capacity = Channel.UNLIMITED)
+    private val viewUpdatesChannel = Channel<SearchViewUpdate>(capacity = Channel.UNLIMITED)
 
-    private val events: PagedDataList<Event> get() = viewModel.currentState.events
+    private val events: PagedDataList<Event>
+        get() = viewModel.currentState.events
 
     private val searchSuggestionsFlow: Flow<SearchViewUpdate?> by lazy {
         viewModel.state.map { it.searchSuggestions }

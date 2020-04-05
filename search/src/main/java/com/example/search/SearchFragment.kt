@@ -2,43 +2,31 @@ package com.example.search
 
 import android.app.SearchManager
 import android.os.Bundle
-import android.os.Handler
 import android.view.*
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat.getSystemService
-import com.example.coreandroid.base.InjectableVectorFragment
-import com.example.coreandroid.di.Dependencies
+import com.example.coreandroid.base.InjectableEpoxyFragment
 import com.example.coreandroid.navigation.IFragmentProvider
 import com.example.coreandroid.util.SnackbarState
 import com.example.coreandroid.util.ext.*
 import com.example.coreandroid.util.itemListController
 import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
 import com.example.coreandroid.view.epoxy.listItem
-import com.github.satoshun.coroutinebinding.androidx.appcompat.widget.queryTextChange
-import com.github.satoshun.coroutinebinding.androidx.appcompat.widget.queryTextChangeEvents
 import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.fragment_search.view.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import reactivecircus.flowbinding.appcompat.queryTextEvents
 import javax.inject.Inject
-import javax.inject.Named
 
 
-class SearchFragment : InjectableVectorFragment() {
+class SearchFragment : InjectableEpoxyFragment() {
 
     @Inject
     internal lateinit var fragmentProvider: IFragmentProvider
 
     @Inject
     internal lateinit var handler: SearchViewEventHandler
-
-    @Inject
-    @field:Named(Dependencies.EPOXY_DIFFER)
-    internal lateinit var differ: Handler
-
-    @Inject
-    @field:Named(Dependencies.EPOXY_BUILDER)
-    internal lateinit var builder: Handler
 
     private val eventsScrollListener: EndlessRecyclerViewScrollListener by lazy {
         EndlessRecyclerViewScrollListener {
@@ -48,7 +36,7 @@ class SearchFragment : InjectableVectorFragment() {
 
     private val epoxyController by lazy {
         itemListController(
-            builder, differ, handler.viewModel, SearchState::events,
+            handler.viewModel, SearchState::events,
             onScrollListener = eventsScrollListener,
             emptyText = "No events found"
         ) { event ->
@@ -75,7 +63,6 @@ class SearchFragment : InjectableVectorFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setHasOptionsMenuIfVisible()
 
         fragmentScope.launch {
             handler.updates.collect {
@@ -108,6 +95,17 @@ class SearchFragment : InjectableVectorFragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        setHasOptionsMenu(true)
+        activity?.invalidateOptionsMenu()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        setHasOptionsMenu(false)
+    }
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         menuController?.menuView?.let { menuView ->
             menuView.menu.clear()
@@ -137,25 +135,12 @@ class SearchFragment : InjectableVectorFragment() {
             )?.getSearchableInfo(activity?.componentName)
         )
         searchView.suggestionsAdapter = searchSuggestionsAdapter
-
-        fragmentScope.launch {
-            searchView.queryTextChangeEvents()
-                .consumeAsFlow()
-                .filter { it.isSubmitted && it.queryText.isNotBlank() && it.queryText.length > 2 }
-                .collect {
-                    handler.eventOccurred(Interaction.SearchTextChanged(it.toString()))
-                }
-        }
-
-        fragmentScope.launch {
-            searchView.queryTextChange()
-                .consumeAsFlow()
-                .filter { it.isNotBlank() && it.length > 2 }
-                .debounce(500)
-                .distinctUntilChanged()
-                .collect {
-                    handler.eventOccurred(Interaction.SearchTextChanged(it.toString()))
-                }
-        }
+        searchView.queryTextEvents()
+            .debounce(500)
+            .filter { it.queryText.isNotBlank() && it.queryText.length > 2 }
+            .onEach {
+                handler.eventOccurred(Interaction.SearchTextChanged(it.toString()))
+            }
+            .launchIn(fragmentScope)
     }
 }

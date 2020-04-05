@@ -37,6 +37,7 @@ buildscript {
         daggerVersion = '2.21'
         epoxyVersion = '3.7.0'
         flickrVersion = '3.0.1'
+        flowBindingVersion = '0.10.2'
         geoVersion = '0.7.1'
         glideVersion = '4.9.0'
         gsonVersion = '2.8.5'

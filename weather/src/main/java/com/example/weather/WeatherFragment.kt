@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.coreandroid.base.InjectableVectorFragment
+import com.example.coreandroid.base.InjectableFragment
 import com.example.coreandroid.util.delegate.NullableFragmentArgument
 import com.example.coreandroid.util.ext.setupToolbar
 import com.example.coreandroid.util.ext.setupToolbarWithDrawerToggle
@@ -15,7 +15,7 @@ import kotlinx.android.synthetic.main.fragment_weather.view.*
 import javax.inject.Inject
 
 
-class WeatherFragment : InjectableVectorFragment() {
+class WeatherFragment : InjectableFragment() {
 
     @Inject
     lateinit var viewModel: WeatherViewModel

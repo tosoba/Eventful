@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.PagerAdapter
-import com.example.coreandroid.base.InjectableVectorFragment
+import com.example.coreandroid.base.InjectableFragment
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.util.*
 import com.example.coreandroid.util.delegate.FragmentArgument
@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class EventFragment : InjectableVectorFragment() {
+class EventFragment : InjectableFragment() {
 
     var event: Event by FragmentArgument()
         private set

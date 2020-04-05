@@ -1,13 +1,14 @@
 package com.example.favourites
 
 import android.os.Bundle
-import android.os.Handler
 import android.view.*
-import com.example.coreandroid.base.InjectableVectorFragment
+import com.example.coreandroid.base.InjectableEpoxyFragment
 import com.example.coreandroid.base.MainFragmentSelectedStateProvider
-import com.example.coreandroid.di.Dependencies
 import com.example.coreandroid.navigation.IFragmentProvider
-import com.example.coreandroid.util.ext.*
+import com.example.coreandroid.util.ext.menuController
+import com.example.coreandroid.util.ext.navigationFragment
+import com.example.coreandroid.util.ext.restoreScrollPosition
+import com.example.coreandroid.util.ext.saveScrollPosition
 import com.example.coreandroid.util.itemListController
 import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
 import com.example.coreandroid.view.epoxy.listItem
@@ -16,21 +17,12 @@ import kotlinx.android.synthetic.main.fragment_favourites.view.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Named
 
 
-class FavouritesFragment : InjectableVectorFragment() {
+class FavouritesFragment : InjectableEpoxyFragment() {
 
     @Inject
     internal lateinit var fragmentProvider: IFragmentProvider
-
-    @Inject
-    @field:Named(Dependencies.EPOXY_DIFFER)
-    internal lateinit var differ: Handler
-
-    @Inject
-    @field:Named(Dependencies.EPOXY_BUILDER)
-    internal lateinit var builder: Handler
 
     @Inject
     internal lateinit var viewModel: FavouritesViewModel
@@ -44,7 +36,7 @@ class FavouritesFragment : InjectableVectorFragment() {
 
     private val epoxyController by lazy {
         itemListController(
-            builder, differ, viewModel, FavouritesState::events,
+            viewModel, FavouritesState::events,
             emptyText = "No favourite events added yet",
             onScrollListener = eventsScrollListener
         ) { event ->
@@ -67,7 +59,6 @@ class FavouritesFragment : InjectableVectorFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setHasOptionsMenuIfVisible()
 
         fragmentScope.launch { viewModel.state.collect { epoxyController.setData(it) } }
         fragmentScope.launch {
@@ -77,6 +68,17 @@ class FavouritesFragment : InjectableVectorFragment() {
                     if (it) activity?.invalidateOptionsMenu()
                 }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        setHasOptionsMenu(true)
+        activity?.invalidateOptionsMenu()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        setHasOptionsMenu(false)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
