@@ -40,16 +40,16 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
 
+    implementation project(':core')
+    implementation project(':coreandroid')
+
     implementation "androidx.appcompat:appcompat:$appCompatVersion"
-    implementation "androidx.core:core-ktx:$coreKtxVersion"
     implementation "androidx.constraintlayout:constraintlayout:$constraintLayoutVersion"
     implementation "com.google.android.material:material:$materialVersion"
 
-    implementation project(':core')
-    implementation project(':coreandroid')
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0-alpha04"
-    implementation "androidx.lifecycle:lifecycle-extensions:2.2.0-alpha04"
-    implementation "androidx.core:core-ktx:1.1.0"
+    implementation "androidx.core:core-ktx:$coreKtxVersion"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleViewModelKtxVersion"
+    implementation "androidx.lifecycle:lifecycle-extensions:$lifecycleExtensionsVersion"
 
     implementation "com.google.dagger:dagger-android:$daggerVersion"
     implementation "com.google.dagger:dagger-android-support:$daggerVersion"
@@ -60,19 +60,17 @@ dependencies {
     implementation 'com.github.satoshun.coroutinebinding:coroutinebinding-core:1.0.0-rc2'
     implementation 'com.github.satoshun.coroutinebinding:coroutinebinding:1.0.0-rc2'
 
-    implementation 'com.airbnb.android:epoxy:3.7.0'
-    implementation 'com.airbnb.android:epoxy-databinding:3.7.0'
-    kapt 'com.airbnb.android:epoxy-processor:3.7.0'
+    implementation "com.airbnb.android:epoxy:$epoxyVersion"
+    implementation "com.airbnb.android:epoxy-databinding:$epoxyVersion"
+    kapt "com.airbnb.android:epoxy-processor:$epoxyVersion"
 
-    implementation "com.github.haroldadmin:Vector:0.4.2"
-
-    implementation "com.github.haroldadmin:NetworkResponseAdapter:2.1.0"
+    implementation "com.github.haroldadmin:Vector:$vectorVersion"
+    implementation "com.github.haroldadmin:NetworkResponseAdapter:$networkResponseAdapterVersion"
 
     testImplementation project(':test')
-
     testImplementation "junit:junit:$junitVersion"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinxCoroutinesTestVersion"
+    testImplementation "io.mockk:mockk:$mockkVersion"
     androidTestImplementation "androidx.test:runner:$testRunnerVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
-    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.2'
-    testImplementation "io.mockk:mockk:1.9.3"
 }

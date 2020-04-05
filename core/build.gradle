@@ -4,22 +4,18 @@ apply plugin: 'kotlin-kapt'
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib"
-
-    implementation 'androidx.core:core-ktx:1.1.0'
-
-    implementation "com.google.code.gson:gson:$gsonVersion"
-    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
-
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
-
-    implementation "com.google.code.gson:gson:$gsonVersion"
-    implementation "com.squareup.retrofit2:converter-gson:$retrofitConverterGsonVersion"
 
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
     api "com.google.dagger:dagger:$daggerVersion"
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
+
+    implementation "androidx.core:core-ktx:$coreKtxVersion"
+
+    implementation "com.google.code.gson:gson:$gsonVersion"
+
+    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    implementation "com.squareup.retrofit2:converter-gson:$retrofitConverterGsonVersion"
 }
 
 sourceCompatibility = "8"

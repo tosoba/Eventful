@@ -1,38 +1,56 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
-
 buildscript {
     ext {
         kotlinVersion = '1.3.61'
-        appCompatVersion = '1.1.0-alpha04'
-        coreKtxVersion = '1.1.0-alpha05'
+
+        appCompatVersion = '1.1.0'
         constraintLayoutVersion = '1.1.3'
         materialVersion = '1.1.0-alpha05'
         vectorDrawableVersion = '1.1.0-alpha01'
         legacySupportV4Version = '1.0.0'
         recyclerViewVersion = '1.0.0'
 
-        guavaVersion = '27.1-android'
-        daggerVersion = '2.21'
-        flickrVersion = '3.0.1'
-        retrofitVersion = '2.5.0'
-        retrofitConverterGsonVersion = '2.4.0'
-        gsonVersion = '2.8.5'
-        pekoVersion = '1.0.1'
+        lifecycleVersion = '1.1.1'
+        lifecycleViewModelKtxVersion = '2.2.0-alpha04'
+        lifecycleExtensionsVersion = '2.2.0-alpha04'
+
         rxAndroidVersion = '2.1.1'
         rxJavaVersion = '2.2.8'
         rxLocationVersion = '1.0.5'
         reactiveNetworkVersion = '3.0.2'
 
-        liveDataKtxVersion = '1.0.1'
-        lifecycleVersion = '1.1.1'
         coroutinesVersion = '1.3.2'
         coroutinesRx2Version = '1.2.1'
+
+        coreKtxVersion = '1.1.0'
+        liveDataKtxVersion = '1.0.1'
+
+        retrofitVersion = '2.5.0'
+        retrofitConverterGsonVersion = '2.4.0'
+
+        vectorVersion = '0.4.2'
+        networkResponseAdapterVersion = '2.1.0'
+
         playServicesMapsVersion = '16.1.0'
         playServicesLocationVersion = '16.0.0'
 
+        bannerSliderVersion = '2.0.0'
+        daggerVersion = '2.21'
+        epoxyVersion = '3.7.0'
+        flickrVersion = '3.0.1'
+        geoVersion = '0.7.1'
+        glideVersion = '4.9.0'
+        gsonVersion = '2.8.5'
+        guavaVersion = '27.1-android'
+        jsoupVersion = '1.12.1'
+        pekoVersion = '1.0.1'
+        roomVersion = '2.2.0-rc01'
+
+        espressoVersion = '3.2.0'
         junitVersion = '4.12'
+        kotlinxCoroutinesTestVersion = '1.3.2'
+        mockkVersion = '1.9.3'
+        testExtJunitVersion = '1.1.0'
         testRunnerVersion = '1.2.0-alpha03'
-        espressoVersion = '3.2.0-alpha03'
     }
 
     repositories {
@@ -51,8 +69,6 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "org.jetbrains.kotlin:kotlin-android-extensions:$kotlinVersion"
         classpath 'com.jakewharton:butterknife-gradle-plugin:10.1.0'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
 }
 

@@ -34,37 +34,35 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
+    implementation project(':core')
+    implementation project(':coreandroid')
+    implementation project(':weather')
+    
     implementation "androidx.appcompat:appcompat:$appCompatVersion"
     implementation "androidx.legacy:legacy-support-v4:$legacySupportV4Version"
     implementation "androidx.recyclerview:recyclerview:$recyclerViewVersion"
     implementation "com.google.android.material:material:$materialVersion"
     implementation "androidx.constraintlayout:constraintlayout:$constraintLayoutVersion"
 
-    api "com.google.guava:guava:$guavaVersion"
-
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0-alpha04"
-    implementation "androidx.lifecycle:lifecycle-extensions:2.2.0-alpha04"
-    implementation "androidx.core:core-ktx:1.1.0"
-
-    implementation project(':core')
-    implementation project(':coreandroid')
-    implementation project(':weather')
-
-    implementation 'com.airbnb.android:epoxy:3.7.0'
-    implementation 'com.airbnb.android:epoxy-databinding:3.7.0'
-    kapt 'com.airbnb.android:epoxy-processor:3.7.0'
-
-    implementation "com.github.haroldadmin:Vector:0.4.2"
-
-    implementation "com.google.android.gms:play-services-maps:$playServicesMapsVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
 
     implementation "com.google.dagger:dagger-android:$daggerVersion"
     implementation "com.google.dagger:dagger-android-support:$daggerVersion"
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
     kapt "com.google.dagger:dagger-android-processor:$daggerVersion"
 
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
+    implementation "com.airbnb.android:epoxy:$epoxyVersion"
+    implementation "com.airbnb.android:epoxy-databinding:$epoxyVersion"
+    kapt "com.airbnb.android:epoxy-processor:$epoxyVersion"
+
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleViewModelKtxVersion"
+    implementation "androidx.lifecycle:lifecycle-extensions:$lifecycleExtensionsVersion"
+    implementation "androidx.core:core-ktx:$coreKtxVersion"
+
+    api "com.google.guava:guava:$guavaVersion"
+    implementation "com.google.android.gms:play-services-maps:$playServicesMapsVersion"
+    implementation "com.github.haroldadmin:Vector:$vectorVersion"
 
     implementation 'com.github.satoshun.coroutinebinding:coroutinebinding-appcompat:1.0.0-rc2'
     implementation 'com.github.satoshun.coroutinebinding:coroutinebinding-core:1.0.0-rc2'
