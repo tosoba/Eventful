@@ -37,8 +37,7 @@ class LocationAvailabilityObserver(
     }
 
     fun stop() {
-        if (disposable?.isDisposed == false)
-            disposable?.dispose()
+        disposable?.dispose()
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)

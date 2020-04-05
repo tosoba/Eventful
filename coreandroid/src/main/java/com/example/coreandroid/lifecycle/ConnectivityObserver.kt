@@ -17,7 +17,7 @@ class ConnectivityObserver(
 
     constructor(onChanged: (Boolean) -> Unit) : this(onChanged, { onChanged(false) })
 
-    private lateinit var disposable: Disposable
+    private var disposable: Disposable? = null
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun onCreate() {
@@ -31,6 +31,6 @@ class ConnectivityObserver(
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun onDestroy() {
-        disposable.dispose()
+        disposable?.dispose()
     }
 }
