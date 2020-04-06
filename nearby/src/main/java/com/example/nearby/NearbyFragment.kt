@@ -52,6 +52,11 @@ class NearbyFragment : InjectableEpoxyFragment() {
 
     private var actionMode: ActionMode? = null
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_nearby, container, false).apply {
@@ -95,11 +100,7 @@ class NearbyFragment : InjectableEpoxyFragment() {
                         Toast.makeText(context, it.msg, Toast.LENGTH_SHORT).show()
                     }
                     is FragmentSelectedStateChanged -> {
-                        setHasOptionsMenu(it.isSelected)
-                        if (it.isSelected) {
-                            updateActionMode()
-                            activity?.invalidateOptionsMenu()
-                        } else finishActionMode()
+
                     }
                 }
             }
@@ -108,13 +109,13 @@ class NearbyFragment : InjectableEpoxyFragment() {
 
     override fun onResume() {
         super.onResume()
-        setHasOptionsMenu(true)
         activity?.invalidateOptionsMenu()
+        updateActionMode()
     }
 
     override fun onPause() {
         super.onPause()
-        setHasOptionsMenu(false)
+        finishActionMode()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

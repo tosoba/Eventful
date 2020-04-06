@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import com.example.coreandroid.base.MenuController
 import com.example.coreandroid.base.SnackbarController
 import com.example.coreandroid.util.SnackbarState
+import com.example.coreandroid.util.ext.setupToolbar
 import com.example.coreandroid.util.ext.setupToolbarWithDrawerToggle
 import com.example.coreandroid.view.TitledFragmentsPagerAdapter
 import com.example.coreandroid.view.ViewPagerPageSelectedListener
@@ -66,14 +67,10 @@ class MainFragment : DaggerFragment(), SnackbarController, MenuController {
 
     override val menuView: ActionMenuView? get() = main_action_menu_view
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_main, container, false).apply {
+        setupToolbar(main_toolbar)
         setupToolbarWithDrawerToggle(main_toolbar)
 
         main_bottom_nav_view.setOnNavigationItemSelectedListener(

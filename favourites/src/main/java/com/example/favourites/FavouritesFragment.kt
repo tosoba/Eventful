@@ -14,8 +14,8 @@ import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
 import com.example.coreandroid.view.epoxy.listItem
 import kotlinx.android.synthetic.main.fragment_favourites.*
 import kotlinx.android.synthetic.main.fragment_favourites.view.*
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 
@@ -46,6 +46,11 @@ class FavouritesFragment : InjectableEpoxyFragment() {
         }
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_favourites, container, false).apply {
@@ -59,26 +64,12 @@ class FavouritesFragment : InjectableEpoxyFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        fragmentScope.launch { viewModel.state.collect { epoxyController.setData(it) } }
-        fragmentScope.launch {
-            mainFragmentSelectedStateProvider.isSelectedFlow(FavouritesFragment::class.java)
-                .collect {
-                    setHasOptionsMenu(it)
-                    if (it) activity?.invalidateOptionsMenu()
-                }
-        }
+        viewModel.state.onEach { epoxyController.setData(it) }.launchIn(fragmentScope)
     }
 
     override fun onResume() {
         super.onResume()
-        setHasOptionsMenu(true)
         activity?.invalidateOptionsMenu()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        setHasOptionsMenu(false)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

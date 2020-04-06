@@ -50,6 +50,11 @@ class SearchFragment : InjectableEpoxyFragment() {
         SearchSuggestionsAdapter(requireContext(), null)
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_search, container, false).apply {
@@ -87,8 +92,7 @@ class SearchFragment : InjectableEpoxyFragment() {
                     }
                     is UpdateSearchSuggestions -> searchSuggestionsAdapter.swapCursor(it.cursor)
                     is FragmentSelectedStateChanged -> {
-                        setHasOptionsMenu(it.isSelected)
-                        if (it.isSelected) activity?.invalidateOptionsMenu()
+
                     }
                 }
             }
@@ -97,13 +101,7 @@ class SearchFragment : InjectableEpoxyFragment() {
 
     override fun onResume() {
         super.onResume()
-        setHasOptionsMenu(true)
         activity?.invalidateOptionsMenu()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        setHasOptionsMenu(false)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
