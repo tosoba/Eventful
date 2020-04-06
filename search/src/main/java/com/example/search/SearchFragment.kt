@@ -7,15 +7,16 @@ import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat.getSystemService
 import com.example.coreandroid.base.InjectableEpoxyFragment
 import com.example.coreandroid.navigation.IFragmentProvider
-import com.example.coreandroid.util.SnackbarState
 import com.example.coreandroid.util.ext.*
 import com.example.coreandroid.util.itemListController
 import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
 import com.example.coreandroid.view.epoxy.listItem
 import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.fragment_search.view.*
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import reactivecircus.flowbinding.appcompat.queryTextEvents
 import javax.inject.Inject
 
@@ -66,42 +67,23 @@ class SearchFragment : InjectableEpoxyFragment() {
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        fragmentScope.launch {
-            handler.updates.collect {
-                when (it) {
-                    is InvalidateList -> {
-                        if (it.hideSnackbar) snackbarController?.transitionTo(
-                            SnackbarState.Hidden,
-                            this@SearchFragment
-                        )
-                        epoxyController.setData(handler.viewModel.currentState)
-                    }
-                    is ShowEvent -> {
-                        navigationFragment?.showFragment(fragmentProvider.eventFragment(it.event))
-                    }
-                    is ShowSnackbarAndInvalidateList -> {
-                        snackbarController?.transitionTo(
-                            SnackbarState.Text(it.msg),
-                            this@SearchFragment
-                        )
-                        epoxyController.setData(handler.viewModel.currentState)
-                        if (it.errorOccurred) eventsScrollListener.onLoadingError()
-                    }
-                    is UpdateSearchSuggestions -> searchSuggestionsAdapter.swapCursor(it.cursor)
-                    is FragmentSelectedStateChanged -> {
-
-                    }
-                }
-            }
-        }
-    }
-
     override fun onResume() {
         super.onResume()
         activity?.invalidateOptionsMenu()
+
+        handler.updates.onEach {
+            when (it) {
+                is InvalidateList -> {
+                    if (it.errorOccurred) eventsScrollListener.onLoadingError()
+                    epoxyController.setData(handler.viewModel.currentState) // TODO: this is dumb AF
+                }
+                is ShowEvent -> navigationFragment?.showFragment(
+                    fragmentProvider.eventFragment(it.event)
+                )
+                is UpdateSnackbar -> snackbarController?.transitionTo(it.state)
+                is UpdateSearchSuggestions -> searchSuggestionsAdapter.swapCursor(it.cursor)
+            }
+        }.launchIn(fragmentScope)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

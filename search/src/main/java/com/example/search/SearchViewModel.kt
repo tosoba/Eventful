@@ -11,6 +11,8 @@ import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.util.LoadedSuccessfully
 import com.example.coreandroid.util.Loading
 import com.example.coreandroid.util.PagedDataList
+import com.example.coreandroid.util.SnackbarState
+import com.haroldadmin.cnradapter.NetworkResponse
 import com.haroldadmin.vector.VectorViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
@@ -53,7 +55,16 @@ class SearchViewModel(
                 }
 
                 is Resource.Error<PagedResult<IEvent>, *> -> setState {
-                    copy(events = events.copyWithError(result.error))
+                    copy(
+                        events = events.copyWithError(result.error),
+                        snackbarState = if (result.error is NetworkResponse.ServerError<*>) {
+                            if ((result.error as NetworkResponse.ServerError<*>).code in 503..504) {
+                                SnackbarState.Text("No connection")
+                            } else {
+                                SnackbarState.Text("Unknown network error.")
+                            }
+                        } else state.snackbarState
+                    )
                 }
             }
         }
@@ -103,7 +114,10 @@ class SearchViewModel(
     }
 
     fun onNotConnected() = setState {
-        copy(events = events.copyWithError(SearchError.NotConnected))
+        copy(
+            events = events.copyWithError(SearchError.NotConnected),
+            snackbarState = SnackbarState.Text("No connection")
+        )
     }
 
     override fun onCleared() {

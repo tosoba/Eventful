@@ -11,6 +11,8 @@ import com.example.core.util.replace
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.Loading
+import com.example.coreandroid.util.SnackbarState
+import com.haroldadmin.cnradapter.NetworkResponse
 import com.haroldadmin.vector.VectorViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.BroadcastChannel
@@ -42,7 +44,8 @@ class NearbyViewModel(
                     copy(
                         events = events.copyWithNewItems(
                             //TODO: make distinctBy work on (Paged)DataList (to prevent duplicates between pages)
-                            result.data.items.map { Selectable(Event(it)) }.distinctBy { it.item.name },
+                            result.data.items.map { Selectable(Event(it)) }
+                                .distinctBy { it.item.name },
                             result.data.currentPage + 1,
                             result.data.totalPages
                         )
@@ -50,7 +53,14 @@ class NearbyViewModel(
                 }
 
                 is Resource.Error<PagedResult<IEvent>, *> -> setState {
-                    copy(events = events.copyWithError(result.error))
+                    copy(
+                        events = events.copyWithError(result.error),
+                        snackarState = if (result.error is NetworkResponse.ServerError<*>) {
+                            if ((result.error as NetworkResponse.ServerError<*>).code in 503..504)
+                                SnackbarState.Text("No connection")
+                            else SnackbarState.Text("Unknown network error")
+                        } else snackarState
+                    )
                 }
             }
         }
@@ -78,14 +88,23 @@ class NearbyViewModel(
     }
 
     fun onNotConnected() = setState {
-        copy(events = events.copyWithError(NearbyError.NotConnected))
+        copy(
+            events = events.copyWithError(NearbyError.NotConnected),
+            snackarState = SnackbarState.Text("No connection")
+        )
     }
 
     fun onLocationNotLoadedYet() = setState {
-        copy(events = events.copyWithError(NearbyError.LocationNotLoadedYet))
+        copy(
+            events = events.copyWithError(NearbyError.LocationNotLoadedYet),
+            snackarState = SnackbarState.Text("Retrieving location...")
+        )
     }
 
     fun onLocationUnavailable() = setState {
-        copy(events = events.copyWithError(NearbyError.LocationUnavailable))
+        copy(
+            events = events.copyWithError(NearbyError.LocationUnavailable),
+            snackarState = SnackbarState.Text("Location unavailable")
+        )
     }
 }

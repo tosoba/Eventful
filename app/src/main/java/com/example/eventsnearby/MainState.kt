@@ -1,13 +1,10 @@
 package com.example.eventsnearby
 
 import com.example.core.model.app.LocationState
-import com.example.coreandroid.util.SnackbarState
 import com.haroldadmin.vector.VectorState
 
 data class MainState(
     val isConnected: Boolean,
-    val snackbarState: Map<Int, SnackbarState>,
-    val selectedFragmentIndex: Int,
     val locationState: LocationState
 ) : VectorState {
     val locationDisabledOrUnknown: Boolean
@@ -17,8 +14,6 @@ data class MainState(
         val INITIAL: MainState
             get() = MainState(
                 isConnected = false,
-                snackbarState = (0..2).map { it to SnackbarState.Hidden }.toMap(),
-                selectedFragmentIndex = 0,
                 locationState = LocationState.Unknown
             )
     }

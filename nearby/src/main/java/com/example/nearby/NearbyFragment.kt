@@ -5,7 +5,6 @@ import android.view.*
 import android.widget.Toast
 import com.example.coreandroid.base.InjectableEpoxyFragment
 import com.example.coreandroid.navigation.IFragmentProvider
-import com.example.coreandroid.util.SnackbarState
 import com.example.coreandroid.util.ext.*
 import com.example.coreandroid.util.itemListController
 import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
@@ -13,8 +12,8 @@ import com.example.coreandroid.view.ToolbarActionModeCallback
 import com.example.coreandroid.view.epoxy.listItem
 import kotlinx.android.synthetic.main.fragment_nearby.*
 import kotlinx.android.synthetic.main.fragment_nearby.view.*
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 
@@ -75,42 +74,31 @@ class NearbyFragment : InjectableEpoxyFragment() {
             Lifecycle.OnViewCreated(savedInstanceState != null)
         )
 
-        fragmentScope.launch {
-            handler.updates.collect {
-                when (it) {
-                    is InvalidateList -> {
-                        if (it.hideSnackbar) snackbarController?.transitionTo(
-                            SnackbarState.Hidden, this@NearbyFragment
-                        )
-                        epoxyController.setData(handler.viewModel.currentState)
-                        updateActionMode()
-                    }
-                    is ShowEvent -> {
-                        navigationFragment?.showFragment(fragmentProvider.eventFragment(it.event))
-                    }
-                    is ShowSnackbarAndInvalidateList -> {
-                        snackbarController?.transitionTo(
-                            SnackbarState.Text(it.msg), this@NearbyFragment
-                        )
-                        epoxyController.setData(handler.viewModel.currentState)
-                        if (it.errorOccurred) eventsScrollListener.onLoadingError()
-                    }
-                    is FinishActionModeWithMsg -> {
-                        finishActionMode()
-                        Toast.makeText(context, it.msg, Toast.LENGTH_SHORT).show()
-                    }
-                    is FragmentSelectedStateChanged -> {
 
-                    }
-                }
-            }
-        }
     }
 
     override fun onResume() {
         super.onResume()
         activity?.invalidateOptionsMenu()
         updateActionMode()
+
+        handler.updates.onEach {
+            when (it) {
+                is InvalidateList -> {
+                    if (it.errorOccurred) eventsScrollListener.onLoadingError()
+                    epoxyController.setData(handler.viewModel.currentState)
+                    updateActionMode()
+                }
+                is ShowEvent -> navigationFragment?.showFragment(
+                    fragmentProvider.eventFragment(it.event)
+                )
+                is UpdateSnackbar -> snackbarController?.transitionTo(it.state)
+                is FinishActionModeWithMsg -> {
+                    finishActionMode()
+                    Toast.makeText(context, it.msg, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }.launchIn(fragmentScope)
     }
 
     override fun onPause() {

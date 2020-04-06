@@ -3,7 +3,6 @@ package com.example.favourites
 import android.os.Bundle
 import android.view.*
 import com.example.coreandroid.base.InjectableEpoxyFragment
-import com.example.coreandroid.base.MainFragmentSelectedStateProvider
 import com.example.coreandroid.navigation.IFragmentProvider
 import com.example.coreandroid.util.ext.menuController
 import com.example.coreandroid.util.ext.navigationFragment
@@ -26,9 +25,6 @@ class FavouritesFragment : InjectableEpoxyFragment() {
 
     @Inject
     internal lateinit var viewModel: FavouritesViewModel
-
-    @Inject
-    internal lateinit var mainFragmentSelectedStateProvider: MainFragmentSelectedStateProvider
 
     private val eventsScrollListener: EndlessRecyclerViewScrollListener by lazy {
         EndlessRecyclerViewScrollListener(loadMore = viewModel::loadMoreEvents)
@@ -62,14 +58,11 @@ class FavouritesFragment : InjectableEpoxyFragment() {
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        viewModel.state.onEach { epoxyController.setData(it) }.launchIn(fragmentScope)
-    }
-
     override fun onResume() {
         super.onResume()
         activity?.invalidateOptionsMenu()
+
+        viewModel.state.onEach { epoxyController.setData(it) }.launchIn(fragmentScope)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

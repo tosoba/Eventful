@@ -3,7 +3,6 @@ package com.example.search
 import android.content.Context
 import android.database.MatrixCursor
 import com.example.coreandroid.base.ConnectivityStateProvider
-import com.example.coreandroid.base.MainFragmentSelectedStateProvider
 import com.example.coreandroid.di.scope.FragmentScoped
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.util.*
@@ -23,8 +22,7 @@ import kotlin.coroutines.CoroutineContext
 class SearchViewEventHandler @Inject constructor(
     private val appContext: Context,
     val viewModel: SearchViewModel,
-    private val connectivityStateProvider: ConnectivityStateProvider,
-    private val mainFragmentSelectedStateProvider: MainFragmentSelectedStateProvider
+    private val connectivityStateProvider: ConnectivityStateProvider
 ) : CoroutineScope {
 
     private val trackerJob = Job()
@@ -49,26 +47,19 @@ class SearchViewEventHandler @Inject constructor(
             }
     }
 
+    private val snackbarStateFlow: Flow<SearchViewUpdate?> by lazy {
+        viewModel.state.map { it.snackbarState }.distinctUntilChanged().map { UpdateSnackbar(it) }
+    }
+
     private val eventsActionsFlow: Flow<SearchViewUpdate?> by lazy {
         viewModel.state.map { it.events }
             .distinctUntilChanged()
             .map {
                 when (val status = it.status) {
-                    is LoadedSuccessfully, Loading -> InvalidateList(true)
+                    is LoadedSuccessfully, Loading -> InvalidateList(false)
                     is LoadingFailed<*> -> when (val error = status.error) {
-                        is SearchError -> when (error) {
-                            is SearchError.NotConnected -> ShowSnackbarAndInvalidateList(
-                                appContext.getString(R.string.no_connection), true
-                            )
-                        }
-                        is NetworkResponse.ServerError<*> -> {
-                            if (error.code in 503..504) ShowSnackbarAndInvalidateList(
-                                appContext.getString(R.string.no_connection), true
-                            )
-                            else ShowSnackbarAndInvalidateList(
-                                appContext.getString(R.string.unknown_network_error), true
-                            )
-                        }
+                        is SearchError -> InvalidateList(true)
+                        is NetworkResponse.ServerError<*> -> InvalidateList(true)
                         else -> null
                     }
                     is Initial -> null
@@ -88,18 +79,13 @@ class SearchViewEventHandler @Inject constructor(
             .map { null }
     }
 
-    private val selectedStateActionsFlow: Flow<SearchViewUpdate?> by lazy {
-        mainFragmentSelectedStateProvider.isSelectedFlow(SearchFragment::class.java)
-            .map { FragmentSelectedStateChanged(it) }
-    }
-
     val updates: Flow<SearchViewUpdate> by lazy {
         flowOf(
             searchSuggestionsFlow,
             eventsActionsFlow,
             connectionStateActionsFlow,
-            viewUpdatesChannel.consumeAsFlow(),
-            selectedStateActionsFlow
+            snackbarStateFlow,
+            viewUpdatesChannel.consumeAsFlow()
         ).flattenMerge().filterNotNull()
     }
 

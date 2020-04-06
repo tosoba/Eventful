@@ -4,9 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.widget.ActionMenuView
-import androidx.fragment.app.Fragment
-import com.example.coreandroid.base.MenuController
+import com.example.coreandroid.base.InjectableFragment
 import com.example.coreandroid.base.SnackbarController
 import com.example.coreandroid.util.SnackbarState
 import com.example.coreandroid.util.ext.setupToolbar
@@ -20,13 +18,14 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
-import dagger.android.support.DaggerFragment
 import kotlinx.android.synthetic.main.fragment_main.*
 import kotlinx.android.synthetic.main.fragment_main.view.*
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 
-class MainFragment : DaggerFragment(), SnackbarController, MenuController {
+class MainFragment : InjectableFragment(), SnackbarController {
 
     private val bottomNavigationItemSelectedListener =
         BottomNavigationView.OnNavigationItemSelectedListener { item ->
@@ -45,8 +44,6 @@ class MainFragment : DaggerFragment(), SnackbarController, MenuController {
     private val viewPagerSwipedListener = object : ViewPagerPageSelectedListener {
         override fun onPageSelected(position: Int) {
             main_bottom_nav_view.selectedItemId = viewPagerItems.inverse()[position]!!
-            viewModel.selectedFragmentIndex = position
-            updateSnackbar(position, viewModel.currentState.snackbarState.getValue(position))
         }
     }
 
@@ -62,10 +59,10 @@ class MainFragment : DaggerFragment(), SnackbarController, MenuController {
 
     private var snackbar: Snackbar? = null
 
+    private lateinit var snackbarStateChannel : ConflatedBroadcastChannel<SnackbarState>
+
     @Inject
     internal lateinit var viewModel: MainViewModel
-
-    override val menuView: ActionMenuView? get() = main_action_menu_view
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -87,39 +84,38 @@ class MainFragment : DaggerFragment(), SnackbarController, MenuController {
                 .show()
         }
 
-        with(viewModel.currentState) {
-            snackbarState[selectedFragmentIndex]?.let { updateSnackbar(selectedFragmentIndex, it) }
-        }
+        snackbarStateChannel = ConflatedBroadcastChannel()
+        snackbarStateChannel.asFlow()
+            .scan(Pair<SnackbarState?, SnackbarState?>(null, null)) { last2States, newState ->
+                Pair(last2States.second, newState)
+            }
+            .drop(1)
+            .onEach { states -> transitionBetween(states.first, states.second!!) }
+            .launchIn(fragmentScope)
     }
 
-    override fun transitionTo(newState: SnackbarState, fragment: Fragment) {
-        val stateIndex = when (fragment) {
-            is NearbyFragment -> 0
-            is SearchFragment -> 1
-            is FavouritesFragment -> 2
-            else -> return
-        }
-
-        if (stateIndex != viewModel.selectedFragmentIndex || newState == viewModel.currentState.snackbarState[stateIndex])
-            return
-
-        viewModel.updateSnackbarState(stateIndex, newState)
-        updateSnackbar(stateIndex, newState)
+    override fun onPause() {
+        super.onPause()
+        snackbarStateChannel.close()
     }
 
-    private fun updateSnackbar(stateIndex: Int, snackbarState: SnackbarState) {
+    override fun transitionTo(newState: SnackbarState) {
+        snackbarStateChannel.offer(newState)
+    }
+
+    private fun transitionBetween(previousState: SnackbarState?, newState: SnackbarState) {
         main_fab?.let {
-            when (snackbarState) {
+            when (newState) {
                 is SnackbarState.Text -> {
                     if (snackbar != null
                         && snackbar?.isShown != false
                         && snackbar?.duration == Snackbar.LENGTH_INDEFINITE
-                        && viewModel.currentState.snackbarState[stateIndex] is SnackbarState.Text
+                        && previousState is SnackbarState.Text
                     ) {
-                        snackbar?.setText(snackbarState.text)
+                        snackbar?.setText(newState.text)
                     } else {
                         snackbar?.dismiss()
-                        snackbar = Snackbar.make(it, snackbarState.text, snackbarState.length)
+                        snackbar = Snackbar.make(it, newState.text, newState.length)
                             .apply(Snackbar::show)
                     }
                 }
@@ -129,22 +125,5 @@ class MainFragment : DaggerFragment(), SnackbarController, MenuController {
                 }
             }
         }
-    }
-
-    override fun shouldSetHasOptionsMenu(
-        fragment: Fragment
-    ): Boolean = viewModel.selectedFragmentIndex == when (fragment) {
-        is NearbyFragment -> 0
-        is SearchFragment -> 1
-        is FavouritesFragment -> 2
-        else -> -1
-    }
-
-    override fun showTitle() {
-        app_name_text_view?.visibility = View.VISIBLE
-    }
-
-    override fun hideTitle() {
-        app_name_text_view?.visibility = View.GONE
     }
 }

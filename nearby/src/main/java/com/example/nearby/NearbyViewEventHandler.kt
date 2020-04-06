@@ -4,7 +4,6 @@ import android.content.Context
 import com.example.core.model.app.LocationState
 import com.example.coreandroid.base.ConnectivityStateProvider
 import com.example.coreandroid.base.LocationStateProvider
-import com.example.coreandroid.base.MainFragmentSelectedStateProvider
 import com.example.coreandroid.di.scope.FragmentScoped
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable
@@ -26,8 +25,7 @@ class NearbyViewEventHandler @Inject constructor(
     private val appContext: Context,
     val viewModel: NearbyViewModel,
     private val connectivityStateProvider: ConnectivityStateProvider,
-    private val locationStateProvider: LocationStateProvider,
-    private val mainFragmentSelectedStateProvider: MainFragmentSelectedStateProvider
+    private val locationStateProvider: LocationStateProvider
 ) : CoroutineScope {
 
     private val trackerJob = Job()
@@ -45,27 +43,10 @@ class NearbyViewEventHandler @Inject constructor(
             .distinctUntilChanged()
             .map {
                 when (val status = it.status) {
-                    is LoadedSuccessfully, Loading -> InvalidateList(true)
+                    is LoadedSuccessfully, Loading -> InvalidateList(false)
                     is LoadingFailed<*> -> when (val error = status.error) {
-                        is NearbyError -> when (error) {
-                            is NearbyError.NotConnected -> ShowSnackbarAndInvalidateList(
-                                appContext.getString(R.string.no_connection), true
-                            )
-                            is NearbyError.LocationUnavailable -> ShowSnackbarAndInvalidateList(
-                                appContext.getString(R.string.unable_to_retrieve_location), true
-                            )
-                            is NearbyError.LocationNotLoadedYet -> ShowSnackbarAndInvalidateList(
-                                appContext.getString(R.string.retrieving_location), true
-                            )
-                        }
-                        is NetworkResponse.ServerError<*> -> {
-                            if (error.code in 503..504) ShowSnackbarAndInvalidateList(
-                                appContext.getString(R.string.no_connection), true
-                            )
-                            else ShowSnackbarAndInvalidateList(
-                                appContext.getString(R.string.unknown_network_error), true
-                            )
-                        }
+                        is NearbyError -> InvalidateList(true)
+                        is NetworkResponse.ServerError<*> -> InvalidateList(true)
                         else -> null
                     }
                     is Initial -> null
@@ -83,27 +64,11 @@ class NearbyViewEventHandler @Inject constructor(
                     viewModel.loadEvents(locationState.latLng)
                 }
             }
-            .map { (connected, locationState) ->
-                if (locationState is LocationState.Found && !connected) {
-                    ShowSnackbarAndInvalidateList(
-                        appContext.getString(R.string.no_connection), true
-                    )
-                } else if (locationState is LocationState.Loading) {
-                    val sb = StringBuilder(appContext.getString(R.string.retrieving_location))
-                    if (!connected) sb.append(" ${appContext.getString(R.string.no_connection)}")
-                    ShowSnackbarAndInvalidateList(sb.toString(), false)
-                } else if (locationState !is LocationState.Found && locationState !is LocationState.Loading) {
-                    val sb =
-                        StringBuilder(appContext.getString(R.string.unable_to_retrieve_location))
-                    if (!connected) sb.append(" ${appContext.getString(R.string.no_connection)}")
-                    ShowSnackbarAndInvalidateList(sb.toString(), true)
-                } else null
-            }
+            .map { (_, _) -> null }
     }
 
-    private val selectedStateActionsFlow: Flow<NearbyViewUpdate?> by lazy {
-        mainFragmentSelectedStateProvider.isSelectedFlow(NearbyFragment::class.java)
-            .map { FragmentSelectedStateChanged(it) }
+    private val snackbarStateFlow: Flow<NearbyViewUpdate?> by lazy {
+        viewModel.state.map { it.snackarState }.distinctUntilChanged().map { UpdateSnackbar(it) }
     }
 
     private val signalsFlow: Flow<NearbyViewUpdate?> by lazy {
@@ -119,8 +84,8 @@ class NearbyViewEventHandler @Inject constructor(
             eventsActionsFlow,
             loadingConditionsFlow,
             viewUpdatesChannel.consumeAsFlow(),
-            signalsFlow,
-            selectedStateActionsFlow
+            snackbarStateFlow,
+            signalsFlow
         ).flattenMerge().filterNotNull()
     }
 
