@@ -13,10 +13,7 @@ import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
 import com.example.coreandroid.view.epoxy.listItem
 import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.fragment_search.view.*
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import reactivecircus.flowbinding.appcompat.queryTextEvents
 import javax.inject.Inject
 
