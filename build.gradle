@@ -11,7 +11,8 @@ buildscript {
 
         lifecycleVersion = '1.1.1'
         lifecycleViewModelKtxVersion = '2.2.0-alpha04'
-        lifecycleExtensionsVersion = '2.2.0-alpha04'
+        lifecycleExtensionsVersion = '2.2.0'
+        liveEventVersion = '1.2.0'
 
         rxAndroidVersion = '2.1.1'
         rxJavaVersion = '2.2.8'
@@ -22,7 +23,7 @@ buildscript {
         coroutinesRx2Version = '1.2.1'
 
         coreKtxVersion = '1.1.0'
-        liveDataKtxVersion = '1.0.1'
+        liveDataKtxVersion = '2.3.0-alpha01'
 
         retrofitVersion = '2.5.0'
         retrofitConverterGsonVersion = '2.4.0'

@@ -65,7 +65,6 @@ dependencies {
     implementation "android.arch.lifecycle:extensions:$lifecycleVersion"
     kapt "android.arch.lifecycle:compiler:$lifecycleVersion"
 
-    implementation "com.shopify:livedata-ktx:$liveDataKtxVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleViewModelKtxVersion"
 
     implementation 'com.github.satoshun.coroutinebinding:coroutinebinding-appcompat:1.0.0-rc2'

@@ -6,10 +6,11 @@ import com.haroldadmin.vector.VectorState
 
 data class FavouritesState(
     val events: DataList<Event>,
-    val limit: Int
+    val limit: Int,
+    val limitHit: Boolean
 ) : VectorState {
     companion object {
         val INITIAL: FavouritesState
-            get() = FavouritesState(DataList(), 0)
+            get() = FavouritesState(DataList(), 0, false)
     }
 }
