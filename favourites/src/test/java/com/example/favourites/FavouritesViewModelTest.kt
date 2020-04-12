@@ -4,7 +4,7 @@ import com.example.core.usecase.GetSavedEvents
 import com.example.coreandroid.util.LoadedSuccessfully
 import com.example.coreandroid.util.Loading
 import com.example.test.rule.MainDispatcherRule
-import com.example.test.rule.getEvents
+import com.example.test.rule.eventsList
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -45,7 +45,7 @@ internal class FavouritesViewModelTest {
         runBlocking {
             val getSavedEvents: GetSavedEvents = mockk {
                 coEvery { this@mockk(FavouritesViewModel.limitIncrement) } returns flowOf(
-                    getEvents(initialEventsSize)
+                    eventsList(initialEventsSize)
                 )
             }
             val viewModel = FavouritesViewModel(getSavedEvents, testDispatcher)
@@ -58,10 +58,10 @@ internal class FavouritesViewModelTest {
     fun `GivenFavouritesVM WhenThereAreNoMoreEventsToLoad SameEventsAreReturned`() = runBlocking {
         val getSavedEvents: GetSavedEvents = mockk {
             coEvery { this@mockk(FavouritesViewModel.limitIncrement) } returns flowOf(
-                getEvents(initialEventsSize)
+                eventsList(initialEventsSize)
             )
             coEvery { this@mockk(FavouritesViewModel.limitIncrement + initialEventsSize) } returns flowOf(
-                getEvents(initialEventsSize)
+                eventsList(initialEventsSize)
             )
         }
         // wait till initial loading completes
@@ -96,10 +96,10 @@ internal class FavouritesViewModelTest {
     fun `GivenFavouritesVM WhenThereAreMoreEventsToLoad MoreEventsAreReturned`() = runBlocking {
         val getSavedEvents: GetSavedEvents = mockk {
             coEvery { this@mockk(FavouritesViewModel.limitIncrement) } returns flowOf(
-                getEvents(initialEventsSize)
+                eventsList(initialEventsSize)
             )
             coEvery { this@mockk(FavouritesViewModel.limitIncrement + initialEventsSize) } returns flowOf(
-                getEvents(afterLoadMoreSize)
+                eventsList(afterLoadMoreSize)
             )
         }
         // wait till initial loading completes

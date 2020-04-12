@@ -16,15 +16,21 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 @ExperimentalCoroutinesApi
 abstract class BaseViewModel<Intent, State, Event>(initialState: State) : ViewModel() {
 
-    protected val _states: ConflatedBroadcastChannel<State> = ConflatedBroadcastChannel(
+    protected val statesChannel: ConflatedBroadcastChannel<State> = ConflatedBroadcastChannel(
         value = initialState
     )
-    val states: Flow<State> get() = _states.asFlow().distinctUntilChanged()
+    val states: Flow<State> get() = statesChannel.asFlow().distinctUntilChanged()
 
-    protected val _events = LiveEvent<Event>()
-    val events: LiveData<Event> get() = _events
+    protected val liveEvents = LiveEvent<Event>()
+    val events: LiveData<Event> get() = liveEvents
 
-    protected val intents = BroadcastChannel<Intent>(capacity = Channel.CONFLATED)
-    suspend fun send(intent: Intent) = intents.send(intent)
+    protected val intentsChannel = BroadcastChannel<Intent>(capacity = Channel.CONFLATED)
+    suspend fun send(intent: Intent) = intentsChannel.send(intent)
+
+    override fun onCleared() {
+        intentsChannel.close()
+        statesChannel.close()
+        super.onCleared()
+    }
 }
 

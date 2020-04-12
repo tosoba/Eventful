@@ -9,7 +9,7 @@ import com.example.core.usecase.SaveSuggestion
 import com.example.core.usecase.SearchEvents
 import com.example.coreandroid.util.*
 import com.example.test.rule.MainDispatcherRule
-import com.example.test.rule.getEvents
+import com.example.test.rule.eventsList
 import io.mockk.called
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -140,7 +140,7 @@ internal class SearchViewModelTest {
             val searchEvents = mockk<SearchEvents> {
                 coEvery { this@mockk(searchText) } returns Resource.Success(
                     PagedResult<IEvent>(
-                        getEvents(expectedEventsSize),
+                        eventsList(expectedEventsSize),
                         expectedCurrentPage,
                         expectedTotalPages
                     )
@@ -245,7 +245,7 @@ internal class SearchViewModelTest {
             val searchEvents = mockk<SearchEvents> {
                 coEvery { this@mockk(searchText) } returns Resource.Success(
                     PagedResult<IEvent>(
-                        getEvents(eventsPageSize),
+                        eventsList(eventsPageSize),
                         expectedCurrentPage,
                         expectedTotalPages
                     )
@@ -256,7 +256,7 @@ internal class SearchViewModelTest {
                     searchText,
                     mockk(relaxed = true),
                     PagedDataList(
-                        getEvents(eventsPageSize),
+                        eventsList(eventsPageSize),
                         LoadedSuccessfully,
                         1,
                         expectedTotalPages
@@ -302,7 +302,7 @@ internal class SearchViewModelTest {
                     searchText,
                     mockk(relaxed = true),
                     PagedDataList(
-                        getEvents(eventsPageSize),
+                        eventsList(eventsPageSize),
                         LoadedSuccessfully,
                         expectedCurrentPage,
                         2

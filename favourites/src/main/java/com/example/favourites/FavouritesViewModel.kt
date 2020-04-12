@@ -21,16 +21,19 @@ class FavouritesVM(
     private val ioDispatcher: CoroutineDispatcher
 ) : BaseViewModel<FavouritesIntent, FavouritesState, Unit>(FavouritesState.INITIAL) {
     init {
-        intents.asFlow()
+        intentsChannel.asFlow()
             .onStart { emit(LoadFavourites) }
-            .map { Pair(it, _states.value) }
-            .filterNot { (_, state) -> state.limitHit }
-            .flatMapLatest { (_, state) ->
-                flowOf(state.copy(events = state.events.copyWithLoadingInProgress))
+            .filterNot {
+                val state = statesChannel.value
+                state.limitHit || state.events.status is Loading
+            }
+            .flatMapLatest {
+                flowOf(statesChannel.value.copy(events = statesChannel.value.events.copyWithLoadingInProgress))
                     .onCompletion {
-                        emitAll(getSavedEvents(state.limit + limitIncrement)
+                        emitAll(getSavedEvents(statesChannel.value.limit + limitIncrement)
                             .flowOn(ioDispatcher)
                             .map { events ->
+                                val state = statesChannel.value
                                 state.copy(
                                     events = DataList(
                                         value = events.map { Event(it) },
@@ -43,7 +46,7 @@ class FavouritesVM(
                         )
                     }
             }
-            .onEach(_states::send)
+            .onEach(statesChannel::send)
             .launchIn(viewModelScope)
     }
 
