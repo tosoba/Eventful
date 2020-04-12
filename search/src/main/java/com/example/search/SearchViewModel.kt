@@ -3,10 +3,13 @@ package com.example.search
 import androidx.lifecycle.viewModelScope
 import com.example.core.Resource
 import com.example.core.model.PagedResult
+import com.example.core.model.search.SearchSuggestion
 import com.example.core.model.ticketmaster.IEvent
 import com.example.core.usecase.GetSeachSuggestions
 import com.example.core.usecase.SaveSuggestion
 import com.example.core.usecase.SearchEvents
+import com.example.core.util.flatMapFirst
+import com.example.coreandroid.arch.BaseViewModel
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.util.LoadedSuccessfully
 import com.example.coreandroid.util.Loading
@@ -14,10 +17,84 @@ import com.example.coreandroid.util.PagedDataList
 import com.example.coreandroid.util.SnackbarState
 import com.haroldadmin.cnradapter.NetworkResponse
 import com.haroldadmin.vector.VectorViewModel
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
+
+sealed class SearchIntent
+data class NewSearch(val text: String) : SearchIntent()
+object LoadMoreResults
+
+fun SearchState.reduce(
+    resource: Resource<PagedResult<IEvent>>,
+    suggestions: List<SearchSuggestion>? = null
+): SearchState {
+    return when (resource) {
+        is Resource.Success -> copy(
+            events = PagedDataList(
+                resource.data.items.map { Event(it) },
+                LoadedSuccessfully,
+                resource.data.currentPage + 1,
+                resource.data.totalPages
+            ),
+            searchSuggestions = suggestions ?: searchSuggestions
+        )
+        is Resource.Error<PagedResult<IEvent>, *> -> copy(
+            events = events.copyWithError(resource.error),
+            snackbarState = if (resource.error is NetworkResponse.ServerError<*>) {
+                if ((resource.error as NetworkResponse.ServerError<*>).code in 503..504) {
+                    SnackbarState.Text("No connection")
+                } else {
+                    SnackbarState.Text("Unknown network error.")
+                }
+            } else snackbarState,
+            searchSuggestions = suggestions ?: searchSuggestions
+        )
+    }
+}
+
+@ExperimentalCoroutinesApi
+@FlowPreview
+class SearchVM(
+    private val searchEvents: SearchEvents,
+    private val getSearchSuggestions: GetSeachSuggestions,
+    private val saveSuggestion: SaveSuggestion,
+    private val ioDispatcher: CoroutineDispatcher,
+    initialState: SearchState = SearchState.INITIAL
+) : BaseViewModel<SearchIntent, SearchState, Unit>(initialState) {
+
+    init {
+        intentsChannel.asFlow().processIntents().launchIn(viewModelScope)
+    }
+
+    private fun Flow<SearchIntent>.processIntents(): Flow<SearchState> = merge(
+        filterIsInstance<NewSearch>().processNewSearchIntents(),
+        filterIsInstance<LoadMoreResults>().processLoadMoreResultsIntents()
+    )
+
+    private fun Flow<NewSearch>.processNewSearchIntents(): Flow<SearchState> {
+        return distinctUntilChanged()
+            .onEach { (text) -> saveSuggestion(text) }
+            .mapLatest { (text) ->
+                val resource = viewModelScope.async {
+                    withContext(ioDispatcher) { searchEvents(text) }
+                }
+                val suggestions = viewModelScope.async {
+                    withContext(ioDispatcher) { getSearchSuggestions(text) }
+                }
+                statesChannel.value.reduce(resource.await(), suggestions.await())
+            }
+    }
+
+    private fun Flow<LoadMoreResults>.processLoadMoreResultsIntents(): Flow<SearchState> {
+        return filterNot {
+            val state = statesChannel.value
+            state.events.status is Loading || state.events.offset >= state.events.totalItems
+        }.flatMapFirst {
+            flowOf(searchEvents(statesChannel.value.searchText))
+                .map { statesChannel.value.reduce(it) }
+        }
+    }
+}
 
 class SearchViewModel(
     private val searchEvents: SearchEvents,
