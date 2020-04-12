@@ -10,6 +10,7 @@ import com.example.core.usecase.SaveSuggestion
 import com.example.core.usecase.SearchEvents
 import com.example.core.util.flatMapFirst
 import com.example.coreandroid.arch.BaseViewModel
+import com.example.coreandroid.base.ConnectivityStateProvider
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.util.LoadedSuccessfully
 import com.example.coreandroid.util.Loading
@@ -21,35 +22,33 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
 sealed class SearchIntent
-data class NewSearch(val text: String) : SearchIntent()
+data class NewSearch(val text: String, val confirmed: Boolean) : SearchIntent()
 object LoadMoreResults
 
 fun SearchState.reduce(
     resource: Resource<PagedResult<IEvent>>,
     suggestions: List<SearchSuggestion>? = null
-): SearchState {
-    return when (resource) {
-        is Resource.Success -> copy(
-            events = PagedDataList(
-                resource.data.items.map { Event(it) },
-                LoadedSuccessfully,
-                resource.data.currentPage + 1,
-                resource.data.totalPages
-            ),
-            searchSuggestions = suggestions ?: searchSuggestions
-        )
-        is Resource.Error<PagedResult<IEvent>, *> -> copy(
-            events = events.copyWithError(resource.error),
-            snackbarState = if (resource.error is NetworkResponse.ServerError<*>) {
-                if ((resource.error as NetworkResponse.ServerError<*>).code in 503..504) {
-                    SnackbarState.Text("No connection")
-                } else {
-                    SnackbarState.Text("Unknown network error.")
-                }
-            } else snackbarState,
-            searchSuggestions = suggestions ?: searchSuggestions
-        )
-    }
+): SearchState = when (resource) {
+    is Resource.Success -> copy(
+        events = PagedDataList(
+            resource.data.items.map { Event(it) },
+            LoadedSuccessfully,
+            resource.data.currentPage + 1,
+            resource.data.totalPages
+        ),
+        searchSuggestions = suggestions ?: searchSuggestions
+    )
+    is Resource.Error<PagedResult<IEvent>, *> -> copy(
+        events = events.copyWithError(resource.error),
+        snackbarState = if (resource.error is NetworkResponse.ServerError<*>) {
+            if ((resource.error as NetworkResponse.ServerError<*>).code in 503..504) {
+                SnackbarState.Text("No connection")
+            } else {
+                SnackbarState.Text("Unknown network error.")
+            }
+        } else snackbarState,
+        searchSuggestions = suggestions ?: searchSuggestions
+    )
 }
 
 @ExperimentalCoroutinesApi
@@ -58,12 +57,14 @@ class SearchVM(
     private val searchEvents: SearchEvents,
     private val getSearchSuggestions: GetSeachSuggestions,
     private val saveSuggestion: SaveSuggestion,
+    private val connectivityStateProvider: ConnectivityStateProvider,
     private val ioDispatcher: CoroutineDispatcher,
     initialState: SearchState = SearchState.INITIAL
 ) : BaseViewModel<SearchIntent, SearchState, Unit>(initialState) {
 
     init {
-        intentsChannel.asFlow().processIntents().launchIn(viewModelScope)
+        merge(intentsChannel.asFlow().processIntents(), connectivityReactionFlow)
+            .launchIn(viewModelScope)
     }
 
     private fun Flow<SearchIntent>.processIntents(): Flow<SearchState> = merge(
@@ -71,10 +72,20 @@ class SearchVM(
         filterIsInstance<LoadMoreResults>().processLoadMoreResultsIntents()
     )
 
+    private val connectivityReactionFlow: Flow<SearchState>
+        get() = connectivityStateProvider.isConnectedFlow.filter {
+            val state = statesChannel.value
+            it && state.events.loadingFailed && state.events.value.isEmpty()
+        }.map {
+            val state = statesChannel.value
+            val resource = withContext(ioDispatcher) { searchEvents(state.searchText) }
+            statesChannel.value.reduce(resource)
+        }
+
     private fun Flow<NewSearch>.processNewSearchIntents(): Flow<SearchState> {
         return distinctUntilChanged()
-            .onEach { (text) -> saveSuggestion(text) }
-            .mapLatest { (text) ->
+            .onEach { (text, shouldSave) -> if (shouldSave) saveSuggestion(text) }
+            .mapLatest { (text, _) ->
                 val resource = viewModelScope.async {
                     withContext(ioDispatcher) { searchEvents(text) }
                 }
