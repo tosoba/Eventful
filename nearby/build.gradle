@@ -59,11 +59,11 @@ dependencies {
     implementation "com.airbnb.android:epoxy-databinding:$epoxyVersion"
     kapt "com.airbnb.android:epoxy-processor:$epoxyVersion"
 
+    implementation "androidx.core:core-ktx:$coreKtxVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleViewModelKtxVersion"
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycleExtensionsVersion"
-    
+
     implementation "com.ss.bannerslider:bannerslider:$bannerSliderVersion"
-    implementation "androidx.core:core-ktx:$coreKtxVersion"
     implementation "com.flickr4java:flickr4java:$flickrVersion"
     implementation "com.google.android.gms:play-services-maps:$playServicesMapsVersion"
     implementation "com.patloew.rxlocation:rxlocation:$rxLocationVersion"

@@ -8,19 +8,88 @@ import com.example.core.model.ticketmaster.IEvent
 import com.example.core.usecase.GetNearbyEvents
 import com.example.core.usecase.SaveEvents
 import com.example.core.util.replace
+import com.example.coreandroid.arch.BaseViewModel
+import com.example.coreandroid.base.ConnectivityStateProvider
+import com.example.coreandroid.base.LocationStateProvider
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.Loading
 import com.example.coreandroid.util.SnackbarState
 import com.haroldadmin.cnradapter.NetworkResponse
 import com.haroldadmin.vector.VectorViewModel
-import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.*
+
+sealed class NearbyIntent
+object LoadNearbyEvents : NearbyIntent()
+object EventListScrolledToEnd : NearbyIntent()
+data class EventLongClicked(val event: Event) : NearbyIntent()
+object ClearSelectionClicked : NearbyIntent()
+object AddToFavouritesClicked : NearbyIntent()
+
+@ExperimentalCoroutinesApi
+@FlowPreview
+class NearbyVM(
+    private val getNearbyEvents: GetNearbyEvents,
+    private val saveEvents: SaveEvents,
+    private val connectivityStateProvider: ConnectivityStateProvider,
+    private val locationStateProvider: LocationStateProvider,
+    private val ioDispatcher: CoroutineDispatcher,
+    initialState: NearbyState = NearbyState.INITIAL
+) : BaseViewModel<NearbyIntent, NearbyState, NearbySignal>(initialState) {
+
+    init {
+        intentsChannel.asFlow().processIntents().launchIn(viewModelScope)
+    }
+
+    private fun Flow<NearbyIntent>.processIntents(): Flow<NearbyState> = merge(
+        filterIsInstance<ClearSelectionClicked>().processClearSelectionIntents(),
+        filterIsInstance<EventLongClicked>().processEventClickedIntents(),
+        filterIsInstance<AddToFavouritesClicked>().processAddToFavouritesIntents()
+    )
+
+    private fun Flow<ClearSelectionClicked>.processClearSelectionIntents(): Flow<NearbyState> {
+        return map {
+            val state = statesChannel.value
+            state.copy(
+                events = state.events.copy(
+                    value = state.events.value.map { it.copy(selected = false) }
+                )
+            )
+        }
+    }
+
+    private fun Flow<EventLongClicked>.processEventClickedIntents(): Flow<NearbyState> {
+        return map { (event) ->
+            val state = statesChannel.value
+            state.copy(
+                events = state.events.copy(
+                    value = state.events.value.replace(
+                        { matched -> Selectable(event, !matched.selected) },
+                        { it.item.id == event.id }
+                    )
+                )
+            )
+        }
+    }
+
+    private fun Flow<AddToFavouritesClicked>.processAddToFavouritesIntents(): Flow<NearbyState> {
+        return map {
+            val state = statesChannel.value
+            withContext(ioDispatcher) {
+                saveEvents(state.events.value.filter { it.selected }.map { it.item })
+            }
+            liveEvents.value = NearbySignal.FavouritesSaved
+            state.copy(
+                events = state.events.copy(
+                    value = state.events.value.map { it.copy(selected = false) }
+                )
+            )
+        }
+    }
+}
 
 class NearbyViewModel(
     private val getNearbyEvents: GetNearbyEvents,
