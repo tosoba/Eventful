@@ -1,7 +1,7 @@
 package com.example.nearby
 
 import android.content.Context
-import com.example.core.model.app.LocationState
+import com.example.core.model.app.LocationResult
 import com.example.coreandroid.base.ConnectivityStateProvider
 import com.example.coreandroid.base.LocationStateProvider
 import com.example.coreandroid.di.scope.FragmentScoped
@@ -60,7 +60,7 @@ class NearbyViewEventHandler @Inject constructor(
             .distinctUntilChanged()
             .filter { events.loadingFailed }
             .onEach { (_, locationState) ->
-                if (locationState is LocationState.Found) events.ifEmptyAndIsNotLoading {
+                if (locationState is LocationResult.Found) events.ifEmptyAndIsNotLoading {
                     viewModel.loadEvents(locationState.latLng)
                 }
             }
@@ -135,10 +135,10 @@ class NearbyViewEventHandler @Inject constructor(
         }
 
         val locationState = locationStateProvider.locationState
-        if (locationState is LocationState.Loading || locationState is LocationState.Unknown) {
+        if (locationState is LocationResult.Loading || locationState is LocationResult.Unknown) {
             viewModel.onLocationNotLoadedYet()
             return
-        } else if (locationState !is LocationState.Found) {
+        } else if (locationState !is LocationResult.Found) {
             viewModel.onLocationUnavailable()
             return
         }

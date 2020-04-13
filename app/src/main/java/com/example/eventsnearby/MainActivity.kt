@@ -4,7 +4,7 @@ import android.Manifest
 import android.os.Bundle
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import com.example.core.model.app.LocationState
+import com.example.core.model.app.LocationStatus
 import com.example.coreandroid.base.DrawerLayoutHost
 import com.example.coreandroid.base.LocationController
 import com.example.coreandroid.lifecycle.ConnectivityObserver
@@ -77,13 +77,16 @@ class MainActivity : DaggerAppCompatActivity(), DrawerLayoutHost, CoroutineScope
         )
 
         //TODO: are these the only locationStates needed here?
-        if (currentState.locationState == LocationState.Unknown || currentState.locationState == LocationState.Loading) {
+        if (
+            currentState.locationState.status == LocationStatus.Unknown
+            || currentState.locationState.status == LocationStatus.Loading
+        ) {
             requestPermission()
         }
 
         launch {
             viewModel.state.filterNotNull().map { it.locationState }.collect {
-                if (it is LocationState.Disabled) locationAvailabilityObserver.start()
+                if (it.status is LocationStatus.Disabled) locationAvailabilityObserver.start()
                 else locationAvailabilityObserver.stop()
             }
         }
@@ -115,7 +118,8 @@ class MainActivity : DaggerAppCompatActivity(), DrawerLayoutHost, CoroutineScope
                     rationale = AlertDialogPermissionRationale(this@MainActivity) {
                         setTitle(getString(R.string.location_permission_needed))
                         setMessage(getString(R.string.no_location_permission_warning))
-                    })
+                    }
+                )
             )
         }
     }
