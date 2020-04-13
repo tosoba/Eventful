@@ -4,6 +4,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.core.Resource
 import com.example.core.model.PagedResult
 import com.example.core.model.app.LatLng
+import com.example.core.model.app.LocationState
+import com.example.core.model.app.LocationStatus
 import com.example.core.model.ticketmaster.IEvent
 import com.example.core.usecase.GetNearbyEvents
 import com.example.core.usecase.SaveEvents
@@ -23,11 +25,32 @@ import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.*
 
 sealed class NearbyIntent
-object LoadNearbyEvents : NearbyIntent()
 object EventListScrolledToEnd : NearbyIntent()
 data class EventLongClicked(val event: Event) : NearbyIntent()
 object ClearSelectionClicked : NearbyIntent()
 object AddToFavouritesClicked : NearbyIntent()
+
+private fun NearbyState.reduce(resource: Resource<PagedResult<IEvent>>): NearbyState {
+    return when (resource) {
+        is Resource.Success -> copy(
+            events = events.copyWithNewItems(
+                //TODO: make distinctBy work on (Paged)DataList (to prevent duplicates between pages)
+                resource.data.items.map { Selectable(Event(it)) }.distinctBy { it.item.name },
+                resource.data.currentPage + 1,
+                resource.data.totalPages
+            )
+        )
+
+        is Resource.Error<PagedResult<IEvent>, *> -> copy(
+            events = events.copyWithError(resource.error),
+            snackbarState = if (resource.error is NetworkResponse.ServerError<*>) {
+                if ((resource.error as NetworkResponse.ServerError<*>).code in 503..504)
+                    SnackbarState.Text("No connection")
+                else SnackbarState.Text("Unknown network error")
+            } else snackbarState
+        )
+    }
+}
 
 @ExperimentalCoroutinesApi
 @FlowPreview
@@ -41,14 +64,79 @@ class NearbyVM(
 ) : BaseViewModel<NearbyIntent, NearbyState, NearbySignal>(initialState) {
 
     init {
-        intentsChannel.asFlow().processIntents().launchIn(viewModelScope)
+        merge(
+            connectivityReactionFlow,
+            locationSnackbarFlow,
+            loadEventsFlow,
+            intentsChannel.asFlow().processIntents()
+        ).launchIn(viewModelScope)
     }
 
     private fun Flow<NearbyIntent>.processIntents(): Flow<NearbyState> = merge(
         filterIsInstance<ClearSelectionClicked>().processClearSelectionIntents(),
         filterIsInstance<EventLongClicked>().processEventClickedIntents(),
-        filterIsInstance<AddToFavouritesClicked>().processAddToFavouritesIntents()
+        filterIsInstance<AddToFavouritesClicked>().processAddToFavouritesIntents(),
+        filterIsInstance<EventListScrolledToEnd>().processScrolledToEndIntents()
     )
+
+    private val connectivityReactionFlow: Flow<NearbyState>
+        get() = connectivityStateProvider.isConnectedFlow.filter { connected ->
+            val state = statesChannel.value
+            connected && state.events.value.isEmpty() && state.events.loadingFailed
+        }.zip(locationStateProvider.locationStateFlow.notNullLatLng) { _, latLng ->
+            latLng
+        }.flatMapConcat { loadingEventsFlow(it) }
+
+    private val locationSnackbarFlow: Flow<NearbyState>
+        get() = locationStateProvider.locationStateFlow
+            .filter { it.latLng == null }
+            .map { (_, status) ->
+                val state = statesChannel.value
+                when (status) {
+                    LocationStatus.PermissionDenied -> state.copy(
+                        snackbarState = SnackbarState.Text("No location permission")
+                    )
+                    LocationStatus.Disabled -> state.copy(
+                        snackbarState = SnackbarState.Text("Location disabled")
+                    )
+                    LocationStatus.Loading -> state.copy(
+                        snackbarState = SnackbarState.Text("Loading location...")
+                    )
+                    is LocationStatus.Error -> state.copy(
+                        snackbarState = SnackbarState.Text("Unable to load location - error occurred")
+                    )
+                    else -> null
+                }
+            }
+            .filterNotNull()
+
+    private val Flow<LocationState>.notNullLatLng get() = map { it.latLng }.filterNotNull()
+
+    private val loadEventsFlow: Flow<NearbyState>
+        get() = locationStateProvider.locationStateFlow
+            .filter {
+                val state = statesChannel.value
+                state.events.value.isEmpty()
+            }
+            .notNullLatLng
+            .flatMapConcat { loadingEventsFlow(it) }
+
+    private fun loadingEventsFlow(latLng: LatLng): Flow<NearbyState> = flow {
+        val state = statesChannel.value
+        emit(state.copy(events = state.events.copyWithLoadingInProgress))
+        val result = withContext(ioDispatcher) {
+            getNearbyEvents(latLng.lat, latLng.lng, state.events.offset)
+        }
+        state.reduce(result)
+    }
+
+    private fun Flow<EventListScrolledToEnd>.processScrolledToEndIntents() = filterNot {
+        val state = statesChannel.value
+        state.events.status is Loading || state.events.offset >= state.events.totalItems
+    }.zip(locationStateProvider.locationStateFlow.notNullLatLng) { _, latLng ->
+        latLng
+    }.flatMapConcat { loadingEventsFlow(it) }
+
 
     private fun Flow<ClearSelectionClicked>.processClearSelectionIntents(): Flow<NearbyState> {
         return map {
@@ -124,11 +212,11 @@ class NearbyViewModel(
                 is Resource.Error<PagedResult<IEvent>, *> -> setState {
                     copy(
                         events = events.copyWithError(result.error),
-                        snackarState = if (result.error is NetworkResponse.ServerError<*>) {
+                        snackbarState = if (result.error is NetworkResponse.ServerError<*>) {
                             if ((result.error as NetworkResponse.ServerError<*>).code in 503..504)
                                 SnackbarState.Text("No connection")
                             else SnackbarState.Text("Unknown network error")
-                        } else snackarState
+                        } else snackbarState
                     )
                 }
             }
@@ -159,21 +247,21 @@ class NearbyViewModel(
     fun onNotConnected() = setState {
         copy(
             events = events.copyWithError(NearbyError.NotConnected),
-            snackarState = SnackbarState.Text("No connection")
+            snackbarState = SnackbarState.Text("No connection")
         )
     }
 
     fun onLocationNotLoadedYet() = setState {
         copy(
             events = events.copyWithError(NearbyError.LocationNotLoadedYet),
-            snackarState = SnackbarState.Text("Retrieving location...")
+            snackbarState = SnackbarState.Text("Retrieving location...")
         )
     }
 
     fun onLocationUnavailable() = setState {
         copy(
             events = events.copyWithError(NearbyError.LocationUnavailable),
-            snackarState = SnackbarState.Text("Location unavailable")
+            snackbarState = SnackbarState.Text("Location unavailable")
         )
     }
 }

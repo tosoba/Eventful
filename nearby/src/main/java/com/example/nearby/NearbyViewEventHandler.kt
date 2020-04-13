@@ -67,7 +67,7 @@ class NearbyViewEventHandler @Inject constructor(
     }
 
     private val snackbarStateFlow: Flow<NearbyViewUpdate?> by lazy {
-        viewModel.state.map { it.snackarState }.distinctUntilChanged().map { UpdateSnackbar(it) }
+        viewModel.state.map { it.snackbarState }.distinctUntilChanged().map { UpdateSnackbar(it) }
     }
 
     private val signalsFlow: Flow<NearbyViewUpdate?> by lazy {

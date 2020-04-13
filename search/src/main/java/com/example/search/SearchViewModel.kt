@@ -25,7 +25,7 @@ sealed class SearchIntent
 data class NewSearch(val text: String, val confirmed: Boolean) : SearchIntent()
 object LoadMoreResults
 
-fun SearchState.reduce(
+private fun SearchState.reduce(
     resource: Resource<PagedResult<IEvent>>,
     suggestions: List<SearchSuggestion>? = null
 ): SearchState = when (resource) {

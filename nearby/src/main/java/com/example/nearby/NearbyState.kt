@@ -8,10 +8,10 @@ import com.haroldadmin.vector.VectorState
 
 data class NearbyState(
     val events: PagedDataList<Selectable<Event>>,
-    val snackarState: SnackbarState
+    val snackbarState: SnackbarState
 ) : VectorState {
     companion object {
         val INITIAL: NearbyState
-            get() = NearbyState(events = PagedDataList(), snackarState = SnackbarState.Hidden)
+            get() = NearbyState(events = PagedDataList(), snackbarState = SnackbarState.Hidden)
     }
 }
