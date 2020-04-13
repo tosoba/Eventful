@@ -1,7 +1,7 @@
 package com.example.nearby
 
 import android.content.Context
-import com.example.core.model.app.LocationResult
+import com.example.core.model.app.LocationStatus
 import com.example.coreandroid.base.ConnectivityStateProvider
 import com.example.coreandroid.base.LocationStateProvider
 import com.example.coreandroid.di.scope.FragmentScoped
@@ -60,9 +60,8 @@ class NearbyViewEventHandler @Inject constructor(
             .distinctUntilChanged()
             .filter { events.loadingFailed }
             .onEach { (_, locationState) ->
-                if (locationState is LocationResult.Found) events.ifEmptyAndIsNotLoading {
-                    viewModel.loadEvents(locationState.latLng)
-                }
+                if (locationState.status is LocationStatus.Found && locationState.latLng != null)
+                    events.ifEmptyAndIsNotLoading { viewModel.loadEvents(locationState.latLng!!) }
             }
             .map { (_, _) -> null }
     }
@@ -134,15 +133,15 @@ class NearbyViewEventHandler @Inject constructor(
             return
         }
 
-        val locationState = locationStateProvider.locationState
-        if (locationState is LocationResult.Loading || locationState is LocationResult.Unknown) {
-            viewModel.onLocationNotLoadedYet()
-            return
-        } else if (locationState !is LocationResult.Found) {
-            viewModel.onLocationUnavailable()
-            return
-        }
-
-        viewModel.loadEvents(locationState.latLng)
+//        val locationState = locationStateProvider.locationState
+//        if (locationState is LocationResult.Loading || locationState is LocationResult.Unknown) {
+//            viewModel.onLocationNotLoadedYet()
+//            return
+//        } else if (locationState !is LocationResult.Found) {
+//            viewModel.onLocationUnavailable()
+//            return
+//        }
+//
+//        viewModel.loadEvents(locationState.latLng)
     }
 }

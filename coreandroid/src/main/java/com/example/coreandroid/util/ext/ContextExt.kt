@@ -7,15 +7,14 @@ import androidx.core.content.ContextCompat.getSystemService
 
 
 val Context.isLocationAvailable: Boolean
-    get() = getSystemService(this, LocationManager::class.java)?.let {
-        return@let it.isProviderEnabled(LocationManager.GPS_PROVIDER) || it.isProviderEnabled(
-            LocationManager.NETWORK_PROVIDER
-        )
+    get() = getSystemService(this, LocationManager::class.java)?.run {
+        isProviderEnabled(LocationManager.GPS_PROVIDER)
+                || isProviderEnabled(LocationManager.NETWORK_PROVIDER)
     } ?: false
 
 val Context.isConnected: Boolean
     get() {
-        val connectivityManager: ConnectivityManager =
+        val connectivityManager =
             getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val activeNetwork = connectivityManager.activeNetworkInfo
         return activeNetwork != null && activeNetwork.isConnected

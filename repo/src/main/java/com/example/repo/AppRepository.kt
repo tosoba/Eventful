@@ -8,6 +8,7 @@ import com.example.coreandroid.util.ext.currentLocation
 import com.example.coreandroid.util.ext.isLocationAvailable
 import com.example.coreandroid.util.ext.latLng
 import com.example.coreandroid.util.ext.locationEnabled
+import com.github.pwittchen.reactivenetwork.library.rx2.ReactiveNetwork
 import com.patloew.rxlocation.RxLocation
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
@@ -40,6 +41,14 @@ class AppRepository(
             .subscribeOn(Schedulers.io())
             .startWith(0)
             .map { appContext.isLocationAvailable }
+            .distinctUntilChanged()
+            .openSubscription()
+            .consumeAsFlow()
+
+    override val connected: Flow<Boolean>
+        get() = ReactiveNetwork
+            .observeInternetConnectivity()
+            .subscribeOn(Schedulers.io())
             .distinctUntilChanged()
             .openSubscription()
             .consumeAsFlow()

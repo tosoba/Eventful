@@ -67,11 +67,6 @@ class SearchVM(
             .launchIn(viewModelScope)
     }
 
-    private fun Flow<SearchIntent>.processIntents(): Flow<SearchState> = merge(
-        filterIsInstance<NewSearch>().processNewSearchIntents(),
-        filterIsInstance<LoadMoreResults>().processLoadMoreResultsIntents()
-    )
-
     private val connectivityReactionFlow: Flow<SearchState>
         get() = connectivityStateProvider.isConnectedFlow.filter {
             val state = statesChannel.value
@@ -81,6 +76,11 @@ class SearchVM(
             val resource = withContext(ioDispatcher) { searchEvents(state.searchText) }
             statesChannel.value.reduce(resource)
         }
+
+    private fun Flow<SearchIntent>.processIntents(): Flow<SearchState> = merge(
+        filterIsInstance<NewSearch>().processNewSearchIntents(),
+        filterIsInstance<LoadMoreResults>().processLoadMoreResultsIntents()
+    )
 
     private fun Flow<NewSearch>.processNewSearchIntents(): Flow<SearchState> {
         return distinctUntilChanged()
