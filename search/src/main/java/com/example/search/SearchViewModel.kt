@@ -64,6 +64,7 @@ class SearchVM(
 
     init {
         merge(intentsChannel.asFlow().processIntents(), connectivityReactionFlow)
+            .onEach(statesChannel::send)
             .launchIn(viewModelScope)
     }
 

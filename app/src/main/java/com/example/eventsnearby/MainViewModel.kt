@@ -52,7 +52,7 @@ class MainVM(
             intentsChannel.asFlow().processIntents(),
             locationAvailabilityReactionFlow,
             connectionReactionFlow
-        ).launchIn(viewModelScope)
+        ).onEach(statesChannel::send).launchIn(viewModelScope)
     }
 
     private val locationAvailabilityReactionFlow: Flow<MainState>

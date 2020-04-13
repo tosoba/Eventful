@@ -69,7 +69,7 @@ class NearbyVM(
             locationSnackbarFlow,
             loadEventsFlow,
             intentsChannel.asFlow().processIntents()
-        ).launchIn(viewModelScope)
+        ).onEach(statesChannel::send).launchIn(viewModelScope)
     }
 
     private fun Flow<NearbyIntent>.processIntents(): Flow<NearbyState> = merge(
