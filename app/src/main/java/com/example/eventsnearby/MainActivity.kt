@@ -4,12 +4,8 @@ import android.Manifest
 import android.os.Bundle
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import com.example.core.model.app.LocationStatus
 import com.example.coreandroid.base.DrawerLayoutHost
 import com.example.coreandroid.base.LocationController
-import com.example.coreandroid.lifecycle.ConnectivityObserver
-import com.example.coreandroid.lifecycle.LocationAvailabilityObserver
-import com.example.coreandroid.util.ext.plusAssign
 import com.google.android.material.navigation.NavigationView
 import com.markodevcic.peko.ActivityRotatingException
 import com.markodevcic.peko.Peko
@@ -21,9 +17,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
@@ -47,49 +40,19 @@ class MainActivity : DaggerAppCompatActivity(), DrawerLayoutHost, CoroutineScope
             true
         }
 
-    private val currentState: MainState
-        get() = viewModel.currentState
-
     private val mainNavigationFragment: MainNavigationFragment? by lazy(LazyThreadSafetyMode.NONE) {
         supportFragmentManager.findFragmentById(R.id.main_navigation_fragment) as? MainNavigationFragment
     }
 
-    private val locationAvailabilityObserver: LocationAvailabilityObserver by lazy(
-        LazyThreadSafetyMode.NONE
-    ) {
-        LocationAvailabilityObserver(this) { available ->
-            if (available && currentState.locationDisabledOrUnknown)
-                viewModel.loadLocation()
-        }
-    }
-
     @Inject
-    lateinit var viewModel: MainViewModel
+    lateinit var viewModel: MainVM
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         main_drawer_nav_view.setNavigationItemSelectedListener(drawerNavigationItemSelectedListener)
 
-        lifecycle += listOf(
-            ConnectivityObserver { viewModel.connected = it },
-            locationAvailabilityObserver
-        )
-
-        //TODO: are these the only locationStates needed here?
-        if (
-            currentState.locationState.status == LocationStatus.Unknown
-            || currentState.locationState.status == LocationStatus.Loading
-        ) {
-            requestPermission()
-        }
-
-        launch {
-            viewModel.state.filterNotNull().map { it.locationState }.collect {
-                if (it.status is LocationStatus.Disabled) locationAvailabilityObserver.start()
-                else locationAvailabilityObserver.stop()
-            }
-        }
+        requestPermission()
     }
 
     override fun onDestroy() {
@@ -126,10 +89,8 @@ class MainActivity : DaggerAppCompatActivity(), DrawerLayoutHost, CoroutineScope
 
     private fun onRequestPermissionsResult(result: PermissionRequestResult) {
         val (grantedPermissions) = result
-        if (Manifest.permission.ACCESS_COARSE_LOCATION !in grantedPermissions) {
-            viewModel.onPermissionDenied()
-        } else {
-            viewModel.loadLocation()
-        }
+        if (Manifest.permission.ACCESS_COARSE_LOCATION !in grantedPermissions) launch {
+            viewModel.send(PermissionDenied)
+        } else launch { viewModel.send(LoadLocation) }
     }
 }

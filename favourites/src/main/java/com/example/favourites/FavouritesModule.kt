@@ -23,16 +23,16 @@ abstract class FavouritesModule {
 
         @Provides
         @IntoMap
-        @ViewModelKey(FavouritesViewModel::class)
+        @ViewModelKey(FavouritesVM::class)
         fun favouritesViewModelBase(
             getSavedEvents: GetSavedEvents,
             ioDispatcher: CoroutineDispatcher
-        ): ViewModel = FavouritesViewModel(getSavedEvents, ioDispatcher)
+        ): ViewModel = FavouritesVM(getSavedEvents, ioDispatcher)
 
         @Provides
         fun favouritesViewModel(
             factory: ViewModelProvider.Factory, target: FavouritesFragment
-        ): FavouritesViewModel = ViewModelProvider(target, factory)
-            .get(FavouritesViewModel::class.java)
+        ): FavouritesVM = ViewModelProvider(target, factory)
+            .get(FavouritesVM::class.java)
     }
 }

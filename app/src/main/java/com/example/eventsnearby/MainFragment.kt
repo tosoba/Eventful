@@ -59,10 +59,8 @@ class MainFragment : InjectableFragment(), SnackbarController {
 
     private var snackbar: Snackbar? = null
 
-    private lateinit var snackbarStateChannel : ConflatedBroadcastChannel<SnackbarState>
-
-    @Inject
-    internal lateinit var viewModel: MainViewModel
+//    private val snackbarStateChannel: ConflatedBroadcastChannel<SnackbarState> =
+//        ConflatedBroadcastChannel()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -84,23 +82,22 @@ class MainFragment : InjectableFragment(), SnackbarController {
                 .show()
         }
 
-        snackbarStateChannel = ConflatedBroadcastChannel()
-        snackbarStateChannel.asFlow()
-            .scan(Pair<SnackbarState?, SnackbarState?>(null, null)) { last2States, newState ->
-                Pair(last2States.second, newState)
-            }
-            .drop(1)
-            .onEach { states -> transitionBetween(states.first, states.second!!) }
-            .launchIn(fragmentScope)
+//        snackbarStateChannel.asFlow()
+//            .scan(Pair<SnackbarState?, SnackbarState?>(null, null)) { last2States, newState ->
+//                Pair(last2States.second, newState)
+//            }
+//            .drop(1)
+//            .onEach { states -> transitionBetween(states.first, states.second!!) }
+//            .launchIn(fragmentScope)
     }
 
     override fun onPause() {
         super.onPause()
-        snackbarStateChannel.close()
+//        snackbarStateChannel.close()
     }
 
     override fun transitionTo(newState: SnackbarState) {
-        snackbarStateChannel.offer(newState)
+//        snackbarStateChannel.offer(newState)
     }
 
     private fun transitionBetween(previousState: SnackbarState?, newState: SnackbarState) {

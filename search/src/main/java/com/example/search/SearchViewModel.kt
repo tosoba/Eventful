@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.*
 
 sealed class SearchIntent
 data class NewSearch(val text: String, val confirmed: Boolean) : SearchIntent()
-object LoadMoreResults
+object LoadMoreResults : SearchIntent()
 
 private fun SearchState.reduce(
     resource: Resource<PagedResult<IEvent>>,

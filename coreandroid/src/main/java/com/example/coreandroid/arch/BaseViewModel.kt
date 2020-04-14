@@ -20,6 +20,7 @@ abstract class BaseViewModel<Intent, State, Event>(initialState: State) : ViewMo
         value = initialState
     )
     val states: Flow<State> get() = statesChannel.asFlow().distinctUntilChanged()
+    val state: State get() = statesChannel.value
 
     protected val liveEvents = LiveEvent<Event>()
     val events: LiveData<Event> get() = liveEvents

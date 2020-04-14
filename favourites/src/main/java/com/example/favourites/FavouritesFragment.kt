@@ -15,6 +15,7 @@ import kotlinx.android.synthetic.main.fragment_favourites.*
 import kotlinx.android.synthetic.main.fragment_favourites.view.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
@@ -24,10 +25,12 @@ class FavouritesFragment : InjectableEpoxyFragment() {
     internal lateinit var fragmentProvider: IFragmentProvider
 
     @Inject
-    internal lateinit var viewModel: FavouritesViewModel
+    internal lateinit var viewModel: FavouritesVM
 
     private val eventsScrollListener: EndlessRecyclerViewScrollListener by lazy {
-        EndlessRecyclerViewScrollListener(loadMore = viewModel::loadMoreEvents)
+        EndlessRecyclerViewScrollListener(loadMore = {
+            fragmentScope.launch { viewModel.send(LoadFavourites) }
+        })
     }
 
     private val epoxyController by lazy {
@@ -62,7 +65,7 @@ class FavouritesFragment : InjectableEpoxyFragment() {
         super.onResume()
         activity?.invalidateOptionsMenu()
 
-        viewModel.state.onEach { epoxyController.setData(it) }.launchIn(fragmentScope)
+        viewModel.states.onEach { epoxyController.setData(it) }.launchIn(fragmentScope)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

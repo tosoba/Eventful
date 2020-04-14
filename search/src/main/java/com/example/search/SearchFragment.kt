@@ -7,13 +7,20 @@ import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat.getSystemService
 import com.example.coreandroid.base.InjectableEpoxyFragment
 import com.example.coreandroid.navigation.IFragmentProvider
-import com.example.coreandroid.util.ext.*
+import com.example.coreandroid.util.ext.menuController
+import com.example.coreandroid.util.ext.restoreScrollPosition
+import com.example.coreandroid.util.ext.saveScrollPosition
 import com.example.coreandroid.util.itemListController
 import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
 import com.example.coreandroid.view.epoxy.listItem
 import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.fragment_search.view.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import reactivecircus.flowbinding.appcompat.QueryTextEvent
 import reactivecircus.flowbinding.appcompat.queryTextEvents
 import javax.inject.Inject
 
@@ -24,22 +31,22 @@ class SearchFragment : InjectableEpoxyFragment() {
     internal lateinit var fragmentProvider: IFragmentProvider
 
     @Inject
-    internal lateinit var handler: SearchViewEventHandler
+    internal lateinit var viewModel: SearchVM
 
     private val eventsScrollListener: EndlessRecyclerViewScrollListener by lazy {
         EndlessRecyclerViewScrollListener {
-            handler.eventOccurred(Interaction.EventListScrolledToEnd)
+            fragmentScope.launch { viewModel.send(LoadMoreResults) }
         }
     }
 
     private val epoxyController by lazy {
         itemListController(
-            handler.viewModel, SearchState::events,
+            viewModel, SearchState::events,
             onScrollListener = eventsScrollListener,
             emptyText = "No events found"
         ) { event ->
             event.listItem(View.OnClickListener {
-                handler.eventOccurred(Interaction.EventClicked(event))
+                //TODO: navigate to EventFragment
             })
         }
     }
@@ -67,20 +74,9 @@ class SearchFragment : InjectableEpoxyFragment() {
     override fun onResume() {
         super.onResume()
         activity?.invalidateOptionsMenu()
-
-        handler.updates.onEach {
-            when (it) {
-                is InvalidateList -> {
-                    if (it.errorOccurred) eventsScrollListener.onLoadingError()
-                    epoxyController.setData(handler.viewModel.currentState) // TODO: this is dumb AF
-                }
-                is ShowEvent -> navigationFragment?.showFragment(
-                    fragmentProvider.eventFragment(it.event)
-                )
-                is UpdateSnackbar -> snackbarController?.transitionTo(it.state)
-                is UpdateSearchSuggestions -> searchSuggestionsAdapter.swapCursor(it.cursor)
-            }
-        }.launchIn(fragmentScope)
+        //TODO: snackbars
+        //TODO: cursor swap
+        viewModel.states.onEach { epoxyController.setData(it) }.launchIn(fragmentScope)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -99,11 +95,6 @@ class SearchFragment : InjectableEpoxyFragment() {
         search_events_recycler_view?.saveScrollPosition(outState)
     }
 
-    override fun onDestroy() {
-        handler.eventOccurred(Lifecycle.OnDestroy)
-        super.onDestroy()
-    }
-
     private fun initializeSearchView(searchView: SearchView) {
         searchView.maxWidth = Integer.MAX_VALUE
         searchView.setSearchableInfo(
@@ -116,7 +107,9 @@ class SearchFragment : InjectableEpoxyFragment() {
             .debounce(500)
             .filter { it.queryText.isNotBlank() && it.queryText.length > 2 }
             .onEach {
-                handler.eventOccurred(Interaction.SearchTextChanged(it.toString()))
+                viewModel.send(
+                    NewSearch(it.queryText.toString(), it is QueryTextEvent.QuerySubmitted)
+                )
             }
             .launchIn(fragmentScope)
     }

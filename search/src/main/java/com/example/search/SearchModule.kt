@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.core.usecase.GetSeachSuggestions
 import com.example.core.usecase.SaveSuggestion
 import com.example.core.usecase.SearchEvents
+import com.example.coreandroid.base.ConnectivityStateProvider
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
 import dagger.Module
@@ -25,20 +26,25 @@ abstract class SearchModule {
 
         @Provides
         @IntoMap
-        @ViewModelKey(SearchViewModel::class)
+        @ViewModelKey(SearchVM::class)
         fun searchViewModelBase(
             searchEvents: SearchEvents,
             getSeachSuggestions: GetSeachSuggestions,
             saveSuggestion: SaveSuggestion,
+            connectivityStateProvider: ConnectivityStateProvider,
             ioDispatcher: CoroutineDispatcher
-        ): ViewModel = SearchViewModel(
-            searchEvents, getSeachSuggestions, saveSuggestion, ioDispatcher
+        ): ViewModel = SearchVM(
+            searchEvents,
+            getSeachSuggestions,
+            saveSuggestion,
+            connectivityStateProvider,
+            ioDispatcher
         )
 
         @Provides
         fun searchViewModel(
             factory: ViewModelProvider.Factory,
             target: SearchFragment
-        ): SearchViewModel = ViewModelProvider(target, factory).get(SearchViewModel::class.java)
+        ): SearchVM = ViewModelProvider(target, factory).get(SearchVM::class.java)
     }
 }

@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.core.usecase.GetNearbyEvents
 import com.example.core.usecase.SaveEvents
+import com.example.coreandroid.base.ConnectivityStateProvider
+import com.example.coreandroid.base.LocationStateProvider
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
 import dagger.Module
@@ -25,17 +27,25 @@ abstract class NearbyModule {
 
         @Provides
         @IntoMap
-        @ViewModelKey(NearbyViewModel::class)
+        @ViewModelKey(NearbyVM::class)
         fun nearbyViewModelBase(
             getNearbyEvents: GetNearbyEvents,
             saveEvents: SaveEvents,
+            connectivityStateProvider: ConnectivityStateProvider,
+            locationStateProvider: LocationStateProvider,
             ioDispatcher: CoroutineDispatcher
-        ): ViewModel = NearbyViewModel(getNearbyEvents, saveEvents, ioDispatcher)
+        ): ViewModel = NearbyVM(
+            getNearbyEvents,
+            saveEvents,
+            connectivityStateProvider,
+            locationStateProvider,
+            ioDispatcher
+        )
 
         @Provides
         fun nearbyViewModel(
             factory: ViewModelProvider.Factory,
             target: NearbyFragment
-        ): NearbyViewModel = ViewModelProvider(target, factory).get(NearbyViewModel::class.java)
+        ): NearbyVM = ViewModelProvider(target, factory).get(NearbyVM::class.java)
     }
 }

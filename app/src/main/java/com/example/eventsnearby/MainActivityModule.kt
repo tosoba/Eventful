@@ -2,7 +2,9 @@ package com.example.eventsnearby
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.core.usecase.GetConnection
 import com.example.core.usecase.GetLocation
+import com.example.core.usecase.GetLocationAvailability
 import com.example.coreandroid.base.ConnectivityStateProvider
 import com.example.coreandroid.base.LocationStateProvider
 import com.example.coreandroid.di.ViewModelKey
@@ -38,18 +40,22 @@ abstract class MainActivityModule {
     abstract fun mainActivity(): MainActivity
 
     @Binds
-    abstract fun connectivityStateProvider(mainViewModel: MainViewModel): ConnectivityStateProvider
+    abstract fun connectivityStateProvider(mainViewModel: MainVM): ConnectivityStateProvider
 
     @Binds
-    abstract fun locationStateProvider(mainViewModel: MainViewModel): LocationStateProvider
+    abstract fun locationStateProvider(mainViewModel: MainVM): LocationStateProvider
 
     @Module
     class Providers {
 
         @Provides
         @IntoMap
-        @ViewModelKey(MainViewModel::class)
-        fun mainViewModel(getLocation: GetLocation): ViewModel = MainViewModel(getLocation)
+        @ViewModelKey(MainVM::class)
+        fun mainViewModel(
+            getLocation: GetLocation,
+            getLocationAvailability: GetLocationAvailability,
+            getConnection: GetConnection
+        ): ViewModel = MainVM(getLocation, getLocationAvailability, getConnection)
     }
 
     @Module
@@ -58,6 +64,6 @@ abstract class MainActivityModule {
         @Provides
         fun mainViewModel(
             factory: ViewModelProvider.Factory, target: MainActivity
-        ): MainViewModel = ViewModelProvider(target, factory).get(MainViewModel::class.java)
+        ): MainVM = ViewModelProvider(target, factory).get(MainVM::class.java)
     }
 }

@@ -27,7 +27,7 @@ class WeatherVM(
         intentsChannel.asFlow()
             .filterIsInstance<LoadWeather>()
             .flatMapFirst {
-                flow {
+                flow<WeatherState> {
                     val state = statesChannel.value
                     emit(state.copy(forecast = state.forecast.copyWithLoadingInProgress))
                     when (val result = withContext(ioDispatcher) {

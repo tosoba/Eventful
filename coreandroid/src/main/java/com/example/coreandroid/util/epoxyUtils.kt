@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.epoxy.*
 import com.example.coreandroid.*
+import com.example.coreandroid.arch.BaseViewModel
 import com.example.coreandroid.base.InjectableEpoxyFragment
 import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
 import com.haroldadmin.vector.VectorFragment
@@ -115,7 +116,7 @@ inline fun <T, R> CarouselModelBuilder.withModelsFrom(
     models(items.map { (key, value) -> modelBuilder(key, value) })
 }
 
-fun <S : VectorState, A : VectorViewModel<S>, L : HoldsData<List<I>>, I> InjectableEpoxyFragment.itemListController(
+fun <S : VectorState, A : BaseViewModel<*, S, *>, L : HoldsData<List<I>>, I> InjectableEpoxyFragment.itemListController(
     viewModel: A, prop: KProperty1<S, L>,
     reloadClicked: (() -> Unit)? = null,
     onScrollListener: RecyclerView.OnScrollListener? = null,
@@ -127,7 +128,7 @@ fun <S : VectorState, A : VectorViewModel<S>, L : HoldsData<List<I>>, I> Injecta
     override fun buildModels(data: S) {
         if (view == null || isRemoving) return
 
-        withState(viewModel) { state ->
+        viewModel.state.let { state ->
             val items = prop.get(state)
             if (items.value.isEmpty()) when (val status = items.status) {
                 is Loading -> if (showLoadingIndicator) loadingIndicator {
