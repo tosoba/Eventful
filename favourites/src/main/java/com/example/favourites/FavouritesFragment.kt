@@ -3,6 +3,7 @@ package com.example.favourites
 import android.os.Bundle
 import android.view.*
 import com.example.coreandroid.base.InjectableEpoxyFragment
+import com.example.coreandroid.base.clearMenu
 import com.example.coreandroid.navigation.IFragmentProvider
 import com.example.coreandroid.util.ext.menuController
 import com.example.coreandroid.util.ext.navigationFragment
@@ -70,7 +71,7 @@ class FavouritesFragment : InjectableEpoxyFragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
-        menuController?.menuView?.menu?.clear()
+        menuController?.clearMenu()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

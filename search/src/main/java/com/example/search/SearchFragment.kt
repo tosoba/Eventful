@@ -6,6 +6,7 @@ import android.view.*
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat.getSystemService
 import com.example.coreandroid.base.InjectableEpoxyFragment
+import com.example.coreandroid.base.initializeMenu
 import com.example.coreandroid.navigation.IFragmentProvider
 import com.example.coreandroid.util.ext.menuController
 import com.example.coreandroid.util.ext.restoreScrollPosition
@@ -80,10 +81,8 @@ class SearchFragment : InjectableEpoxyFragment() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        menuController?.menuView?.let { menuView ->
-            menuView.menu.clear()
-            inflater.inflate(R.menu.search_menu, menuView.menu)
-            (menuView.menu.findItem(R.id.search_action)?.actionView as? SearchView)
+        menuController?.initializeMenu(R.menu.search_menu, inflater) {
+            (it.findItem(R.id.search_action)?.actionView as? SearchView)
                 ?.let(::initializeSearchView)
         }
 
