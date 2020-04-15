@@ -91,6 +91,8 @@ class MainActivity : DaggerAppCompatActivity(), DrawerLayoutHost, CoroutineScope
         val (grantedPermissions) = result
         if (Manifest.permission.ACCESS_COARSE_LOCATION !in grantedPermissions) launch {
             viewModel.send(PermissionDenied)
-        } else launch { viewModel.send(LoadLocation) }
+        } else launch {
+            viewModel.send(LoadLocation)
+        }
     }
 }

@@ -4,7 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.ActionMenuView
 import com.example.coreandroid.base.InjectableFragment
+import com.example.coreandroid.base.MenuController
 import com.example.coreandroid.base.SnackbarController
 import com.example.coreandroid.util.SnackbarState
 import com.example.coreandroid.util.ext.setupToolbar
@@ -20,12 +22,9 @@ import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
 import kotlinx.android.synthetic.main.fragment_main.*
 import kotlinx.android.synthetic.main.fragment_main.view.*
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.flow.*
-import javax.inject.Inject
 
 
-class MainFragment : InjectableFragment(), SnackbarController {
+class MainFragment : InjectableFragment(), MenuController, SnackbarController {
 
     private val bottomNavigationItemSelectedListener =
         BottomNavigationView.OnNavigationItemSelectedListener { item ->
@@ -123,4 +122,6 @@ class MainFragment : InjectableFragment(), SnackbarController {
             }
         }
     }
+
+    override val menuView: ActionMenuView? get() = main_action_menu_view
 }
