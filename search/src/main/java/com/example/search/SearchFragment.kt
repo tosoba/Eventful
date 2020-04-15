@@ -11,15 +11,13 @@ import com.example.coreandroid.navigation.IFragmentProvider
 import com.example.coreandroid.util.ext.menuController
 import com.example.coreandroid.util.ext.restoreScrollPosition
 import com.example.coreandroid.util.ext.saveScrollPosition
+import com.example.coreandroid.util.ext.snackbarController
 import com.example.coreandroid.util.itemListController
 import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
 import com.example.coreandroid.view.epoxy.listItem
 import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.fragment_search.view.*
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import reactivecircus.flowbinding.appcompat.QueryTextEvent
 import reactivecircus.flowbinding.appcompat.queryTextEvents
@@ -78,6 +76,12 @@ class SearchFragment : InjectableEpoxyFragment() {
         //TODO: snackbars
         //TODO: cursor swap
         viewModel.states.onEach { epoxyController.setData(it) }.launchIn(fragmentScope)
+
+        viewModel.states
+            .map { it.snackbarState }
+            .distinctUntilChanged()
+            .onEach { snackbarController?.transitionTo(it) }
+            .launchIn(fragmentScope)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

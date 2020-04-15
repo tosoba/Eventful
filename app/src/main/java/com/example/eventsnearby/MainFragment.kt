@@ -22,6 +22,8 @@ import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
 import kotlinx.android.synthetic.main.fragment_main.*
 import kotlinx.android.synthetic.main.fragment_main.view.*
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.*
 
 
 class MainFragment : InjectableFragment(), MenuController, SnackbarController {
@@ -58,8 +60,8 @@ class MainFragment : InjectableFragment(), MenuController, SnackbarController {
 
     private var snackbar: Snackbar? = null
 
-//    private val snackbarStateChannel: ConflatedBroadcastChannel<SnackbarState> =
-//        ConflatedBroadcastChannel()
+    private val snackbarStateChannel: ConflatedBroadcastChannel<SnackbarState> =
+        ConflatedBroadcastChannel()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -81,22 +83,22 @@ class MainFragment : InjectableFragment(), MenuController, SnackbarController {
                 .show()
         }
 
-//        snackbarStateChannel.asFlow()
-//            .scan(Pair<SnackbarState?, SnackbarState?>(null, null)) { last2States, newState ->
-//                Pair(last2States.second, newState)
-//            }
-//            .drop(1)
-//            .onEach { states -> transitionBetween(states.first, states.second!!) }
-//            .launchIn(fragmentScope)
+        snackbarStateChannel.asFlow()
+            .scan(Pair<SnackbarState?, SnackbarState?>(null, null)) { last2States, newState ->
+                Pair(last2States.second, newState)
+            }
+            .drop(1)
+            .onEach { states -> transitionBetween(states.first, states.second!!) }
+            .launchIn(fragmentScope)
     }
 
     override fun onPause() {
         super.onPause()
-//        snackbarStateChannel.close()
+        snackbarStateChannel.close()
     }
 
     override fun transitionTo(newState: SnackbarState) {
-//        snackbarStateChannel.offer(newState)
+        snackbarStateChannel.offer(newState)
     }
 
     private fun transitionBetween(previousState: SnackbarState?, newState: SnackbarState) {

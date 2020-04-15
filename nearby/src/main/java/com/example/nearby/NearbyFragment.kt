@@ -9,13 +9,16 @@ import com.example.coreandroid.navigation.IFragmentProvider
 import com.example.coreandroid.util.ext.menuController
 import com.example.coreandroid.util.ext.restoreScrollPosition
 import com.example.coreandroid.util.ext.saveScrollPosition
+import com.example.coreandroid.util.ext.snackbarController
 import com.example.coreandroid.util.itemListController
 import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
 import com.example.coreandroid.view.ToolbarActionModeCallback
 import com.example.coreandroid.view.epoxy.listItem
 import kotlinx.android.synthetic.main.fragment_nearby.*
 import kotlinx.android.synthetic.main.fragment_nearby.view.*
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -78,9 +81,13 @@ class NearbyFragment : InjectableEpoxyFragment() {
         activity?.invalidateOptionsMenu()
         updateActionMode()
 
-        viewModel.states.onEach {
-            epoxyController.setData(it)
-        }.launchIn(fragmentScope)
+        viewModel.states.onEach { epoxyController.setData(it) }.launchIn(fragmentScope)
+
+        viewModel.states
+            .map { it.snackbarState }
+            .distinctUntilChanged()
+            .onEach { snackbarController?.transitionTo(it) }
+            .launchIn(fragmentScope)
 
         viewModel.events.observe(this, Observer {
             if (it is NearbySignal.FavouritesSaved) finishActionMode()

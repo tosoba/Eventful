@@ -22,7 +22,10 @@ import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 
-class MainActivity : DaggerAppCompatActivity(), DrawerLayoutHost, CoroutineScope,
+class MainActivity :
+    DaggerAppCompatActivity(),
+    DrawerLayoutHost,
+    CoroutineScope,
     LocationController {
 
     private val supervisorJob = CompletableDeferred<Any>()
