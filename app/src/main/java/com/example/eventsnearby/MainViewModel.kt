@@ -71,12 +71,13 @@ class MainVM(
         filterIsInstance<PermissionDenied>().processPermissionDeniedIntents()
     )
 
-    private val locationLoadingStates: Flow<MainState> = flow {
-        val state = statesChannel.value
-        state.copy(locationState = state.locationState.copy(status = LocationStatus.Loading))
-        val result = getLocation()
-        state.reduce(result)
-    }
+    private val locationLoadingStates: Flow<MainState>
+        get() = flow {
+            val state = statesChannel.value
+            state.copy(locationState = state.locationState.copy(status = LocationStatus.Loading))
+            val result = getLocation()
+            state.reduce(result)
+        }
 
     private fun Flow<LoadLocation>.processLoadLocationIntents(): Flow<MainState> = filterNot {
         statesChannel.value.locationState.status is LocationStatus.Loading
