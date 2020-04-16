@@ -101,9 +101,9 @@ class SearchFragment : InjectableEpoxyFragment() {
     private fun initializeSearchView(searchView: SearchView) {
         searchView.maxWidth = Integer.MAX_VALUE
         searchView.setSearchableInfo(
-            getSystemService<SearchManager>(
-                requireContext(), SearchManager::class.java
-            )?.getSearchableInfo(activity?.componentName)
+            getSystemService(requireContext(), SearchManager::class.java)?.getSearchableInfo(
+                activity?.componentName
+            )
         )
         searchView.suggestionsAdapter = searchSuggestionsAdapter
         searchView.queryTextEvents()

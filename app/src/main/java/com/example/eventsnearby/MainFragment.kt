@@ -92,8 +92,8 @@ class MainFragment : InjectableFragment(), MenuController, SnackbarController {
             .launchIn(fragmentScope)
     }
 
-    override fun onPause() {
-        super.onPause()
+    override fun onDestroy() {
+        super.onDestroy()
         snackbarStateChannel.close()
     }
 
