@@ -38,7 +38,8 @@ private fun NearbyState.reduce(resource: Resource<PagedResult<IEvent>>): NearbyS
                 resource.data.items.map { Selectable(Event(it)) }.distinctBy { it.item.name },
                 resource.data.currentPage + 1,
                 resource.data.totalPages
-            )
+            ),
+            snackbarState = SnackbarState.Hidden
         )
 
         is Resource.Error<PagedResult<IEvent>, *> -> copy(
@@ -123,11 +124,16 @@ class NearbyVM(
 
     private fun loadingEventsFlow(latLng: LatLng): Flow<NearbyState> = flow {
         val state = statesChannel.value
-        emit(state.copy(events = state.events.copyWithLoadingInProgress))
+        emit(
+            state.copy(
+                events = state.events.copyWithLoadingInProgress,
+                snackbarState = SnackbarState.Text("Loading nearby events...")
+            )
+        )
         val result = withContext(ioDispatcher) {
             getNearbyEvents(latLng.lat, latLng.lng, state.events.offset)
         }
-        state.reduce(result)
+        emit(state.reduce(result))
     }
 
     private fun Flow<EventListScrolledToEnd>.processScrolledToEndIntents() = filterNot {

@@ -8,11 +8,6 @@ data class MainState(
     val isConnected: Boolean,
     val locationState: LocationState
 ) : VectorState {
-
-    val locationDisabledOrUnknown: Boolean
-        get() = locationState.status is LocationStatus.Disabled
-                || locationState.status is LocationStatus.Unknown
-
     companion object {
         val INITIAL: MainState
             get() = MainState(isConnected = false, locationState = LocationState())

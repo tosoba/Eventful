@@ -92,10 +92,11 @@ class MainActivity :
 
     private fun onRequestPermissionsResult(result: PermissionRequestResult) {
         val (grantedPermissions) = result
-        if (Manifest.permission.ACCESS_COARSE_LOCATION !in grantedPermissions) launch {
-            viewModel.send(PermissionDenied)
-        } else launch {
-            viewModel.send(LoadLocation)
+        launch {
+            viewModel.send(
+                if (Manifest.permission.ACCESS_COARSE_LOCATION in grantedPermissions) LoadLocation
+                else PermissionDenied
+            )
         }
     }
 }
