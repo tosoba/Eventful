@@ -62,11 +62,14 @@ class FavouritesFragment : InjectableEpoxyFragment() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        viewModel.states.onEach { epoxyController.setData(it) }.launchIn(fragmentScope)
+    }
+
     override fun onResume() {
         super.onResume()
         activity?.invalidateOptionsMenu()
-
-        viewModel.states.onEach { epoxyController.setData(it) }.launchIn(fragmentScope)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

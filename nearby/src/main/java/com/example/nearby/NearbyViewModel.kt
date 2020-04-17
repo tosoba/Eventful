@@ -143,7 +143,6 @@ class NearbyVM(
         latLng
     }.flatMapConcat { loadingEventsFlow(it) }
 
-
     private fun Flow<ClearSelectionClicked>.processClearSelectionIntents(): Flow<NearbyState> {
         return map {
             val state = statesChannel.value

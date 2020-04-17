@@ -29,8 +29,8 @@ open class InjectableFragment : Fragment(), HasSupportFragmentInjector {
         super.onAttach(context)
     }
 
-    override fun onPause() {
-        super.onPause()
+    override fun onDestroy() {
+        super.onDestroy()
         fragmentScope.cancel()
     }
 }

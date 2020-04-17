@@ -70,9 +70,8 @@ class SearchFragment : InjectableEpoxyFragment() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        activity?.invalidateOptionsMenu()
+    override fun onStart() {
+        super.onStart()
         //TODO: snackbars
         //TODO: cursor swap
         viewModel.states.onEach { epoxyController.setData(it) }.launchIn(fragmentScope)
@@ -82,6 +81,12 @@ class SearchFragment : InjectableEpoxyFragment() {
             .distinctUntilChanged()
             .onEach { snackbarController?.transitionTo(it) }
             .launchIn(fragmentScope)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        activity?.invalidateOptionsMenu()
+        snackbarController?.transitionTo(viewModel.state.snackbarState)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

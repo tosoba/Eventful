@@ -76,10 +76,8 @@ class NearbyFragment : InjectableEpoxyFragment() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        activity?.invalidateOptionsMenu()
-        updateActionMode()
+    override fun onStart() {
+        super.onStart()
 
         viewModel.states.onEach { epoxyController.setData(it) }.launchIn(fragmentScope)
 
@@ -92,6 +90,13 @@ class NearbyFragment : InjectableEpoxyFragment() {
         viewModel.events.observe(this, Observer {
             if (it is NearbySignal.FavouritesSaved) finishActionMode()
         })
+    }
+
+    override fun onResume() {
+        super.onResume()
+        activity?.invalidateOptionsMenu()
+        updateActionMode()
+        snackbarController?.transitionTo(viewModel.state.snackbarState)
     }
 
     override fun onPause() {
