@@ -75,7 +75,7 @@ class NearbyVM(
 
     private fun Flow<NearbyIntent>.processIntents(): Flow<NearbyState> = merge(
         filterIsInstance<ClearSelectionClicked>().processClearSelectionIntents(),
-        filterIsInstance<EventLongClicked>().processEventClickedIntents(),
+        filterIsInstance<EventLongClicked>().processEventLongClickedIntents(),
         filterIsInstance<AddToFavouritesClicked>().processAddToFavouritesIntents(),
         filterIsInstance<EventListScrolledToEnd>().processScrolledToEndIntents()
     )
@@ -154,15 +154,14 @@ class NearbyVM(
         }
     }
 
-    private fun Flow<EventLongClicked>.processEventClickedIntents(): Flow<NearbyState> {
+    private fun Flow<EventLongClicked>.processEventLongClickedIntents(): Flow<NearbyState> {
         return map { (event) ->
             val state = statesChannel.value
             state.copy(
                 events = state.events.copy(
-                    value = state.events.value.replace(
-                        { matched -> Selectable(event, !matched.selected) },
-                        { it.item.id == event.id }
-                    )
+                    value = state.events.value.map {
+                        if (it.item.id == event.id) Selectable(event, !it.selected) else it
+                    }
                 )
             )
         }

@@ -16,6 +16,8 @@ import com.example.coreandroid.view.ToolbarActionModeCallback
 import com.example.coreandroid.view.epoxy.listItem
 import kotlinx.android.synthetic.main.fragment_nearby.*
 import kotlinx.android.synthetic.main.fragment_nearby.view.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -24,6 +26,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
+@FlowPreview
+@ExperimentalCoroutinesApi
 class NearbyFragment : InjectableEpoxyFragment() {
 
     @Inject
@@ -82,6 +86,12 @@ class NearbyFragment : InjectableEpoxyFragment() {
         viewModel.states.onEach { epoxyController.setData(it) }.launchIn(fragmentScope)
 
         viewModel.states
+            .map { state -> state.events.value.count { it.selected } }
+            .distinctUntilChanged()
+            .onEach { updateActionMode(it) }
+            .launchIn(fragmentScope)
+
+        viewModel.states
             .map { it.snackbarState }
             .distinctUntilChanged()
             .onEach { snackbarController?.transitionTo(it) }
@@ -95,7 +105,6 @@ class NearbyFragment : InjectableEpoxyFragment() {
     override fun onResume() {
         super.onResume()
         activity?.invalidateOptionsMenu()
-        updateActionMode()
         snackbarController?.transitionTo(viewModel.state.snackbarState)
     }
 
@@ -119,11 +128,7 @@ class NearbyFragment : InjectableEpoxyFragment() {
         actionMode = null
     }
 
-    private fun updateActionMode() {
-        val numberOfSelectedEvents = viewModel.state.events.value
-            .filter { selectable -> selectable.selected }
-            .size
-
+    private fun updateActionMode(numberOfSelectedEvents: Int) {
         if (actionMode == null && numberOfSelectedEvents > 0) {
             actionMode = activity?.startActionMode(
                 ToolbarActionModeCallback(

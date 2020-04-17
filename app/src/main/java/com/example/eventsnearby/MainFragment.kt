@@ -22,7 +22,8 @@ import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
 import kotlinx.android.synthetic.main.fragment_main.*
 import kotlinx.android.synthetic.main.fragment_main.view.*
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.channels.BroadcastChannel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 
 
@@ -60,8 +61,9 @@ class MainFragment : InjectableFragment(), MenuController, SnackbarController {
 
     private var snackbar: Snackbar? = null
 
-    private val snackbarStateChannel: ConflatedBroadcastChannel<SnackbarState> =
-        ConflatedBroadcastChannel()
+    private val snackbarStateChannel: BroadcastChannel<SnackbarState> = BroadcastChannel(
+        capacity = Channel.CONFLATED
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
