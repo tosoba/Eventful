@@ -116,7 +116,7 @@ inline fun <T, R> CarouselModelBuilder.withModelsFrom(
     models(items.map { (key, value) -> modelBuilder(key, value) })
 }
 
-fun <S : VectorState, A : BaseViewModel<*, S, *>, L : HoldsData<List<I>>, I> InjectableEpoxyFragment.itemListController(
+fun <S, A : BaseViewModel<*, S, *>, L : HoldsData<List<I>>, I> InjectableEpoxyFragment.itemListController(
     viewModel: A, prop: KProperty1<S, L>,
     reloadClicked: (() -> Unit)? = null,
     onScrollListener: RecyclerView.OnScrollListener? = null,

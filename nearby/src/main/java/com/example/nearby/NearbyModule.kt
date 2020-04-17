@@ -13,8 +13,12 @@ import dagger.Provides
 import dagger.android.ContributesAndroidInjector
 import dagger.multibindings.IntoMap
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 
 
+@FlowPreview
+@ExperimentalCoroutinesApi
 @Module
 abstract class NearbyModule {
 

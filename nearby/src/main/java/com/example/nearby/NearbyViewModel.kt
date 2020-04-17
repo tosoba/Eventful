@@ -1,57 +1,23 @@
 package com.example.nearby
 
 import androidx.lifecycle.viewModelScope
-import com.example.core.Resource
-import com.example.core.model.PagedResult
 import com.example.core.model.app.LatLng
 import com.example.core.model.app.LocationState
 import com.example.core.model.app.LocationStatus
-import com.example.core.model.ticketmaster.IEvent
 import com.example.core.usecase.GetNearbyEvents
 import com.example.core.usecase.SaveEvents
-import com.example.core.util.replace
 import com.example.coreandroid.arch.BaseViewModel
 import com.example.coreandroid.base.ConnectivityStateProvider
 import com.example.coreandroid.base.LocationStateProvider
-import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.Loading
 import com.example.coreandroid.util.SnackbarState
-import com.haroldadmin.cnradapter.NetworkResponse
-import com.haroldadmin.vector.VectorViewModel
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.withContext
 
-sealed class NearbyIntent
-object EventListScrolledToEnd : NearbyIntent()
-data class EventLongClicked(val event: Event) : NearbyIntent()
-object ClearSelectionClicked : NearbyIntent()
-object AddToFavouritesClicked : NearbyIntent()
-
-private fun NearbyState.reduce(resource: Resource<PagedResult<IEvent>>): NearbyState {
-    return when (resource) {
-        is Resource.Success -> copy(
-            events = events.copyWithNewItems(
-                //TODO: make distinctBy work on (Paged)DataList (to prevent duplicates between pages)
-                resource.data.items.map { Selectable(Event(it)) }.distinctBy { it.item.name },
-                resource.data.currentPage + 1,
-                resource.data.totalPages
-            ),
-            snackbarState = SnackbarState.Hidden
-        )
-
-        is Resource.Error<PagedResult<IEvent>, *> -> copy(
-            events = events.copyWithError(resource.error),
-            snackbarState = if (resource.error is NetworkResponse.ServerError<*>) {
-                if ((resource.error as NetworkResponse.ServerError<*>).code in 503..504)
-                    SnackbarState.Text("No connection")
-                else SnackbarState.Text("Unknown network error")
-            } else snackbarState
-        )
-    }
-}
 
 @ExperimentalCoroutinesApi
 @FlowPreview
@@ -61,7 +27,7 @@ class NearbyVM(
     private val connectivityStateProvider: ConnectivityStateProvider,
     private val locationStateProvider: LocationStateProvider,
     private val ioDispatcher: CoroutineDispatcher,
-    initialState: NearbyState = NearbyState.INITIAL
+    initialState: NearbyState = NearbyState()
 ) : BaseViewModel<NearbyIntent, NearbyState, NearbySignal>(initialState) {
 
     init {
@@ -180,92 +146,5 @@ class NearbyVM(
                 )
             )
         }
-    }
-}
-
-class NearbyViewModel(
-    private val getNearbyEvents: GetNearbyEvents,
-    private val saveEvents: SaveEvents,
-    private val ioDispatcher: CoroutineDispatcher
-) : VectorViewModel<NearbyState>(NearbyState.INITIAL) {
-
-    private val signalsChannel: BroadcastChannel<NearbySignal> = ConflatedBroadcastChannel()
-    val signalsFlow: Flow<NearbySignal> get() = signalsChannel.asFlow()
-
-    fun loadEvents(userLatLng: LatLng) = withState { state ->
-        if (state.events.status is Loading || state.events.offset >= state.events.totalItems)
-            return@withState
-
-        viewModelScope.launch {
-            setState { copy(events = events.copyWithLoadingInProgress) }
-            when (val result = withContext(ioDispatcher) {
-                getNearbyEvents(userLatLng.lat, userLatLng.lng, state.events.offset)
-            }) {
-                is Resource.Success -> setState {
-                    copy(
-                        events = events.copyWithNewItems(
-                            //TODO: make distinctBy work on (Paged)DataList (to prevent duplicates between pages)
-                            result.data.items.map { Selectable(Event(it)) }
-                                .distinctBy { it.item.name },
-                            result.data.currentPage + 1,
-                            result.data.totalPages
-                        )
-                    )
-                }
-
-                is Resource.Error<PagedResult<IEvent>, *> -> setState {
-                    copy(
-                        events = events.copyWithError(result.error),
-                        snackbarState = if (result.error is NetworkResponse.ServerError<*>) {
-                            if ((result.error as NetworkResponse.ServerError<*>).code in 503..504)
-                                SnackbarState.Text("No connection")
-                            else SnackbarState.Text("Unknown network error")
-                        } else snackbarState
-                    )
-                }
-            }
-        }
-    }
-
-    fun addEventsToFavourites() = withState { state ->
-        viewModelScope.launch {
-            withContext(ioDispatcher) {
-                saveEvents(state.events.value.filter { it.selected }.map { it.item })
-                clearSelection()
-                signalsChannel.send(NearbySignal.FavouritesSaved)
-            }
-        }
-    }
-
-    fun clearSelection() = setState {
-        copy(events = events.copy(value = events.value.map { it.copy(selected = false) }))
-    }
-
-    fun toggleEventSelection(event: Event) = setState {
-        copy(events = events.copy(value = events.value.replace(
-            { matched -> Selectable(event, !matched.selected) },
-            { it.item.id == event.id }
-        )))
-    }
-
-    fun onNotConnected() = setState {
-        copy(
-            events = events.copyWithError(NearbyError.NotConnected),
-            snackbarState = SnackbarState.Text("No connection")
-        )
-    }
-
-    fun onLocationNotLoadedYet() = setState {
-        copy(
-            events = events.copyWithError(NearbyError.LocationNotLoadedYet),
-            snackbarState = SnackbarState.Text("Retrieving location...")
-        )
-    }
-
-    fun onLocationUnavailable() = setState {
-        copy(
-            events = events.copyWithError(NearbyError.LocationUnavailable),
-            snackbarState = SnackbarState.Text("Location unavailable")
-        )
     }
 }
