@@ -21,7 +21,7 @@ import kotlinx.coroutines.withContext
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class NearbyVM(
+class NearbyViewModel(
     private val getNearbyEvents: GetNearbyEvents,
     private val saveEvents: SaveEvents,
     private val connectivityStateProvider: ConnectivityStateProvider,
@@ -70,7 +70,7 @@ class NearbyVM(
                         snackbarState = SnackbarState.Text("Loading location...")
                     )
                     is LocationStatus.Error -> state.copy(
-                        snackbarState = SnackbarState.Text("Unable to load location - error occurred")
+                        snackbarState = SnackbarState.Text("Unable to load location - error occurred") //TODO: this appears before location is available...
                     )
                     else -> null
                 }

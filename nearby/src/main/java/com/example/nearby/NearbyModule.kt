@@ -31,14 +31,14 @@ abstract class NearbyModule {
 
         @Provides
         @IntoMap
-        @ViewModelKey(NearbyVM::class)
+        @ViewModelKey(NearbyViewModel::class)
         fun nearbyViewModelBase(
             getNearbyEvents: GetNearbyEvents,
             saveEvents: SaveEvents,
             connectivityStateProvider: ConnectivityStateProvider,
             locationStateProvider: LocationStateProvider,
             ioDispatcher: CoroutineDispatcher
-        ): ViewModel = NearbyVM(
+        ): ViewModel = NearbyViewModel(
             getNearbyEvents,
             saveEvents,
             connectivityStateProvider,
@@ -50,6 +50,6 @@ abstract class NearbyModule {
         fun nearbyViewModel(
             factory: ViewModelProvider.Factory,
             target: NearbyFragment
-        ): NearbyVM = ViewModelProvider(target, factory).get(NearbyVM::class.java)
+        ): NearbyViewModel = ViewModelProvider(target, factory).get(NearbyViewModel::class.java)
     }
 }

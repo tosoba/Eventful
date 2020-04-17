@@ -37,7 +37,7 @@ class NearbyFragment : InjectableEpoxyFragment() {
     internal lateinit var fragmentProvider: IFragmentProvider
 
     @Inject
-    internal lateinit var viewModel: NearbyVM
+    internal lateinit var viewModel: NearbyViewModel
 
     private val eventsScrollListener: EndlessRecyclerViewScrollListener by lazy {
         EndlessRecyclerViewScrollListener {
