@@ -6,6 +6,9 @@ import androidx.lifecycle.Observer
 import com.example.coreandroid.base.InjectableEpoxyFragment
 import com.example.coreandroid.base.clearMenu
 import com.example.coreandroid.navigation.IFragmentProvider
+import com.example.coreandroid.ticketmaster.Event
+import com.example.coreandroid.ticketmaster.Selectable
+import com.example.coreandroid.util.PagedDataList
 import com.example.coreandroid.util.ext.menuController
 import com.example.coreandroid.util.ext.restoreScrollPosition
 import com.example.coreandroid.util.ext.saveScrollPosition
@@ -43,8 +46,7 @@ class NearbyFragment : InjectableEpoxyFragment() {
     }
 
     private val epoxyController by lazy {
-        itemListController(
-            viewModel, NearbyState::events,
+        itemListController<PagedDataList<Selectable<Event>>, Selectable<Event>>(
             onScrollListener = eventsScrollListener
         ) { selectable ->
             selectable.listItem(
@@ -83,7 +85,7 @@ class NearbyFragment : InjectableEpoxyFragment() {
     override fun onStart() {
         super.onStart()
 
-        viewModel.states.onEach { epoxyController.setData(it) }.launchIn(fragmentScope)
+        viewModel.states.onEach { epoxyController.setData(it.events) }.launchIn(fragmentScope)
 
         viewModel.states
             .map { state -> state.events.value.count { it.selected } }

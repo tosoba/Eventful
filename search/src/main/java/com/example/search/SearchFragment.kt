@@ -8,6 +8,8 @@ import androidx.core.content.ContextCompat.getSystemService
 import com.example.coreandroid.base.InjectableEpoxyFragment
 import com.example.coreandroid.base.initializeMenu
 import com.example.coreandroid.navigation.IFragmentProvider
+import com.example.coreandroid.ticketmaster.Event
+import com.example.coreandroid.util.PagedDataList
 import com.example.coreandroid.util.ext.menuController
 import com.example.coreandroid.util.ext.restoreScrollPosition
 import com.example.coreandroid.util.ext.saveScrollPosition
@@ -39,8 +41,7 @@ class SearchFragment : InjectableEpoxyFragment() {
     }
 
     private val epoxyController by lazy {
-        itemListController(
-            viewModel, SearchState::events,
+        itemListController<PagedDataList<Event>, Event>(
             onScrollListener = eventsScrollListener,
             emptyText = "No events found"
         ) { event ->
@@ -74,7 +75,7 @@ class SearchFragment : InjectableEpoxyFragment() {
         super.onStart()
         //TODO: snackbars
         //TODO: cursor swap
-        viewModel.states.onEach { epoxyController.setData(it) }.launchIn(fragmentScope)
+        viewModel.states.onEach { epoxyController.setData(it.events) }.launchIn(fragmentScope)
 
         viewModel.states
             .map { it.snackbarState }

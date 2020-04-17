@@ -5,6 +5,8 @@ import android.view.*
 import com.example.coreandroid.base.InjectableEpoxyFragment
 import com.example.coreandroid.base.clearMenu
 import com.example.coreandroid.navigation.IFragmentProvider
+import com.example.coreandroid.ticketmaster.Event
+import com.example.coreandroid.util.DataList
 import com.example.coreandroid.util.ext.menuController
 import com.example.coreandroid.util.ext.navigationFragment
 import com.example.coreandroid.util.ext.restoreScrollPosition
@@ -35,8 +37,7 @@ class FavouritesFragment : InjectableEpoxyFragment() {
     }
 
     private val epoxyController by lazy {
-        itemListController(
-            viewModel, FavouritesState::events,
+        itemListController<DataList<Event>, Event>(
             emptyText = "No favourite events added yet",
             onScrollListener = eventsScrollListener
         ) { event ->
@@ -64,7 +65,7 @@ class FavouritesFragment : InjectableEpoxyFragment() {
 
     override fun onStart() {
         super.onStart()
-        viewModel.states.onEach { epoxyController.setData(it) }.launchIn(fragmentScope)
+        viewModel.states.onEach { epoxyController.setData(it.events) }.launchIn(fragmentScope)
     }
 
     override fun onResume() {

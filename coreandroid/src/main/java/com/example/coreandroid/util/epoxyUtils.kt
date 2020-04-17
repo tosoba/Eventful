@@ -6,14 +6,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.epoxy.*
 import com.example.coreandroid.*
-import com.example.coreandroid.arch.BaseViewModel
 import com.example.coreandroid.base.InjectableEpoxyFragment
 import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
 import com.haroldadmin.vector.VectorFragment
 import com.haroldadmin.vector.VectorState
 import com.haroldadmin.vector.VectorViewModel
 import com.haroldadmin.vector.withState
-import kotlin.reflect.KProperty1
 
 
 fun VectorFragment.simpleController(
@@ -44,18 +42,6 @@ fun <S : VectorState, A : VectorViewModel<S>> VectorFragment.asyncController(
         if (view == null || isRemoving) return
         withState(viewModel) { state ->
             build(state)
-        }
-    }
-}
-
-fun <A : VectorViewModel<B>, B : VectorState, C : VectorViewModel<D>, D : VectorState> VectorFragment.simpleController(
-    viewModel1: A, viewModel2: C,
-    buildUsing: EpoxyController.(state1: B, state2: D) -> Unit
-) = object : AsyncEpoxyController() {
-    override fun buildModels() {
-        if (view == null || isRemoving) return
-        withState(viewModel1, viewModel2) { state1, state2 ->
-            buildUsing(state1, state2)
         }
     }
 }
@@ -116,8 +102,7 @@ inline fun <T, R> CarouselModelBuilder.withModelsFrom(
     models(items.map { (key, value) -> modelBuilder(key, value) })
 }
 
-fun <S, A : BaseViewModel<*, S, *>, L : HoldsData<List<I>>, I> InjectableEpoxyFragment.itemListController(
-    viewModel: A, prop: KProperty1<S, L>,
+fun <S : HoldsData<List<I>>, I> InjectableEpoxyFragment.itemListController(
     reloadClicked: (() -> Unit)? = null,
     onScrollListener: RecyclerView.OnScrollListener? = null,
     showLoadingIndicator: Boolean = true,
@@ -128,30 +113,27 @@ fun <S, A : BaseViewModel<*, S, *>, L : HoldsData<List<I>>, I> InjectableEpoxyFr
     override fun buildModels(data: S) {
         if (view == null || isRemoving) return
 
-        viewModel.state.let { state ->
-            val items = prop.get(state)
-            if (items.value.isEmpty()) when (val status = items.status) {
-                is Loading -> if (showLoadingIndicator) loadingIndicator {
-                    id("loading-indicator-items")
+        if (data.value.isEmpty()) when (val status = data.status) {
+            is Loading -> if (showLoadingIndicator) loadingIndicator {
+                id("loading-indicator-items")
+            }
+            is LoadedSuccessfully -> {
+                if (emptyText != null && emptyText.isNotBlank()) noItemsText {
+                    id("empty-text")
+                    text(emptyText)
                 }
-                is LoadedSuccessfully -> {
-                    if (emptyText != null && emptyText.isNotBlank()) noItemsText {
-                        id("empty-text")
-                        text(emptyText)
-                    }
-                }
-                is LoadingFailed<*> -> reloadControl {
-                    id("reload-control")
-                    reloadClicked?.let { onReloadClicked(View.OnClickListener { it() }) }
-                    (status.error as? HasFailureMessage)?.let { message(it.message) }
-                }
-            } else {
-                items.value.forEach {
-                    buildItem(it).spanSizeOverride { _, _, _ -> 1 }.addTo(this)
-                }
-                if (items.status is Loading && showLoadingIndicator) loadingMoreIndicator {
-                    id("loading-indicator-more-items")
-                }
+            }
+            is LoadingFailed<*> -> reloadControl {
+                id("reload-control")
+                reloadClicked?.let { onReloadClicked(View.OnClickListener { it() }) }
+                (status.error as? HasFailureMessage)?.let { message(it.message) }
+            }
+        } else {
+            data.value.forEach {
+                buildItem(it).spanSizeOverride { _, _, _ -> 1 }.addTo(this)
+            }
+            if (data.status is Loading && showLoadingIndicator) loadingMoreIndicator {
+                id("loading-indicator-more-items")
             }
         }
     }
@@ -175,7 +157,6 @@ class Column(
     constructor(
         vararg models: EpoxyModel<*>
     ) : this(models.toList(), null)
-
 
     override fun bind(holder: ModelGroupHolder) {
         super.bind(holder)
