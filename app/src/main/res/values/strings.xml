@@ -11,5 +11,5 @@
 
     <string name="location_permission_needed">Location permission needed</string>
     <string name="no_location_permission_warning">Finding nearby events feature will not work without it.</string>
-    <string name="search_hint">Search...</string>
+    <string name="search_hint">Search…</string>
 </resources>

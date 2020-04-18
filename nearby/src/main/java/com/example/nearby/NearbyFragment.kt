@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.*
 import androidx.lifecycle.Observer
 import com.example.coreandroid.base.InjectableEpoxyFragment
-import com.example.coreandroid.base.clearMenu
 import com.example.coreandroid.navigation.IFragmentProvider
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable
@@ -96,7 +95,7 @@ class NearbyFragment : InjectableEpoxyFragment() {
         viewModel.states
             .map { it.snackbarState }
             .distinctUntilChanged()
-            .onEach { snackbarController?.transitionTo(it) }
+            .onEach { snackbarController?.transitionToSnackbarState(it) }
             .launchIn(fragmentScope)
 
         viewModel.events.observe(this, Observer {
@@ -107,7 +106,7 @@ class NearbyFragment : InjectableEpoxyFragment() {
     override fun onResume() {
         super.onResume()
         activity?.invalidateOptionsMenu()
-        snackbarController?.transitionTo(viewModel.state.snackbarState)
+        snackbarController?.transitionToSnackbarState(viewModel.state.snackbarState)
     }
 
     override fun onPause() {

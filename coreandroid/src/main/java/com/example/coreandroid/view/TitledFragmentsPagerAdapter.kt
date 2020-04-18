@@ -6,7 +6,7 @@ import androidx.fragment.app.FragmentStatePagerAdapter
 
 class TitledFragmentsPagerAdapter(
     fragmentManager: FragmentManager,
-    private val titledFragments: List<Pair<String, Fragment>>
+    private val titledFragments: Array<Pair<String, Fragment>>
 ) : FragmentStatePagerAdapter(fragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 
     override fun getItem(position: Int): Fragment = titledFragments[position].second

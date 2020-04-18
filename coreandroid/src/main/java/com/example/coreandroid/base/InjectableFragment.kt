@@ -17,7 +17,7 @@ import javax.inject.Named
 
 open class InjectableFragment : Fragment(), HasSupportFragmentInjector {
 
-    protected open val fragmentScope by lazy { CoroutineScope(Dispatchers.Main + Job()) }
+    val fragmentScope by lazy { CoroutineScope(Dispatchers.Main + Job()) }
 
     @Inject
     internal lateinit var childFragmentInjector: DispatchingAndroidInjector<Fragment>

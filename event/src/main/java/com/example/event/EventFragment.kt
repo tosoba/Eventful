@@ -33,7 +33,7 @@ class EventFragment : InjectableFragment() {
 
     private val eventViewPagerAdapter: PagerAdapter by lazy(LazyThreadSafetyMode.NONE) {
         TitledFragmentsPagerAdapter(
-            childFragmentManager, listOf(
+            childFragmentManager, arrayOf(
                 "Details" to EventDetailsFragment.new(event) as Fragment,
                 "Weather" to WeatherFragment.new(event.venues?.firstOrNull()?.latLng) as Fragment
             )

@@ -6,7 +6,6 @@ import android.view.*
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat.getSystemService
 import com.example.coreandroid.base.InjectableEpoxyFragment
-import com.example.coreandroid.base.initializeMenu
 import com.example.coreandroid.navigation.IFragmentProvider
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.util.PagedDataList
@@ -80,14 +79,14 @@ class SearchFragment : InjectableEpoxyFragment() {
         viewModel.states
             .map { it.snackbarState }
             .distinctUntilChanged()
-            .onEach { snackbarController?.transitionTo(it) }
+            .onEach { snackbarController?.transitionToSnackbarState(it) }
             .launchIn(fragmentScope)
     }
 
     override fun onResume() {
         super.onResume()
         activity?.invalidateOptionsMenu()
-        snackbarController?.transitionTo(viewModel.state.snackbarState)
+        snackbarController?.transitionToSnackbarState(viewModel.state.snackbarState)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
