@@ -62,7 +62,7 @@ private class ToolbarActionModeCallback(
     private val onDestroyActionMode: () -> Unit
 ) : ActionMode.Callback {
 
-    var callOnDestroy = false
+    var callOnDestroy = true
 
     override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
         itemClickedCallbacks[item.itemId]?.invoke()
@@ -83,5 +83,6 @@ private class ToolbarActionModeCallback(
 
     override fun onDestroyActionMode(mode: ActionMode?) {
         if (callOnDestroy) onDestroyActionMode()
+        else callOnDestroy = true
     }
 }

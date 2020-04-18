@@ -13,9 +13,6 @@ import com.example.coreandroid.view.ActionBarDrawerToggleEnd
 val Fragment.appCompatActivity: AppCompatActivity
     get() = activity as AppCompatActivity
 
-val Fragment.drawerLayoutHost: DrawerLayoutHost
-    get() = activity as DrawerLayoutHost
-
 val Fragment.navigationFragment: BaseNavigationFragment?
     get() = findAncestorFragmentOfType()
 
@@ -40,16 +37,21 @@ fun Fragment.setupToolbar(toolbar: Toolbar) {
 }
 
 fun Fragment.setupToolbarWithDrawerToggle(toolbar: Toolbar) {
-    ActionBarDrawerToggleEnd(
-        activity!!,
-        drawerLayoutHost.drawerLayout!!,
-        toolbar,
-        R.string.navigation_drawer_open,
-        R.string.navigation_drawer_close
-    ).run {
-        drawerLayoutHost.drawerLayout!!.addDrawerListener(this)
-        syncState()
+    val activityRef = activity
+    if (activityRef != null && activityRef is DrawerLayoutHost && activityRef.drawerLayout != null) {
+        val drawerLayout = (activityRef as DrawerLayoutHost).drawerLayout!!
+        ActionBarDrawerToggleEnd(
+            activityRef,
+            drawerLayout,
+            toolbar,
+            R.string.navigation_drawer_open,
+            R.string.navigation_drawer_close
+        ).run {
+            drawerLayout.addDrawerListener(this)
+            syncState()
+        }
     }
+
 }
 
 fun Fragment.showBackNavArrow() {
