@@ -27,6 +27,7 @@ class EventfulApp : DaggerApplication() {
     override fun onCreate() {
         super.onCreate()
         Slider.init(BannerSliderImageLoadingService)
+        //TODO: maybe uncomment this?
 //        registerLifecycleCallbacks()
         RxJavaPlugins.setErrorHandler {
             Log.e("Rx error", it?.message ?: "Unknown searchText")

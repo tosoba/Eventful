@@ -5,9 +5,9 @@ import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.example.coreandroid.R
 import com.example.coreandroid.base.BaseNavigationFragment
-import com.example.coreandroid.base.DrawerLayoutHost
-import com.example.coreandroid.base.MenuController
-import com.example.coreandroid.base.SnackbarController
+import com.example.coreandroid.controller.DrawerLayoutController
+import com.example.coreandroid.controller.MenuController
+import com.example.coreandroid.controller.SnackbarController
 import com.example.coreandroid.view.ActionBarDrawerToggleEnd
 
 val Fragment.appCompatActivity: AppCompatActivity
@@ -38,8 +38,8 @@ fun Fragment.setupToolbar(toolbar: Toolbar) {
 
 fun Fragment.setupToolbarWithDrawerToggle(toolbar: Toolbar) {
     val activityRef = activity
-    if (activityRef != null && activityRef is DrawerLayoutHost && activityRef.drawerLayout != null) {
-        val drawerLayout = (activityRef as DrawerLayoutHost).drawerLayout!!
+    if (activityRef != null && activityRef is DrawerLayoutController && activityRef.drawerLayout != null) {
+        val drawerLayout = (activityRef as DrawerLayoutController).drawerLayout!!
         ActionBarDrawerToggleEnd(
             activityRef,
             drawerLayout,

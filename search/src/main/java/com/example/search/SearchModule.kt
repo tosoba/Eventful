@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.core.usecase.GetSeachSuggestions
 import com.example.core.usecase.SaveSuggestion
 import com.example.core.usecase.SearchEvents
-import com.example.coreandroid.base.ConnectivityStateProvider
+import com.example.coreandroid.provider.ConnectivityStateProvider
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
 import dagger.Module

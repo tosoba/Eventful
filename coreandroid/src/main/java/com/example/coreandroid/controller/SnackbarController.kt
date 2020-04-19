@@ -1,6 +1,7 @@
-package com.example.coreandroid.base
+package com.example.coreandroid.controller
 
 import android.view.View
+import com.example.coreandroid.base.InjectableFragment
 import com.example.coreandroid.util.SnackbarState
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -14,8 +15,8 @@ interface SnackbarController {
     fun transitionToSnackbarState(newState: SnackbarState)
 }
 
-@FlowPreview
 @ExperimentalCoroutinesApi
+@FlowPreview
 fun <T> T.handleSnackbarState(
     view: View
 ): SendChannel<SnackbarState> where T : SnackbarController, T : InjectableFragment {

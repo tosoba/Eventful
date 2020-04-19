@@ -4,8 +4,7 @@ import android.Manifest
 import android.os.Bundle
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import com.example.coreandroid.base.DrawerLayoutHost
-import com.example.coreandroid.base.LocationController
+import com.example.coreandroid.controller.DrawerLayoutController
 import com.google.android.material.navigation.NavigationView
 import com.markodevcic.peko.ActivityRotatingException
 import com.markodevcic.peko.Peko
@@ -24,9 +23,8 @@ import kotlin.coroutines.CoroutineContext
 
 class MainActivity :
     DaggerAppCompatActivity(),
-    DrawerLayoutHost,
-    CoroutineScope,
-    LocationController {
+    DrawerLayoutController,
+    CoroutineScope {
 
     private val supervisorJob = CompletableDeferred<Any>()
     override val coroutineContext: CoroutineContext
@@ -48,7 +46,7 @@ class MainActivity :
     }
 
     @Inject
-    lateinit var viewModel: MainVM
+    lateinit var viewModel: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,7 +72,7 @@ class MainActivity :
         else super.onBackPressed()
     }
 
-    override fun requestPermission() {
+    private fun requestPermission() {
         if (Peko.isRequestInProgress()) launch {
             onRequestPermissionsResult(result = Peko.resumeRequest())
         } else launch {

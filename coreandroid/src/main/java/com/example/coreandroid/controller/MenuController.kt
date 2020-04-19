@@ -1,4 +1,4 @@
-package com.example.coreandroid.base
+package com.example.coreandroid.controller
 
 import android.view.Menu
 import android.view.MenuInflater

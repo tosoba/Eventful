@@ -5,8 +5,8 @@ import com.example.core.usecase.GetSeachSuggestions
 import com.example.core.usecase.SaveSuggestion
 import com.example.core.usecase.SearchEvents
 import com.example.core.util.flatMapFirst
-import com.example.coreandroid.arch.BaseViewModel
-import com.example.coreandroid.base.ConnectivityStateProvider
+import com.example.coreandroid.base.BaseViewModel
+import com.example.coreandroid.provider.ConnectivityStateProvider
 import com.example.coreandroid.util.Loading
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*

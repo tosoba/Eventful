@@ -1,15 +1,25 @@
 package com.example.eventsnearby
 
+import com.example.core.model.app.LocationResult
 import com.example.core.model.app.LocationState
 import com.example.core.model.app.LocationStatus
-import com.haroldadmin.vector.VectorState
 
 data class MainState(
-    val isConnected: Boolean,
-    val locationState: LocationState
-) : VectorState {
-    companion object {
-        val INITIAL: MainState
-            get() = MainState(isConnected = false, locationState = LocationState())
-    }
-}
+    val isConnected: Boolean = false,
+    val locationState: LocationState = LocationState()
+)
+
+internal fun MainState.reduce(result: LocationResult): MainState = copy(
+    locationState = if (result is LocationResult.Found) locationState.copy(
+        latLng = result.latLng,
+        status = LocationStatus.Found
+    ) else locationState.copy(
+        status = when (result) {
+            is LocationResult.Disabled -> LocationStatus.Disabled
+            is LocationResult.Error -> LocationStatus.Error(
+                result.throwable
+            )
+            else -> locationState.status
+        }
+    )
+)

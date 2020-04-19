@@ -1,4 +1,4 @@
-package com.example.coreandroid.arch
+package com.example.coreandroid.base
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel

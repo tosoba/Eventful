@@ -7,9 +7,8 @@ import android.view.*
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat.getSystemService
 import com.example.coreandroid.base.InjectableEpoxyFragment
-import com.example.coreandroid.navigation.IFragmentProvider
+import com.example.coreandroid.navigation.IFragmentFactory
 import com.example.coreandroid.ticketmaster.Event
-import com.example.coreandroid.util.PagedDataList
 import com.example.coreandroid.util.ext.*
 import com.example.coreandroid.util.itemListController
 import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
@@ -30,7 +29,7 @@ import javax.inject.Inject
 class SearchFragment : InjectableEpoxyFragment() {
 
     @Inject
-    internal lateinit var fragmentProvider: IFragmentProvider
+    internal lateinit var fragmentFactory: IFragmentFactory
 
     @Inject
     internal lateinit var viewModel: SearchViewModel
@@ -47,7 +46,7 @@ class SearchFragment : InjectableEpoxyFragment() {
             emptyText = "No events found"
         ) { event ->
             event.listItem(View.OnClickListener {
-                navigationFragment?.showFragment(fragmentProvider.eventFragment(event))
+                navigationFragment?.showFragment(fragmentFactory.eventFragment(event))
             })
         }
     }

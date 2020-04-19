@@ -3,10 +3,10 @@ package com.example.nearby
 import android.os.Bundle
 import android.view.*
 import androidx.lifecycle.Observer
-import com.example.coreandroid.base.EventsSelectionActionModeController
+import com.example.coreandroid.controller.EventsSelectionActionModeController
 import com.example.coreandroid.base.InjectableEpoxyFragment
-import com.example.coreandroid.base.eventsSelectionActionModeController
-import com.example.coreandroid.navigation.IFragmentProvider
+import com.example.coreandroid.controller.eventsSelectionActionModeController
+import com.example.coreandroid.navigation.IFragmentFactory
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.ext.*
@@ -29,7 +29,7 @@ import javax.inject.Inject
 class NearbyFragment : InjectableEpoxyFragment() {
 
     @Inject
-    internal lateinit var fragmentProvider: IFragmentProvider
+    internal lateinit var fragmentFactory: IFragmentFactory
 
     @Inject
     internal lateinit var viewModel: NearbyViewModel
@@ -47,7 +47,7 @@ class NearbyFragment : InjectableEpoxyFragment() {
             selectable.listItem(
                 selected = selectable.selected,
                 clicked = View.OnClickListener {
-                    navigationFragment?.showFragment(fragmentProvider.eventFragment(selectable.item))
+                    navigationFragment?.showFragment(fragmentFactory.eventFragment(selectable.item))
                 },
                 longClicked = View.OnLongClickListener {
                     fragmentScope.launch {

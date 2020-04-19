@@ -1,7 +1,7 @@
-package com.example.coreandroid.base
+package com.example.coreandroid.controller
 
 import androidx.drawerlayout.widget.DrawerLayout
 
-interface DrawerLayoutHost {
+interface DrawerLayoutController {
     val drawerLayout: DrawerLayout?
 }

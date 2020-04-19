@@ -5,10 +5,10 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.core.usecase.GetConnection
 import com.example.core.usecase.GetLocation
 import com.example.core.usecase.GetLocationAvailability
-import com.example.coreandroid.base.ConnectivityStateProvider
-import com.example.coreandroid.base.LocationStateProvider
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.ActivityScoped
+import com.example.coreandroid.provider.ConnectivityStateProvider
+import com.example.coreandroid.provider.LocationStateProvider
 import com.example.event.EventModule
 import com.example.favourites.FavouritesModule
 import com.example.nearby.NearbyModule
@@ -19,10 +19,12 @@ import dagger.Module
 import dagger.Provides
 import dagger.android.ContributesAndroidInjector
 import dagger.multibindings.IntoMap
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 
-@Module(
-    includes = [MainActivityModule.Providers::class]
-)
+@ExperimentalCoroutinesApi
+@FlowPreview
+@Module(includes = [MainActivityModule.Providers::class])
 abstract class MainActivityModule {
 
     @ActivityScoped
@@ -40,22 +42,22 @@ abstract class MainActivityModule {
     abstract fun mainActivity(): MainActivity
 
     @Binds
-    abstract fun connectivityStateProvider(mainViewModel: MainVM): ConnectivityStateProvider
+    abstract fun connectivityStateProvider(mainViewModel: MainViewModel): ConnectivityStateProvider
 
     @Binds
-    abstract fun locationStateProvider(mainViewModel: MainVM): LocationStateProvider
+    abstract fun locationStateProvider(mainViewModel: MainViewModel): LocationStateProvider
 
     @Module
     class Providers {
 
         @Provides
         @IntoMap
-        @ViewModelKey(MainVM::class)
+        @ViewModelKey(MainViewModel::class)
         fun mainViewModel(
             getLocation: GetLocation,
             getLocationAvailability: GetLocationAvailability,
             getConnection: GetConnection
-        ): ViewModel = MainVM(getLocation, getLocationAvailability, getConnection)
+        ): ViewModel = MainViewModel(getLocation, getLocationAvailability, getConnection)
     }
 
     @Module
@@ -64,6 +66,6 @@ abstract class MainActivityModule {
         @Provides
         fun mainViewModel(
             factory: ViewModelProvider.Factory, target: MainActivity
-        ): MainVM = ViewModelProvider(target, factory).get(MainVM::class.java)
+        ): MainViewModel = ViewModelProvider(target, factory).get(MainViewModel::class.java)
     }
 }

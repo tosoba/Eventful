@@ -6,7 +6,7 @@ import com.example.core.model.weather.Forecast
 import com.example.core.repo.IWeatherRepository
 import com.example.core.usecase.GetForecast
 import com.example.core.util.flatMapFirst
-import com.example.coreandroid.arch.BaseViewModel
+import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.util.Loading
 import com.google.android.gms.maps.model.LatLng
 import com.haroldadmin.vector.VectorViewModel

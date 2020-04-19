@@ -3,9 +3,8 @@ package com.example.favourites
 import android.os.Bundle
 import android.view.*
 import com.example.coreandroid.base.InjectableEpoxyFragment
-import com.example.coreandroid.navigation.IFragmentProvider
+import com.example.coreandroid.navigation.IFragmentFactory
 import com.example.coreandroid.ticketmaster.Event
-import com.example.coreandroid.util.DataList
 import com.example.coreandroid.util.ext.menuController
 import com.example.coreandroid.util.ext.navigationFragment
 import com.example.coreandroid.util.ext.restoreScrollPosition
@@ -29,7 +28,7 @@ import javax.inject.Inject
 class FavouritesFragment : InjectableEpoxyFragment() {
 
     @Inject
-    internal lateinit var fragmentProvider: IFragmentProvider
+    internal lateinit var fragmentFactory: IFragmentFactory
 
     @Inject
     internal lateinit var viewModel: FavouritesVM
@@ -46,7 +45,7 @@ class FavouritesFragment : InjectableEpoxyFragment() {
             onScrollListener = eventsScrollListener
         ) { event ->
             event.listItem(View.OnClickListener {
-                navigationFragment?.showFragment(fragmentProvider.eventFragment(event))
+                navigationFragment?.showFragment(fragmentFactory.eventFragment(event))
             })
         }
     }

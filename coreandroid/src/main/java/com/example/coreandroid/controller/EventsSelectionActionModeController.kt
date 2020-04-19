@@ -1,4 +1,4 @@
-package com.example.coreandroid.base
+package com.example.coreandroid.controller
 
 import android.view.ActionMode
 import android.view.Menu
@@ -26,7 +26,8 @@ fun Fragment.eventsSelectionActionModeController(
         itemClickedCallbacks,
         onDestroyActionMode
     )
-    val controller = object : EventsSelectionActionModeController {
+    val controller = object :
+        EventsSelectionActionModeController {
         override fun update(numberOfSelectedEvents: Int) {
             if (actionMode == null && numberOfSelectedEvents > 0) {
                 actionMode = activity?.startActionMode(callback)?.apply {

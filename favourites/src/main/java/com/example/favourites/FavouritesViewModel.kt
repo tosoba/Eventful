@@ -2,7 +2,7 @@ package com.example.favourites
 
 import androidx.lifecycle.viewModelScope
 import com.example.core.usecase.GetSavedEvents
-import com.example.coreandroid.arch.BaseViewModel
+import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.util.DataList
 import com.example.coreandroid.util.LoadedSuccessfully

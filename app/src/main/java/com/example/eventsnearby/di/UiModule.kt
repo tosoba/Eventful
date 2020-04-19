@@ -3,8 +3,8 @@ package com.example.eventsnearby.di
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.coreandroid.di.ViewModelFactory
-import com.example.coreandroid.navigation.IFragmentProvider
-import com.example.eventsnearby.FragmentProvider
+import com.example.coreandroid.navigation.IFragmentFactory
+import com.example.eventsnearby.FragmentFactory
 import com.example.eventsnearby.MainActivityModule
 import dagger.Module
 import dagger.Provides
@@ -23,5 +23,5 @@ class UiModule {
     ): ViewModelProvider.Factory = ViewModelFactory(providers)
 
     @Provides
-    fun fragmentProvider(): IFragmentProvider = FragmentProvider
+    fun fragmentProvider(): IFragmentFactory = FragmentFactory
 }

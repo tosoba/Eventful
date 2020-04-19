@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.core.usecase.GetNearbyEvents
 import com.example.core.usecase.SaveEvents
-import com.example.coreandroid.base.ConnectivityStateProvider
-import com.example.coreandroid.base.LocationStateProvider
+import com.example.coreandroid.provider.ConnectivityStateProvider
+import com.example.coreandroid.provider.LocationStateProvider
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
 import dagger.Module

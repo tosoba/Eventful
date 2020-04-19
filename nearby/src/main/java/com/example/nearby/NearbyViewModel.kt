@@ -6,9 +6,9 @@ import com.example.core.model.app.LocationState
 import com.example.core.model.app.LocationStatus
 import com.example.core.usecase.GetNearbyEvents
 import com.example.core.usecase.SaveEvents
-import com.example.coreandroid.arch.BaseViewModel
-import com.example.coreandroid.base.ConnectivityStateProvider
-import com.example.coreandroid.base.LocationStateProvider
+import com.example.coreandroid.base.BaseViewModel
+import com.example.coreandroid.provider.ConnectivityStateProvider
+import com.example.coreandroid.provider.LocationStateProvider
 import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.Loading
 import com.example.coreandroid.util.SnackbarState
