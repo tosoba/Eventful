@@ -15,12 +15,17 @@ import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
 import com.example.coreandroid.view.epoxy.listItem
 import kotlinx.android.synthetic.main.fragment_favourites.*
 import kotlinx.android.synthetic.main.fragment_favourites.view.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
+@ExperimentalCoroutinesApi
+@FlowPreview
 class FavouritesFragment : InjectableEpoxyFragment() {
 
     @Inject
@@ -29,7 +34,7 @@ class FavouritesFragment : InjectableEpoxyFragment() {
     @Inject
     internal lateinit var viewModel: FavouritesVM
 
-    private val eventsScrollListener: EndlessRecyclerViewScrollListener by lazy {
+    private val eventsScrollListener: EndlessRecyclerViewScrollListener by lazy(LazyThreadSafetyMode.NONE) {
         EndlessRecyclerViewScrollListener(loadMore = {
             fragmentScope.launch { viewModel.send(LoadFavourites) }
         })
@@ -65,7 +70,11 @@ class FavouritesFragment : InjectableEpoxyFragment() {
     override fun onResume() {
         super.onResume()
         activity?.invalidateOptionsMenu()
-        viewModel.states.onEach { epoxyController.setData(it.events) }.launchIn(fragmentScope)
+        viewModel.states
+            .map { it.events }
+            .distinctUntilChanged()
+            .onEach { epoxyController.setData(it) }
+            .launchIn(fragmentScope)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

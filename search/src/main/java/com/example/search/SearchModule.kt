@@ -13,7 +13,11 @@ import dagger.Provides
 import dagger.android.ContributesAndroidInjector
 import dagger.multibindings.IntoMap
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 
+@ExperimentalCoroutinesApi
+@FlowPreview
 @Module
 abstract class SearchModule {
 
@@ -26,14 +30,14 @@ abstract class SearchModule {
 
         @Provides
         @IntoMap
-        @ViewModelKey(SearchVM::class)
+        @ViewModelKey(SearchViewModel::class)
         fun searchViewModelBase(
             searchEvents: SearchEvents,
             getSeachSuggestions: GetSeachSuggestions,
             saveSuggestion: SaveSuggestion,
             connectivityStateProvider: ConnectivityStateProvider,
             ioDispatcher: CoroutineDispatcher
-        ): ViewModel = SearchVM(
+        ): ViewModel = SearchViewModel(
             searchEvents,
             getSeachSuggestions,
             saveSuggestion,
@@ -45,6 +49,6 @@ abstract class SearchModule {
         fun searchViewModel(
             factory: ViewModelProvider.Factory,
             target: SearchFragment
-        ): SearchVM = ViewModelProvider(target, factory).get(SearchVM::class.java)
+        ): SearchViewModel = ViewModelProvider(target, factory).get(SearchViewModel::class.java)
     }
 }

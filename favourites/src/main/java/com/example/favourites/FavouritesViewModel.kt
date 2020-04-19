@@ -7,8 +7,9 @@ import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.util.DataList
 import com.example.coreandroid.util.LoadedSuccessfully
 import com.example.coreandroid.util.Loading
-import com.haroldadmin.vector.VectorViewModel
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 
 sealed class FavouritesIntent
@@ -18,8 +19,9 @@ object LoadFavourites : FavouritesIntent()
 @ExperimentalCoroutinesApi
 class FavouritesVM(
     private val getSavedEvents: GetSavedEvents,
-    private val ioDispatcher: CoroutineDispatcher
-) : BaseViewModel<FavouritesIntent, FavouritesState, Unit>(FavouritesState.INITIAL) {
+    private val ioDispatcher: CoroutineDispatcher,
+    initialState: FavouritesState = FavouritesState()
+) : BaseViewModel<FavouritesIntent, FavouritesState, Unit>(initialState) {
     init {
         intentsChannel.asFlow()
             .onStart { emit(LoadFavourites) }
@@ -28,7 +30,8 @@ class FavouritesVM(
                 state.limitHit || state.events.status is Loading
             }
             .flatMapLatest {
-                flowOf(statesChannel.value.copy(events = statesChannel.value.events.copyWithLoadingInProgress))
+                val outerState = statesChannel.value
+                flowOf(outerState.copy(events = outerState.events.copyWithLoadingInProgress))
                     .onCompletion {
                         emitAll(getSavedEvents(statesChannel.value.limit + limitIncrement)
                             .flowOn(ioDispatcher)
@@ -52,47 +55,5 @@ class FavouritesVM(
 
     companion object {
         const val limitIncrement: Int = 20 //TODO: move to settings later?
-    }
-}
-
-class FavouritesViewModel(
-    private val getSavedEvents: GetSavedEvents,
-    private val ioDispatcher: CoroutineDispatcher
-) : VectorViewModel<FavouritesState>(FavouritesState.INITIAL) {
-
-    private var getSavedEventsJob: Job = getEvents(limitIncrement)
-
-    fun loadMoreEvents() = withState { (events, limit) ->
-        if (events.status is Loading) return@withState
-        getSavedEventsJob.cancel()
-        getSavedEventsJob = getEvents(limit + limitIncrement)
-    }
-
-    override fun onCleared() {
-        getSavedEventsJob.cancel()
-        super.onCleared()
-    }
-
-    private fun getEvents(limit: Int): Job {
-        setState { copy(events = events.copyWithLoadingInProgress) }
-        return viewModelScope.launch {
-            withContext(ioDispatcher) {
-                getSavedEvents(limit).collect {
-                    setState {
-                        copy(
-                            events = DataList(
-                                value = it.map { Event(it) },
-                                status = LoadedSuccessfully
-                            ),
-                            limit = it.size
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    companion object {
-        const val limitIncrement: Int = 20
     }
 }
