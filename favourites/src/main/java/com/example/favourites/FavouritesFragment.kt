@@ -40,8 +40,8 @@ class FavouritesFragment : InjectableEpoxyFragment() {
         })
     }
 
-    private val epoxyController by lazy {
-        itemListController<DataList<Event>, Event>(
+    private val epoxyController by lazy(LazyThreadSafetyMode.NONE) {
+        itemListController<Event>(
             emptyText = "No favourite events added yet",
             onScrollListener = eventsScrollListener
         ) { event ->

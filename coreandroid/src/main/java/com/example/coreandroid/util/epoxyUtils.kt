@@ -102,15 +102,15 @@ inline fun <T, R> CarouselModelBuilder.withModelsFrom(
     models(items.map { (key, value) -> modelBuilder(key, value) })
 }
 
-fun <S : HoldsData<List<I>>, I> InjectableEpoxyFragment.itemListController(
+fun <I> InjectableEpoxyFragment.itemListController(
     reloadClicked: (() -> Unit)? = null,
     onScrollListener: RecyclerView.OnScrollListener? = null,
     showLoadingIndicator: Boolean = true,
     emptyText: String? = null,
     buildItem: (I) -> EpoxyModel<*>
-) = object : TypedEpoxyController<S>(builder, differ) {
+) = object : TypedEpoxyController<HoldsData<List<I>>>(builder, differ) {
 
-    override fun buildModels(data: S) {
+    override fun buildModels(data: HoldsData<List<I>>) {
         if (view == null || isRemoving) return
 
         if (data.value.isEmpty()) when (val status = data.status) {

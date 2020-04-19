@@ -64,7 +64,6 @@ dependencies {
     implementation "com.airbnb.android:epoxy-databinding:$epoxyVersion"
     kapt "com.airbnb.android:epoxy-processor:$epoxyVersion"
 
-    implementation "com.github.haroldadmin:Vector:$vectorVersion"
     implementation "com.github.haroldadmin:NetworkResponseAdapter:$networkResponseAdapterVersion"
 
     testImplementation project(':test')

@@ -66,11 +66,9 @@ dependencies {
 
     implementation "com.ss.bannerslider:bannerslider:$bannerSliderVersion"
     implementation "com.flickr4java:flickr4java:$flickrVersion"
+    implementation "com.github.haroldadmin:NetworkResponseAdapter:$networkResponseAdapterVersion"
     implementation "com.google.android.gms:play-services-maps:$playServicesMapsVersion"
     implementation "com.patloew.rxlocation:rxlocation:$rxLocationVersion"
-
-    implementation "com.github.haroldadmin:NetworkResponseAdapter:$networkResponseAdapterVersion"
-    implementation "com.github.haroldadmin:Vector:$vectorVersion"
 
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test:runner:$testRunnerVersion"

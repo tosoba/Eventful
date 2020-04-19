@@ -10,10 +10,7 @@ import com.example.coreandroid.base.InjectableEpoxyFragment
 import com.example.coreandroid.navigation.IFragmentProvider
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.util.PagedDataList
-import com.example.coreandroid.util.ext.menuController
-import com.example.coreandroid.util.ext.restoreScrollPosition
-import com.example.coreandroid.util.ext.saveScrollPosition
-import com.example.coreandroid.util.ext.snackbarController
+import com.example.coreandroid.util.ext.*
 import com.example.coreandroid.util.itemListController
 import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
 import com.example.coreandroid.view.epoxy.listItem
@@ -45,12 +42,12 @@ class SearchFragment : InjectableEpoxyFragment() {
     }
 
     private val epoxyController by lazy(LazyThreadSafetyMode.NONE) {
-        itemListController<PagedDataList<Event>, Event>(
+        itemListController<Event>(
             onScrollListener = eventsScrollListener,
             emptyText = "No events found"
         ) { event ->
             event.listItem(View.OnClickListener {
-                //TODO: navigate to EventFragment
+                navigationFragment?.showFragment(fragmentProvider.eventFragment(event))
             })
         }
     }

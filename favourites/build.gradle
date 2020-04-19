@@ -50,7 +50,6 @@ dependencies {
     kapt "com.airbnb.android:epoxy-processor:$epoxyVersion"
 
     implementation "androidx.core:core-ktx:$coreKtxVersion"
-    implementation "com.github.haroldadmin:Vector:$vectorVersion"
 
     testImplementation project(':test')
     testImplementation "junit:junit:$junitVersion"

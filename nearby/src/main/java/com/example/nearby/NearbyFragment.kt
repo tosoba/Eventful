@@ -9,11 +9,7 @@ import com.example.coreandroid.base.eventsSelectionActionModeController
 import com.example.coreandroid.navigation.IFragmentProvider
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable
-import com.example.coreandroid.util.PagedDataList
-import com.example.coreandroid.util.ext.menuController
-import com.example.coreandroid.util.ext.restoreScrollPosition
-import com.example.coreandroid.util.ext.saveScrollPosition
-import com.example.coreandroid.util.ext.snackbarController
+import com.example.coreandroid.util.ext.*
 import com.example.coreandroid.util.itemListController
 import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
 import com.example.coreandroid.view.epoxy.listItem
@@ -45,13 +41,13 @@ class NearbyFragment : InjectableEpoxyFragment() {
     }
 
     private val epoxyController by lazy(LazyThreadSafetyMode.NONE) {
-        itemListController<PagedDataList<Selectable<Event>>, Selectable<Event>>(
+        itemListController<Selectable<Event>>(
             onScrollListener = eventsScrollListener
         ) { selectable ->
             selectable.listItem(
                 selected = selectable.selected,
                 clicked = View.OnClickListener {
-                    //TODO: navigate to EventFragment
+                    navigationFragment?.showFragment(fragmentProvider.eventFragment(selectable.item))
                 },
                 longClicked = View.OnLongClickListener {
                     fragmentScope.launch {
@@ -100,7 +96,11 @@ class NearbyFragment : InjectableEpoxyFragment() {
 
         activity?.invalidateOptionsMenu()
 
-        viewModel.states.onEach { epoxyController.setData(it.events) }.launchIn(fragmentScope)
+        viewModel.states
+            .map { it.events }
+            .distinctUntilChanged()
+            .onEach { epoxyController.setData(it) }
+            .launchIn(fragmentScope)
 
         viewModel.states
             .map { state -> state.events.value.count { it.selected } }
