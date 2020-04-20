@@ -8,13 +8,13 @@ import com.example.eventsnearby.FragmentFactory
 import com.example.eventsnearby.MainActivityModule
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import javax.inject.Provider
 
-@Module(
-    includes = [
-        MainActivityModule::class
-    ]
-)
+@ExperimentalCoroutinesApi
+@FlowPreview
+@Module(includes = [MainActivityModule::class])
 class UiModule {
 
     @Provides

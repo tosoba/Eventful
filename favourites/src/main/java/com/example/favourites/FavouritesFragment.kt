@@ -2,9 +2,11 @@ package com.example.favourites
 
 import android.os.Bundle
 import android.view.*
-import com.example.coreandroid.base.InjectableEpoxyFragment
+import androidx.lifecycle.lifecycleScope
+import com.example.coreandroid.base.InjectableFragment
 import com.example.coreandroid.navigation.IFragmentFactory
 import com.example.coreandroid.ticketmaster.Event
+import com.example.coreandroid.util.EpoxyThreads
 import com.example.coreandroid.util.ext.menuController
 import com.example.coreandroid.util.ext.navigationFragment
 import com.example.coreandroid.util.ext.restoreScrollPosition
@@ -25,7 +27,7 @@ import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class FavouritesFragment : InjectableEpoxyFragment() {
+class FavouritesFragment : InjectableFragment() {
 
     @Inject
     internal lateinit var fragmentFactory: IFragmentFactory
@@ -33,14 +35,18 @@ class FavouritesFragment : InjectableEpoxyFragment() {
     @Inject
     internal lateinit var viewModel: FavouritesVM
 
+    @Inject
+    internal lateinit var epoxyThreads: EpoxyThreads
+
     private val eventsScrollListener: EndlessRecyclerViewScrollListener by lazy(LazyThreadSafetyMode.NONE) {
         EndlessRecyclerViewScrollListener(loadMore = {
-            fragmentScope.launch { viewModel.send(LoadFavourites) }
+            lifecycleScope.launch { viewModel.send(LoadFavourites) }
         })
     }
 
     private val epoxyController by lazy(LazyThreadSafetyMode.NONE) {
         itemListController<Event>(
+            epoxyThreads,
             emptyText = "No favourite events added yet",
             onScrollListener = eventsScrollListener
         ) { event ->
@@ -73,7 +79,7 @@ class FavouritesFragment : InjectableEpoxyFragment() {
             .map { it.events }
             .distinctUntilChanged()
             .onEach { epoxyController.setData(it) }
-            .launchIn(fragmentScope)
+            .launchIn(lifecycleScope)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

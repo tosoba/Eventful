@@ -1,6 +1,7 @@
 package com.example.coreandroid.controller
 
 import android.view.View
+import androidx.lifecycle.lifecycleScope
 import com.example.coreandroid.base.InjectableFragment
 import com.example.coreandroid.util.SnackbarState
 import com.google.android.material.snackbar.Snackbar
@@ -54,7 +55,7 @@ fun <T> T.handleSnackbarState(
         }
         .drop(1)
         .onEach { states -> transitionBetween(states.first, states.second!!) }
-        .launchIn(fragmentScope)
+        .launchIn(lifecycleScope)
 
     return snackbarStateChannel
 }

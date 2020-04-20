@@ -6,9 +6,11 @@ import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat.getSystemService
-import com.example.coreandroid.base.InjectableEpoxyFragment
+import androidx.lifecycle.lifecycleScope
+import com.example.coreandroid.base.InjectableFragment
 import com.example.coreandroid.navigation.IFragmentFactory
 import com.example.coreandroid.ticketmaster.Event
+import com.example.coreandroid.util.EpoxyThreads
 import com.example.coreandroid.util.ext.*
 import com.example.coreandroid.util.itemListController
 import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
@@ -23,10 +25,9 @@ import reactivecircus.flowbinding.appcompat.QueryTextEvent
 import reactivecircus.flowbinding.appcompat.queryTextEvents
 import javax.inject.Inject
 
-
 @ExperimentalCoroutinesApi
 @FlowPreview
-class SearchFragment : InjectableEpoxyFragment() {
+class SearchFragment : InjectableFragment() {
 
     @Inject
     internal lateinit var fragmentFactory: IFragmentFactory
@@ -34,14 +35,18 @@ class SearchFragment : InjectableEpoxyFragment() {
     @Inject
     internal lateinit var viewModel: SearchViewModel
 
+    @Inject
+    internal lateinit var epoxyThreads: EpoxyThreads
+
     private val eventsScrollListener: EndlessRecyclerViewScrollListener by lazy(LazyThreadSafetyMode.NONE) {
         EndlessRecyclerViewScrollListener {
-            fragmentScope.launch { viewModel.send(LoadMoreResults) }
+            lifecycleScope.launch { viewModel.send(LoadMoreResults) }
         }
     }
 
     private val epoxyController by lazy(LazyThreadSafetyMode.NONE) {
         itemListController<Event>(
+            epoxyThreads,
             onScrollListener = eventsScrollListener,
             emptyText = "No events found"
         ) { event ->
@@ -79,13 +84,13 @@ class SearchFragment : InjectableEpoxyFragment() {
             .map { it.events }
             .distinctUntilChanged()
             .onEach { epoxyController.setData(it) }
-            .launchIn(fragmentScope)
+            .launchIn(lifecycleScope)
 
         viewModel.states
             .map { it.snackbarState }
             .distinctUntilChanged()
             .onEach { snackbarController?.transitionToSnackbarState(it) }
-            .launchIn(fragmentScope)
+            .launchIn(lifecycleScope)
 
         viewModel.states.map { it.searchSuggestions to it.searchText }
             .filter { (suggestions, _) -> suggestions.isNotEmpty() }
@@ -99,7 +104,7 @@ class SearchFragment : InjectableEpoxyFragment() {
                     }
                 )
             }
-            .launchIn(fragmentScope)
+            .launchIn(lifecycleScope)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -132,6 +137,6 @@ class SearchFragment : InjectableEpoxyFragment() {
                     NewSearch(it.queryText.toString(), it is QueryTextEvent.QuerySubmitted)
                 )
             }
-            .launchIn(fragmentScope)
+            .launchIn(lifecycleScope)
     }
 }

@@ -11,6 +11,7 @@ buildscript {
 
         lifecycleVersion = '1.1.1'
         lifecycleViewModelKtxVersion = '2.2.0-alpha04'
+        lifecycleRuntimeKtxVersion = '2.2.0-beta01'
         lifecycleExtensionsVersion = '2.2.0'
         liveEventVersion = '1.2.0'
 

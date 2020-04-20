@@ -42,6 +42,7 @@ class AppRepository(
             .startWith(0)
             .map { appContext.isLocationAvailable }
             .distinctUntilChanged()
+            .onErrorReturn { false }
             .openSubscription()
             .consumeAsFlow()
 
@@ -50,6 +51,7 @@ class AppRepository(
             .observeInternetConnectivity()
             .subscribeOn(Schedulers.io())
             .distinctUntilChanged()
+            .onErrorReturn { false }
             .openSubscription()
             .consumeAsFlow()
 }

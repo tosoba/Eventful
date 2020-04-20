@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.PagerAdapter
 import com.example.coreandroid.base.InjectableFragment
 import com.example.coreandroid.ticketmaster.Event
@@ -22,10 +23,14 @@ import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
 import kotlinx.android.synthetic.main.fragment_event.*
 import kotlinx.android.synthetic.main.fragment_event.view.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@ExperimentalCoroutinesApi
+@FlowPreview
 class EventFragment : InjectableFragment() {
 
     var event: Event by FragmentArgument()
@@ -68,7 +73,7 @@ class EventFragment : InjectableFragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_event, container, false).apply {
-        fragmentScope.launch {
+        lifecycleScope.launch {
             event_fab.clicks()
                 .consumeAsFlow()
                 .debounce(200)
@@ -87,7 +92,7 @@ class EventFragment : InjectableFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        fragmentScope.launch {
+        lifecycleScope.launch {
             viewModel.state.map { it.isFavourite }
                 .scan(emptyList<Data<Boolean>>()) { previousStates, value ->
                     if (previousStates.size < 3) previousStates + value

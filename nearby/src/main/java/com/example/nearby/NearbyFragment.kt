@@ -3,12 +3,14 @@ package com.example.nearby
 import android.os.Bundle
 import android.view.*
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
+import com.example.coreandroid.base.InjectableFragment
 import com.example.coreandroid.controller.EventsSelectionActionModeController
-import com.example.coreandroid.base.InjectableEpoxyFragment
 import com.example.coreandroid.controller.eventsSelectionActionModeController
 import com.example.coreandroid.navigation.IFragmentFactory
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable
+import com.example.coreandroid.util.EpoxyThreads
 import com.example.coreandroid.util.ext.*
 import com.example.coreandroid.util.itemListController
 import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
@@ -26,7 +28,7 @@ import javax.inject.Inject
 
 @FlowPreview
 @ExperimentalCoroutinesApi
-class NearbyFragment : InjectableEpoxyFragment() {
+class NearbyFragment : InjectableFragment() {
 
     @Inject
     internal lateinit var fragmentFactory: IFragmentFactory
@@ -34,14 +36,18 @@ class NearbyFragment : InjectableEpoxyFragment() {
     @Inject
     internal lateinit var viewModel: NearbyViewModel
 
+    @Inject
+    internal lateinit var epoxyThreads: EpoxyThreads
+
     private val eventsScrollListener: EndlessRecyclerViewScrollListener by lazy(LazyThreadSafetyMode.NONE) {
         EndlessRecyclerViewScrollListener {
-            fragmentScope.launch { viewModel.send(EventListScrolledToEnd) }
+            lifecycleScope.launch { viewModel.send(EventListScrolledToEnd) }
         }
     }
 
     private val epoxyController by lazy(LazyThreadSafetyMode.NONE) {
         itemListController<Selectable<Event>>(
+            epoxyThreads,
             onScrollListener = eventsScrollListener
         ) { selectable ->
             selectable.listItem(
@@ -50,7 +56,7 @@ class NearbyFragment : InjectableEpoxyFragment() {
                     navigationFragment?.showFragment(fragmentFactory.eventFragment(selectable.item))
                 },
                 longClicked = View.OnLongClickListener {
-                    fragmentScope.launch {
+                    lifecycleScope.launch {
                         viewModel.send(EventLongClicked(selectable.item))
                     }
                     true
@@ -66,11 +72,11 @@ class NearbyFragment : InjectableEpoxyFragment() {
             menuId = R.menu.nearby_events_selection_menu,
             itemClickedCallbacks = mapOf(
                 R.id.nearby_action_add_favourite to {
-                    fragmentScope.launch { viewModel.send(AddToFavouritesClicked) }.let { Unit }
+                    lifecycleScope.launch { viewModel.send(AddToFavouritesClicked) }.let { Unit }
                 }
             ),
             onDestroyActionMode = {
-                fragmentScope.launch { viewModel.send(ClearSelectionClicked) }.let { Unit }
+                lifecycleScope.launch { viewModel.send(ClearSelectionClicked) }.let { Unit }
             }
         )
     }
@@ -100,19 +106,19 @@ class NearbyFragment : InjectableEpoxyFragment() {
             .map { it.events }
             .distinctUntilChanged()
             .onEach { epoxyController.setData(it) }
-            .launchIn(fragmentScope)
+            .launchIn(lifecycleScope)
 
         viewModel.states
             .map { state -> state.events.value.count { it.selected } }
             .distinctUntilChanged()
             .onEach { actionModeController.update(it) }
-            .launchIn(fragmentScope)
+            .launchIn(lifecycleScope)
 
         viewModel.states
             .map { it.snackbarState }
             .distinctUntilChanged()
             .onEach { snackbarController?.transitionToSnackbarState(it) }
-            .launchIn(fragmentScope)
+            .launchIn(lifecycleScope)
 
         viewModel.events.observe(this, Observer {
             if (it is NearbySignal.FavouritesSaved) actionModeController.finish(true)

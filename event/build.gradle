@@ -56,10 +56,11 @@ dependencies {
     implementation "com.airbnb.android:epoxy-databinding:$epoxyVersion"
     kapt "com.airbnb.android:epoxy-processor:$epoxyVersion"
 
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleViewModelKtxVersion"
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycleExtensionsVersion"
-    implementation "androidx.core:core-ktx:$coreKtxVersion"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleRuntimeKtxVersion"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleViewModelKtxVersion"
 
+    implementation "androidx.core:core-ktx:$coreKtxVersion"
     api "com.google.guava:guava:$guavaVersion"
     implementation "com.google.android.gms:play-services-maps:$playServicesMapsVersion"
     implementation "com.github.haroldadmin:Vector:$vectorVersion"

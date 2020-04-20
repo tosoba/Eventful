@@ -3,16 +3,17 @@ package com.example.coreandroid.util
 import android.os.Handler
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.epoxy.*
 import com.example.coreandroid.*
-import com.example.coreandroid.base.InjectableEpoxyFragment
 import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
 import com.haroldadmin.vector.VectorFragment
 import com.haroldadmin.vector.VectorState
 import com.haroldadmin.vector.VectorViewModel
 import com.haroldadmin.vector.withState
 
+class EpoxyThreads(val builder: Handler, val differ: Handler)
 
 fun VectorFragment.simpleController(
     build: EpoxyController.() -> Unit
@@ -102,13 +103,14 @@ inline fun <T, R> CarouselModelBuilder.withModelsFrom(
     models(items.map { (key, value) -> modelBuilder(key, value) })
 }
 
-fun <I> InjectableEpoxyFragment.itemListController(
+fun <I> Fragment.itemListController(
+    epoxyThreads: EpoxyThreads,
     reloadClicked: (() -> Unit)? = null,
     onScrollListener: RecyclerView.OnScrollListener? = null,
     showLoadingIndicator: Boolean = true,
     emptyText: String? = null,
     buildItem: (I) -> EpoxyModel<*>
-) = object : TypedEpoxyController<HoldsData<List<I>>>(builder, differ) {
+) = object : TypedEpoxyController<HoldsData<List<I>>>(epoxyThreads.builder, epoxyThreads.differ) {
 
     override fun buildModels(data: HoldsData<List<I>>) {
         if (view == null || isRemoving) return
