@@ -1,6 +1,7 @@
 package com.example.coreandroid.controller
 
 import android.view.View
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.example.coreandroid.base.InjectableFragment
 import com.example.coreandroid.util.SnackbarState
@@ -20,7 +21,7 @@ interface SnackbarController {
 @FlowPreview
 fun <T> T.handleSnackbarState(
     view: View
-): SendChannel<SnackbarState> where T : SnackbarController, T : InjectableFragment {
+): SendChannel<SnackbarState> where T : SnackbarController, T : LifecycleOwner {
     val snackbarStateChannel: BroadcastChannel<SnackbarState> = BroadcastChannel(
         capacity = Channel.CONFLATED
     )

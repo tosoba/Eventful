@@ -60,6 +60,7 @@ dependencies {
     implementation "com.github.hadilq.liveevent:liveevent:$liveEventVersion"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$liveDataKtxVersion"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleRuntimeKtxVersion"
+    implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycleRuntimeKtxVersion"
 
     implementation "androidx.core:core-ktx:$coreKtxVersion"
 
