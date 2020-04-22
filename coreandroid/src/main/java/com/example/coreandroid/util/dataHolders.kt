@@ -1,80 +1,88 @@
 package com.example.coreandroid.util
 
-interface HoldsData<Value> {
-    val value: Value
+interface HoldsData<T> {
+    val data: T
     val status: DataStatus
-    val copyWithLoadingInProgress: HoldsData<Value>
+    val copyWithLoadingInProgress: HoldsData<T>
     val loadingFailed: Boolean get() = status is LoadingFailed<*>
-    fun <E> copyWithError(error: E): HoldsData<Value>
+    fun <E> copyWithError(error: E): HoldsData<T>
 }
 
-data class Data<Value>(
-    override val value: Value,
+data class Data<T>(
+    override val data: T,
     override val status: DataStatus = Initial
-) : HoldsData<Value> {
+) : HoldsData<T> {
 
-    override val copyWithLoadingInProgress: Data<Value>
+    override val copyWithLoadingInProgress: Data<T>
         get() = copy(status = Loading)
 
-    override fun <E> copyWithError(error: E): Data<Value> = copy(
+    override fun <E> copyWithError(error: E): Data<T> = copy(
         status = LoadingFailed(error)
     )
 
-    fun copyWithNewValue(value: Value): Data<Value> = copy(
-        value = value,
+    fun copyWithNewValue(value: T): Data<T> = copy(
+        data = value,
         status = LoadedSuccessfully
     )
 }
 
-data class DataList<Value>(
-    override val value: List<Value> = emptyList(),
+data class DataList<T>(
+    override val data: List<T> = emptyList(),
     override val status: DataStatus = Initial
-) : HoldsData<List<Value>> {
+) : HoldsData<List<T>> {
 
-    override val copyWithLoadingInProgress: DataList<Value>
+    override val copyWithLoadingInProgress: DataList<T>
         get() = copy(status = Loading)
 
-    override fun <E> copyWithError(error: E): DataList<Value> = copy(
+    override fun <E> copyWithError(error: E): DataList<T> = copy(
         status = LoadingFailed(error)
     )
 
-    fun copyWithNewItems(newItems: List<Value>): DataList<Value> = copy(
-        value = value + newItems,
+    fun transformItems(transform: (T) -> T): DataList<T> = copy(
+        data = data.map(transform)
+    )
+
+    fun copyWithNewItems(newItems: List<T>): DataList<T> = copy(
+        data = data + newItems,
         status = LoadedSuccessfully
     )
 
-    fun copyWithNewItems(vararg newItems: Value): DataList<Value> = copy(
-        value = value + newItems,
+    fun copyWithNewItems(vararg newItems: T): DataList<T> = copy(
+        data = data + newItems,
         status = LoadedSuccessfully
     )
 }
 
-data class PagedDataList<Value>(
-    override val value: List<Value> = emptyList(),
+data class PagedDataList<T>(
+    override val data: List<T> = emptyList(),
     override val status: DataStatus = Initial,
     val offset: Int = 0,
     val totalItems: Int = Integer.MAX_VALUE
-) : HoldsData<List<Value>> {
+) : HoldsData<List<T>> {
 
-    override val copyWithLoadingInProgress: PagedDataList<Value>
+    override val copyWithLoadingInProgress: PagedDataList<T>
         get() = copy(status = Loading)
 
-    override fun <E> copyWithError(error: E): PagedDataList<Value> = copy(
+    override fun <E> copyWithError(error: E): PagedDataList<T> = copy(
         status = LoadingFailed(error)
     )
 
+    fun transformItems(transform: (T) -> T): PagedDataList<T> = copy(
+        data = data.map(transform)
+    )
+
     fun copyWithNewItems(
-        newItems: List<Value>, offset: Int
-    ): PagedDataList<Value> = copy(
-        value = value + newItems,
+        newItems: List<T>, offset: Int
+    ): PagedDataList<T> = copy(
+        data = data + newItems,
         offset = offset,
         status = LoadedSuccessfully
     )
 
     fun copyWithNewItems(
-        newItems: List<Value>, offset: Int, totalItems: Int
-    ): PagedDataList<Value> = copy(
-        value = value + newItems,
+        newItems: List<T>, offset: Int, totalItems: Int
+    ): PagedDataList<T> = copy(
+        data = data + newItems,
         offset = offset,
         status = LoadedSuccessfully,
         totalItems = totalItems

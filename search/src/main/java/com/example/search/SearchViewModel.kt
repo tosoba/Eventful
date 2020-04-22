@@ -31,7 +31,7 @@ class SearchViewModel(
     private val connectivityReactionFlow: Flow<SearchState>
         get() = connectivityStateProvider.isConnectedFlow.filter {
             val state = statesChannel.value
-            it && state.events.loadingFailed && state.events.value.isEmpty()
+            it && state.events.loadingFailed && state.events.data.isEmpty()
         }.map {
             val state = statesChannel.value
             val resource = withContext(ioDispatcher) { searchEvents(state.searchText) }

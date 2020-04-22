@@ -103,7 +103,7 @@ class NearbyFragment : InjectableFragment() {
             .launchIn(lifecycleScope)
 
         viewModel.states
-            .map { state -> state.events.value.count { it.selected } }
+            .map { state -> state.events.data.count { it.selected } }
             .distinctUntilChanged()
             .onEach { actionModeController.update(it) }
             .launchIn(lifecycleScope)
@@ -115,7 +115,7 @@ class NearbyFragment : InjectableFragment() {
             .launchIn(lifecycleScope)
 
         viewModel.events.observe(this, Observer {
-            if (it is NearbySignal.FavouritesSaved) actionModeController.finish(true)
+            if (it is NearbySignal.FavouritesSaved) actionModeController.finish()
         })
     }
 

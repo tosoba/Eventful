@@ -59,14 +59,14 @@ internal class FavouritesViewModelTest {
             coVerify { getSavedEvents(FavouritesViewModel.limitIncrement) }
             val loadingState = states[states.size - 2]
             assert(
-                loadingState.events.value.isEmpty()
+                loadingState.events.data.isEmpty()
                         && loadingState.events.status is Loading
                         && loadingState.limit == 0
                         && !loadingState.limitHit
             )
             val loadedState = states.last()
             assert(
-                loadedState.events.value.size == initialEventsSize
+                loadedState.events.data.size == initialEventsSize
                         && loadedState.events.status is LoadedSuccessfully
                         && loadedState.limit == initialEventsSize
                         && !loadedState.limitHit
@@ -102,13 +102,13 @@ internal class FavouritesViewModelTest {
         val loadingMoreState = states[states.size - 2]
         assert(
             loadingMoreState.events.status is Loading
-                    && loadingMoreState.events.value.size == initialEventsSize
+                    && loadingMoreState.events.data.size == initialEventsSize
                     && loadingMoreState.limit == initialEventsSize
         )
         val finalState = states.last()
         assert(
             finalState.events.status is LoadedSuccessfully
-                    && finalState.events.value.size == initialEventsSize
+                    && finalState.events.data.size == initialEventsSize
                     && finalState.limit == initialEventsSize
                     && finalState.limitHit
         )
@@ -143,13 +143,13 @@ internal class FavouritesViewModelTest {
         val loadingMoreState = states[states.size - 2]
         assert(
             loadingMoreState.events.status is Loading
-                    && loadingMoreState.events.value.size == initialEventsSize
+                    && loadingMoreState.events.data.size == initialEventsSize
                     && loadingMoreState.limit == initialEventsSize
         )
         val finalState = states.last()
         assert(
             finalState.events.status is LoadedSuccessfully
-                    && finalState.events.value.size == afterLoadMoreSize
+                    && finalState.events.data.size == afterLoadMoreSize
                     && finalState.limit == afterLoadMoreSize
                     && !finalState.limitHit
         )

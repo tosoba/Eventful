@@ -42,7 +42,7 @@ class EventViewModel(
         setState { copy(isFavourite = isFavourite.copyWithLoadingInProgress) }
 
         viewModelScope.launch {
-            if (state.isFavourite.value) deleteEvent(state.eventArg)
+            if (state.isFavourite.data) deleteEvent(state.eventArg)
             else saveEvent(state.eventArg)
         }
     }

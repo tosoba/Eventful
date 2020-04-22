@@ -7,13 +7,18 @@ import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.PagedDataList
+import com.example.coreandroid.util.SelectableEventsState
 import com.haroldadmin.cnradapter.NetworkResponse
 import java.util.*
 
 data class NearbyState(
-    val events: PagedDataList<Selectable<Event>> = PagedDataList(),
+    override val events: PagedDataList<Selectable<Event>> = PagedDataList(),
     val snackbarState: SnackbarState = SnackbarState.Hidden
-)
+) : SelectableEventsState<NearbyState> {
+    override fun copyWithTransformedEvents(
+        transform: (Selectable<Event>) -> Selectable<Event>
+    ): NearbyState = copy(events = events.transformItems(transform))
+}
 
 internal fun NearbyState.reduce(
     resource: Resource<PagedResult<IEvent>>

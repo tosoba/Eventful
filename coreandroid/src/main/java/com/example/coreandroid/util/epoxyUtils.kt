@@ -107,7 +107,7 @@ fun <I> Fragment.itemListController(
     override fun buildModels(data: HoldsData<List<I>>) {
         if (view == null || isRemoving) return
 
-        if (data.value.isEmpty()) when (val status = data.status) {
+        if (data.data.isEmpty()) when (val status = data.status) {
             is Loading -> if (showLoadingIndicator) loadingIndicator {
                 id("loading-indicator-items")
             }
@@ -123,7 +123,7 @@ fun <I> Fragment.itemListController(
                 (status.error as? HasFailureMessage)?.let { message(it.message) }
             }
         } else {
-            data.value.forEach {
+            data.data.forEach {
                 buildItem(it).spanSizeOverride { _, _, _ -> 1 }.addTo(this)
             }
             if (data.status is Loading && showLoadingIndicator) loadingMoreIndicator {

@@ -10,8 +10,9 @@ import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.provider.ConnectivityStateProvider
 import com.example.coreandroid.provider.LocationStateProvider
-import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.Loading
+import com.example.coreandroid.util.processClearSelectionIntents
+import com.example.coreandroid.util.processEventLongClickedIntents
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -40,8 +41,8 @@ class NearbyViewModel(
     }
 
     private fun Flow<NearbyIntent>.processIntents(): Flow<NearbyState> = merge(
-        filterIsInstance<ClearSelectionClicked>().processClearSelectionIntents(),
-        filterIsInstance<EventLongClicked>().processEventLongClickedIntents(),
+        filterIsInstance<ClearSelectionClicked>().processClearSelectionIntents { state },
+        filterIsInstance<EventLongClicked>().processEventLongClickedIntents { state },
         filterIsInstance<AddToFavouritesClicked>().processAddToFavouritesIntents(),
         filterIsInstance<EventListScrolledToEnd>().processScrolledToEndIntents()
     )
@@ -49,7 +50,7 @@ class NearbyViewModel(
     private val connectivityReactionFlow: Flow<NearbyState>
         get() = connectivityStateProvider.isConnectedFlow.filter { connected ->
             val state = statesChannel.value
-            connected && state.events.value.isEmpty() && state.events.loadingFailed
+            connected && state.events.data.isEmpty() && state.events.loadingFailed
         }.zip(locationStateProvider.locationStateFlow.notNullLatLng) { _, latLng ->
             latLng
         }.flatMapConcat { loadingEventsFlow(it) }
@@ -83,7 +84,7 @@ class NearbyViewModel(
         get() = locationStateProvider.locationStateFlow
             .filter {
                 val state = statesChannel.value
-                state.events.value.isEmpty()
+                state.events.data.isEmpty()
             }
             .notNullLatLng
             .flatMapConcat { loadingEventsFlow(it) }
@@ -109,41 +110,15 @@ class NearbyViewModel(
         latLng
     }.flatMapConcat { loadingEventsFlow(it) }
 
-    private fun Flow<ClearSelectionClicked>.processClearSelectionIntents(): Flow<NearbyState> {
-        return map {
-            val state = statesChannel.value
-            state.copy(
-                events = state.events.copy(
-                    value = state.events.value.map { it.copy(selected = false) }
-                )
-            )
-        }
-    }
-
-    private fun Flow<EventLongClicked>.processEventLongClickedIntents(): Flow<NearbyState> {
-        return map { (event) ->
-            val state = statesChannel.value
-            state.copy(
-                events = state.events.copy(
-                    value = state.events.value.map {
-                        if (it.item.id == event.id) Selectable(event, !it.selected) else it
-                    }
-                )
-            )
-        }
-    }
-
     private fun Flow<AddToFavouritesClicked>.processAddToFavouritesIntents(): Flow<NearbyState> {
         return map {
             val state = statesChannel.value
             withContext(ioDispatcher) {
-                saveEvents(state.events.value.filter { it.selected }.map { it.item })
+                saveEvents(state.events.data.filter { it.selected }.map { it.item })
             }
             liveEvents.value = NearbySignal.FavouritesSaved
             state.copy(
-                events = state.events.copy(
-                    value = state.events.value.map { it.copy(selected = false) }
-                )
+                events = state.events.transformItems { it.copy(selected = false) }
             )
         }
     }

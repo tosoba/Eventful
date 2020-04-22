@@ -12,7 +12,7 @@ import com.example.coreandroid.util.ext.plusAssign
 
 interface EventsSelectionActionModeController {
     fun update(numberOfSelectedEvents: Int)
-    fun finish(clearSelection: Boolean)
+    fun finish()
 }
 
 fun Fragment.eventsSelectionActionModeController(
@@ -21,11 +21,7 @@ fun Fragment.eventsSelectionActionModeController(
     onDestroyActionMode: () -> Unit
 ): EventsSelectionActionModeController {
     var actionMode: ActionMode? = null
-    val callback = ToolbarActionModeCallback(
-        menuId,
-        itemClickedCallbacks,
-        onDestroyActionMode
-    )
+    val callback = ToolbarActionModeCallback(menuId, itemClickedCallbacks, onDestroyActionMode)
     val controller = object : EventsSelectionActionModeController {
         override fun update(numberOfSelectedEvents: Int) {
             if (actionMode == null && numberOfSelectedEvents > 0) {
@@ -35,12 +31,11 @@ fun Fragment.eventsSelectionActionModeController(
             } else if (actionMode != null) {
                 if (numberOfSelectedEvents > 0)
                     actionMode?.title = "$numberOfSelectedEvents selected"
-                else finish(false)
+                else finish()
             }
         }
 
-        override fun finish(clearSelection: Boolean) {
-            callback.callOnDestroy = clearSelection
+        override fun finish() {
             actionMode?.finish()
             actionMode = null
         }
@@ -50,7 +45,7 @@ fun Fragment.eventsSelectionActionModeController(
     lifecycle += object : LifecycleObserver {
         @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
         fun finishOnPause() {
-            controller.finish(false)
+            controller.finish()
         }
     }
 
@@ -62,8 +57,6 @@ private class ToolbarActionModeCallback(
     private val itemClickedCallbacks: Map<Int, () -> Unit>,
     private val onDestroyActionMode: () -> Unit
 ) : ActionMode.Callback {
-
-    var callOnDestroy = true
 
     override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
         itemClickedCallbacks[item.itemId]?.invoke()
@@ -83,7 +76,6 @@ private class ToolbarActionModeCallback(
     }
 
     override fun onDestroyActionMode(mode: ActionMode?) {
-        if (callOnDestroy) onDestroyActionMode()
-        else callOnDestroy = true
+        onDestroyActionMode()
     }
 }

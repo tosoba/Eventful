@@ -6,9 +6,7 @@ import com.example.core.usecase.GetSavedEvents
 import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable
-import com.example.coreandroid.util.DataList
-import com.example.coreandroid.util.LoadedSuccessfully
-import com.example.coreandroid.util.Loading
+import com.example.coreandroid.util.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -31,7 +29,7 @@ class FavouritesViewModel(
                 if (intent is RemoveFromFavouritesClicked) {
                     val state = statesChannel.value
                     withContext(ioDispatcher) {
-                        deleteEvents(state.events.value.filter { it.selected }.map { it.item })
+                        deleteEvents(state.events.data.filter { it.selected }.map { it.item })
                     }
                     liveEvents.value = FavouritesSignal.FavouritesRemoved
                 }
@@ -43,8 +41,8 @@ class FavouritesViewModel(
 
     private fun Flow<FavouritesIntent>.processIntents(): Flow<FavouritesState> = merge(
         filterIsInstance<LoadFavourites>().processLoadFavouritesIntents(),
-        filterIsInstance<EventLongClicked>().processEventLongClickedIntents(),
-        filterIsInstance<ClearSelectionClicked>().processClearSelectionIntents()
+        filterIsInstance<EventLongClicked>().processEventLongClickedIntents { state },
+        filterIsInstance<ClearSelectionClicked>().processClearSelectionIntents { state }
     )
 
     private fun Flow<LoadFavourites>.processLoadFavouritesIntents(): Flow<FavouritesState> {
@@ -61,43 +59,15 @@ class FavouritesViewModel(
                             val state = statesChannel.value
                             state.copy(
                                 events = DataList(
-                                    value = events.map { Selectable(Event(it)) },
+                                    data = events.map { Selectable(Event(it)) },
                                     status = LoadedSuccessfully
                                 ),
                                 limit = events.size,
-                                limitHit = state.events.value.size == events.size
+                                limitHit = state.events.data.size == events.size
                             )
                         }
                     )
                 }
-        }
-    }
-
-    //TODO: think about refactoring this out of viewModel classes
-    // (via some extension methods and interfaces) since basically the same logic is in NearbyViewModel
-    private fun Flow<EventLongClicked>.processEventLongClickedIntents(): Flow<FavouritesState> {
-        return map { (event) ->
-            val state = statesChannel.value
-            state.copy(
-                events = state.events.copy(
-                    value = state.events.value.map {
-                        if (it.item.id == event.id) Selectable(event, !it.selected) else it
-                    }
-                )
-            )
-        }
-    }
-
-    //TODO: think about refactoring this out of viewModel classes
-    // (via some extension methods and interfaces) since basically the same logic is in NearbyViewModel
-    private fun Flow<ClearSelectionClicked>.processClearSelectionIntents(): Flow<FavouritesState> {
-        return map {
-            val state = statesChannel.value
-            state.copy(
-                events = state.events.copy(
-                    value = state.events.value.map { it.copy(selected = false) }
-                )
-            )
         }
     }
 
