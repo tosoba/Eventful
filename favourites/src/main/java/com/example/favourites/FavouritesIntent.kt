@@ -1,0 +1,9 @@
+package com.example.favourites
+
+import com.example.coreandroid.ticketmaster.Event
+
+sealed class FavouritesIntent
+object LoadFavourites : FavouritesIntent()
+object RemoveFromFavouritesClicked : FavouritesIntent()
+data class EventLongClicked(val event: Event) : FavouritesIntent()
+object ClearSelectionClicked : FavouritesIntent()

@@ -51,7 +51,6 @@ class NearbyFragment : InjectableFragment() {
             onScrollListener = eventsScrollListener
         ) { selectable ->
             selectable.listItem(
-                selected = selectable.selected,
                 clicked = View.OnClickListener {
                     navigationFragment?.showFragment(fragmentFactory.eventFragment(selectable.item))
                 },

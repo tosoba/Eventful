@@ -46,6 +46,9 @@ class EventRepository(
 
     override suspend fun deleteEvent(event: IEvent) = eventDao.deleteEvent(event.id)
 
+    override suspend fun deleteEvents(events: List<IEvent>) = eventDao
+        .deleteEvents(events.map(IEvent::id))
+
     override suspend fun getSearchSuggestions(
         searchText: String
     ): List<SearchSuggestion> = searchSuggestionDao.getSearchSuggestions(searchText)

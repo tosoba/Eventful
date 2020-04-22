@@ -2,10 +2,14 @@ package com.example.favourites
 
 import android.os.Bundle
 import android.view.*
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.example.coreandroid.base.InjectableFragment
+import com.example.coreandroid.controller.EventsSelectionActionModeController
+import com.example.coreandroid.controller.eventsSelectionActionModeController
 import com.example.coreandroid.navigation.IFragmentFactory
 import com.example.coreandroid.ticketmaster.Event
+import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.EpoxyThreads
 import com.example.coreandroid.util.ext.menuController
 import com.example.coreandroid.util.ext.navigationFragment
@@ -33,7 +37,7 @@ class FavouritesFragment : InjectableFragment() {
     internal lateinit var fragmentFactory: IFragmentFactory
 
     @Inject
-    internal lateinit var viewModel: FavouritesVM
+    internal lateinit var viewModel: FavouritesViewModel
 
     @Inject
     internal lateinit var epoxyThreads: EpoxyThreads
@@ -45,15 +49,38 @@ class FavouritesFragment : InjectableFragment() {
     }
 
     private val epoxyController by lazy(LazyThreadSafetyMode.NONE) {
-        itemListController<Event>(
+        itemListController<Selectable<Event>>(
             epoxyThreads,
             emptyText = "No favourite events added yet",
             onScrollListener = eventsScrollListener
-        ) { event ->
-            event.listItem(View.OnClickListener {
-                navigationFragment?.showFragment(fragmentFactory.eventFragment(event))
-            })
+        ) { selectable ->
+            selectable.listItem(
+                clicked = View.OnClickListener {
+                    navigationFragment?.showFragment(fragmentFactory.eventFragment(selectable.item))
+                },
+                longClicked = View.OnLongClickListener {
+                    lifecycleScope.launch { viewModel.send(EventLongClicked(selectable.item)) }
+                    true
+                }
+            )
         }
+    }
+
+    private val actionModeController: EventsSelectionActionModeController by lazy(
+        LazyThreadSafetyMode.NONE
+    ) {
+        eventsSelectionActionModeController(
+            menuId = R.menu.favourites_events_selection_menu,
+            itemClickedCallbacks = mapOf(
+                R.id.favourites_action_remove_favourite to {
+                    lifecycleScope.launch { viewModel.send(RemoveFromFavouritesClicked) }
+                    Unit
+                }
+            ),
+            onDestroyActionMode = {
+                lifecycleScope.launch { viewModel.send(ClearSelectionClicked) }.let { Unit }
+            }
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,11 +100,22 @@ class FavouritesFragment : InjectableFragment() {
     override fun onResume() {
         super.onResume()
         activity?.invalidateOptionsMenu()
+
         viewModel.states
             .map { it.events }
             .distinctUntilChanged()
             .onEach { epoxyController.setData(it) }
             .launchIn(lifecycleScope)
+
+        viewModel.states
+            .map { state -> state.events.value.count { it.selected } }
+            .distinctUntilChanged()
+            .onEach { actionModeController.update(it) }
+            .launchIn(lifecycleScope)
+
+        viewModel.events.observe(this, Observer {
+            if (it is FavouritesSignal.FavouritesRemoved) actionModeController.finish(true)
+        })
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

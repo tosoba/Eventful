@@ -50,7 +50,6 @@ class SelectableEventItem(
 }
 
 fun Selectable<Event>.listItem(
-    selected: Boolean,
     clicked: View.OnClickListener,
     longClicked: View.OnLongClickListener
 ) = SelectableEventItem(

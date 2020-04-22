@@ -9,7 +9,9 @@ import kotlinx.coroutines.flow.Flow
 interface IEventRepository {
 
     suspend fun getNearbyEvents(
-        lat: Double, lon: Double, offset: Int?
+        lat: Double,
+        lon: Double,
+        offset: Int?
     ): Resource<PagedResult<IEvent>>
 
     suspend fun searchEvents(searchText: String): Resource<PagedResult<IEvent>>
@@ -23,6 +25,8 @@ interface IEventRepository {
     suspend fun saveEvents(events: List<IEvent>)
 
     suspend fun deleteEvent(event: IEvent)
+
+    suspend fun deleteEvents(events: List<IEvent>)
 
     fun getSavedEventsFlow(limit: Int): Flow<List<IEvent>>
 

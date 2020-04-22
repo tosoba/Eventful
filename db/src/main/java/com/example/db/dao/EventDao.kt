@@ -107,4 +107,7 @@ interface EventDao {
 
     @Query("DELETE FROM ${Tables.EVENT} WHERE id = :id")
     suspend fun deleteEvent(id: String)
+
+    @Query("DELETE FROM ${Tables.EVENT} WHERE id IN (:ids)")
+    suspend fun deleteEvents(ids: List<String>)
 }
