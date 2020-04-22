@@ -51,7 +51,6 @@ fun Fragment.setupToolbarWithDrawerToggle(toolbar: Toolbar) {
             syncState()
         }
     }
-
 }
 
 fun Fragment.showBackNavArrow() {

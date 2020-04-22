@@ -2,12 +2,8 @@ package com.example.eventsnearby
 
 import android.os.Bundle
 import android.view.*
-import com.example.coreandroid.base.*
-import com.example.coreandroid.controller.MenuController
-import com.example.coreandroid.controller.SnackbarController
-import com.example.coreandroid.controller.handleSnackbarState
-import com.example.coreandroid.controller.initializeMenu
-import com.example.coreandroid.util.SnackbarState
+import com.example.coreandroid.base.InjectableFragment
+import com.example.coreandroid.controller.*
 import com.example.coreandroid.util.ext.setupToolbar
 import com.example.coreandroid.util.ext.setupToolbarWithDrawerToggle
 import com.example.coreandroid.view.TitledFragmentsPagerAdapter

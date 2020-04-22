@@ -6,44 +6,32 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.epoxy.*
-import com.example.coreandroid.*
+import com.example.coreandroid.loadingIndicator
+import com.example.coreandroid.loadingMoreIndicator
+import com.example.coreandroid.noItemsText
+import com.example.coreandroid.reloadControl
 import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
-import com.haroldadmin.vector.VectorFragment
-import com.haroldadmin.vector.VectorState
-import com.haroldadmin.vector.VectorViewModel
-import com.haroldadmin.vector.withState
 
 class EpoxyThreads(val builder: Handler, val differ: Handler)
 
-fun VectorFragment.simpleController(
+fun Fragment.simpleController(
     build: EpoxyController.() -> Unit
-) = object : AsyncEpoxyController() {
+): AsyncEpoxyController = object : AsyncEpoxyController() {
     override fun buildModels() {
         if (view == null || isRemoving) return
         build()
     }
 }
 
-fun <S : VectorState, A : VectorViewModel<S>> VectorFragment.simpleController(
-    viewModel: A, buildModels: EpoxyController.(state: S) -> Unit
-) = object : AsyncEpoxyController() {
-    override fun buildModels() {
-        if (view == null || isRemoving) return
-        withState(viewModel) { state ->
-            buildModels(state)
-        }
-    }
-}
-
-fun <S : VectorState, A : VectorViewModel<S>> VectorFragment.asyncController(
-    modelBuildingHandler: Handler, diffingHandler: Handler,
-    viewModel: A, build: EpoxyController.(state: S) -> Unit
-) = object : TypedEpoxyController<S>(modelBuildingHandler, diffingHandler) {
+fun <S> Fragment.asyncController(
+    epoxyThreads: EpoxyThreads,
+    build: EpoxyController.(state: S) -> Unit
+): TypedEpoxyController<S> = object : TypedEpoxyController<S>(
+    epoxyThreads.builder, epoxyThreads.differ
+) {
     override fun buildModels(data: S) {
         if (view == null || isRemoving) return
-        withState(viewModel) { state ->
-            build(state)
-        }
+        build(data)
     }
 }
 
@@ -58,7 +46,6 @@ class InfiniteNestedScrollingCarouselModel(
     private val minItemsBeforeLoadingMore: Int = 10,
     private val onLoadMore: () -> Unit
 ) : NestedScrollingCarouselModel() {
-
     override fun buildView(parent: ViewGroup): Carousel = super.buildView(parent).apply {
         addOnScrollListener(
             EndlessRecyclerViewScrollListener(visibleThreshold, minItemsBeforeLoadingMore) {
@@ -75,8 +62,10 @@ inline fun EpoxyController.carousel(modelInitializer: CarouselModelBuilder.() ->
 }
 
 inline fun EpoxyController.infiniteCarousel(
-    visibleThreshold: Int = 5, minItemsBeforeLoadingMore: Int = 0,
-    noinline onLoadMore: () -> Unit, modelInitializer: CarouselModelBuilder.() -> Unit
+    visibleThreshold: Int = 5,
+    minItemsBeforeLoadingMore: Int = 0,
+    noinline onLoadMore: () -> Unit,
+    modelInitializer: CarouselModelBuilder.() -> Unit
 ) {
     InfiniteNestedScrollingCarouselModel(
         visibleThreshold, minItemsBeforeLoadingMore, onLoadMore
@@ -84,7 +73,8 @@ inline fun EpoxyController.infiniteCarousel(
 }
 
 inline fun <T> CarouselModelBuilder.withModelsFrom(
-    items: Collection<T>, modelBuilder: (T) -> EpoxyModel<*>
+    items: Collection<T>,
+    modelBuilder: (T) -> EpoxyModel<*>
 ) {
     models(items.map { modelBuilder(it) })
 }
@@ -98,7 +88,8 @@ inline fun <T> CarouselModelBuilder.withModelsFrom(
 }
 
 inline fun <T, R> CarouselModelBuilder.withModelsFrom(
-    items: Map<T, R>, modelBuilder: (T, R) -> EpoxyModel<*>
+    items: Map<T, R>,
+    modelBuilder: (T, R) -> EpoxyModel<*>
 ) {
     models(items.map { (key, value) -> modelBuilder(key, value) })
 }
@@ -110,8 +101,9 @@ fun <I> Fragment.itemListController(
     showLoadingIndicator: Boolean = true,
     emptyText: String? = null,
     buildItem: (I) -> EpoxyModel<*>
-) = object : TypedEpoxyController<HoldsData<List<I>>>(epoxyThreads.builder, epoxyThreads.differ) {
-
+): TypedEpoxyController<HoldsData<List<I>>> = object : TypedEpoxyController<HoldsData<List<I>>>(
+    epoxyThreads.builder, epoxyThreads.differ
+) {
     override fun buildModels(data: HoldsData<List<I>>) {
         if (view == null || isRemoving) return
 
@@ -143,45 +135,5 @@ fun <I> Fragment.itemListController(
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
         onScrollListener?.let { recyclerView.addOnScrollListener(it) }
-    }
-}
-
-class Column(
-    models: Collection<EpoxyModel<*>>,
-    private val clicked: View.OnClickListener? = null
-) : EpoxyModelGroup(R.layout.column, models) {
-
-    constructor(
-        clicked: View.OnClickListener? = null,
-        vararg models: EpoxyModel<*>
-    ) : this(models.toList(), clicked)
-
-    constructor(
-        vararg models: EpoxyModel<*>
-    ) : this(models.toList(), null)
-
-    override fun bind(holder: ModelGroupHolder) {
-        super.bind(holder)
-        clicked?.let { holder.rootView.setOnClickListener(it) }
-    }
-}
-
-class Row(
-    models: Collection<EpoxyModel<*>>,
-    private val clicked: View.OnClickListener? = null
-) : EpoxyModelGroup(R.layout.row, models) {
-
-    constructor(
-        clicked: View.OnClickListener? = null,
-        vararg models: EpoxyModel<*>
-    ) : this(models.toList(), clicked)
-
-    constructor(
-        vararg models: EpoxyModel<*>
-    ) : this(models.toList(), null)
-
-    override fun bind(holder: ModelGroupHolder) {
-        super.bind(holder)
-        clicked?.let { holder.rootView.setOnClickListener(it) }
     }
 }

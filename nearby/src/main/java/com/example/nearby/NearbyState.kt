@@ -3,10 +3,10 @@ package com.example.nearby
 import com.example.core.Resource
 import com.example.core.model.PagedResult
 import com.example.core.model.ticketmaster.IEvent
+import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.PagedDataList
-import com.example.coreandroid.util.SnackbarState
 import com.haroldadmin.cnradapter.NetworkResponse
 import java.util.*
 

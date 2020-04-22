@@ -3,8 +3,6 @@ package com.example.coreandroid.controller
 import android.view.View
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import com.example.coreandroid.base.InjectableFragment
-import com.example.coreandroid.util.SnackbarState
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -59,4 +57,13 @@ fun <T> T.handleSnackbarState(
         .launchIn(lifecycleScope)
 
     return snackbarStateChannel
+}
+
+sealed class SnackbarState {
+    class Text(
+        val text: String,
+        @Snackbar.Duration val length: Int = Snackbar.LENGTH_INDEFINITE
+    ) : SnackbarState()
+
+    object Hidden : SnackbarState()
 }

@@ -7,11 +7,11 @@ import com.example.core.model.app.LocationStatus
 import com.example.core.usecase.GetNearbyEvents
 import com.example.core.usecase.SaveEvents
 import com.example.coreandroid.base.BaseViewModel
+import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.provider.ConnectivityStateProvider
 import com.example.coreandroid.provider.LocationStateProvider
 import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.Loading
-import com.example.coreandroid.util.SnackbarState
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview

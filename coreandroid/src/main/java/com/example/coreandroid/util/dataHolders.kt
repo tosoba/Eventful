@@ -4,22 +4,8 @@ interface HoldsData<Value> {
     val value: Value
     val status: DataStatus
     val copyWithLoadingInProgress: HoldsData<Value>
-    val loadingFailed: Boolean
-        get() = status is LoadingFailed<*>
-
+    val loadingFailed: Boolean get() = status is LoadingFailed<*>
     fun <E> copyWithError(error: E): HoldsData<Value>
-}
-
-inline fun <Holder : HoldsData<Value>, Value> Holder.ifNotLoading(block: (Holder) -> Unit) {
-    if (status !is Loading) block(this)
-}
-
-inline fun <Holder : HoldsData<Value>, Value> Holder.ifLastLoadingFailed(block: (Holder) -> Unit) {
-    if (status is LoadingFailed<*>) block(this)
-}
-
-inline fun <Holder : HoldsData<Value>, Value> Holder.ifLastLoadingCompletedSuccessFully(block: (Holder) -> Unit) {
-    if (status is LoadedSuccessfully) block(this)
 }
 
 data class Data<Value>(
@@ -38,17 +24,6 @@ data class Data<Value>(
         value = value,
         status = LoadedSuccessfully
     )
-}
-
-fun <Holder : HoldsData<List<Value>>, Value> Holder.isEmptyAndLastLoadingFailed(): Boolean =
-    loadingFailed && value.isEmpty()
-
-inline fun <Holder : HoldsData<List<Value>>, Value> Holder.ifEmptyAndIsNotLoading(block: (Holder) -> Unit) {
-    if (status !is Loading && value.isEmpty()) block(this)
-}
-
-inline fun <Holder : HoldsData<List<Item>>, Item> Holder.ifNotEmpty(block: (Holder) -> Unit) {
-    if (value.isNotEmpty()) block(this)
 }
 
 data class DataList<Value>(
@@ -104,10 +79,6 @@ data class PagedDataList<Value>(
         status = LoadedSuccessfully,
         totalItems = totalItems
     )
-
-    inline fun ifNotLoadingAndNotAllLoaded(block: (PagedDataList<Value>) -> Unit) {
-        if (status !is Loading && offset < totalItems) block(this)
-    }
 }
 
 sealed class DataStatus
