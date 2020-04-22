@@ -115,7 +115,7 @@ class NearbyFragment : InjectableFragment() {
             .launchIn(lifecycleScope)
 
         viewModel.events.observe(this, Observer {
-            if (it is NearbySignal.FavouritesSaved) actionModeController.finish()
+            if (it is NearbySignal.FavouritesSaved) actionModeController.finish(false)
         })
     }
 
