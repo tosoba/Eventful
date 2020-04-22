@@ -68,12 +68,7 @@ class SearchFragment : InjectableFragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_search, container, false).apply {
-        this.search_events_recycler_view.setController(epoxyController)
-        savedInstanceState?.let {
-            this.search_events_recycler_view.restoreScrollPosition(
-                savedInstanceState, epoxyController
-            )
-        }
+        this.search_events_recycler_view.onCreateControllerView(epoxyController, savedInstanceState)
     }
 
     override fun onResume() {

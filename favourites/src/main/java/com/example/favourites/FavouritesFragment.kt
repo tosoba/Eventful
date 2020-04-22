@@ -9,7 +9,7 @@ import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.util.EpoxyThreads
 import com.example.coreandroid.util.ext.menuController
 import com.example.coreandroid.util.ext.navigationFragment
-import com.example.coreandroid.util.ext.restoreScrollPosition
+import com.example.coreandroid.util.ext.onCreateControllerView
 import com.example.coreandroid.util.ext.saveScrollPosition
 import com.example.coreandroid.util.itemListController
 import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
@@ -64,12 +64,10 @@ class FavouritesFragment : InjectableFragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_favourites, container, false).apply {
-        this.favourite_events_recycler_view.setController(epoxyController)
-        savedInstanceState?.let {
-            this.favourite_events_recycler_view.restoreScrollPosition(
-                savedInstanceState, epoxyController
-            )
-        }
+        this.favourite_events_recycler_view.onCreateControllerView(
+            epoxyController,
+            savedInstanceState
+        )
     }
 
     override fun onResume() {

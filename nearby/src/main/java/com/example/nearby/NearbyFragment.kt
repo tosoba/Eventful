@@ -89,12 +89,7 @@ class NearbyFragment : InjectableFragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_nearby, container, false).apply {
-        this.nearby_events_recycler_view.setController(epoxyController)
-        savedInstanceState?.let {
-            this.nearby_events_recycler_view.restoreScrollPosition(
-                savedInstanceState, epoxyController
-            )
-        }
+        this.nearby_events_recycler_view.onCreateControllerView(epoxyController, savedInstanceState)
     }
 
     override fun onResume() {
