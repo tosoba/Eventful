@@ -59,6 +59,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycleExtensionsVersion"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleRuntimeKtxVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleViewModelKtxVersion"
+    implementation "com.github.hadilq.liveevent:liveevent:$liveEventVersion"
 
     implementation "androidx.core:core-ktx:$coreKtxVersion"
     api "com.google.guava:guava:$guavaVersion"

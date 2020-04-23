@@ -47,10 +47,12 @@ dependencies {
     kapt "com.google.dagger:dagger-android-processor:$daggerVersion"
 
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleViewModelKtxVersion"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleRuntimeKtxVersion"
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycleExtensionsVersion"
     implementation "android.arch.lifecycle:runtime:$lifecycleVersion"
     implementation "android.arch.lifecycle:extensions:$lifecycleVersion"
     kapt "android.arch.lifecycle:compiler:$lifecycleVersion"
+    implementation "com.github.hadilq.liveevent:liveevent:$liveEventVersion"
 
     implementation "com.google.android.gms:play-services-maps:$playServicesMapsVersion"
     implementation "com.github.haroldadmin:Vector:$vectorVersion"

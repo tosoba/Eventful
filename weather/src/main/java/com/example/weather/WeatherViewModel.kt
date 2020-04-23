@@ -3,22 +3,18 @@ package com.example.weather
 import androidx.lifecycle.viewModelScope
 import com.example.core.Resource
 import com.example.core.model.weather.Forecast
-import com.example.core.repo.IWeatherRepository
 import com.example.core.usecase.GetForecast
 import com.example.core.util.flatMapFirst
 import com.example.coreandroid.base.BaseViewModel
-import com.example.coreandroid.util.Loading
-import com.google.android.gms.maps.model.LatLng
-import com.haroldadmin.vector.VectorViewModel
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
-
-sealed class WeatherIntent
-class LoadWeather(val latLng: LatLng) : WeatherIntent()
+import kotlinx.coroutines.withContext
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class WeatherVM(
+class WeatherViewModel(
     private val getForecast: GetForecast,
     private val ioDispatcher: CoroutineDispatcher,
     initialState: WeatherState = WeatherState.INITIAL
@@ -44,30 +40,5 @@ class WeatherVM(
             }
             .onEach(statesChannel::send)
             .launchIn(viewModelScope)
-    }
-}
-
-class WeatherViewModel(
-    private val repo: IWeatherRepository,
-    private val ioDispatcher: CoroutineDispatcher
-) : VectorViewModel<WeatherState>(WeatherState.INITIAL) {
-
-    fun loadWeather(latLng: LatLng) = withState { state ->
-        if (state.forecast.status is Loading) return@withState
-
-        viewModelScope.launch {
-            setState { copy(forecast = forecast.copyWithLoadingInProgress) }
-            when (val result = withContext(ioDispatcher) {
-                repo.getForecast(lat = latLng.latitude, lon = latLng.longitude)
-            }) {
-                is Resource.Success -> setState {
-                    copy(forecast = forecast.copyWithNewValue(result.data))
-                }
-
-                is Resource.Error<Forecast, *> -> setState {
-                    copy(forecast = forecast.copyWithError(result.error))
-                }
-            }
-        }
     }
 }

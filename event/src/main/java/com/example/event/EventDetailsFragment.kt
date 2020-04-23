@@ -5,6 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
+import com.airbnb.epoxy.AsyncEpoxyController
 import com.example.coreandroid.description
 import com.example.coreandroid.eventInfo
 import com.example.coreandroid.ticketmaster.Event
@@ -16,15 +18,14 @@ import com.example.coreandroid.util.ext.toPx
 import com.example.coreandroid.util.simpleController
 import com.example.coreandroid.view.epoxy.kindsCarousel
 import com.example.event.databinding.FragmentEventDetailsBinding
-import com.haroldadmin.vector.VectorFragment
 import kotlinx.android.synthetic.main.fragment_event_details.*
 
 
-class EventDetailsFragment : VectorFragment() {
+class EventDetailsFragment : Fragment() {
 
     private var event: Event by FragmentArgument()
 
-    private val epoxyController by lazy(LazyThreadSafetyMode.NONE) {
+    private val epoxyController: AsyncEpoxyController by lazy(LazyThreadSafetyMode.NONE) {
         simpleController {
             event.kindsCarousel.addTo(this)
             eventInfo {

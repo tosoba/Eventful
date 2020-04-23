@@ -4,46 +4,53 @@ import androidx.lifecycle.viewModelScope
 import com.example.core.usecase.DeleteEvent
 import com.example.core.usecase.IsEventSaved
 import com.example.core.usecase.SaveEvent
+import com.example.core.util.flatMapFirst
+import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.util.Data
+import com.example.coreandroid.util.Initial
 import com.example.coreandroid.util.LoadedSuccessfully
-import com.example.coreandroid.util.Loading
-import com.example.coreandroid.util.LoadingFailed
-import com.haroldadmin.vector.VectorViewModel
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.*
 
+@ExperimentalCoroutinesApi
+@FlowPreview
 class EventViewModel(
     initialState: EventState,
     private val isEventSaved: IsEventSaved,
     private val saveEvent: SaveEvent,
     private val deleteEvent: DeleteEvent
-) : VectorViewModel<EventState>(initialState) {
+) : BaseViewModel<EventIntent, EventState, EventSignal>(initialState) {
 
     init {
-        viewModelScope.launch {
-            isEventSaved(initialState.eventArg.id)
-                .map { Data(it, LoadedSuccessfully) }
-                .catch { emit(Data(false, LoadingFailed(it))) }
-                .collect {
-                    setState {
-                        if (it.status is LoadingFailed<*>)
-                            copy(isFavourite = isFavourite.copyWithError((it.status as LoadingFailed<*>).error))
-                        else copy(isFavourite = it)
+        merge(
+            intentsChannel.asFlow().processIntents(),
+            statesChannel.asFlow()
+                .map { it.event.id }
+                .distinctUntilChanged()
+                .flatMapLatest { isEventSaved(it) }
+                .map {
+                    state.run {
+                        if (isFavourite.status !is Initial)
+                            liveEvents.value = EventSignal.FavouriteStateToggled(it)
+                        copy(isFavourite = Data(it, LoadedSuccessfully))
                     }
                 }
-        }
+        ).onEach(statesChannel::send).launchIn(viewModelScope)
     }
 
-    fun toggleEventFavourite() = withState { state ->
-        if (state.isFavourite.status is Loading) return@withState
+    private fun Flow<EventIntent>.processIntents(): Flow<EventState> {
+        return filterIsInstance<ToggleFavourite>().processToggleFavouriteIntents()
+    }
 
-        setState { copy(isFavourite = isFavourite.copyWithLoadingInProgress) }
-
-        viewModelScope.launch {
-            if (state.isFavourite.data) deleteEvent(state.eventArg)
-            else saveEvent(state.eventArg)
+    //TODO: this fails eventually after a couple of toggles
+    private fun Flow<ToggleFavourite>.processToggleFavouriteIntents(): Flow<EventState> {
+        return flatMapFirst {
+            flowOf(state.run {
+                if (isFavourite.data) deleteEvent(event)
+                else saveEvent(event)
+                copy(isFavourite = isFavourite.copyWithLoadingInProgress)
+            })
         }
     }
 }

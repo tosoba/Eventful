@@ -57,8 +57,7 @@ class NearbyFragment : InjectableFragment() {
                 longClicked = View.OnLongClickListener {
                     lifecycleScope.launch {
                         viewModel.send(EventLongClicked(selectable.item))
-                    }
-                    true
+                    }.let { true }
                 }
             )
         }
