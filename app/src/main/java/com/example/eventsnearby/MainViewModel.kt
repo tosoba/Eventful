@@ -35,13 +35,14 @@ class MainViewModel(
         ).onEach(statesChannel::send).launchIn(viewModelScope)
     }
 
+    //TODO: this is a problem when getLocationAvailability emits and LocationStatus is Loading...
     private val locationAvailabilityReactionFlow: Flow<MainState>
         get() = getLocationAvailability()
             .filter {
                 val locationState = statesChannel.value.locationState
                 it && locationState.latLng == null && locationState.status !is LocationStatus.Loading
             }
-            .flatMapFirst { locationLoadingStates }
+            .flatMapFirst { locationLoadingStatesFlow }
 
     private val connectionReactionFlow: Flow<MainState>
         get() = getConnection().map { statesChannel.value.copy(isConnected = it) }
@@ -51,7 +52,7 @@ class MainViewModel(
         filterIsInstance<PermissionDenied>().processPermissionDeniedIntents()
     )
 
-    private val locationLoadingStates: Flow<MainState>
+    private val locationLoadingStatesFlow: Flow<MainState>
         get() = flow {
             val state = statesChannel.value
             emit(state.copy(locationState = state.locationState.copy(status = LocationStatus.Loading)))
@@ -59,10 +60,35 @@ class MainViewModel(
             emit(state.reduce(result))
         }
 
+    private fun Flow<ReloadLocation>.processReloadLocationIntents() { //TODO: either disable swipe refresh when event list is empty or use filterNot status is Loading
+        flatMapFirst {
+            flowOf(state.run {
+                copy(locationState = locationState.copy(status = LocationStatus.Initial))
+            }).onCompletion {
+                emitAll(reactiveLocationLoadingFlow)
+            }
+        }
+    }
+
+    //TODO: test this out
+    private fun Flow<LoadLocation>.reactiveProcessLoadLocationIntents(): Flow<MainState> = take(1)
+        .flatMapConcat { reactiveLocationLoadingFlow }
+
+    private val reactiveLocationLoadingFlow: Flow<MainState>
+        get() = getLocationAvailability()
+            .distinctUntilChanged()
+            .takeWhile { state.locationState.status !is LocationStatus.Found }
+            .flatMapConcat {
+                if (it) locationLoadingStatesFlow
+                else flowOf(state.run {
+                    copy(locationState = locationState.copy(status = LocationStatus.Disabled))
+                })
+            }
+
     private fun Flow<LoadLocation>.processLoadLocationIntents(): Flow<MainState> = filterNot {
         statesChannel.value.locationState.status is LocationStatus.Loading
     }.flatMapFirst {
-        locationLoadingStates
+        locationLoadingStatesFlow
     }
 
     private fun Flow<PermissionDenied>.processPermissionDeniedIntents(): Flow<MainState> = map {

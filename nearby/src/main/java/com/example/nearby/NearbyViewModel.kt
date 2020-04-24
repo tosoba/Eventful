@@ -84,7 +84,7 @@ class NearbyViewModel(
         get() = locationStateProvider.locationStateFlow
             .filter {
                 val state = statesChannel.value
-                state.events.data.isEmpty()
+                state.events.data.isEmpty() //TODO: this won't work with refreshing with SwipeRefreshLayout
             }
             .notNullLatLng
             .flatMapConcat { loadingEventsFlow(it) }

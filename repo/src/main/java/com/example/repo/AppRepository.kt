@@ -26,6 +26,7 @@ class AppRepository(
     private val rxLocation: RxLocation
 ) : IAppRepository {
 
+    //TODO: use either locationEnabled or isLocationAvailable -> decide which one is better
     override suspend fun usersLocation(): LocationResult = try {
         if (appContext.locationEnabled) rxLocation.currentLocation()?.let {
             LocationResult.Found(it.latLng)
