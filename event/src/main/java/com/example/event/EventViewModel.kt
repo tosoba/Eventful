@@ -12,6 +12,7 @@ import com.example.coreandroid.util.LoadedSuccessfully
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
 @FlowPreview
@@ -43,14 +44,15 @@ class EventViewModel(
         return filterIsInstance<ToggleFavourite>().processToggleFavouriteIntents()
     }
 
-    //TODO: this fails eventually after a couple of toggles
     private fun Flow<ToggleFavourite>.processToggleFavouriteIntents(): Flow<EventState> {
         return flatMapFirst {
-            flowOf(state.run {
-                if (isFavourite.data) deleteEvent(event)
-                else saveEvent(event)
-                copy(isFavourite = isFavourite.copyWithLoadingInProgress)
-            })
+            state.run {
+                viewModelScope.launch {
+                    if (isFavourite.data) deleteEvent(event)
+                    else saveEvent(event)
+                }
+                flowOf(copy(isFavourite = isFavourite.copyWithLoadingInProgress))
+            }
         }
     }
 }
