@@ -37,8 +37,10 @@ fun <T> T.handleSnackbarState(
                     snackbar?.setText(newState.text)
                 } else {
                     snackbar?.dismiss()
-                    snackbar = Snackbar.make(view, newState.text, newState.length)
-                        .apply(Snackbar::show)
+                    snackbar = Snackbar.make(view, newState.text, newState.length).apply {
+                        newState.action?.let { setAction(it.msg, it.onClickListener) }
+                        show()
+                    }
                 }
             }
             is SnackbarState.Hidden -> {
@@ -62,8 +64,11 @@ fun <T> T.handleSnackbarState(
 sealed class SnackbarState {
     class Text(
         val text: String,
-        @Snackbar.Duration val length: Int = Snackbar.LENGTH_INDEFINITE
+        @Snackbar.Duration val length: Int = Snackbar.LENGTH_INDEFINITE,
+        val action: SnackbarAction? = null
     ) : SnackbarState()
 
     object Hidden : SnackbarState()
 }
+
+class SnackbarAction(val msg: String, val onClickListener: View.OnClickListener)

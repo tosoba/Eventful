@@ -13,6 +13,7 @@ import com.example.coreandroid.provider.LocationStateProvider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 //TODO: maybe observe permissions as well?
 
@@ -34,8 +35,16 @@ class MainViewModel(
         ).onEach(statesChannel::send).launchIn(viewModelScope)
     }
 
+    override val isConnectedFlow: Flow<Boolean>
+        get() = statesChannel.asFlow().map { it.isConnected }
+
+    override val locationStateFlow: Flow<LocationState>
+        get() = statesChannel.asFlow().map { it.locationState }
+
     private val connectionReactionFlow: Flow<MainState>
         get() = getConnection().map { state.copy(isConnected = it) }
+
+    override fun reloadLocation() = viewModelScope.launch { send(ReloadLocation) }.let { Unit }
 
     private fun Flow<MainIntent>.processIntents(): Flow<MainState> = merge(
         filterIsInstance<LoadLocation>().processLoadLocationIntents(),
@@ -81,10 +90,4 @@ class MainViewModel(
     private fun Flow<PermissionDenied>.processPermissionDeniedIntents(): Flow<MainState> = map {
         state.run { copy(locationState = locationState.copy(status = LocationStatus.PermissionDenied)) }
     }
-
-    override val isConnectedFlow: Flow<Boolean>
-        get() = statesChannel.asFlow().map { it.isConnected }
-
-    override val locationStateFlow: Flow<LocationState>
-        get() = statesChannel.asFlow().map { it.locationState }
 }

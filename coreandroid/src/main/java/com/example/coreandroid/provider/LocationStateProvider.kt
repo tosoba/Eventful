@@ -5,4 +5,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface LocationStateProvider {
     val locationStateFlow: Flow<LocationState>
+    fun reloadLocation()
 }

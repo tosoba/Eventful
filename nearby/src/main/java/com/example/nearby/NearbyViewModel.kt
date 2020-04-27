@@ -1,5 +1,6 @@
 package com.example.nearby
 
+import android.view.View
 import androidx.lifecycle.viewModelScope
 import com.example.core.model.app.LatLng
 import com.example.core.model.app.LocationState
@@ -7,6 +8,7 @@ import com.example.core.model.app.LocationStatus
 import com.example.core.usecase.GetNearbyEvents
 import com.example.core.usecase.SaveEvents
 import com.example.coreandroid.base.BaseViewModel
+import com.example.coreandroid.controller.SnackbarAction
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.provider.ConnectivityStateProvider
 import com.example.coreandroid.provider.LocationStateProvider
@@ -70,9 +72,14 @@ class NearbyViewModel(
                     LocationStatus.Loading -> state.copy(
                         snackbarState = SnackbarState.Text("Loading location...")
                     )
-                    //TODO: add retry button (or smth like that) in this snackbar -> send ReloadLocation intent to MainVM
                     is LocationStatus.Error -> state.copy(
-                        snackbarState = SnackbarState.Text("Unable to load location - error occurred")
+                        snackbarState = SnackbarState.Text(
+                            "Unable to load location - error occurred",
+                            action = SnackbarAction(
+                                "Retry",
+                                View.OnClickListener { locationStateProvider.reloadLocation() }
+                            )
+                        )
                     )
                     else -> null
                 }
