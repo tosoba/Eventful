@@ -9,7 +9,7 @@ sealed class LocationResult {
 class FailedToFindLocationException : Throwable()
 
 sealed class LocationStatus {
-    object Unknown : LocationStatus()
+    object Initial : LocationStatus()
     object PermissionDenied : LocationStatus()
     object Disabled : LocationStatus()
     object Loading : LocationStatus()
@@ -19,5 +19,5 @@ sealed class LocationStatus {
 
 data class LocationState(
     val latLng: LatLng? = null,
-    val status: LocationStatus = LocationStatus.Unknown
+    val status: LocationStatus = LocationStatus.Initial
 )
