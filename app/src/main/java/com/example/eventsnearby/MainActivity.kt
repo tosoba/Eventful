@@ -13,25 +13,19 @@ import com.markodevcic.peko.rationale.AlertDialogPermissionRationale
 import com.markodevcic.peko.requestPermissionsAsync
 import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 
-class MainActivity :
-    DaggerAppCompatActivity(),
-    DrawerLayoutController,
-    CoroutineScope {
+@FlowPreview
+@ExperimentalCoroutinesApi
+class MainActivity : DaggerAppCompatActivity(), DrawerLayoutController, CoroutineScope {
 
     private val supervisorJob = CompletableDeferred<Any>()
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + supervisorJob
+    override val coroutineContext: CoroutineContext get() = Dispatchers.Main + supervisorJob
 
     override val drawerLayout: DrawerLayout? get() = main_drawer_layout
-
     private val drawerNavigationItemSelectedListener =
         NavigationView.OnNavigationItemSelectedListener { item ->
             when (item.itemId) {
@@ -62,10 +56,7 @@ class MainActivity :
         super.onDestroy()
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        onBackPressed()
-        return true
-    }
+    override fun onSupportNavigateUp(): Boolean = onBackPressed().let { true }
 
     override fun onBackPressed() {
         if (mainNavigationFragment?.onBackPressed() == true) return

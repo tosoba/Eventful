@@ -30,51 +30,43 @@ class MainViewModel(
     init {
         merge(
             intentsChannel.asFlow().processIntents(),
-            locationAvailabilityReactionFlow,
             connectionReactionFlow
         ).onEach(statesChannel::send).launchIn(viewModelScope)
     }
 
-    //TODO: this is a problem when getLocationAvailability emits and LocationStatus is Loading...
-    private val locationAvailabilityReactionFlow: Flow<MainState>
-        get() = getLocationAvailability()
-            .filter {
-                val locationState = statesChannel.value.locationState
-                it && locationState.latLng == null && locationState.status !is LocationStatus.Loading
-            }
-            .flatMapFirst { locationLoadingStatesFlow }
-
     private val connectionReactionFlow: Flow<MainState>
-        get() = getConnection().map { statesChannel.value.copy(isConnected = it) }
+        get() = getConnection().map { state.copy(isConnected = it) }
 
     private fun Flow<MainIntent>.processIntents(): Flow<MainState> = merge(
         filterIsInstance<LoadLocation>().processLoadLocationIntents(),
+        filterIsInstance<ReloadLocation>().processReloadLocationIntents(),
         filterIsInstance<PermissionDenied>().processPermissionDeniedIntents()
     )
 
     private val locationLoadingStatesFlow: Flow<MainState>
         get() = flow {
-            val state = statesChannel.value
-            emit(state.copy(locationState = state.locationState.copy(status = LocationStatus.Loading)))
-            val result = getLocation()
-            emit(state.reduce(result))
+            state.run {
+                emit(copy(locationState = locationState.copy(status = LocationStatus.Loading)))
+                val result = getLocation()
+                emit(reduce(result))
+            }
         }
 
-    private fun Flow<ReloadLocation>.processReloadLocationIntents() { //TODO: either disable swipe refresh when event list is empty or use filterNot status is Loading
-        flatMapFirst {
+    //TODO: either disable swipe refresh when event list is empty or use filterNot status is Loading
+    private fun Flow<ReloadLocation>.processReloadLocationIntents(): Flow<MainState> {
+        return flatMapFirst {
             flowOf(state.run {
                 copy(locationState = locationState.copy(status = LocationStatus.Initial))
             }).onCompletion {
-                emitAll(reactiveLocationLoadingFlow)
+                emitAll(locationLoadingFlow)
             }
         }
     }
 
-    //TODO: test this out
-    private fun Flow<LoadLocation>.reactiveProcessLoadLocationIntents(): Flow<MainState> = take(1)
-        .flatMapConcat { reactiveLocationLoadingFlow }
+    private fun Flow<LoadLocation>.processLoadLocationIntents(): Flow<MainState> = take(1)
+        .flatMapConcat { locationLoadingFlow }
 
-    private val reactiveLocationLoadingFlow: Flow<MainState>
+    private val locationLoadingFlow: Flow<MainState>
         get() = getLocationAvailability()
             .distinctUntilChanged()
             .takeWhile { state.locationState.status !is LocationStatus.Found }
@@ -85,15 +77,9 @@ class MainViewModel(
                 })
             }
 
-    private fun Flow<LoadLocation>.processLoadLocationIntents(): Flow<MainState> = filterNot {
-        statesChannel.value.locationState.status is LocationStatus.Loading
-    }.flatMapFirst {
-        locationLoadingStatesFlow
-    }
-
+    //TODO: test this
     private fun Flow<PermissionDenied>.processPermissionDeniedIntents(): Flow<MainState> = map {
-        val state = statesChannel.value
-        state.copy(locationState = state.locationState.copy(status = LocationStatus.PermissionDenied))
+        state.run { copy(locationState = locationState.copy(status = LocationStatus.PermissionDenied)) }
     }
 
     override val isConnectedFlow: Flow<Boolean>

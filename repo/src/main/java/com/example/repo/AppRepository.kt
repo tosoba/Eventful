@@ -7,7 +7,6 @@ import com.example.core.repo.IAppRepository
 import com.example.coreandroid.util.ext.currentLocation
 import com.example.coreandroid.util.ext.isLocationAvailable
 import com.example.coreandroid.util.ext.latLng
-import com.example.coreandroid.util.ext.locationEnabled
 import com.github.pwittchen.reactivenetwork.library.rx2.ReactiveNetwork
 import com.patloew.rxlocation.RxLocation
 import io.reactivex.Observable
@@ -26,9 +25,8 @@ class AppRepository(
     private val rxLocation: RxLocation
 ) : IAppRepository {
 
-    //TODO: use either locationEnabled or isLocationAvailable -> decide which one is better
     override suspend fun usersLocation(): LocationResult = try {
-        if (appContext.locationEnabled) rxLocation.currentLocation()?.let {
+        if (appContext.isLocationAvailable) rxLocation.currentLocation()?.let {
             LocationResult.Found(it.latLng)
         } ?: run {
             LocationResult.Error(FailedToFindLocationException())

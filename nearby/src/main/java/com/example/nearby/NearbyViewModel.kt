@@ -55,7 +55,7 @@ class NearbyViewModel(
             latLng
         }.flatMapConcat { loadingEventsFlow(it) }
 
-    private val locationSnackbarFlow: Flow<NearbyState>
+    private val locationSnackbarFlow: Flow<NearbyState> //TODO: zip this with connection status?
         get() = locationStateProvider.locationStateFlow
             .filter { it.latLng == null }
             .map { (_, status) ->
@@ -70,8 +70,9 @@ class NearbyViewModel(
                     LocationStatus.Loading -> state.copy(
                         snackbarState = SnackbarState.Text("Loading location...")
                     )
+                    //TODO: add retry button (or smth like that) in this snackbar -> send ReloadLocation intent to MainVM
                     is LocationStatus.Error -> state.copy(
-                        snackbarState = SnackbarState.Text("Unable to load location - error occurred") //TODO: this appears before location is available...
+                        snackbarState = SnackbarState.Text("Unable to load location - error occurred")
                     )
                     else -> null
                 }
