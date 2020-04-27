@@ -61,27 +61,28 @@ class NearbyViewModel(
         get() = locationStateProvider.locationStateFlow
             .filter { it.latLng == null }
             .map { (_, status) ->
-                val state = statesChannel.value
-                when (status) {
-                    LocationStatus.PermissionDenied -> state.copy(
-                        snackbarState = SnackbarState.Text("No location permission")
-                    )
-                    LocationStatus.Disabled -> state.copy(
-                        snackbarState = SnackbarState.Text("Location disabled")
-                    )
-                    LocationStatus.Loading -> state.copy(
-                        snackbarState = SnackbarState.Text("Loading location...")
-                    )
-                    is LocationStatus.Error -> state.copy(
-                        snackbarState = SnackbarState.Text(
-                            "Unable to load location - error occurred",
-                            action = SnackbarAction(
-                                "Retry",
-                                View.OnClickListener { locationStateProvider.reloadLocation() }
+                state.run {
+                    when (status) {
+                        LocationStatus.PermissionDenied -> copy(
+                            snackbarState = SnackbarState.Text("No location permission")
+                        )
+                        LocationStatus.Disabled -> copy(
+                            snackbarState = SnackbarState.Text("Location disabled")
+                        )
+                        LocationStatus.Loading -> copy(
+                            snackbarState = SnackbarState.Text("Loading location...")
+                        )
+                        is LocationStatus.Error -> copy(
+                            snackbarState = SnackbarState.Text(
+                                "Unable to load location - error occurred",
+                                action = SnackbarAction(
+                                    "Retry",
+                                    View.OnClickListener { locationStateProvider.reloadLocation() }
+                                )
                             )
                         )
-                    )
-                    else -> null
+                        else -> null
+                    }
                 }
             }
             .filterNotNull()
@@ -90,25 +91,23 @@ class NearbyViewModel(
 
     private val loadEventsFlow: Flow<NearbyState>
         get() = locationStateProvider.locationStateFlow
-            .filter {
-                val state = statesChannel.value
-                state.events.data.isEmpty() //TODO: this won't work with refreshing with SwipeRefreshLayout
-            }
+            .filter { state.events.data.isEmpty() }//TODO: this won't work with refreshing with SwipeRefreshLayout
             .notNullLatLng
             .flatMapConcat { loadingEventsFlow(it) }
 
     private fun loadingEventsFlow(latLng: LatLng): Flow<NearbyState> = flow {
-        val state = statesChannel.value
-        emit(
-            state.copy(
-                events = state.events.copyWithLoadingInProgress,
-                snackbarState = SnackbarState.Text("Loading nearby events...")
+        state.run {
+            emit(
+                copy(
+                    events = events.copyWithLoadingInProgress,
+                    snackbarState = SnackbarState.Text("Loading nearby events...")
+                )
             )
-        )
-        val result = withContext(ioDispatcher) {
-            getNearbyEvents(latLng.lat, latLng.lng, state.events.offset)
+            val result = withContext(ioDispatcher) {
+                getNearbyEvents(latLng.lat, latLng.lng, events.offset)
+            }
+            emit(reduce(result))
         }
-        emit(state.reduce(result))
     }
 
     private fun Flow<EventListScrolledToEnd>.processScrolledToEndIntents() = filterNot {
@@ -120,14 +119,13 @@ class NearbyViewModel(
 
     private fun Flow<AddToFavouritesClicked>.processAddToFavouritesIntents(): Flow<NearbyState> {
         return map {
-            val state = statesChannel.value
-            withContext(ioDispatcher) {
-                saveEvents(state.events.data.filter { it.selected }.map { it.item })
+            state.run {
+                withContext(ioDispatcher) {
+                    saveEvents(events.data.filter { it.selected }.map { it.item })
+                }
+                liveEvents.value = NearbySignal.FavouritesSaved
+                copy(events = events.transformItems { it.copy(selected = false) })
             }
-            liveEvents.value = NearbySignal.FavouritesSaved
-            state.copy(
-                events = state.events.transformItems { it.copy(selected = false) }
-            )
         }
     }
 }
