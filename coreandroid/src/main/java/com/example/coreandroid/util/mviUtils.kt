@@ -18,16 +18,12 @@ interface EventSelectionToggledIntent {
 
 fun <I : ClearEventSelectionIntent, S : SelectableEventsState<S>> Flow<I>.processClearSelectionIntents(
     currentState: () -> S
-): Flow<S> = map {
-    val state = currentState()
-    state.copyWithTransformedEvents { it.copy(selected = false) }
-}
+): Flow<S> = map { currentState().copyWithTransformedEvents { it.copy(selected = false) } }
 
 fun <I : EventSelectionToggledIntent, S : SelectableEventsState<S>> Flow<I>.processEventLongClickedIntents(
     currentState: () -> S
 ): Flow<S> = map { intent ->
-    val state = currentState()
-    state.copyWithTransformedEvents {
+    currentState().copyWithTransformedEvents {
         if (it.item.id == intent.event.id) Selectable(intent.event, !it.selected) else it
     }
 }

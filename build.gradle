@@ -29,7 +29,6 @@ buildscript {
         retrofitVersion = '2.5.0'
         retrofitConverterGsonVersion = '2.4.0'
 
-        vectorVersion = '0.4.2'
         networkResponseAdapterVersion = '2.1.0'
 
         playServicesMapsVersion = '16.1.0'

@@ -64,7 +64,6 @@ dependencies {
     implementation "androidx.core:core-ktx:$coreKtxVersion"
     api "com.google.guava:guava:$guavaVersion"
     implementation "com.google.android.gms:play-services-maps:$playServicesMapsVersion"
-    implementation "com.github.haroldadmin:Vector:$vectorVersion"
 
     implementation 'com.github.satoshun.coroutinebinding:coroutinebinding-appcompat:1.0.0-rc2'
     implementation 'com.github.satoshun.coroutinebinding:coroutinebinding-core:1.0.0-rc2'

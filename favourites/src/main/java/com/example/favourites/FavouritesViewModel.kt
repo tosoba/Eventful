@@ -27,7 +27,6 @@ class FavouritesViewModel(
             .onStart { emit(LoadFavourites) }
             .onEach { intent ->
                 if (intent is RemoveFromFavouritesClicked) {
-                    val state = statesChannel.value
                     withContext(ioDispatcher) {
                         deleteEvents(state.events.data.filter { it.selected }.map { it.item })
                     }
@@ -56,15 +55,16 @@ class FavouritesViewModel(
                     emitAll(getSavedEvents(statesChannel.value.limit + limitIncrement)
                         .flowOn(ioDispatcher)
                         .map { events ->
-                            val state = statesChannel.value
-                            state.copy(
-                                events = DataList(
-                                    data = events.map { Selectable(Event(it)) },
-                                    status = LoadedSuccessfully
-                                ),
-                                limit = events.size,
-                                limitHit = state.events.data.size == events.size
-                            )
+                            state.run {
+                                copy(
+                                    events = DataList(
+                                        data = events.map { Selectable(Event(it)) },
+                                        status = LoadedSuccessfully
+                                    ),
+                                    limit = events.size,
+                                    limitHit = this.events.data.size == events.size
+                                )
+                            }
                         }
                     )
                 }

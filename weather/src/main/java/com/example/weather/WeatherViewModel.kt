@@ -17,24 +17,25 @@ import kotlinx.coroutines.withContext
 class WeatherViewModel(
     private val getForecast: GetForecast,
     private val ioDispatcher: CoroutineDispatcher,
-    initialState: WeatherState = WeatherState.INITIAL
+    initialState: WeatherState = WeatherState()
 ) : BaseViewModel<WeatherIntent, WeatherState, Unit>(initialState) {
     init {
         intentsChannel.asFlow()
             .filterIsInstance<LoadWeather>()
             .flatMapFirst {
                 flow<WeatherState> {
-                    val state = statesChannel.value
-                    emit(state.copy(forecast = state.forecast.copyWithLoadingInProgress))
-                    when (val result = withContext(ioDispatcher) {
-                        getForecast(lat = it.latLng.latitude, lon = it.latLng.longitude)
-                    }) {
-                        is Resource.Success -> state.copy(
-                            forecast = state.forecast.copyWithNewValue(result.data)
-                        )
-                        is Resource.Error<Forecast, *> -> state.copy(
-                            forecast = state.forecast.copyWithError(result.error)
-                        )
+                    state.run {
+                        emit(copy(forecast = forecast.copyWithLoadingInProgress))
+                        when (val result = withContext(ioDispatcher) {
+                            getForecast(lat = it.latLng.latitude, lon = it.latLng.longitude)
+                        }) {
+                            is Resource.Success -> copy(
+                                forecast = forecast.copyWithNewValue(result.data)
+                            )
+                            is Resource.Error<Forecast, *> -> copy(
+                                forecast = forecast.copyWithError(result.error)
+                            )
+                        }
                     }
                 }
             }

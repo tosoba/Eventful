@@ -23,11 +23,7 @@ internal fun SearchState.reduce(
 ): SearchState = when (resource) {
     is Resource.Success -> copy(
         events = PagedDataList(
-            resource.data.items.map {
-                Event(
-                    it
-                )
-            },
+            resource.data.items.map { Event(it) },
             LoadedSuccessfully,
             resource.data.currentPage + 1,
             resource.data.totalPages

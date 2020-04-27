@@ -55,7 +55,6 @@ dependencies {
     implementation "com.github.hadilq.liveevent:liveevent:$liveEventVersion"
 
     implementation "com.google.android.gms:play-services-maps:$playServicesMapsVersion"
-    implementation "com.github.haroldadmin:Vector:$vectorVersion"
 
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test:runner:$testRunnerVersion"

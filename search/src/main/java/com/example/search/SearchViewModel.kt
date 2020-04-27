@@ -33,9 +33,10 @@ class SearchViewModel(
             val state = statesChannel.value
             it && state.events.loadingFailed && state.events.data.isEmpty()
         }.map {
-            val state = statesChannel.value
-            val resource = withContext(ioDispatcher) { searchEvents(state.searchText) }
-            statesChannel.value.reduce(resource)
+            state.run {
+                val resource = withContext(ioDispatcher) { searchEvents(searchText) }
+                reduce(resource)
+            }
         }
 
     private fun Flow<SearchIntent>.processIntents(): Flow<SearchState> = merge(
@@ -53,7 +54,7 @@ class SearchViewModel(
                 val suggestions = viewModelScope.async {
                     withContext(ioDispatcher) { getSearchSuggestions(text) }
                 }
-                statesChannel.value.reduce(resource.await(), suggestions.await())
+                state.reduce(resource.await(), suggestions.await())
             }
     }
 
