@@ -8,6 +8,7 @@ import javax.inject.Inject
 
 class SearchEvents @Inject constructor(private val eventRepository: IEventRepository) {
     suspend operator fun invoke(
-        searchText: String
-    ): Resource<PagedResult<IEvent>> = eventRepository.searchEvents(searchText)
+        searchText: String,
+        offset: Int? = null
+    ): Resource<PagedResult<IEvent>> = eventRepository.searchEvents(searchText, offset)
 }

@@ -14,7 +14,7 @@ interface IEventRepository {
         offset: Int?
     ): Resource<PagedResult<IEvent>>
 
-    suspend fun searchEvents(searchText: String): Resource<PagedResult<IEvent>>
+    suspend fun searchEvents(searchText: String, offset: Int?): Resource<PagedResult<IEvent>>
 
     suspend fun getSearchSuggestions(searchText: String): List<SearchSuggestion>
 

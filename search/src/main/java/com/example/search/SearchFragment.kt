@@ -1,15 +1,18 @@
 package com.example.search
 
 import android.app.SearchManager
-import android.database.MatrixCursor
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat.getSystemService
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.example.coreandroid.base.InjectableFragment
+import com.example.coreandroid.controller.EventsSelectionActionModeController
+import com.example.coreandroid.controller.eventsSelectionActionModeController
 import com.example.coreandroid.navigation.IFragmentFactory
 import com.example.coreandroid.ticketmaster.Event
+import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.EpoxyThreads
 import com.example.coreandroid.util.ext.*
 import com.example.coreandroid.util.itemListController
@@ -19,7 +22,10 @@ import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.fragment_search.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import reactivecircus.flowbinding.appcompat.QueryTextEvent
 import reactivecircus.flowbinding.appcompat.queryTextEvents
@@ -45,15 +51,38 @@ class SearchFragment : InjectableFragment() {
     }
 
     private val epoxyController by lazy(LazyThreadSafetyMode.NONE) {
-        itemListController<Event>(
+        itemListController<Selectable<Event>>(
             epoxyThreads,
             onScrollListener = eventsScrollListener,
             emptyText = "No events found"
-        ) { event ->
-            event.listItem(View.OnClickListener {
-                navigationFragment?.showFragment(fragmentFactory.eventFragment(event))
-            })
+        ) { selectable ->
+            selectable.listItem(
+                clicked = View.OnClickListener {
+                    navigationFragment?.showFragment(fragmentFactory.eventFragment(selectable.item))
+                },
+                longClicked = View.OnLongClickListener {
+                    lifecycleScope.launch {
+                        viewModel.send(EventLongClicked(selectable.item))
+                    }.let { true }
+                }
+            )
         }
+    }
+
+    private val actionModeController: EventsSelectionActionModeController by lazy(
+        LazyThreadSafetyMode.NONE
+    ) {
+        eventsSelectionActionModeController(
+            menuId = R.menu.search_events_selection_menu,
+            itemClickedCallbacks = mapOf(
+                R.id.search_action_add_favourite to {
+                    lifecycleScope.launch { viewModel.send(AddToFavouritesClicked) }.let { Unit }
+                }
+            ),
+            onDestroyActionMode = {
+                lifecycleScope.launch { viewModel.send(ClearSelectionClicked) }.let { Unit }
+            }
+        )
     }
 
     private val searchSuggestionsAdapter: SearchSuggestionsAdapter by lazy(LazyThreadSafetyMode.NONE) {
@@ -75,31 +104,18 @@ class SearchFragment : InjectableFragment() {
         super.onResume()
         activity?.invalidateOptionsMenu()
 
-        viewModel.states
-            .map { it.events }
-            .distinctUntilChanged()
-            .onEach { epoxyController.setData(it) }
-            .launchIn(lifecycleScope)
-
-        viewModel.states
-            .map { it.snackbarState }
-            .distinctUntilChanged()
-            .onEach { snackbarController?.transitionToSnackbarState(it) }
-            .launchIn(lifecycleScope)
-
-        viewModel.states.map { it.searchSuggestions to it.searchText }
-            .filter { (suggestions, _) -> suggestions.isNotEmpty() }
-            .distinctUntilChanged()
-            .onEach { (suggestions, searchText) ->
-                searchSuggestionsAdapter.swapCursor(
-                    MatrixCursor(SearchSuggestionsAdapter.COLUMN_NAMES).apply {
-                        suggestions.filter { searchText != it.searchText }
-                            .distinctBy { it.searchText }
-                            .forEach { addRow(arrayOf(it.id, it.searchText, it.timestampMs)) }
-                    }
-                )
+        viewModel.updates().onEach {
+            when (it) {
+                is UpdateEvents -> epoxyController.setData(it.events)
+                is UpdateSnackbar -> snackbarController?.transitionToSnackbarState(it.state)
+                is SwapCursor -> searchSuggestionsAdapter.swapCursor(it.cursor)
+                is UpdateActionMode -> actionModeController.update(it.numberOfSelectedEvents)
             }
-            .launchIn(lifecycleScope)
+        }.launchIn(lifecycleScope)
+
+        viewModel.events.observe(this, Observer {
+            if (it is SearchSignal.FavouritesSaved) actionModeController.finish(false)
+        })
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

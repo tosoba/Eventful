@@ -110,12 +110,14 @@ class NearbyViewModel(
         }
     }
 
-    private fun Flow<EventListScrolledToEnd>.processScrolledToEndIntents() = filterNot {
-        val state = statesChannel.value
-        state.events.status is Loading || state.events.offset >= state.events.totalItems
-    }.zip(locationStateProvider.locationStateFlow.notNullLatLng) { _, latLng ->
-        latLng
-    }.flatMapConcat { loadingEventsFlow(it) }
+    private fun Flow<EventListScrolledToEnd>.processScrolledToEndIntents(): Flow<NearbyState> {
+        return filterNot {
+            val state = statesChannel.value
+            state.events.status is Loading || state.events.offset >= state.events.totalItems
+        }.zip(locationStateProvider.locationStateFlow.notNullLatLng) { _, latLng ->
+            latLng
+        }.flatMapConcat { loadingEventsFlow(it) }
+    }
 
     private fun Flow<AddToFavouritesClicked>.processAddToFavouritesIntents(): Flow<NearbyState> {
         return map {
@@ -124,7 +126,7 @@ class NearbyViewModel(
                     saveEvents(events.data.filter { it.selected }.map { it.item })
                 }
                 liveEvents.value = NearbySignal.FavouritesSaved
-                copy(events = events.transformItems { it.copy(selected = false) })
+                copy(events = events.transformItems { it.copy(selected = false) }) //TODO: snackbar state with info how many added
             }
         }
     }

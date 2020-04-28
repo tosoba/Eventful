@@ -2,12 +2,15 @@ package com.example.search
 
 import androidx.lifecycle.viewModelScope
 import com.example.core.usecase.GetSeachSuggestions
+import com.example.core.usecase.SaveEvents
 import com.example.core.usecase.SaveSuggestion
 import com.example.core.usecase.SearchEvents
 import com.example.core.util.flatMapFirst
 import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.provider.ConnectivityStateProvider
 import com.example.coreandroid.util.Loading
+import com.example.coreandroid.util.processClearSelectionIntents
+import com.example.coreandroid.util.processEventLongClickedIntents
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
@@ -15,12 +18,13 @@ import kotlinx.coroutines.flow.*
 @FlowPreview
 class SearchViewModel(
     private val searchEvents: SearchEvents,
+    private val saveEvents: SaveEvents,
     private val getSearchSuggestions: GetSeachSuggestions,
     private val saveSuggestion: SaveSuggestion,
     private val connectivityStateProvider: ConnectivityStateProvider,
     private val ioDispatcher: CoroutineDispatcher,
     initialState: SearchState = SearchState()
-) : BaseViewModel<SearchIntent, SearchState, Unit>(initialState) {
+) : BaseViewModel<SearchIntent, SearchState, SearchSignal>(initialState) {
 
     init {
         merge(intentsChannel.asFlow().processIntents(), connectivityReactionFlow)
@@ -41,7 +45,10 @@ class SearchViewModel(
 
     private fun Flow<SearchIntent>.processIntents(): Flow<SearchState> = merge(
         filterIsInstance<NewSearch>().processNewSearchIntents(),
-        filterIsInstance<LoadMoreResults>().processLoadMoreResultsIntents()
+        filterIsInstance<LoadMoreResults>().processLoadMoreResultsIntents(),
+        filterIsInstance<ClearSelectionClicked>().processClearSelectionIntents { state },
+        filterIsInstance<EventLongClicked>().processEventLongClickedIntents { state },
+        filterIsInstance<AddToFavouritesClicked>().processAddToFavouritesIntents()
     )
 
     private fun Flow<NewSearch>.processNewSearchIntents(): Flow<SearchState> {
@@ -60,11 +67,23 @@ class SearchViewModel(
 
     private fun Flow<LoadMoreResults>.processLoadMoreResultsIntents(): Flow<SearchState> {
         return filterNot {
-            val state = statesChannel.value
-            state.events.status is Loading || state.events.offset >= state.events.totalItems
+            state.run { events.status is Loading || events.offset >= events.totalItems }
         }.flatMapFirst {
-            flowOf(searchEvents(statesChannel.value.searchText))
-                .map { statesChannel.value.reduce(it) }
+            state.run {
+                flowOf(searchEvents(searchText, events.offset)).map { reduce(it) }
+            }
+        }
+    }
+
+    private fun Flow<AddToFavouritesClicked>.processAddToFavouritesIntents(): Flow<SearchState> {
+        return map {
+            state.run {
+                withContext(ioDispatcher) {
+                    saveEvents(events.data.filter { it.selected }.map { it.item })
+                }
+                liveEvents.value = SearchSignal.FavouritesSaved
+                copy(events = events.transformItems { it.copy(selected = false) })
+            }
         }
     }
 }

@@ -33,7 +33,8 @@ class EventRepository(
     ).await().asResource
 
     override suspend fun searchEvents(
-        searchText: String
+        searchText: String,
+        offset: Int?
     ): Resource<PagedResult<IEvent>> = ticketMasterApi.searchEvents(keyword = searchText)
         .await()
         .asResource
