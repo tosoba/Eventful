@@ -49,10 +49,10 @@ class FavouritesViewModel(
             val state = statesChannel.value
             state.limitHit || state.events.status is Loading
         }.flatMapLatest {
-            val outerState = statesChannel.value
+            val outerState = state
             flowOf(outerState.copy(events = outerState.events.copyWithLoadingInProgress))
                 .onCompletion {
-                    emitAll(getSavedEvents(statesChannel.value.limit + limitIncrement)
+                    emitAll(getSavedEvents(state.limit + limitIncrement)
                         .flowOn(ioDispatcher)
                         .map { events ->
                             state.run {
