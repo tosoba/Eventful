@@ -5,7 +5,6 @@ import android.view.*
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.example.coreandroid.base.InjectableFragment
-import com.example.coreandroid.controller.EventsSelectionActionModeController
 import com.example.coreandroid.controller.eventsSelectionActionModeController
 import com.example.coreandroid.navigation.IFragmentFactory
 import com.example.coreandroid.ticketmaster.Event
@@ -16,7 +15,7 @@ import com.example.coreandroid.util.ext.navigationFragment
 import com.example.coreandroid.util.ext.onCreateControllerView
 import com.example.coreandroid.util.ext.saveScrollPosition
 import com.example.coreandroid.util.itemListController
-import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
+import com.example.coreandroid.view.InfiniteRecyclerViewScrollListener
 import com.example.coreandroid.view.epoxy.listItem
 import kotlinx.android.synthetic.main.fragment_favourites.*
 import kotlinx.android.synthetic.main.fragment_favourites.view.*
@@ -42,10 +41,10 @@ class FavouritesFragment : InjectableFragment() {
     @Inject
     internal lateinit var epoxyThreads: EpoxyThreads
 
-    private val eventsScrollListener: EndlessRecyclerViewScrollListener by lazy(LazyThreadSafetyMode.NONE) {
-        EndlessRecyclerViewScrollListener(loadMore = {
+    private val eventsScrollListener by lazy(LazyThreadSafetyMode.NONE) {
+        InfiniteRecyclerViewScrollListener {
             lifecycleScope.launch { viewModel.send(LoadFavourites) }
-        })
+        }
     }
 
     private val epoxyController by lazy(LazyThreadSafetyMode.NONE) {
@@ -66,9 +65,7 @@ class FavouritesFragment : InjectableFragment() {
         }
     }
 
-    private val actionModeController: EventsSelectionActionModeController by lazy(
-        LazyThreadSafetyMode.NONE
-    ) {
+    private val actionModeController by lazy(LazyThreadSafetyMode.NONE) {
         eventsSelectionActionModeController(
             menuId = R.menu.favourites_events_selection_menu,
             itemClickedCallbacks = mapOf(
@@ -92,8 +89,7 @@ class FavouritesFragment : InjectableFragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_favourites, container, false).apply {
         this.favourite_events_recycler_view.onCreateControllerView(
-            epoxyController,
-            savedInstanceState
+            epoxyController, savedInstanceState
         )
     }
 
@@ -104,7 +100,10 @@ class FavouritesFragment : InjectableFragment() {
         viewModel.states
             .map { it.events }
             .distinctUntilChanged()
-            .onEach { epoxyController.setData(it) }
+            .onEach {
+                epoxyController.setData(it)
+                if (it.loadingFailed) eventsScrollListener.onLoadingError()
+            }
             .launchIn(lifecycleScope)
 
         viewModel.states

@@ -10,7 +10,7 @@ import com.example.coreandroid.loadingIndicator
 import com.example.coreandroid.loadingMoreIndicator
 import com.example.coreandroid.noItemsText
 import com.example.coreandroid.reloadControl
-import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
+import com.example.coreandroid.view.InfiniteRecyclerViewScrollListener
 
 class EpoxyThreads(val builder: Handler, val differ: Handler)
 
@@ -43,15 +43,10 @@ open class NestedScrollingCarouselModel : CarouselModel_() {
 
 class InfiniteNestedScrollingCarouselModel(
     private val visibleThreshold: Int = 5,
-    private val minItemsBeforeLoadingMore: Int = 10,
     private val onLoadMore: () -> Unit
 ) : NestedScrollingCarouselModel() {
     override fun buildView(parent: ViewGroup): Carousel = super.buildView(parent).apply {
-        addOnScrollListener(
-            EndlessRecyclerViewScrollListener(visibleThreshold, minItemsBeforeLoadingMore) {
-                this@InfiniteNestedScrollingCarouselModel.onLoadMore()
-            }
-        )
+        addOnScrollListener(InfiniteRecyclerViewScrollListener(visibleThreshold, onLoadMore))
     }
 }
 
@@ -63,13 +58,11 @@ inline fun EpoxyController.carousel(modelInitializer: CarouselModelBuilder.() ->
 
 inline fun EpoxyController.infiniteCarousel(
     visibleThreshold: Int = 5,
-    minItemsBeforeLoadingMore: Int = 0,
     noinline onLoadMore: () -> Unit,
     modelInitializer: CarouselModelBuilder.() -> Unit
 ) {
-    InfiniteNestedScrollingCarouselModel(
-        visibleThreshold, minItemsBeforeLoadingMore, onLoadMore
-    ).apply(modelInitializer).addTo(this)
+    InfiniteNestedScrollingCarouselModel(visibleThreshold, onLoadMore)
+        .apply(modelInitializer).addTo(this)
 }
 
 inline fun <T> CarouselModelBuilder.withModelsFrom(

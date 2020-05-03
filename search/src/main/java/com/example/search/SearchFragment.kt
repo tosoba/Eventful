@@ -8,7 +8,6 @@ import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.example.coreandroid.base.InjectableFragment
-import com.example.coreandroid.controller.EventsSelectionActionModeController
 import com.example.coreandroid.controller.eventsSelectionActionModeController
 import com.example.coreandroid.navigation.IFragmentFactory
 import com.example.coreandroid.ticketmaster.Event
@@ -16,7 +15,7 @@ import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.EpoxyThreads
 import com.example.coreandroid.util.ext.*
 import com.example.coreandroid.util.itemListController
-import com.example.coreandroid.view.EndlessRecyclerViewScrollListener
+import com.example.coreandroid.view.InfiniteRecyclerViewScrollListener
 import com.example.coreandroid.view.epoxy.listItem
 import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.fragment_search.view.*
@@ -44,8 +43,8 @@ class SearchFragment : InjectableFragment() {
     @Inject
     internal lateinit var epoxyThreads: EpoxyThreads
 
-    private val eventsScrollListener: EndlessRecyclerViewScrollListener by lazy(LazyThreadSafetyMode.NONE) {
-        EndlessRecyclerViewScrollListener {
+    private val eventsScrollListener by lazy(LazyThreadSafetyMode.NONE) {
+        InfiniteRecyclerViewScrollListener {
             lifecycleScope.launch { viewModel.send(LoadMoreResults) }
         }
     }
@@ -61,17 +60,14 @@ class SearchFragment : InjectableFragment() {
                     navigationFragment?.showFragment(fragmentFactory.eventFragment(selectable.item))
                 },
                 longClicked = View.OnLongClickListener {
-                    lifecycleScope.launch {
-                        viewModel.send(EventLongClicked(selectable.item))
-                    }.let { true }
+                    lifecycleScope.launch { viewModel.send(EventLongClicked(selectable.item)) }
+                    true
                 }
             )
         }
     }
 
-    private val actionModeController: EventsSelectionActionModeController by lazy(
-        LazyThreadSafetyMode.NONE
-    ) {
+    private val actionModeController by lazy(LazyThreadSafetyMode.NONE) {
         eventsSelectionActionModeController(
             menuId = R.menu.search_events_selection_menu,
             itemClickedCallbacks = mapOf(
@@ -85,7 +81,7 @@ class SearchFragment : InjectableFragment() {
         )
     }
 
-    private val searchSuggestionsAdapter: SearchSuggestionsAdapter by lazy(LazyThreadSafetyMode.NONE) {
+    private val searchSuggestionsAdapter by lazy(LazyThreadSafetyMode.NONE) {
         SearchSuggestionsAdapter(requireContext(), null)
     }
 
@@ -106,7 +102,10 @@ class SearchFragment : InjectableFragment() {
 
         viewModel.updates().onEach {
             when (it) {
-                is UpdateEvents -> epoxyController.setData(it.events)
+                is UpdateEvents -> {
+                    epoxyController.setData(it.events)
+                    if (it.events.loadingFailed) eventsScrollListener.onLoadingError()
+                }
                 is UpdateSnackbar -> snackbarController?.transitionToSnackbarState(it.state)
                 is SwapCursor -> searchSuggestionsAdapter.swapCursor(it.cursor)
                 is UpdateActionMode -> actionModeController.update(it.numberOfSelectedEvents)
