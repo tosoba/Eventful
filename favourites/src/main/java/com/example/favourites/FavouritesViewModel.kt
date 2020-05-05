@@ -33,16 +33,20 @@ class FavouritesViewModel(
                     liveEvents.value = FavouritesSignal.FavouritesRemoved
                 }
             }
+            .filterNot { it is RemoveFromFavouritesClicked }
             .processIntents()
             .onEach(statesChannel::send)
             .launchIn(viewModelScope)
     }
 
-    private fun Flow<FavouritesIntent>.processIntents(): Flow<FavouritesState> = merge(
-        filterIsInstance<LoadFavourites>().processLoadFavouritesIntents(),
-        filterIsInstance<EventLongClicked>().processEventLongClickedIntents { state },
-        filterIsInstance<ClearSelectionClicked>().processClearSelectionIntents { state }
-    )
+    private fun Flow<FavouritesIntent>.processIntents(): Flow<FavouritesState> = flatMapConcat {
+        when (it) {
+            is LoadFavourites -> flowOf(it).processLoadFavouritesIntents()
+            is EventLongClicked -> flowOf(it).processEventLongClickedIntents { state }
+            is ClearSelectionClicked -> flowOf(it).processClearSelectionIntents { state }
+            else -> throw IllegalArgumentException()
+        }
+    }
 
     private fun Flow<LoadFavourites>.processLoadFavouritesIntents(): Flow<FavouritesState> {
         return filterNot {

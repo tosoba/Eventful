@@ -8,8 +8,8 @@ import com.example.coreandroid.util.LoadedSuccessfully
 import com.example.coreandroid.util.Loading
 import com.example.coreandroid.util.takeWhileInclusive
 import com.example.test.rule.eventsList
-import com.example.test.rule.relaxedEventsList
 import com.example.test.rule.onPausedDispatcher
+import com.example.test.rule.relaxedEventsList
 import io.mockk.called
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -66,7 +66,7 @@ internal class FavouritesViewModelTest {
                     .toList()
             }
 
-            coVerify { getSavedEvents(FavouritesViewModel.limitIncrement) }
+            coVerify(exactly = 1) { getSavedEvents(FavouritesViewModel.limitIncrement) }
             assert(states.size == 3)
             val initialState = states.first()
             assert(
@@ -111,8 +111,10 @@ internal class FavouritesViewModelTest {
             // try load more after limit was hit
             viewModel.send(LoadFavourites)
 
-            coVerify {
+            coVerify(exactly = 1) {
                 getSavedEvents(initialEventsSize + FavouritesViewModel.limitIncrement)
+            }
+            coVerify {
                 getSavedEvents(initialEventsSize + 2 * FavouritesViewModel.limitIncrement) wasNot called
             }
             val loadingMoreState = states[1]
@@ -153,7 +155,9 @@ internal class FavouritesViewModelTest {
                     .toList()
             }
 
-            coVerify { getSavedEvents(initialEventsSize + FavouritesViewModel.limitIncrement) }
+            coVerify(exactly = 1) {
+                getSavedEvents(initialEventsSize + FavouritesViewModel.limitIncrement)
+            }
             val loadingMoreState = states[1]
             assert(
                 loadingMoreState.events.status is Loading
@@ -220,7 +224,7 @@ internal class FavouritesViewModelTest {
             viewModel.send(EventLongClicked(eventsList.last()))
             viewModel.send(RemoveFromFavouritesClicked)
 
-            coVerify { deleteEvents(listOf(eventsList.first(), eventsList.last())) }
+            coVerify(exactly = 1) { deleteEvents(listOf(eventsList.first(), eventsList.last())) }
             assert(viewModel.events.value == FavouritesSignal.FavouritesRemoved)
         }
     }
