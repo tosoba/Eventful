@@ -9,8 +9,6 @@ object LoadFavourites : FavouritesIntent()
 object RemoveFromFavouritesClicked : FavouritesIntent()
 data class EventLongClicked(
     override val event: Event
-) : FavouritesIntent(),
-    EventSelectionToggledIntent
+) : FavouritesIntent(), EventSelectionToggledIntent
 
-object ClearSelectionClicked : FavouritesIntent(),
-    ClearEventSelectionIntent
+object ClearSelectionClicked : FavouritesIntent(), ClearEventSelectionIntent

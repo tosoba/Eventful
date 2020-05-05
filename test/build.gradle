@@ -29,7 +29,8 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
 
     implementation project(':coreandroid')
-    
+    implementation project(':core')
+
     api "junit:junit:$junitVersion"
     api "androidx.test.ext:junit:$testExtJunitVersion"
     api "androidx.test.espresso:espresso-core:$espressoVersion"
