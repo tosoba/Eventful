@@ -24,8 +24,9 @@ class FavouritesViewModel(
 
     init {
         intentsChannel.asFlow()
-            .onStart { emit(LoadFavourites) }
-            .onEach { intent ->
+            .withLatestFrom(states) { intent, state -> intent to state }
+            .onStart { emit(LoadFavourites to initialState) }
+            .onEach { (intent, state) ->
                 if (intent is RemoveFromFavouritesClicked) {
                     withContext(ioDispatcher) {
                         deleteEvents(state.events.data.filter { it.selected }.map { it.item })
@@ -33,28 +34,28 @@ class FavouritesViewModel(
                     liveEvents.value = FavouritesSignal.FavouritesRemoved
                 }
             }
-            .filterNot { it is RemoveFromFavouritesClicked }
+            .filterNot { (intent, _) -> intent is RemoveFromFavouritesClicked }
             .processIntents()
             .onEach(statesChannel::send)
             .launchIn(viewModelScope)
     }
 
-    private fun Flow<FavouritesIntent>.processIntents(): Flow<FavouritesState> = flatMapConcat {
-        when (it) {
-            is LoadFavourites -> flowOf(it).processLoadFavouritesIntents()
-            is EventLongClicked -> flowOf(it).processEventLongClickedIntents { state }
-            is ClearSelectionClicked -> flowOf(it).processClearSelectionIntents { state }
-            else -> throw IllegalArgumentException()
+    private fun Flow<Pair<FavouritesIntent, FavouritesState>>.processIntents(): Flow<FavouritesState> {
+        return flatMapConcat { (intent, s) ->
+            when (intent) {
+                is LoadFavourites -> flowOf(intent to s).processLoadFavouritesIntents()
+                is EventLongClicked -> flowOf(intent).processEventLongClickedIntents { state }
+                is ClearSelectionClicked -> flowOf(intent).processClearSelectionIntents { state }
+                else -> throw IllegalArgumentException()
+            }
         }
     }
 
-    private fun Flow<LoadFavourites>.processLoadFavouritesIntents(): Flow<FavouritesState> {
-        return filterNot {
-            val state = statesChannel.value
+    private fun Flow<Pair<LoadFavourites, FavouritesState>>.processLoadFavouritesIntents(): Flow<FavouritesState> {
+        return filterNot { (_, state) ->
             state.limitHit || state.events.status is Loading
-        }.flatMapLatest {
-            val outerState = state
-            flowOf(outerState.copy(events = outerState.events.copyWithLoadingInProgress))
+        }.flatMapLatest { (_, state) ->
+            flowOf(state.copy(events = state.events.copyWithLoadingInProgress))
                 .onCompletion {
                     emitAll(getSavedEvents(state.limit + limitIncrement)
                         .flowOn(ioDispatcher)
