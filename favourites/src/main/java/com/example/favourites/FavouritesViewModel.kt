@@ -23,8 +23,7 @@ class FavouritesViewModel(
 ) : BaseViewModel<FavouritesIntent, FavouritesState, FavouritesSignal>(initialState) {
 
     init {
-        intentsChannel.asFlow()
-            .withLatestFrom(states) { intent, state -> intent to state }
+        intentsWithLatestStates
             .onStart { emit(LoadFavourites to initialState) }
             .onEach { (intent, state) ->
                 if (intent is RemoveFromFavouritesClicked) {
@@ -41,9 +40,9 @@ class FavouritesViewModel(
     }
 
     private fun Flow<Pair<FavouritesIntent, FavouritesState>>.processIntents(): Flow<FavouritesState> {
-        return flatMapConcat { (intent, s) ->
+        return flatMapConcat { (intent, state) ->
             when (intent) {
-                is LoadFavourites -> flowOf(intent to s).processLoadFavouritesIntents()
+                is LoadFavourites -> flowOf(intent to state).processLoadFavouritesIntents()
                 is EventLongClicked -> flowOf(intent).processEventLongClickedIntents { state }
                 is ClearSelectionClicked -> flowOf(intent).processClearSelectionIntents { state }
                 else -> throw IllegalArgumentException()

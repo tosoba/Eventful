@@ -2,6 +2,7 @@ package com.example.coreandroid.base
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
+import com.example.coreandroid.util.withLatestFrom
 import com.hadilq.liveevent.LiveEvent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -14,7 +15,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 
 @FlowPreview
 @ExperimentalCoroutinesApi
-abstract class BaseViewModel<Intent, State, Event>(initialState: State) : ViewModel() {
+abstract class BaseViewModel<Intent, State : Any, Event>(initialState: State) : ViewModel() {
 
     protected val statesChannel: ConflatedBroadcastChannel<State> = ConflatedBroadcastChannel(
         value = initialState
@@ -27,6 +28,10 @@ abstract class BaseViewModel<Intent, State, Event>(initialState: State) : ViewMo
 
     protected val intentsChannel = BroadcastChannel<Intent>(capacity = Channel.CONFLATED)
     suspend fun send(intent: Intent) = intentsChannel.send(intent)
+
+    protected val intentsWithLatestStates: Flow<Pair<Intent, State>>
+        get() = intentsChannel.asFlow()
+            .withLatestFrom(states) { intent, state -> intent to state }
 
     override fun onCleared() {
         intentsChannel.close()
