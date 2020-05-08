@@ -33,11 +33,12 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
 
     implementation project(':core')
     implementation project(':coreandroid')
     implementation project(':weather')
-    
+
     implementation "androidx.appcompat:appcompat:$appCompatVersion"
     implementation "androidx.legacy:legacy-support-v4:$legacySupportV4Version"
     implementation "androidx.recyclerview:recyclerview:$recyclerViewVersion"
@@ -69,8 +70,11 @@ dependencies {
     implementation 'com.github.satoshun.coroutinebinding:coroutinebinding-core:1.0.0-rc2'
     implementation 'com.github.satoshun.coroutinebinding:coroutinebinding:1.0.0-rc2'
 
+    testImplementation project(':test')
     testImplementation "junit:junit:$junitVersion"
-    androidTestImplementation "androidx.test:runner:$testRunnerVersion"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinxCoroutinesTestVersion"
+    testImplementation "io.mockk:mockk:$mockkVersion"
+    testImplementation "androidx.arch.core:core-testing:$archCoreTestingVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
+    androidTestImplementation "androidx.test:runner:$testRunnerVersion"
 }

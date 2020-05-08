@@ -7,24 +7,24 @@ import kotlinx.coroutines.test.TestCoroutineScope
 
 fun relaxedEventsList(size: Int): List<Event> = (1..size).map { mockk<Event>(relaxed = true) }
 
-fun eventsList(size: Int): List<Event> = (1..size).map {
-    Event(
-        it.toString(),
-        "name$it",
-        "url$it",
-        "imageUrl$it",
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        emptyList(),
-        null,
-        null,
-        null
-    )
-}
+fun event(index: Int = 0): Event = Event(
+    index.toString(),
+    "name$index",
+    "url$index",
+    "imageUrl$index",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    emptyList(),
+    null,
+    null,
+    null
+)
+
+fun eventsList(size: Int): List<Event> = (1..size).map { event(it) }
 
 @ExperimentalCoroutinesApi
 inline fun <T> TestCoroutineScope.onPausedDispatcher(block: () -> T): T {

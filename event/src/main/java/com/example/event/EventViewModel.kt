@@ -25,7 +25,19 @@ class EventViewModel(
 
     init {
         merge(
-            intentsChannel.asFlow().processIntents(),
+            intentsWithLatestStates.flatMapConcat { (intent, state) ->
+                when (intent) {
+                    is ToggleFavourite -> flowOf(intent).flatMapFirst {
+                        state.run {
+                            viewModelScope.launch {
+                                if (isFavourite.data) deleteEvent(event)
+                                else saveEvent(event)
+                            }
+                            flowOf(copy(isFavourite = isFavourite.copyWithLoadingInProgress))
+                        }
+                    }
+                }
+            },
             statesChannel.asFlow()
                 .map { it.event.id }
                 .distinctUntilChanged()
@@ -38,21 +50,5 @@ class EventViewModel(
                     }
                 }
         ).onEach(statesChannel::send).launchIn(viewModelScope)
-    }
-
-    private fun Flow<EventIntent>.processIntents(): Flow<EventState> {
-        return filterIsInstance<ToggleFavourite>().processToggleFavouriteIntents()
-    }
-
-    private fun Flow<ToggleFavourite>.processToggleFavouriteIntents(): Flow<EventState> {
-        return flatMapFirst {
-            state.run {
-                viewModelScope.launch {
-                    if (isFavourite.data) deleteEvent(event)
-                    else saveEvent(event)
-                }
-                flowOf(copy(isFavourite = isFavourite.copyWithLoadingInProgress))
-            }
-        }
     }
 }
