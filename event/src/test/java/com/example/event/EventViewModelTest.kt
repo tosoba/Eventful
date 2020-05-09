@@ -1,7 +1,9 @@
 package com.example.event
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.example.core.usecase.DeleteEvent
 import com.example.core.usecase.IsEventSaved
+import com.example.core.usecase.SaveEvent
 import com.example.coreandroid.util.Data
 import com.example.coreandroid.util.Initial
 import com.example.coreandroid.util.LoadedSuccessfully
@@ -69,5 +71,45 @@ internal class EventViewModelTest {
         val loadedState = states.last()
         assert(loadedState.isFavourite.data && loadedState.isFavourite.status is LoadedSuccessfully)
         assert(viewModel.events.value == null)
+    }
+
+    @Test
+    fun `GivenEventVMWithSavedEvent WhenToggleFavourite DeleteEventIsCalled`() {
+        testScope.runBlockingTest {
+            val deleteEvent: DeleteEvent = mockk(relaxed = true)
+            val event = event()
+            val viewModel = EventViewModel(
+                initialState = EventState(event, Data(false, Initial)),
+                isEventSaved = mockk {
+                    coEvery { this@mockk(any()) } returns flowOf(true)
+                },
+                saveEvent = mockk(relaxed = true),
+                deleteEvent = deleteEvent
+            )
+
+            viewModel.send(ToggleFavourite)
+
+            coVerify(exactly = 1) { deleteEvent(event) }
+        }
+    }
+
+    @Test
+    fun `GivenEventVMWithNonSavedEvent WhenToggleFavourite SaveEventIsCalled`() {
+        testScope.runBlockingTest {
+            val saveEvent: SaveEvent = mockk(relaxed = true)
+            val event = event()
+            val viewModel = EventViewModel(
+                initialState = EventState(event, Data(false, Initial)),
+                isEventSaved = mockk {
+                    coEvery { this@mockk(any()) } returns flowOf(false)
+                },
+                saveEvent = saveEvent,
+                deleteEvent = mockk(relaxed = true)
+            )
+
+            viewModel.send(ToggleFavourite)
+
+            coVerify(exactly = 1) { saveEvent(event) }
+        }
     }
 }
