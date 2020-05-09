@@ -30,7 +30,7 @@ class FavouritesViewModel(
                     withContext(ioDispatcher) {
                         deleteEvents(state.events.data.filter { it.selected }.map { it.item })
                     }
-                    liveEvents.value = FavouritesSignal.FavouritesRemoved
+                    liveSignals.value = FavouritesSignal.FavouritesRemoved
                 }
             }
             .filterNot { (intent, _) -> intent is RemoveFromFavouritesClicked }

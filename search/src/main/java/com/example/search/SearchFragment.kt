@@ -112,7 +112,7 @@ class SearchFragment : InjectableFragment() {
             }
         }.launchIn(lifecycleScope)
 
-        viewModel.events.observe(this, Observer {
+        viewModel.signals.observe(this, Observer {
             if (it is SearchSignal.FavouritesSaved) actionModeController.finish(false)
         })
     }

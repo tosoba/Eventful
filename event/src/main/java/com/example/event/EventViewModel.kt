@@ -45,7 +45,7 @@ class EventViewModel(
                 .map {
                     state.run {
                         if (isFavourite.status !is Initial)
-                            liveEvents.value = EventSignal.FavouriteStateToggled(it)
+                            liveSignals.value = EventSignal.FavouriteStateToggled(it)
                         copy(isFavourite = Data(it, LoadedSuccessfully))
                     }
                 }

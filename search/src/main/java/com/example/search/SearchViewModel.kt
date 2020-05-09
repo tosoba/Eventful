@@ -81,7 +81,7 @@ class SearchViewModel(
                 withContext(ioDispatcher) {
                     saveEvents(events.data.filter { it.selected }.map { it.item })
                 }
-                liveEvents.value = SearchSignal.FavouritesSaved
+                liveSignals.value = SearchSignal.FavouritesSaved
                 copy(events = events.transformItems { it.copy(selected = false) })
             }
         }

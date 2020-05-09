@@ -100,7 +100,7 @@ class EventFragment : InjectableFragment(), SnackbarController {
             }
             .launchIn(lifecycleScope)
 
-        viewModel.events.observe(this, Observer {
+        viewModel.signals.observe(this, Observer {
             if (it is EventSignal.FavouriteStateToggled) {
                 transitionToSnackbarState(
                     SnackbarState.Text(

@@ -67,7 +67,7 @@ internal class EventViewModelTest {
         assert(!initialState.isFavourite.data && initialState.isFavourite.status is Initial)
         val loadedState = states.last()
         assert(loadedState.isFavourite.data && loadedState.isFavourite.status is LoadedSuccessfully)
-        assert(viewModel.events.value == null)
+        assert(viewModel.signals.value == null)
     }
 
     @Test
@@ -109,7 +109,7 @@ internal class EventViewModelTest {
                 stateAfterSaving.isFavourite.status is LoadedSuccessfully
                         && !stateAfterSaving.isFavourite.data
             )
-            assert(viewModel.events.value == EventSignal.FavouriteStateToggled(false))
+            assert(viewModel.signals.value == EventSignal.FavouriteStateToggled(false))
         }
     }
 
@@ -152,7 +152,7 @@ internal class EventViewModelTest {
                 stateAfterSaving.isFavourite.status is LoadedSuccessfully
                         && stateAfterSaving.isFavourite.data
             )
-            assert(viewModel.events.value == EventSignal.FavouriteStateToggled(true))
+            assert(viewModel.signals.value == EventSignal.FavouriteStateToggled(true))
         }
     }
 }

@@ -125,7 +125,7 @@ class NearbyViewModel(
                 withContext(ioDispatcher) {
                     saveEvents(events.data.filter { it.selected }.map { it.item })
                 }
-                liveEvents.value = NearbySignal.FavouritesSaved
+                liveSignals.value = NearbySignal.FavouritesSaved
                 copy(events = events.transformItems { it.copy(selected = false) }) //TODO: snackbar state with info how many added
             }
         }

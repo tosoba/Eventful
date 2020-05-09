@@ -112,7 +112,7 @@ class NearbyFragment : InjectableFragment() {
             .onEach { snackbarController?.transitionToSnackbarState(it) }
             .launchIn(lifecycleScope)
 
-        viewModel.events.observe(this, Observer {
+        viewModel.signals.observe(this, Observer {
             if (it is NearbySignal.FavouritesSaved) actionModeController.finish(false)
         })
     }

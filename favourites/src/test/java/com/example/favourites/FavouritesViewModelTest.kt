@@ -225,7 +225,7 @@ internal class FavouritesViewModelTest {
             viewModel.send(RemoveFromFavouritesClicked)
 
             coVerify(exactly = 1) { deleteEvents(listOf(eventsList.first(), eventsList.last())) }
-            assert(viewModel.events.value == FavouritesSignal.FavouritesRemoved)
+            assert(viewModel.signals.value == FavouritesSignal.FavouritesRemoved)
         }
     }
 }

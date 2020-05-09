@@ -112,7 +112,7 @@ class FavouritesFragment : InjectableFragment() {
             .onEach { actionModeController.update(it) }
             .launchIn(lifecycleScope)
 
-        viewModel.events.observe(this, Observer {
+        viewModel.signals.observe(this, Observer {
             if (it is FavouritesSignal.FavouritesRemoved) actionModeController.finish(false)
         })
     }
