@@ -73,21 +73,21 @@ internal class FavouritesViewModelTest {
                 initialState.events.data.isEmpty()
                         && initialState.events.status is Initial
                         && initialState.limit == 0
-                        && !initialState.limitHit
+                        && !initialState.events.limitHit
             )
             val loadingState = states[1]
             assert(
                 loadingState.events.data.isEmpty()
                         && loadingState.events.status is Loading
                         && loadingState.limit == 0
-                        && !loadingState.limitHit
+                        && !initialState.events.limitHit
             )
             val loadedState = states.last()
             assert(
                 loadedState.events.data.size == initialEventsSize
                         && loadedState.events.status is LoadedSuccessfully
                         && loadedState.limit == initialEventsSize
-                        && !loadedState.limitHit
+                        && !initialState.events.limitHit
             )
         }
     }
@@ -128,7 +128,7 @@ internal class FavouritesViewModelTest {
                 finalState.events.status is LoadedSuccessfully
                         && finalState.events.data.size == initialEventsSize
                         && finalState.limit == initialEventsSize
-                        && finalState.limitHit
+                        && finalState.events.limitHit
             )
         }
     }
@@ -169,7 +169,7 @@ internal class FavouritesViewModelTest {
                 finalState.events.status is LoadedSuccessfully
                         && finalState.events.data.size == afterLoadMoreSize
                         && finalState.limit == afterLoadMoreSize
-                        && !finalState.limitHit
+                        && !finalState.events.limitHit
             )
         }
     }

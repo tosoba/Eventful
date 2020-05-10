@@ -67,7 +67,7 @@ class SearchViewModel(
 
     private fun Flow<LoadMoreResults>.processLoadMoreResultsIntents(): Flow<SearchState> {
         return filterNot {
-            state.run { events.status is Loading || events.offset >= events.totalItems }
+            state.run { events.status is Loading || events.offset >= events.limit }
         }.flatMapFirst {
             state.run {
                 flowOf(searchEvents(searchText, events.offset)).map { reduce(it) }

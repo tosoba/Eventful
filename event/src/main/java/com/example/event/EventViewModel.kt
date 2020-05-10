@@ -33,7 +33,7 @@ class EventViewModel(
                                 if (isFavourite.data) deleteEvent(event)
                                 else saveEvent(event)
                             }
-                            flowOf(copy(isFavourite = isFavourite.copyWithLoadingInProgress))
+                            flowOf(copy(isFavourite = isFavourite.copyWithLoadingStatus))
                         }
                     }
                 }

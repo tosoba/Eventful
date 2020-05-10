@@ -25,7 +25,7 @@ class WeatherViewModel(
             .flatMapFirst {
                 flow<WeatherState> {
                     state.run {
-                        emit(copy(forecast = forecast.copyWithLoadingInProgress))
+                        emit(copy(forecast = forecast.copyWithLoadingStatus))
                         when (val result = withContext(ioDispatcher) {
                             getForecast(lat = it.latLng.latitude, lon = it.latLng.longitude)
                         }) {
@@ -33,7 +33,7 @@ class WeatherViewModel(
                                 forecast = forecast.copyWithNewValue(result.data)
                             )
                             is Resource.Error<Forecast, *> -> copy(
-                                forecast = forecast.copyWithError(result.error)
+                                forecast = forecast.copyWithFailureStatus(result.error)
                             )
                         }
                     }

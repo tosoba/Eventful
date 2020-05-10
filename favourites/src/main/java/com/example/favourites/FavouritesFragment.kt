@@ -14,9 +14,8 @@ import com.example.coreandroid.util.ext.menuController
 import com.example.coreandroid.util.ext.navigationFragment
 import com.example.coreandroid.util.ext.onCreateControllerView
 import com.example.coreandroid.util.ext.saveScrollPosition
-import com.example.coreandroid.util.itemListController
+import com.example.coreandroid.util.infiniteItemListController
 import com.example.coreandroid.view.epoxy.listItem
-import com.example.coreandroid.view.infiniteRecyclerViewScrollListener
 import kotlinx.android.synthetic.main.fragment_favourites.*
 import kotlinx.android.synthetic.main.fragment_favourites.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -41,15 +40,11 @@ class FavouritesFragment : InjectableFragment() {
     @Inject
     internal lateinit var epoxyThreads: EpoxyThreads
 
-    private val eventsScrollListener by lazy(LazyThreadSafetyMode.NONE) {
-        infiniteRecyclerViewScrollListener { viewModel.send(LoadFavourites) }
-    }
-
     private val epoxyController by lazy(LazyThreadSafetyMode.NONE) {
-        itemListController<Selectable<Event>>(
+        infiniteItemListController<Selectable<Event>>(
             epoxyThreads,
             emptyText = "No favourite events added yet",
-            onScrollListener = eventsScrollListener
+            loadMore = { lifecycleScope.launch { viewModel.send(LoadFavourites) } }
         ) { selectable ->
             selectable.listItem(
                 clicked = View.OnClickListener {

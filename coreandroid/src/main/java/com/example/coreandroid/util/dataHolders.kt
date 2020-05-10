@@ -3,44 +3,35 @@ package com.example.coreandroid.util
 interface HoldsData<T> {
     val data: T
     val status: DataStatus
-    val copyWithLoadingInProgress: HoldsData<T>
-    val loadingFailed: Boolean get() = status is LoadingFailed<*>
-    fun <E> copyWithError(error: E): HoldsData<T>
+    val loadingFailed: Boolean get() = status is Failure
+    val copyWithLoadingStatus: HoldsData<T>
+    fun copyWithFailureStatus(error: Any?): HoldsData<T>
 }
 
 data class Data<T>(
     override val data: T,
     override val status: DataStatus = Initial
 ) : HoldsData<T> {
+    override val copyWithLoadingStatus: Data<T> get() = copy(status = Loading)
+    override fun copyWithFailureStatus(error: Any?): Data<T> = copy(status = Failure(error))
+    fun copyWithNewValue(value: T): Data<T> = copy(data = value, status = LoadedSuccessfully)
+}
 
-    override val copyWithLoadingInProgress: Data<T>
-        get() = copy(status = Loading)
-
-    override fun <E> copyWithError(error: E): Data<T> = copy(
-        status = LoadingFailed(error)
-    )
-
-    fun copyWithNewValue(value: T): Data<T> = copy(
-        data = value,
-        status = LoadedSuccessfully
-    )
+interface HoldsList<T> : HoldsData<List<T>> {
+    val canLoadMore: Boolean
 }
 
 data class DataList<T>(
     override val data: List<T> = emptyList(),
-    override val status: DataStatus = Initial
-) : HoldsData<List<T>> {
+    override val status: DataStatus = Initial,
+    val limitHit: Boolean = false
+) : HoldsList<T> {
 
-    override val copyWithLoadingInProgress: DataList<T>
-        get() = copy(status = Loading)
+    override val canLoadMore: Boolean get() = !limitHit
+    override val copyWithLoadingStatus: DataList<T> get() = copy(status = Loading)
+    override fun copyWithFailureStatus(error: Any?): DataList<T> = copy(status = Failure(error))
 
-    override fun <E> copyWithError(error: E): DataList<T> = copy(
-        status = LoadingFailed(error)
-    )
-
-    fun transformItems(transform: (T) -> T): DataList<T> = copy(
-        data = data.map(transform)
-    )
+    fun transformItems(transform: (T) -> T): DataList<T> = copy(data = data.map(transform))
 
     fun copyWithNewItems(newItems: List<T>): DataList<T> = copy(
         data = data + newItems,
@@ -57,27 +48,16 @@ data class PagedDataList<T>(
     override val data: List<T> = emptyList(),
     override val status: DataStatus = Initial,
     val offset: Int = 0,
-    val totalItems: Int = Integer.MAX_VALUE
-) : HoldsData<List<T>> {
+    val limit: Int = Integer.MAX_VALUE
+) : HoldsList<T> {
 
-    override val copyWithLoadingInProgress: PagedDataList<T>
-        get() = copy(status = Loading)
+    override val canLoadMore: Boolean get() = offset < limit
+    override val copyWithLoadingStatus: PagedDataList<T> get() = copy(status = Loading)
+    override fun copyWithFailureStatus(error: Any?): PagedDataList<T> {
+        return copy(status = Failure(error))
+    }
 
-    override fun <E> copyWithError(error: E): PagedDataList<T> = copy(
-        status = LoadingFailed(error)
-    )
-
-    fun transformItems(transform: (T) -> T): PagedDataList<T> = copy(
-        data = data.map(transform)
-    )
-
-    fun copyWithNewItems(
-        newItems: List<T>, offset: Int
-    ): PagedDataList<T> = copy(
-        data = data + newItems,
-        offset = offset,
-        status = LoadedSuccessfully
-    )
+    fun transformItems(transform: (T) -> T): PagedDataList<T> = copy(data = data.map(transform))
 
     fun copyWithNewItems(
         newItems: List<T>, offset: Int, totalItems: Int
@@ -85,7 +65,7 @@ data class PagedDataList<T>(
         data = data + newItems,
         offset = offset,
         status = LoadedSuccessfully,
-        totalItems = totalItems
+        limit = totalItems
     )
 }
 
@@ -93,7 +73,7 @@ sealed class DataStatus
 object Initial : DataStatus()
 object Loading : DataStatus()
 object LoadedSuccessfully : DataStatus()
-data class LoadingFailed<E>(val error: E) : DataStatus()
+data class Failure(val error: Any?) : DataStatus()
 
 interface HasFailureMessage {
     val message: String

@@ -7,8 +7,7 @@ import com.example.coreandroid.util.SelectableEventsState
 
 data class FavouritesState(
     override val events: DataList<Selectable<Event>> = DataList(),
-    val limit: Int = 0,
-    val limitHit: Boolean = false
+    val limit: Int = 0
 ) : SelectableEventsState<FavouritesState> {
     override fun copyWithTransformedEvents(
         transform: (Selectable<Event>) -> Selectable<Event>

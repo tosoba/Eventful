@@ -52,24 +52,22 @@ class FavouritesViewModel(
     }
 
     private fun Flow<Pair<LoadFavourites, FavouritesState>>.processLoadFavouritesIntents(): Flow<FavouritesState> {
-        return filterNot { (_, state) ->
-            state.limitHit || state.events.status is Loading
-        }.flatMapFirst { (_, state) ->
-            flowOf(state.copy(events = state.events.copyWithLoadingInProgress))
+        return filterNot { (_, currentState) ->
+            currentState.events.limitHit || currentState.events.status is Loading
+        }.flatMapFirst { (_, currentState) ->
+            flowOf(currentState.copy(events = currentState.events.copyWithLoadingStatus))
                 .onCompletion {
-                    emitAll(getSavedEvents(state.limit + limitIncrement)
+                    emitAll(getSavedEvents(currentState.limit + limitIncrement)
                         .flowOn(ioDispatcher)
                         .map { events ->
-                            state.run {
-                                copy(
-                                    events = DataList(
-                                        data = events.map { Selectable(Event(it)) },
-                                        status = LoadedSuccessfully
-                                    ),
-                                    limit = events.size,
-                                    limitHit = this.events.data.size == events.size
-                                )
-                            }
+                            currentState.copy(
+                                events = DataList(
+                                    data = events.map { Selectable(Event(it)) },
+                                    status = LoadedSuccessfully,
+                                    limitHit = currentState.events.data.size == events.size
+                                ),
+                                limit = events.size
+                            )
                         }
                     )
                 }

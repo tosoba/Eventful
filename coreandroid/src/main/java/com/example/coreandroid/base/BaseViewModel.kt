@@ -17,9 +17,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 @ExperimentalCoroutinesApi
 abstract class BaseViewModel<Intent, State : Any, Signal>(initialState: State) : ViewModel() {
 
-    protected val statesChannel: ConflatedBroadcastChannel<State> = ConflatedBroadcastChannel(
-        value = initialState
-    )
+    protected val statesChannel = ConflatedBroadcastChannel(value = initialState)
     val states: Flow<State> get() = statesChannel.asFlow().distinctUntilChanged()
     val state: State get() = statesChannel.value
 
@@ -30,8 +28,7 @@ abstract class BaseViewModel<Intent, State : Any, Signal>(initialState: State) :
     suspend fun send(intent: Intent) = intentsChannel.send(intent)
 
     protected val intentsWithLatestStates: Flow<Pair<Intent, State>>
-        get() = intentsChannel.asFlow()
-            .withLatestFrom(states) { intent, state -> intent to state }
+        get() = intentsChannel.asFlow().withLatestFrom(states) { intent, state -> intent to state }
 
     override fun onCleared() {
         intentsChannel.close()
@@ -39,4 +36,3 @@ abstract class BaseViewModel<Intent, State : Any, Signal>(initialState: State) :
         super.onCleared()
     }
 }
-

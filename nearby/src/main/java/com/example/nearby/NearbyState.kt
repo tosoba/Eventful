@@ -35,7 +35,7 @@ internal fun NearbyState.reduce(
     )
 
     is Resource.Error<PagedResult<IEvent>, *> -> copy(
-        events = events.copyWithError(resource.error),
+        events = events.copyWithFailureStatus(resource.error),
         snackbarState = if (resource.error is NetworkResponse.ServerError<*>) {
             if ((resource.error as NetworkResponse.ServerError<*>).code in 503..504)
                 SnackbarState.Text("No connection")

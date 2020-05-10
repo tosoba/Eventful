@@ -4,13 +4,11 @@ import android.os.Handler
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.epoxy.*
+import com.example.coreandroid.LoadingMoreIndicatorBindingModel_
 import com.example.coreandroid.loadingIndicator
-import com.example.coreandroid.loadingMoreIndicator
 import com.example.coreandroid.noItemsText
 import com.example.coreandroid.reloadControl
-import com.example.coreandroid.view.InfiniteRecyclerViewScrollListener
 
 class EpoxyThreads(val builder: Handler, val differ: Handler)
 
@@ -42,10 +40,10 @@ open class NestedScrollingCarouselModel : CarouselModel_() {
 }
 
 class InfiniteNestedScrollingCarouselModel(
-    private val infiniteRecyclerViewScrollListener: InfiniteRecyclerViewScrollListener
+    private val loadMore: () -> Unit
 ) : NestedScrollingCarouselModel() {
     override fun buildView(parent: ViewGroup): Carousel = super.buildView(parent).apply {
-        addOnScrollListener(infiniteRecyclerViewScrollListener)
+        onBind { _, _, _ -> loadMore() }
     }
 }
 
@@ -56,11 +54,10 @@ inline fun EpoxyController.carousel(modelInitializer: CarouselModelBuilder.() ->
 }
 
 inline fun EpoxyController.infiniteCarousel(
-    infiniteRecyclerViewScrollListener: InfiniteRecyclerViewScrollListener,
+    noinline loadMore: () -> Unit,
     modelInitializer: CarouselModelBuilder.() -> Unit
 ) {
-    InfiniteNestedScrollingCarouselModel(infiniteRecyclerViewScrollListener)
-        .apply(modelInitializer).addTo(this)
+    InfiniteNestedScrollingCarouselModel(loadMore).apply(modelInitializer).addTo(this)
 }
 
 inline fun <T> CarouselModelBuilder.withModelsFrom(
@@ -85,30 +82,25 @@ inline fun <T, R> CarouselModelBuilder.withModelsFrom(
     models(items.map { (key, value) -> modelBuilder(key, value) })
 }
 
-fun <I> Fragment.itemListController(
+fun <I> Fragment.infiniteItemListController(
     epoxyThreads: EpoxyThreads,
     reloadClicked: (() -> Unit)? = null,
-    onScrollListener: RecyclerView.OnScrollListener? = null,
-    showLoadingIndicator: Boolean = true,
     emptyText: String? = null,
+    loadMore: () -> Unit,
     buildItem: (I) -> EpoxyModel<*>
-): TypedEpoxyController<HoldsData<List<I>>> = object : TypedEpoxyController<HoldsData<List<I>>>(
+): TypedEpoxyController<HoldsList<I>> = object : TypedEpoxyController<HoldsList<I>>(
     epoxyThreads.builder, epoxyThreads.differ
 ) {
-    override fun buildModels(data: HoldsData<List<I>>) {
+    override fun buildModels(data: HoldsList<I>) {
         if (view == null || isRemoving) return
 
         if (data.data.isEmpty()) when (val status = data.status) {
-            is Loading -> if (showLoadingIndicator) loadingIndicator {
-                id("loading-indicator-items")
+            is Loading -> loadingIndicator { id("loading-indicator-items") }
+            is LoadedSuccessfully -> if (emptyText != null && emptyText.isNotBlank()) noItemsText {
+                id("empty-text")
+                text(emptyText)
             }
-            is LoadedSuccessfully -> {
-                if (emptyText != null && emptyText.isNotBlank()) noItemsText {
-                    id("empty-text")
-                    text(emptyText)
-                }
-            }
-            is LoadingFailed<*> -> reloadControl {
+            is Failure -> reloadControl {
                 id("reload-control")
                 reloadClicked?.let { onReloadClicked(View.OnClickListener { it() }) }
                 (status.error as? HasFailureMessage)?.let { message(it.message) }
@@ -117,14 +109,10 @@ fun <I> Fragment.itemListController(
             data.data.forEach {
                 buildItem(it).spanSizeOverride { _, _, _ -> 1 }.addTo(this)
             }
-            if (data.status is Loading && showLoadingIndicator) loadingMoreIndicator {
-                id("loading-indicator-more-items")
-            }
+            LoadingMoreIndicatorBindingModel_()
+                .id("loading-indicator-more-items")
+                .onBind { _, _, _ -> loadMore() }
+                .addIf(data.canLoadMore, this)
         }
-    }
-
-    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        super.onAttachedToRecyclerView(recyclerView)
-        onScrollListener?.let { recyclerView.addOnScrollListener(it) }
     }
 }

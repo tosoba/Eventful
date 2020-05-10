@@ -101,7 +101,7 @@ class NearbyViewModel(
         state.run {
             emit(
                 copy(
-                    events = events.copyWithLoadingInProgress,
+                    events = events.copyWithLoadingStatus,
                     snackbarState = SnackbarState.Text("Loading nearby events...")
                 )
             )
@@ -114,8 +114,9 @@ class NearbyViewModel(
 
     private fun Flow<EventListScrolledToEnd>.processScrolledToEndIntents(): Flow<NearbyState> {
         return filterNot {
-            val state = statesChannel.value
-            state.events.status is Loading || state.events.offset >= state.events.totalItems
+            statesChannel.value.run {
+                events.status is Loading || events.data.isEmpty() || events.offset >= events.limit
+            }
         }.withLatestFrom(locationStateProvider.locationStateFlow.notNullLatLng) { _, latLng ->
             latLng
         }.flatMapFirst { loadingEventsFlow(it) }

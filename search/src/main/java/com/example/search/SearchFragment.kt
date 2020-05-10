@@ -14,9 +14,8 @@ import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.EpoxyThreads
 import com.example.coreandroid.util.ext.*
-import com.example.coreandroid.util.itemListController
+import com.example.coreandroid.util.infiniteItemListController
 import com.example.coreandroid.view.epoxy.listItem
-import com.example.coreandroid.view.infiniteRecyclerViewScrollListener
 import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.fragment_search.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -43,15 +42,11 @@ class SearchFragment : InjectableFragment() {
     @Inject
     internal lateinit var epoxyThreads: EpoxyThreads
 
-    private val eventsScrollListener by lazy(LazyThreadSafetyMode.NONE) {
-        infiniteRecyclerViewScrollListener { viewModel.send(LoadMoreResults) }
-    }
-
     private val epoxyController by lazy(LazyThreadSafetyMode.NONE) {
-        itemListController<Selectable<Event>>(
+        infiniteItemListController<Selectable<Event>>(
             epoxyThreads,
-            onScrollListener = eventsScrollListener,
-            emptyText = "No events found"
+            emptyText = "No events found",
+            loadMore = { lifecycleScope.launch { viewModel.send(LoadMoreResults) } }
         ) { selectable ->
             selectable.listItem(
                 clicked = View.OnClickListener {
