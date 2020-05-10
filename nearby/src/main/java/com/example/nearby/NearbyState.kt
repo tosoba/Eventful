@@ -34,7 +34,7 @@ internal fun NearbyState.reduce(
         snackbarState = SnackbarState.Hidden
     )
 
-    is Resource.Error<PagedResult<IEvent>, *> -> copy(
+    is Resource.Error<PagedResult<IEvent>> -> copy(
         events = events.copyWithFailureStatus(resource.error),
         snackbarState = if (resource.error is NetworkResponse.ServerError<*>) {
             if ((resource.error as NetworkResponse.ServerError<*>).code in 503..504)
