@@ -15,8 +15,8 @@ import com.example.coreandroid.util.ext.navigationFragment
 import com.example.coreandroid.util.ext.onCreateControllerView
 import com.example.coreandroid.util.ext.saveScrollPosition
 import com.example.coreandroid.util.itemListController
-import com.example.coreandroid.view.InfiniteRecyclerViewScrollListener
 import com.example.coreandroid.view.epoxy.listItem
+import com.example.coreandroid.view.infiniteRecyclerViewScrollListener
 import kotlinx.android.synthetic.main.fragment_favourites.*
 import kotlinx.android.synthetic.main.fragment_favourites.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -42,9 +42,7 @@ class FavouritesFragment : InjectableFragment() {
     internal lateinit var epoxyThreads: EpoxyThreads
 
     private val eventsScrollListener by lazy(LazyThreadSafetyMode.NONE) {
-        InfiniteRecyclerViewScrollListener {
-            lifecycleScope.launch { viewModel.send(LoadFavourites) }
-        }
+        infiniteRecyclerViewScrollListener { viewModel.send(LoadFavourites) }
     }
 
     private val epoxyController by lazy(LazyThreadSafetyMode.NONE) {
@@ -100,10 +98,7 @@ class FavouritesFragment : InjectableFragment() {
         viewModel.states
             .map { it.events }
             .distinctUntilChanged()
-            .onEach {
-                epoxyController.setData(it)
-                if (it.loadingFailed) eventsScrollListener.onLoadingError()
-            }
+            .onEach { epoxyController.setData(it) }
             .launchIn(lifecycleScope)
 
         viewModel.states

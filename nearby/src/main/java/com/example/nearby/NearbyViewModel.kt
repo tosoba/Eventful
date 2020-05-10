@@ -7,6 +7,7 @@ import com.example.core.model.app.LocationState
 import com.example.core.model.app.LocationStatus
 import com.example.core.usecase.GetNearbyEvents
 import com.example.core.usecase.SaveEvents
+import com.example.core.util.flatMapFirst
 import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.controller.SnackbarAction
 import com.example.coreandroid.controller.SnackbarState
@@ -15,6 +16,7 @@ import com.example.coreandroid.provider.LocationStateProvider
 import com.example.coreandroid.util.Loading
 import com.example.coreandroid.util.processClearSelectionIntents
 import com.example.coreandroid.util.processEventLongClickedIntents
+import com.example.coreandroid.util.withLatestFrom
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -53,7 +55,7 @@ class NearbyViewModel(
         get() = connectivityStateProvider.isConnectedFlow.filter { connected ->
             val state = statesChannel.value
             connected && state.events.data.isEmpty() && state.events.loadingFailed
-        }.zip(locationStateProvider.locationStateFlow.notNullLatLng) { _, latLng ->
+        }.withLatestFrom(locationStateProvider.locationStateFlow.notNullLatLng) { _, latLng ->
             latLng
         }.flatMapConcat { loadingEventsFlow(it) }
 
@@ -114,9 +116,9 @@ class NearbyViewModel(
         return filterNot {
             val state = statesChannel.value
             state.events.status is Loading || state.events.offset >= state.events.totalItems
-        }.zip(locationStateProvider.locationStateFlow.notNullLatLng) { _, latLng ->
+        }.withLatestFrom(locationStateProvider.locationStateFlow.notNullLatLng) { _, latLng ->
             latLng
-        }.flatMapConcat { loadingEventsFlow(it) }
+        }.flatMapFirst { loadingEventsFlow(it) }
     }
 
     private fun Flow<AddToFavouritesClicked>.processAddToFavouritesIntents(): Flow<NearbyState> {

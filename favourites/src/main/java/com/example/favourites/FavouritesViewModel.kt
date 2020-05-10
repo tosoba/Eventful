@@ -3,6 +3,7 @@ package com.example.favourites
 import androidx.lifecycle.viewModelScope
 import com.example.core.usecase.DeleteEvents
 import com.example.core.usecase.GetSavedEvents
+import com.example.core.util.flatMapFirst
 import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable
@@ -53,7 +54,7 @@ class FavouritesViewModel(
     private fun Flow<Pair<LoadFavourites, FavouritesState>>.processLoadFavouritesIntents(): Flow<FavouritesState> {
         return filterNot { (_, state) ->
             state.limitHit || state.events.status is Loading
-        }.flatMapLatest { (_, state) ->
+        }.flatMapFirst { (_, state) ->
             flowOf(state.copy(events = state.events.copyWithLoadingInProgress))
                 .onCompletion {
                     emitAll(getSavedEvents(state.limit + limitIncrement)

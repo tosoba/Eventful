@@ -42,11 +42,10 @@ open class NestedScrollingCarouselModel : CarouselModel_() {
 }
 
 class InfiniteNestedScrollingCarouselModel(
-    private val visibleThreshold: Int = 5,
-    private val onLoadMore: () -> Unit
+    private val infiniteRecyclerViewScrollListener: InfiniteRecyclerViewScrollListener
 ) : NestedScrollingCarouselModel() {
     override fun buildView(parent: ViewGroup): Carousel = super.buildView(parent).apply {
-        addOnScrollListener(InfiniteRecyclerViewScrollListener(visibleThreshold, onLoadMore))
+        addOnScrollListener(infiniteRecyclerViewScrollListener)
     }
 }
 
@@ -57,11 +56,10 @@ inline fun EpoxyController.carousel(modelInitializer: CarouselModelBuilder.() ->
 }
 
 inline fun EpoxyController.infiniteCarousel(
-    visibleThreshold: Int = 5,
-    noinline onLoadMore: () -> Unit,
+    infiniteRecyclerViewScrollListener: InfiniteRecyclerViewScrollListener,
     modelInitializer: CarouselModelBuilder.() -> Unit
 ) {
-    InfiniteNestedScrollingCarouselModel(visibleThreshold, onLoadMore)
+    InfiniteNestedScrollingCarouselModel(infiniteRecyclerViewScrollListener)
         .apply(modelInitializer).addTo(this)
 }
 

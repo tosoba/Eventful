@@ -12,8 +12,8 @@ import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.EpoxyThreads
 import com.example.coreandroid.util.ext.*
 import com.example.coreandroid.util.itemListController
-import com.example.coreandroid.view.InfiniteRecyclerViewScrollListener
 import com.example.coreandroid.view.epoxy.listItem
+import com.example.coreandroid.view.infiniteRecyclerViewScrollListener
 import kotlinx.android.synthetic.main.fragment_nearby.*
 import kotlinx.android.synthetic.main.fragment_nearby.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -39,9 +39,7 @@ class NearbyFragment : InjectableFragment() {
     internal lateinit var epoxyThreads: EpoxyThreads
 
     private val eventsScrollListener by lazy(LazyThreadSafetyMode.NONE) {
-        InfiniteRecyclerViewScrollListener {
-            lifecycleScope.launch { viewModel.send(EventListScrolledToEnd) }
-        }
+        infiniteRecyclerViewScrollListener { viewModel.send(EventListScrolledToEnd) }
     }
 
     private val epoxyController by lazy(LazyThreadSafetyMode.NONE) {
@@ -94,10 +92,7 @@ class NearbyFragment : InjectableFragment() {
         viewModel.states
             .map { it.events }
             .distinctUntilChanged()
-            .onEach {
-                epoxyController.setData(it)
-                if (it.loadingFailed) eventsScrollListener.onLoadingError()
-            }
+            .onEach { epoxyController.setData(it) }
             .launchIn(lifecycleScope)
 
         viewModel.states
