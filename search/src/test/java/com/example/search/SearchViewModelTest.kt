@@ -4,12 +4,13 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.example.core.Resource
 import com.example.core.model.PagedResult
 import com.example.core.model.search.SearchSuggestion
+import com.example.core.model.ticketmaster.IEvent
 import com.example.core.usecase.GetSeachSuggestions
 import com.example.core.usecase.SaveEvents
 import com.example.core.usecase.SaveSuggestion
 import com.example.core.usecase.SearchEvents
 import com.example.coreandroid.provider.ConnectivityStateProvider
-import com.example.test.rule.relaxedIEventsList
+import com.example.test.rule.relaxedMockedList
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -64,7 +65,7 @@ internal class SearchViewModelTest {
         testScope.runBlockingTest {
             val searchEvents = mockk<SearchEvents> {
                 coEvery { this@mockk(any()) } returns Resource.successWith(
-                    PagedResult(relaxedIEventsList(20), 1, 1)
+                    PagedResult(relaxedMockedList<IEvent>(20), 1, 1)
                 )
             }
             val saveSuggestion = mockk<SaveSuggestion>(relaxed = true)
@@ -91,7 +92,7 @@ internal class SearchViewModelTest {
         testScope.runBlockingTest {
             val searchEvents = mockk<SearchEvents> {
                 coEvery { this@mockk(any()) } returns Resource.successWith(
-                    PagedResult(relaxedIEventsList(20), 1, 1)
+                    PagedResult(relaxedMockedList<IEvent>(20), 1, 1)
                 )
             }
             val saveSuggestion = mockk<SaveSuggestion>(relaxed = true)

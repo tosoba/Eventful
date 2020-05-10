@@ -1,14 +1,15 @@
 package com.example.test.rule
 
-import com.example.core.model.ticketmaster.IEvent
 import com.example.coreandroid.ticketmaster.Event
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineScope
 
-fun relaxedIEventsList(size: Int): List<IEvent> = (1..size).map { mockk<IEvent>(relaxed = true) }
+inline fun <reified T : Any> relaxedMockedList(size: Int): List<T> = (1..size)
+    .map { mockk<T>(relaxed = true) }
 
-fun relaxedEventsList(size: Int): List<Event> = (1..size).map { mockk<Event>(relaxed = true) }
+inline fun <reified T : Any> mockedList(size: Int, builder: (Int) -> T): List<T> = (1..size)
+    .map(builder)
 
 fun event(index: Int = 0): Event = Event(
     index.toString(),
@@ -26,10 +27,6 @@ fun event(index: Int = 0): Event = Event(
     null,
     null
 )
-
-fun eventsList(size: Int): List<Event> = (1..size).map { event(it) }
-
-fun iEventsList(size: Int): List<IEvent> = (1..size).map { event(it) }
 
 @ExperimentalCoroutinesApi
 inline fun <T> TestCoroutineScope.onPausedDispatcher(block: () -> T): T {
