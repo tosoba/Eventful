@@ -102,7 +102,9 @@ class NearbyViewModel(
             emit(
                 copy(
                     events = events.copyWithLoadingStatus,
-                    snackbarState = SnackbarState.Text("Loading nearby events...")
+                    snackbarState = if (events.data.isEmpty())
+                        SnackbarState.Text("Loading nearby events...")
+                    else snackbarState
                 )
             )
             val result = withContext(ioDispatcher) {
