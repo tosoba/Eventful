@@ -10,6 +10,10 @@ import com.example.core.usecase.SaveEvents
 import com.example.core.usecase.SaveSuggestion
 import com.example.core.usecase.SearchEvents
 import com.example.coreandroid.provider.ConnectivityStateProvider
+import com.example.coreandroid.util.LoadedSuccessfully
+import com.example.coreandroid.util.Loading
+import com.example.coreandroid.util.takeWhileInclusive
+import com.example.test.rule.onPausedDispatcher
 import com.example.test.rule.relaxedMockedList
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -17,6 +21,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Before
@@ -111,6 +116,84 @@ internal class SearchViewModelTest {
             coVerify(exactly = 0) { saveSuggestion(searchText) }
             coVerify(exactly = 1) { searchEvents(searchText) }
             coVerify(exactly = 1) { getSearchSuggestions(searchText) }
+        }
+    }
+
+    @Test
+    fun `GivenSearchVM WhenSearchEventsReturnsSuccessfully ProperStateTransitionsOccur`() {
+        testScope.runBlockingTest {
+            val returnedEventsListSize = 20
+            val currentPage = 0
+            val totalPages = 1
+            val searchEvents = mockk<SearchEvents> {
+                coEvery { this@mockk(any()) } returns Resource.successWith(
+                    PagedResult(
+                        relaxedMockedList<IEvent>(returnedEventsListSize),
+                        currentPage,
+                        totalPages
+                    )
+                )
+            }
+            val returnedSuggestionsListSize = 20
+            val getSearchSuggestions = mockk<GetSeachSuggestions> {
+                coEvery { this@mockk(any()) } returns relaxedMockedList<SearchSuggestion>(
+                    returnedSuggestionsListSize
+                )
+            }
+            val initialState = SearchState()
+            val viewModel = searchViewModel(
+                searchEvents = searchEvents,
+                getSearchSuggestions = getSearchSuggestions,
+                initialState = initialState
+            )
+            val searchText = "test"
+
+            val states = onPausedDispatcher {
+                viewModel.send(NewSearch(searchText, false))
+                viewModel.states.takeWhileInclusive { it.events.status !is LoadedSuccessfully }
+                    .toList()
+            }
+
+            assert(states.size == 3)
+
+            val (
+                initialSearchText,
+                initialSuggestions,
+                initialEvents,
+                initialSnackbarState
+            ) = states.first()
+            assert(
+                initialSearchText == initialState.searchText
+                        && initialSuggestions == initialState.searchSuggestions
+                        && initialEvents == initialState.events
+                        && initialSnackbarState == initialState.snackbarState
+            )
+
+            val loadingState = states[1]
+            assert(
+                loadingState.searchText == initialState.searchText
+                        && loadingState.searchSuggestions == initialState.searchSuggestions
+                        && loadingState.snackbarState == initialState.snackbarState
+            )
+            assert(
+                loadingState.events.data.isEmpty()
+                        && loadingState.events.status is Loading
+                        && loadingState.events.offset == initialState.events.offset
+                        && loadingState.events.limit == initialState.events.limit
+            )
+
+            val loadedState = states.last()
+            assert(
+                loadedState.searchText == searchText
+                        && loadedState.searchSuggestions.size == returnedSuggestionsListSize
+                        && loadedState.snackbarState == initialState.snackbarState
+            )
+            assert(
+                loadedState.events.data.size == returnedEventsListSize
+                        && loadedState.events.status is LoadedSuccessfully
+                        && loadedState.events.offset == currentPage + 1
+                        && loadedState.events.limit == totalPages
+            )
         }
     }
 }

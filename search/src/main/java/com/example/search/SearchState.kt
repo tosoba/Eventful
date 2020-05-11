@@ -24,7 +24,8 @@ data class SearchState(
 
 internal fun SearchState.reduce(
     resource: Resource<PagedResult<IEvent>>,
-    suggestions: List<SearchSuggestion>? = null
+    suggestions: List<SearchSuggestion>? = null,
+    text: String? = null
 ): SearchState = when (resource) {
     is Resource.Success -> copy(
         events = events.copyWithNewItems(
@@ -32,7 +33,8 @@ internal fun SearchState.reduce(
             resource.data.currentPage + 1,
             resource.data.totalPages
         ),
-        searchSuggestions = suggestions ?: searchSuggestions
+        searchSuggestions = suggestions ?: searchSuggestions,
+        searchText = text ?: searchText
     )
 
     is Resource.Error<PagedResult<IEvent>> -> copy(
@@ -44,6 +46,7 @@ internal fun SearchState.reduce(
                 SnackbarState.Text("Unknown network error.")
             }
         } else snackbarState,
-        searchSuggestions = suggestions ?: searchSuggestions
+        searchSuggestions = suggestions ?: searchSuggestions,
+        searchText = text ?: searchText
     )
 }

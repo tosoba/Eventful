@@ -54,14 +54,25 @@ class SearchViewModel(
     private fun Flow<NewSearch>.processNewSearchIntents(): Flow<SearchState> {
         return distinctUntilChanged()
             .onEach { (text, shouldSave) -> if (shouldSave) saveSuggestion(text) }
-            .mapLatest { (text, _) ->
-                val resource = viewModelScope.async {
-                    withContext(ioDispatcher) { searchEvents(text) }
+            .flatMapLatest { (text, _) ->
+                state.run {
+                    flow {
+                        emit(copy(events = events.copyWithLoadingStatus))
+                        val resource = viewModelScope.async {
+                            withContext(ioDispatcher) { searchEvents(text) }
+                        }
+                        val suggestions = viewModelScope.async {
+                            withContext(ioDispatcher) { getSearchSuggestions(text) }
+                        }
+                        emit(
+                            reduce(
+                                resource = resource.await(),
+                                suggestions = suggestions.await(),
+                                text = text
+                            )
+                        )
+                    }
                 }
-                val suggestions = viewModelScope.async {
-                    withContext(ioDispatcher) { getSearchSuggestions(text) }
-                }
-                state.reduce(resource.await(), suggestions.await())
             }
     }
 
@@ -70,7 +81,13 @@ class SearchViewModel(
             state.run { events.status is Loading || events.offset >= events.limit }
         }.flatMapFirst {
             state.run {
-                flowOf(searchEvents(searchText, events.offset)).map { reduce(it) }
+                flow {
+                    emit(copy(events = events.copyWithLoadingStatus))
+                    val resource = viewModelScope.async {
+                        withContext(ioDispatcher) { searchEvents(searchText, events.offset) }
+                    }
+                    emit(reduce(resource = resource.await()))
+                }
             }
         }
     }
