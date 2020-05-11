@@ -11,6 +11,7 @@ import com.example.coreandroid.provider.ConnectivityStateProvider
 import com.example.coreandroid.util.Loading
 import com.example.coreandroid.util.processClearSelectionIntents
 import com.example.coreandroid.util.processEventLongClickedIntents
+import com.example.coreandroid.util.withLatestFrom
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
@@ -27,80 +28,83 @@ class SearchViewModel(
 ) : BaseViewModel<SearchIntent, SearchState, SearchSignal>(initialState) {
 
     init {
-        merge(intentsChannel.asFlow().processIntents(), connectivityReactionFlow)
+        merge(intentsWithLatestStates.processIntents(), connectivityReactionFlow)
             .onEach(statesChannel::send)
             .launchIn(viewModelScope)
     }
 
     private val connectivityReactionFlow: Flow<SearchState>
-        get() = connectivityStateProvider.isConnectedFlow.filter {
-            val state = statesChannel.value
-            it && state.events.loadingFailed && state.events.data.isEmpty()
-        }.map {
-            state.run {
-                val resource = withContext(ioDispatcher) { searchEvents(searchText) }
-                reduce(resource)
+        get() = connectivityStateProvider.isConnectedFlow
+            .withLatestFrom(states) { isConnected, currentState -> isConnected to currentState }
+            .filter { (isConnected, currentState) ->
+                isConnected && currentState.events.loadingFailed && currentState.events.data.isEmpty()
+            }.map { (_, currentState) ->
+                val resource = withContext(ioDispatcher) { searchEvents(currentState.searchText) }
+                currentState.reduce(resource)
+            }
+
+    private fun Flow<Pair<SearchIntent, SearchState>>.processIntents(): Flow<SearchState> {
+        return flatMapConcat { (intent, currentState) ->
+            when (intent) {
+                is NewSearch -> flowOf(intent to currentState).processNewSearchIntents()
+                is LoadMoreResults -> flowOf(intent to currentState).processLoadMoreResultsIntents()
+                is EventLongClicked -> flowOf(intent).processEventLongClickedIntents { currentState }
+                is ClearSelectionClicked -> flowOf(intent).processClearSelectionIntents { currentState }
+                is AddToFavouritesClicked -> flowOf(intent to currentState).processAddToFavouritesIntents()
             }
         }
-
-    private fun Flow<SearchIntent>.processIntents(): Flow<SearchState> = merge(
-        filterIsInstance<NewSearch>().processNewSearchIntents(),
-        filterIsInstance<LoadMoreResults>().processLoadMoreResultsIntents(),
-        filterIsInstance<ClearSelectionClicked>().processClearSelectionIntents { state },
-        filterIsInstance<EventLongClicked>().processEventLongClickedIntents { state },
-        filterIsInstance<AddToFavouritesClicked>().processAddToFavouritesIntents()
-    )
-
-    private fun Flow<NewSearch>.processNewSearchIntents(): Flow<SearchState> {
-        return distinctUntilChanged()
-            .onEach { (text, shouldSave) -> if (shouldSave) saveSuggestion(text) }
-            .flatMapLatest { (text, _) ->
-                state.run {
-                    flow {
-                        emit(copy(events = events.copyWithLoadingStatus))
-                        val resource = viewModelScope.async {
-                            withContext(ioDispatcher) { searchEvents(text) }
-                        }
-                        val suggestions = viewModelScope.async {
-                            withContext(ioDispatcher) { getSearchSuggestions(text) }
-                        }
-                        emit(
-                            reduce(
-                                resource = resource.await(),
-                                suggestions = suggestions.await(),
-                                text = text
-                            )
-                        )
-                    }
-                }
-            }
     }
 
-    private fun Flow<LoadMoreResults>.processLoadMoreResultsIntents(): Flow<SearchState> {
-        return filterNot {
-            state.run { events.status is Loading || events.offset >= events.limit }
-        }.flatMapFirst {
-            state.run {
+    private fun Flow<Pair<NewSearch, SearchState>>.processNewSearchIntents(): Flow<SearchState> {
+        return distinctUntilChangedBy { (intent, _) -> intent }
+            .onEach { (intent, _) ->
+                val (text, shouldSave) = intent
+                if (shouldSave) saveSuggestion(text)
+            }
+            .flatMapLatest { (intent, currentState) ->
+                val (text, _) = intent
                 flow {
-                    emit(copy(events = events.copyWithLoadingStatus))
+                    emit(currentState.copy(events = currentState.events.copyWithLoadingStatus))
                     val resource = viewModelScope.async {
-                        withContext(ioDispatcher) { searchEvents(searchText, events.offset) }
+                        withContext(ioDispatcher) { searchEvents(text) }
                     }
-                    emit(reduce(resource = resource.await()))
+                    val suggestions = viewModelScope.async {
+                        withContext(ioDispatcher) { getSearchSuggestions(text) }
+                    }
+                    emit(
+                        currentState.reduce(
+                            resource = resource.await(),
+                            suggestions = suggestions.await(),
+                            text = text
+                        )
+                    )
                 }
+            }
+    }
+
+    private fun Flow<Pair<LoadMoreResults, SearchState>>.processLoadMoreResultsIntents(): Flow<SearchState> {
+        return filterNot { (_, currentState) ->
+            currentState.events.status is Loading || !currentState.events.canLoadMore
+        }.flatMapFirst { (_, currentState) ->
+            flow {
+                emit(currentState.copy(events = currentState.events.copyWithLoadingStatus))
+                val resource = viewModelScope.async {
+                    withContext(ioDispatcher) {
+                        searchEvents(currentState.searchText, currentState.events.offset)
+                    }
+                }
+                emit(currentState.reduce(resource = resource.await()))
             }
         }
     }
 
-    private fun Flow<AddToFavouritesClicked>.processAddToFavouritesIntents(): Flow<SearchState> {
-        return map {
-            state.run {
-                withContext(ioDispatcher) {
-                    saveEvents(events.data.filter { it.selected }.map { it.item })
-                }
-                liveSignals.value = SearchSignal.FavouritesSaved
-                copy(events = events.transformItems { it.copy(selected = false) })
+    private fun Flow<Pair<AddToFavouritesClicked, SearchState>>.processAddToFavouritesIntents(): Flow<SearchState> {
+        return map { (_, currentState) ->
+            withContext(ioDispatcher) {
+                saveEvents(currentState.events.data.filter { it.selected }.map { it.item })
             }
+            liveSignals.value = SearchSignal.FavouritesSaved
+            currentState.copy(events = currentState.events.transformItems { it.copy(selected = false) })
         }
     }
 }
