@@ -30,6 +30,10 @@ abstract class BaseViewModel<Intent, State : Any, Signal>(initialState: State) :
     protected val intentsWithLatestStates: Flow<Pair<Intent, State>>
         get() = intentsChannel.asFlow().withLatestFrom(states) { intent, state -> intent to state }
 
+    protected fun <T> Flow<T>.withLatestState(): Flow<Pair<T, State>> {
+        return withLatestFrom(states) { intent, state -> intent to state }
+    }
+
     override fun onCleared() {
         intentsChannel.close()
         statesChannel.close()

@@ -27,3 +27,15 @@ fun <I : EventSelectionToggledIntent, S : SelectableEventsState<S>> Flow<I>.proc
         if (it.item.id == intent.event.id) Selectable(intent.event, !it.selected) else it
     }
 }
+
+fun <I : ClearEventSelectionIntent, S : SelectableEventsState<S>> Flow<Pair<I, S>>.processClearSelectionIntents(): Flow<S> {
+    return map { (_, state) -> state.copyWithTransformedEvents { it.copy(selected = false) } }
+}
+
+fun <I : EventSelectionToggledIntent, S : SelectableEventsState<S>> Flow<Pair<I, S>>.processEventLongClickedIntents(): Flow<S> {
+    return map { (intent, state) ->
+        state.copyWithTransformedEvents {
+            if (it.item.id == intent.event.id) Selectable(intent.event, !it.selected) else it
+        }
+    }
+}

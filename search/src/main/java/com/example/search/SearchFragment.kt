@@ -134,7 +134,10 @@ class SearchFragment : InjectableFragment() {
             .filter { it.queryText.isNotBlank() && it.queryText.length > 2 }
             .onEach {
                 viewModel.send(
-                    NewSearch(it.queryText.toString(), it is QueryTextEvent.QuerySubmitted)
+                    NewSearch(
+                        text = it.queryText.toString().trim(),
+                        confirmed = it is QueryTextEvent.QuerySubmitted
+                    )
                 )
             }
             .launchIn(lifecycleScope)

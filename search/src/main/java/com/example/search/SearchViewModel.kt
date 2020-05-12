@@ -28,7 +28,7 @@ class SearchViewModel(
 ) : BaseViewModel<SearchIntent, SearchState, SearchSignal>(initialState) {
 
     init {
-        merge(intentsWithLatestStates.processIntents(), connectivityReactionFlow)
+        merge(intentsChannel.asFlow().processIntents(), connectivityReactionFlow)
             .onEach(statesChannel::send)
             .launchIn(viewModelScope)
     }
@@ -43,16 +43,16 @@ class SearchViewModel(
                 currentState.reduce(resource)
             }
 
-    private fun Flow<Pair<SearchIntent, SearchState>>.processIntents(): Flow<SearchState> {
-        return flatMapConcat { (intent, currentState) ->
-            when (intent) {
-                is NewSearch -> flowOf(intent to currentState).processNewSearchIntents()
-                is LoadMoreResults -> flowOf(intent to currentState).processLoadMoreResultsIntents()
-                is EventLongClicked -> flowOf(intent).processEventLongClickedIntents { currentState }
-                is ClearSelectionClicked -> flowOf(intent).processClearSelectionIntents { currentState }
-                is AddToFavouritesClicked -> flowOf(intent to currentState).processAddToFavouritesIntents()
-            }
-        }
+    private fun Flow<SearchIntent>.processIntents(): Flow<SearchState> {
+        return merge(
+            filterIsInstance<NewSearch>().withLatestState().processNewSearchIntents(),
+            filterIsInstance<LoadMoreResults>().withLatestState().processLoadMoreResultsIntents(),
+            filterIsInstance<ClearSelectionClicked>().withLatestState()
+                .processClearSelectionIntents(),
+            filterIsInstance<EventLongClicked>().withLatestState().processEventLongClickedIntents(),
+            filterIsInstance<AddToFavouritesClicked>().withLatestState()
+                .processAddToFavouritesIntents()
+        )
     }
 
     private fun Flow<Pair<NewSearch, SearchState>>.processNewSearchIntents(): Flow<SearchState> {

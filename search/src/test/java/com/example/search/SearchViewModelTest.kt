@@ -196,4 +196,31 @@ internal class SearchViewModelTest {
             )
         }
     }
+
+    @Test
+    fun `GivenSearchVM WhenTwoEqualNewSearchesAreSent OnlyFirstIsProcessed`() {
+        testScope.runBlockingTest {
+            val searchEvents = mockk<SearchEvents> {
+                coEvery { this@mockk(any()) } returns Resource.successWith(
+                    PagedResult(relaxedMockedList<IEvent>(20), 0, 1)
+                )
+            }
+            val getSearchSuggestions = mockk<GetSeachSuggestions> {
+                coEvery { this@mockk(any()) } returns relaxedMockedList<SearchSuggestion>(20)
+            }
+            val initialState = SearchState()
+            val viewModel = searchViewModel(
+                searchEvents = searchEvents,
+                getSearchSuggestions = getSearchSuggestions,
+                initialState = initialState
+            )
+            val searchText = "test"
+
+            viewModel.send(NewSearch(searchText, true))
+            viewModel.send(NewSearch(searchText, true))
+
+            coVerify(exactly = 1) { searchEvents(searchText) }
+            coVerify(exactly = 1) { getSearchSuggestions(searchText) }
+        }
+    }
 }
