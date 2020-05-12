@@ -24,31 +24,28 @@ class FavouritesViewModel(
 ) : BaseViewModel<FavouritesIntent, FavouritesState, FavouritesSignal>(initialState) {
 
     init {
-        intentsWithLatestStates
-            .onStart { emit(LoadFavourites to initialState) }
-            .onEach { (intent, state) ->
-                if (intent is RemoveFromFavouritesClicked) {
-                    withContext(ioDispatcher) {
-                        deleteEvents(state.events.data.filter { it.selected }.map { it.item })
-                    }
-                    liveSignals.value = FavouritesSignal.FavouritesRemoved
-                }
-            }
-            .filterNot { (intent, _) -> intent is RemoveFromFavouritesClicked }
+        intentsChannel.asFlow()
+            .onStart { emit(LoadFavourites) }
             .processIntents()
             .onEach(statesChannel::send)
             .launchIn(viewModelScope)
     }
 
-    private fun Flow<Pair<FavouritesIntent, FavouritesState>>.processIntents(): Flow<FavouritesState> {
-        return flatMapConcat { (intent, state) ->
-            when (intent) {
-                is LoadFavourites -> flowOf(intent to state).processLoadFavouritesIntents()
-                is EventLongClicked -> flowOf(intent).processEventLongClickedIntents { state }
-                is ClearSelectionClicked -> flowOf(intent).processClearSelectionIntents { state }
-                else -> throw IllegalArgumentException()
-            }
-        }
+    private fun Flow<FavouritesIntent>.processIntents(): Flow<FavouritesState> {
+        return merge(
+            filterIsInstance<LoadFavourites>().withLatestState().processLoadFavouritesIntents(),
+            filterIsInstance<EventLongClicked>().withLatestState().processEventLongClickedIntents(),
+            filterIsInstance<ClearSelectionClicked>().withLatestState()
+                .processClearSelectionIntents(),
+            filterIsInstance<RemoveFromFavouritesClicked>().withLatestState()
+                .map { (_, state) ->
+                    withContext(ioDispatcher) {
+                        deleteEvents(state.events.data.filter { it.selected }.map { it.item })
+                    }
+                    liveSignals.value = FavouritesSignal.FavouritesRemoved
+                    state
+                }
+        )
     }
 
     private fun Flow<Pair<LoadFavourites, FavouritesState>>.processLoadFavouritesIntents(): Flow<FavouritesState> {

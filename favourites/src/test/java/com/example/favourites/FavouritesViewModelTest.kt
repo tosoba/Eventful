@@ -16,9 +16,7 @@ import io.mockk.called
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
@@ -63,12 +61,16 @@ internal class FavouritesViewModelTest {
             }
             val deleteEvents: DeleteEvents = mockk(relaxed = true)
 
-            val states: List<FavouritesState> = onPausedDispatcher {
-                FavouritesViewModel(getSavedEvents, deleteEvents, testDispatcher)
-                    .states
+            val states = mutableListOf<FavouritesState>()
+            pauseDispatcher()
+            val viewModel = FavouritesViewModel(getSavedEvents, deleteEvents, testDispatcher)
+            val job = launch {
+                viewModel.states
                     .takeWhileInclusive { it.events.status !is LoadedSuccessfully }
-                    .toList()
+                    .toList(states)
             }
+            resumeDispatcher()
+            job.join()
 
             coVerify(exactly = 1) { getSavedEvents(FavouritesViewModel.limitIncrement) }
             assert(states.size == 3)
