@@ -45,94 +45,101 @@ class NearbyViewModel(
     }
 
     private fun Flow<NearbyIntent>.processIntents(): Flow<NearbyState> = merge(
-        filterIsInstance<ClearSelectionClicked>().processClearSelectionIntents { state },
-        filterIsInstance<EventLongClicked>().processEventLongClickedIntents { state },
-        filterIsInstance<AddToFavouritesClicked>().processAddToFavouritesIntents(),
-        filterIsInstance<EventListScrolledToEnd>().processScrolledToEndIntents()
+        filterIsInstance<ClearSelectionClicked>().withLatestState().processClearSelectionIntents(),
+        filterIsInstance<EventLongClicked>().withLatestState().processEventLongClickedIntents(),
+        filterIsInstance<AddToFavouritesClicked>().withLatestState()
+            .processAddToFavouritesIntents(),
+        filterIsInstance<EventListScrolledToEnd>().withLatestState().processScrolledToEndIntents()
     )
 
     private val connectivityReactionFlow: Flow<NearbyState>
-        get() = connectivityStateProvider.isConnectedFlow.filter { connected ->
-            val state = statesChannel.value
-            connected && state.events.data.isEmpty() && state.events.loadingFailed
-        }.withLatestFrom(locationStateProvider.locationStateFlow.notNullLatLng) { _, latLng ->
-            latLng
-        }.flatMapConcat { loadingEventsFlow(it) }
+        get() = connectivityStateProvider.isConnectedFlow.withLatestState()
+            .filter { (connected, currentState) ->
+                connected && currentState.events.data.isEmpty() && currentState.events.loadingFailed
+            }
+            .withLatestFrom(locationStateProvider.locationStateFlow.notNullLatLng) { connectedWithState, latLng ->
+                connectedWithState to latLng
+            }
+            .flatMapConcat { (connectedWithState, latLng) ->
+                val (_, currentState) = connectedWithState
+                loadingEventsFlow(latLng, currentState)
+            }
 
     private val locationSnackbarFlow: Flow<NearbyState> //TODO: zip this with connection status?
         get() = locationStateProvider.locationStateFlow
             .filter { it.latLng == null }
-            .map { (_, status) ->
-                state.run {
-                    when (status) {
-                        LocationStatus.PermissionDenied -> copy(
-                            snackbarState = SnackbarState.Text("No location permission")
-                        )
-                        LocationStatus.Disabled -> copy(
-                            snackbarState = SnackbarState.Text("Location disabled")
-                        )
-                        LocationStatus.Loading -> copy(
-                            snackbarState = SnackbarState.Text("Loading location...")
-                        )
-                        is LocationStatus.Error -> copy(
-                            snackbarState = SnackbarState.Text(
-                                "Unable to load location - error occurred",
-                                action = SnackbarAction(
-                                    "Retry",
-                                    View.OnClickListener { locationStateProvider.reloadLocation() }
-                                )
+            .withLatestState()
+            .map { (location, currentState) ->
+                val (_, status) = location
+                when (status) {
+                    LocationStatus.PermissionDenied -> currentState.copy(
+                        snackbarState = SnackbarState.Text("No location permission")
+                    )
+                    LocationStatus.Disabled -> currentState.copy(
+                        snackbarState = SnackbarState.Text("Location disabled")
+                    )
+                    LocationStatus.Loading -> currentState.copy(
+                        snackbarState = SnackbarState.Text("Loading location...")
+                    )
+                    is LocationStatus.Error -> currentState.copy(
+                        snackbarState = SnackbarState.Text(
+                            "Unable to load location - error occurred",
+                            action = SnackbarAction(
+                                "Retry",
+                                View.OnClickListener { locationStateProvider.reloadLocation() }
                             )
                         )
-                        else -> null
-                    }
+                    )
+                    else -> null
                 }
             }
             .filterNotNull()
 
-    private val Flow<LocationState>.notNullLatLng get() = map { it.latLng }.filterNotNull()
-
     private val loadEventsFlow: Flow<NearbyState>
         get() = locationStateProvider.locationStateFlow
-            .filter { state.events.data.isEmpty() }//TODO: this won't work with refreshing with SwipeRefreshLayout
             .notNullLatLng
-            .flatMapConcat { loadingEventsFlow(it) }
+            .withLatestState()
+            .filter { (_, currentState) -> currentState.events.data.isEmpty() }//TODO: this won't work with refreshing with SwipeRefreshLayout
+            .flatMapConcat { (latLng, currentState) -> loadingEventsFlow(latLng, currentState) }
 
-    private fun loadingEventsFlow(latLng: LatLng): Flow<NearbyState> = flow {
-        state.run {
+    private fun Flow<Pair<EventListScrolledToEnd, NearbyState>>.processScrolledToEndIntents(): Flow<NearbyState> {
+        return filterNot { (_, currentState) ->
+            currentState.events.status is Loading
+                    || currentState.events.data.isEmpty()
+                    || currentState.events.offset >= currentState.events.limit
+        }.withLatestFrom(locationStateProvider.locationStateFlow.notNullLatLng) { intentWithState, latLng ->
+            val (_, currentState) = intentWithState
+            latLng to currentState
+        }.flatMapFirst { loadingEventsFlow(it.first, it.second) }
+    }
+
+    private val Flow<LocationState>.notNullLatLng get() = map { it.latLng }.filterNotNull()
+
+    private fun loadingEventsFlow(latLng: LatLng, currentState: NearbyState): Flow<NearbyState> =
+        flow {
             emit(
-                copy(
-                    events = events.copyWithLoadingStatus,
-                    snackbarState = if (events.data.isEmpty())
+                currentState.copy(
+                    events = currentState.events.copyWithLoadingStatus,
+                    snackbarState = if (currentState.events.data.isEmpty())
                         SnackbarState.Text("Loading nearby events...")
-                    else snackbarState
+                    else currentState.snackbarState
                 )
             )
             val result = withContext(ioDispatcher) {
-                getNearbyEvents(latLng.lat, latLng.lng, events.offset)
+                getNearbyEvents(latLng.lat, latLng.lng, currentState.events.offset)
             }
-            emit(reduce(result))
+            emit(currentState.reduce(result))
         }
-    }
 
-    private fun Flow<EventListScrolledToEnd>.processScrolledToEndIntents(): Flow<NearbyState> {
-        return filterNot {
-            statesChannel.value.run {
-                events.status is Loading || events.data.isEmpty() || events.offset >= events.limit
+    private fun Flow<Pair<AddToFavouritesClicked, NearbyState>>.processAddToFavouritesIntents(): Flow<NearbyState> {
+        return map { (_, currentState) ->
+            withContext(ioDispatcher) {
+                saveEvents(currentState.events.data.filter { it.selected }.map { it.item })
             }
-        }.withLatestFrom(locationStateProvider.locationStateFlow.notNullLatLng) { _, latLng ->
-            latLng
-        }.flatMapFirst { loadingEventsFlow(it) }
-    }
-
-    private fun Flow<AddToFavouritesClicked>.processAddToFavouritesIntents(): Flow<NearbyState> {
-        return map {
-            state.run {
-                withContext(ioDispatcher) {
-                    saveEvents(events.data.filter { it.selected }.map { it.item })
-                }
-                liveSignals.value = NearbySignal.FavouritesSaved
-                copy(events = events.transformItems { it.copy(selected = false) }) //TODO: snackbar state with info how many added
-            }
+            liveSignals.value = NearbySignal.FavouritesSaved
+            currentState.copy(
+                events = currentState.events.transformItems { it.copy(selected = false) }
+            ) //TODO: snackbar state with info how many added
         }
     }
 }
