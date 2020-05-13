@@ -22,21 +22,25 @@ class WeatherViewModel(
     init {
         intentsChannel.asFlow()
             .filterIsInstance<LoadWeather>()
-            .flatMapFirst {
+            .withLatestState()
+            .flatMapFirst { (intent, state) ->
                 flow<WeatherState> {
-                    state.run {
-                        emit(copy(forecast = forecast.copyWithLoadingStatus))
+                    emit(state.copy(forecast = state.forecast.copyWithLoadingStatus))
+                    emit(
                         when (val result = withContext(ioDispatcher) {
-                            getForecast(lat = it.latLng.latitude, lon = it.latLng.longitude)
-                        }) {
-                            is Resource.Success -> copy(
-                                forecast = forecast.copyWithNewValue(result.data)
+                            getForecast(
+                                lat = intent.latLng.latitude,
+                                lon = intent.latLng.longitude
                             )
-                            is Resource.Error<Forecast, *> -> copy(
-                                forecast = forecast.copyWithFailureStatus(result.error)
+                        }) {
+                            is Resource.Success -> state.copy(
+                                forecast = state.forecast.copyWithNewValue(result.data)
+                            )
+                            is Resource.Error<Forecast> -> state.copy(
+                                forecast = state.forecast.copyWithFailureStatus(result.error)
                             )
                         }
-                    }
+                    )
                 }
             }
             .onEach(statesChannel::send)

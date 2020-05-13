@@ -28,13 +28,11 @@ class EventViewModel(
             intentsWithLatestStates.flatMapConcat { (intent, state) ->
                 when (intent) {
                     is ToggleFavourite -> flowOf(intent).flatMapFirst {
-                        state.run {
-                            viewModelScope.launch {
-                                if (isFavourite.data) deleteEvent(event)
-                                else saveEvent(event)
-                            }
-                            flowOf(copy(isFavourite = isFavourite.copyWithLoadingStatus))
+                        viewModelScope.launch {
+                            if (state.isFavourite.data) deleteEvent(state.event)
+                            else saveEvent(state.event)
                         }
+                        flowOf(state.copy(isFavourite = state.isFavourite.copyWithLoadingStatus))
                     }
                 }
             },
