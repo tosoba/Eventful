@@ -8,10 +8,7 @@ import com.example.core.usecase.SearchEvents
 import com.example.core.util.flatMapFirst
 import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.provider.ConnectivityStateProvider
-import com.example.coreandroid.util.Loading
-import com.example.coreandroid.util.processClearSelectionIntents
-import com.example.coreandroid.util.processEventLongClickedIntents
-import com.example.coreandroid.util.withLatestFrom
+import com.example.coreandroid.util.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
@@ -51,7 +48,7 @@ class SearchViewModel(
                 .processClearSelectionIntents(),
             filterIsInstance<EventLongClicked>().withLatestState().processEventLongClickedIntents(),
             filterIsInstance<AddToFavouritesClicked>().withLatestState()
-                .processAddToFavouritesIntents()
+                .processAddToFavouritesIntents(saveEvents, ioDispatcher)
         )
     }
 
@@ -84,27 +81,22 @@ class SearchViewModel(
 
     private fun Flow<Pair<LoadMoreResults, SearchState>>.processLoadMoreResultsIntents(): Flow<SearchState> {
         return filterNot { (_, currentState) ->
-            currentState.events.status is Loading || !currentState.events.canLoadMore
+            currentState.events.status is Loading
+                    || !currentState.events.canLoadMore
+                    || currentState.events.data.isEmpty()
         }.flatMapFirst { (_, currentState) ->
             flow {
                 emit(currentState.copy(events = currentState.events.copyWithLoadingStatus))
                 val resource = viewModelScope.async {
                     withContext(ioDispatcher) {
-                        searchEvents(currentState.searchText, currentState.events.offset)
+                        searchEvents(
+                            searchText = currentState.searchText,
+                            offset = currentState.events.offset
+                        )
                     }
                 }
                 emit(currentState.reduce(resource = resource.await()))
             }
-        }
-    }
-
-    private fun Flow<Pair<AddToFavouritesClicked, SearchState>>.processAddToFavouritesIntents(): Flow<SearchState> {
-        return map { (_, currentState) ->
-            withContext(ioDispatcher) {
-                saveEvents(currentState.events.data.filter { it.selected }.map { it.item })
-            }
-            liveSignals.value = SearchSignal.FavouritesSaved
-            currentState.copy(events = currentState.events.transformItems { it.copy(selected = false) })
         }
     }
 }
