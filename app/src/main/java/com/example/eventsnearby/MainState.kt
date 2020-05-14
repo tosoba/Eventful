@@ -10,16 +10,20 @@ data class MainState(
 )
 
 internal fun MainState.reduce(result: LocationResult): MainState = copy(
-    locationState = if (result is LocationResult.Found) locationState.copy(
-        latLng = result.latLng,
-        status = LocationStatus.Found
-    ) else locationState.copy(
-        status = when (result) {
-            is LocationResult.Disabled -> LocationStatus.Disabled
-            is LocationResult.Error -> LocationStatus.Error(
-                result.throwable
-            )
-            else -> locationState.status
-        }
-    )
+    locationState = when (result) {
+        is LocationResult.Found -> locationState.copy(
+            latLng = result.latLng,
+            status = LocationStatus.Found
+        )
+        is LocationResult.Loading -> locationState.copy(status = LocationStatus.Loading)
+        else -> locationState.copy(
+            status = when (result) {
+                is LocationResult.Disabled -> LocationStatus.Disabled
+                is LocationResult.Error -> LocationStatus.Error(
+                    result.throwable
+                )
+                else -> locationState.status
+            }
+        )
+    }
 )

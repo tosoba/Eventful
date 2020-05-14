@@ -1,6 +1,7 @@
 package com.example.eventsnearby
 
 import androidx.lifecycle.viewModelScope
+import com.example.core.model.app.LocationResult
 import com.example.core.model.app.LocationState
 import com.example.core.model.app.LocationStatus
 import com.example.core.usecase.GetConnection
@@ -49,17 +50,13 @@ class MainViewModel(
         filterIsInstance<PermissionDenied>().withLatestState().processPermissionDeniedIntents()
     )
 
-    private fun locationLoadingStatesFlow(currentState: MainState): Flow<MainState> = flow {
-        emit(
-            currentState.copy(
-                locationState = currentState.locationState.copy(
-                    status = LocationStatus.Loading
-                )
-            )
-        )
-        val result = getLocation()
-        emit(currentState.reduce(result))
-    }
+    private val locationLoadingStatesFlow: Flow<MainState>
+        get() = flow {
+            emit(LocationResult.Loading)
+            val result = getLocation()
+            emit(result)
+        }.withLatestState()
+            .map { (result, currentState) -> currentState.reduce(result) }
 
     //TODO: either disable swipe refresh when event list is empty or use filterNot status is Loading
     private fun Flow<Pair<ReloadLocation, MainState>>.processReloadLocationIntents(): Flow<MainState> {
@@ -85,7 +82,7 @@ class MainViewModel(
             .withLatestState()
             .takeWhile { (_, currentState) -> currentState.locationState.status !is LocationStatus.Found }
             .flatMapConcat { (locationAvailable, currentState) ->
-                if (locationAvailable) locationLoadingStatesFlow(currentState)
+                if (locationAvailable) locationLoadingStatesFlow
                 else flowOf(
                     currentState.copy(
                         locationState = currentState.locationState.copy(
