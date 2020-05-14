@@ -48,7 +48,9 @@ class SearchViewModel(
                 .processClearSelectionIntents(),
             filterIsInstance<EventLongClicked>().withLatestState().processEventLongClickedIntents(),
             filterIsInstance<AddToFavouritesClicked>().withLatestState()
-                .processAddToFavouritesIntents(saveEvents, ioDispatcher)
+                .processAddToFavouritesIntentsWithSnackbar(saveEvents, ioDispatcher) {
+                    liveSignals.value = SearchSignal.FavouritesSaved
+                }
         )
     }
 

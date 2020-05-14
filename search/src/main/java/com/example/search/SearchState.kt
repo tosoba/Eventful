@@ -8,6 +8,7 @@ import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.PagedDataList
+import com.example.coreandroid.util.SelectableEventsSnackbarState
 import com.example.coreandroid.util.SelectableEventsState
 import com.haroldadmin.cnradapter.NetworkResponse
 
@@ -16,10 +17,19 @@ data class SearchState(
     val searchSuggestions: List<SearchSuggestion> = emptyList(),
     override val events: PagedDataList<Selectable<Event>> = PagedDataList(),
     val snackbarState: SnackbarState = SnackbarState.Hidden
-) : SelectableEventsState<SearchState> {
+) : SelectableEventsSnackbarState<SearchState> {
+
     override fun copyWithTransformedEvents(
         transform: (Selectable<Event>) -> Selectable<Event>
     ): SearchState = copy(events = events.transformItems(transform))
+
+    override fun copyWithSnackbarStateAndTransformedEvents(
+        snackbarState: SnackbarState,
+        transform: (Selectable<Event>) -> Selectable<Event>
+    ): SearchState = copy(
+        events = events.transformItems(transform),
+        snackbarState = snackbarState
+    )
 }
 
 internal fun SearchState.reduce(
@@ -41,9 +51,9 @@ internal fun SearchState.reduce(
         events = events.copyWithFailureStatus(resource.error),
         snackbarState = if (resource.error is NetworkResponse.ServerError<*>) {
             if ((resource.error as NetworkResponse.ServerError<*>).code in 503..504) {
-                SnackbarState.Text("No connection")
+                SnackbarState.Shown("No connection")
             } else {
-                SnackbarState.Text("Unknown network error.")
+                SnackbarState.Shown("Unknown network error.")
             }
         } else snackbarState,
         searchSuggestions = suggestions ?: searchSuggestions,

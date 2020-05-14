@@ -28,11 +28,11 @@ fun <T> T.handleSnackbarState(
 
     fun transitionBetween(previousState: SnackbarState?, newState: SnackbarState) {
         when (newState) {
-            is SnackbarState.Text -> {
+            is SnackbarState.Shown -> {
                 if (snackbar != null
                     && snackbar?.isShown != false
                     && snackbar?.duration == Snackbar.LENGTH_INDEFINITE
-                    && previousState is SnackbarState.Text
+                    && previousState is SnackbarState.Shown
                 ) {
                     snackbar?.setText(newState.text)
                 } else {
@@ -62,7 +62,7 @@ fun <T> T.handleSnackbarState(
 }
 
 sealed class SnackbarState {
-    class Text(
+    class Shown(
         val text: String,
         @Snackbar.Duration val length: Int = Snackbar.LENGTH_INDEFINITE,
         val action: SnackbarAction? = null

@@ -103,7 +103,7 @@ class EventFragment : InjectableFragment(), SnackbarController {
         viewModel.signals.observe(this, Observer {
             if (it is EventSignal.FavouriteStateToggled) {
                 transitionToSnackbarState(
-                    SnackbarState.Text(
+                    SnackbarState.Shown(
                         text = if (it.isFavourite) "Event was added to favourites"
                         else "Event was removed from favourites",
                         length = Snackbar.LENGTH_SHORT

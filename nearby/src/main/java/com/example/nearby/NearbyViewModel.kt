@@ -13,10 +13,7 @@ import com.example.coreandroid.controller.SnackbarAction
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.provider.ConnectivityStateProvider
 import com.example.coreandroid.provider.LocationStateProvider
-import com.example.coreandroid.util.Loading
-import com.example.coreandroid.util.processClearSelectionIntents
-import com.example.coreandroid.util.processEventLongClickedIntents
-import com.example.coreandroid.util.withLatestFrom
+import com.example.coreandroid.util.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -48,7 +45,9 @@ class NearbyViewModel(
         filterIsInstance<ClearSelectionClicked>().withLatestState().processClearSelectionIntents(),
         filterIsInstance<EventLongClicked>().withLatestState().processEventLongClickedIntents(),
         filterIsInstance<AddToFavouritesClicked>().withLatestState()
-            .processAddToFavouritesIntents(),
+            .processAddToFavouritesIntentsWithSnackbar(saveEvents, ioDispatcher) {
+                liveSignals.value = NearbySignal.FavouritesSaved
+            },
         filterIsInstance<EventListScrolledToEnd>().withLatestState().processScrolledToEndIntents()
     )
 
@@ -73,16 +72,16 @@ class NearbyViewModel(
                 val (_, status) = location
                 when (status) {
                     LocationStatus.PermissionDenied -> currentState.copy(
-                        snackbarState = SnackbarState.Text("No location permission")
+                        snackbarState = SnackbarState.Shown("No location permission")
                     )
                     LocationStatus.Disabled -> currentState.copy(
-                        snackbarState = SnackbarState.Text("Location disabled")
+                        snackbarState = SnackbarState.Shown("Location disabled")
                     )
                     LocationStatus.Loading -> currentState.copy(
-                        snackbarState = SnackbarState.Text("Loading location...")
+                        snackbarState = SnackbarState.Shown("Loading location...")
                     )
                     is LocationStatus.Error -> currentState.copy(
-                        snackbarState = SnackbarState.Text(
+                        snackbarState = SnackbarState.Shown(
                             "Unable to load location - error occurred",
                             action = SnackbarAction(
                                 "Retry",
@@ -115,31 +114,20 @@ class NearbyViewModel(
 
     private val Flow<LocationState>.notNullLatLng get() = map { it.latLng }.filterNotNull()
 
-    private fun loadingEventsFlow(latLng: LatLng, currentState: NearbyState): Flow<NearbyState> =
-        flow {
-            emit(
-                currentState.copy(
-                    events = currentState.events.copyWithLoadingStatus,
-                    snackbarState = if (currentState.events.data.isEmpty())
-                        SnackbarState.Text("Loading nearby events...")
-                    else currentState.snackbarState
-                )
-            )
-            val result = withContext(ioDispatcher) {
-                getNearbyEvents(latLng.lat, latLng.lng, currentState.events.offset)
-            }
-            emit(currentState.reduce(result))
-        }
-
-    private fun Flow<Pair<AddToFavouritesClicked, NearbyState>>.processAddToFavouritesIntents(): Flow<NearbyState> {
-        return map { (_, currentState) ->
-            withContext(ioDispatcher) {
-                saveEvents(currentState.events.data.filter { it.selected }.map { it.item })
-            }
-            liveSignals.value = NearbySignal.FavouritesSaved
+    private fun loadingEventsFlow(
+        latLng: LatLng, currentState: NearbyState
+    ): Flow<NearbyState> = flow {
+        emit(
             currentState.copy(
-                events = currentState.events.transformItems { it.copy(selected = false) }
-            ) //TODO: snackbar state with info how many added
+                events = currentState.events.copyWithLoadingStatus,
+                snackbarState = if (currentState.events.data.isEmpty())
+                    SnackbarState.Shown("Loading nearby events...")
+                else currentState.snackbarState
+            )
+        )
+        val result = withContext(ioDispatcher) {
+            getNearbyEvents(latLng.lat, latLng.lng, currentState.events.offset)
         }
+        emit(currentState.reduce(result))
     }
 }
