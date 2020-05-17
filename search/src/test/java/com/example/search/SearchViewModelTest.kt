@@ -223,4 +223,53 @@ internal class SearchViewModelTest {
             coVerify(exactly = 1) { getSearchSuggestions(searchText) }
         }
     }
+
+    @Test
+    fun `GivenSearchVM WhenLoadMoreResultsIsCalled ResultsAreLoadedUntilLimitIsHit`() {
+        testScope.runBlockingTest {
+            val returnedEventsListSize = 20
+            val totalPages = 2
+            val searchEvents = mockk<SearchEvents> {
+                coEvery { this@mockk(any()) } returns Resource.successWith(
+                    PagedResult(
+                        relaxedMockedList<IEvent>(returnedEventsListSize),
+                        0,
+                        totalPages
+                    )
+                )
+
+                coEvery { this@mockk(any(), 1) } returns Resource.successWith(
+                    PagedResult(
+                        relaxedMockedList<IEvent>(returnedEventsListSize),
+                        1,
+                        totalPages
+                    )
+                )
+            }
+            val getSearchSuggestions = mockk<GetSeachSuggestions> {
+                coEvery { this@mockk(any()) } returns relaxedMockedList<SearchSuggestion>(1)
+            }
+            val initialState = SearchState()
+            val viewModel = searchViewModel(
+                searchEvents = searchEvents,
+                getSearchSuggestions = getSearchSuggestions,
+                initialState = initialState
+            )
+            val searchText = "test"
+
+            viewModel.send(NewSearch(searchText, false))
+            viewModel.send(LoadMoreResults)
+            viewModel.send(LoadMoreResults)
+
+            coVerify(exactly = 1) { searchEvents(searchText, 1) }
+            val (finalSearchText, _, finalEvents, _) = viewModel.state
+            assert(
+                finalSearchText == searchText
+                        && !finalEvents.canLoadMore
+                        && finalEvents.offset == totalPages
+                        && finalEvents.status is LoadedSuccessfully
+                        && finalEvents.data.size == returnedEventsListSize * 2
+            )
+        }
+    }
 }
