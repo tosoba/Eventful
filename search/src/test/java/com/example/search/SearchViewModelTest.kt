@@ -10,9 +10,13 @@ import com.example.core.usecase.SaveEvents
 import com.example.core.usecase.SaveSuggestion
 import com.example.core.usecase.SearchEvents
 import com.example.coreandroid.provider.ConnectivityStateProvider
+import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.LoadedSuccessfully
 import com.example.coreandroid.util.Loading
+import com.example.coreandroid.util.PagedDataList
 import com.example.coreandroid.util.takeWhileInclusive
+import com.example.test.rule.event
+import com.example.test.rule.mockedList
 import com.example.test.rule.onPausedDispatcher
 import com.example.test.rule.relaxedMockedList
 import io.mockk.coEvery
@@ -270,6 +274,42 @@ internal class SearchViewModelTest {
                         && finalEvents.status is LoadedSuccessfully
                         && finalEvents.data.size == returnedEventsListSize * 2
             )
+        }
+    }
+
+    @Test
+    fun `GivenSearchVMWithInitialEvents WhenEventIsLongClicked EventSelectionChanges`() {
+        testScope.runBlockingTest {
+            val eventsList = mockedList(20) { event(it) }
+            val viewModel = searchViewModel(
+                initialState = SearchState(
+                    events = PagedDataList(eventsList.map { Selectable(it) })
+                )
+            )
+
+            viewModel.send(EventLongClicked(eventsList.first()))
+            assert(viewModel.state.events.data.first().selected)
+
+            viewModel.send(EventLongClicked(eventsList.first()))
+            assert(!viewModel.state.events.data.first().selected)
+        }
+    }
+
+    @Test
+    fun `GivenSearchVMWithInitialEvents WhenClearSelectionClicked NoEventsAreSelected`() {
+        testScope.runBlockingTest {
+            val eventsList = mockedList(20) { event(it) }
+            val viewModel = searchViewModel(
+                initialState = SearchState(
+                    events = PagedDataList(eventsList.map { Selectable(it) })
+                )
+            )
+
+            viewModel.send(EventLongClicked(eventsList.first()))
+            viewModel.send(EventLongClicked(eventsList.last()))
+            viewModel.send(ClearSelectionClicked)
+
+            assert(!viewModel.state.events.data.any { it.selected })
         }
     }
 }
