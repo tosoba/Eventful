@@ -31,18 +31,6 @@ interface EventSelectionToggledIntent {
 
 interface AddToFavouritesIntent
 
-fun <I : ClearEventSelectionIntent, S : SelectableEventsState<S>> Flow<I>.processClearSelectionIntents(
-    currentState: () -> S
-): Flow<S> = map { currentState().copyWithTransformedEvents { it.copy(selected = false) } }
-
-fun <I : EventSelectionToggledIntent, S : SelectableEventsState<S>> Flow<I>.processEventLongClickedIntents(
-    currentState: () -> S
-): Flow<S> = map { intent ->
-    currentState().copyWithTransformedEvents {
-        if (it.item.id == intent.event.id) Selectable(intent.event, !it.selected) else it
-    }
-}
-
 fun <I : ClearEventSelectionIntent, S : SelectableEventsState<S>> Flow<Pair<I, S>>.processClearSelectionIntents(): Flow<S> {
     return map { (_, state) -> state.copyWithTransformedEvents { it.copy(selected = false) } }
 }
@@ -53,18 +41,6 @@ fun <I : EventSelectionToggledIntent, S : SelectableEventsState<S>> Flow<Pair<I,
             if (it.item.id == intent.event.id) Selectable(intent.event, !it.selected) else it
         }
     }
-}
-
-fun <I : AddToFavouritesIntent, S : SelectableEventsState<S>> Flow<Pair<I, S>>.processAddToFavouritesIntents(
-    saveEvents: SaveEvents,
-    ioDispatcher: CoroutineDispatcher,
-    sideEffect: (() -> Unit)? = null
-): Flow<S> = map { (_, currentState) ->
-    withContext(ioDispatcher) {
-        saveEvents(currentState.events.data.filter { it.selected }.map { it.item })
-    }
-    sideEffect?.invoke()
-    currentState.copyWithTransformedEvents { it.copy(selected = false) }
 }
 
 fun <I : AddToFavouritesIntent, S : SelectableEventsSnackbarState<S>> Flow<Pair<I, S>>.processAddToFavouritesIntentsWithSnackbar(
@@ -78,8 +54,8 @@ fun <I : AddToFavouritesIntent, S : SelectableEventsSnackbarState<S>> Flow<Pair<
     currentState.copyWithSnackbarStateAndTransformedEvents(
         SnackbarState.Shown(
             """${selectedEvents.size}
-                |${if (selectedEvents.size > 1) "events" else "event"} 
-                |were added to favourites""".trimMargin(),
+                |${if (selectedEvents.size > 1) " events were" else " event was"} 
+                |added to favourites""".trimMargin().replace("\n", ""),
             length = Snackbar.LENGTH_SHORT
         )
     ) { event ->

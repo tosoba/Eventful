@@ -9,6 +9,7 @@ import com.example.core.usecase.GetSeachSuggestions
 import com.example.core.usecase.SaveEvents
 import com.example.core.usecase.SaveSuggestion
 import com.example.core.usecase.SearchEvents
+import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.provider.ConnectivityStateProvider
 import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.LoadedSuccessfully
@@ -19,6 +20,7 @@ import com.example.test.rule.event
 import com.example.test.rule.mockedList
 import com.example.test.rule.onPausedDispatcher
 import com.example.test.rule.relaxedMockedList
+import com.google.android.material.snackbar.Snackbar
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -310,6 +312,35 @@ internal class SearchViewModelTest {
             viewModel.send(ClearSelectionClicked)
 
             assert(!viewModel.state.events.data.any { it.selected })
+        }
+    }
+
+    @Test
+    fun `GivenSearchVMWithInitialEvents WhenAddToFavourites SelectedEventsAreAddedToFavourites`() {
+        testScope.runBlockingTest {
+            val eventsList = mockedList(20) { event(it) }
+            val saveEvents = mockk<SaveEvents>(relaxed = true)
+            val viewModel = searchViewModel(
+                saveEvents = saveEvents,
+                initialState = SearchState(
+                    events = PagedDataList(eventsList.map { Selectable(it) })
+                )
+            )
+
+            viewModel.send(EventLongClicked(eventsList.first()))
+            viewModel.send(EventLongClicked(eventsList.last()))
+            viewModel.send(AddToFavouritesClicked)
+
+            coVerify(exactly = 1) { saveEvents(listOf(eventsList.first(), eventsList.last())) }
+            val (_, _, finalEvents, finalSnackbarState) = viewModel.state
+            assert(!finalEvents.data.any { it.selected })
+            assert(
+                finalSnackbarState == SnackbarState.Shown(
+                    text = "2 events were added to favourites",
+                    length = Snackbar.LENGTH_SHORT
+                )
+            )
+            assert(viewModel.signals.value == SearchSignal.FavouritesSaved)
         }
     }
 }

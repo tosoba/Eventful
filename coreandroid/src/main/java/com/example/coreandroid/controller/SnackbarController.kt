@@ -62,7 +62,7 @@ fun <T> T.handleSnackbarState(
 }
 
 sealed class SnackbarState {
-    class Shown(
+    data class Shown(
         val text: String,
         @Snackbar.Duration val length: Int = Snackbar.LENGTH_INDEFINITE,
         val action: SnackbarAction? = null
