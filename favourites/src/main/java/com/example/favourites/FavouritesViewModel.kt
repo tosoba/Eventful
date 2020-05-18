@@ -3,7 +3,6 @@ package com.example.favourites
 import androidx.lifecycle.viewModelScope
 import com.example.core.usecase.DeleteEvents
 import com.example.core.usecase.GetSavedEvents
-import com.example.core.util.flatMapFirst
 import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable
@@ -28,18 +27,26 @@ class FavouritesViewModel(
 
     init {
         intentsChannel.asFlow()
-            .onStart { emit(LoadFavourites) }
-            .processIntents()
+            .processIntents(initialState)
             .onEach(statesChannel::send)
             .launchIn(viewModelScope)
     }
 
-    private fun Flow<FavouritesIntent>.processIntents(): Flow<FavouritesState> = merge(
-        filterIsInstance<LoadFavourites>().withLatestState().processLoadFavouritesIntents(),
-        filterIsInstance<EventLongClicked>().withLatestState().processEventLongClickedIntents(),
-        filterIsInstance<ClearSelectionClicked>().withLatestState()
+    private fun Flow<FavouritesIntent>.processIntents(
+        initialState: FavouritesState
+    ): Flow<FavouritesState> = merge(
+        filterIsInstance<LoadFavourites>()
+            .onStart { emit(LoadFavourites) }
+            .withLatestState()
+            .processLoadFavouritesIntents(initialState),
+        filterIsInstance<EventLongClicked>()
+            .withLatestState()
+            .processEventLongClickedIntents(),
+        filterIsInstance<ClearSelectionClicked>()
+            .withLatestState()
             .processClearSelectionIntents(),
-        filterIsInstance<RemoveFromFavouritesClicked>().withLatestState()
+        filterIsInstance<RemoveFromFavouritesClicked>()
+            .withLatestState()
             .map { (_, state) ->
                 withContext(ioDispatcher) {
                     deleteEvents(state.events.data.filter { it.selected }.map { it.item })
@@ -49,23 +56,24 @@ class FavouritesViewModel(
             }
     )
 
-    private fun Flow<Pair<LoadFavourites, FavouritesState>>.processLoadFavouritesIntents(): Flow<FavouritesState> {
-        return filterNot { (_, currentState) -> currentState.events.limitHit }
-            .flatMapFirst { (_, currentState) ->
-                getSavedEvents(currentState.limit + limitIncrement)
-                    .flowOn(ioDispatcher)
-                    .map { events ->
-                        currentState.copy(
-                            events = DataList(
-                                data = events.map { Selectable(Event(it)) },
-                                status = LoadedSuccessfully,
-                                limitHit = currentState.events.data.size == events.size
-                            ),
-                            limit = events.size
-                        )
-                    }
-            }
-    }
+    private fun Flow<Pair<LoadFavourites, FavouritesState>>.processLoadFavouritesIntents(
+        initialState: FavouritesState
+    ): Flow<FavouritesState> = filterNot { (_, currentState) -> currentState.events.limitHit }
+        .onStart { emit(LoadFavourites to initialState) }
+        .flatMapLatest { (_, currentState) ->
+            getSavedEvents(currentState.limit + limitIncrement)
+                .flowOn(ioDispatcher)
+                .map { events ->
+                    currentState.copy(
+                        events = DataList(
+                            data = events.map { Selectable(Event(it)) },
+                            status = LoadedSuccessfully,
+                            limitHit = currentState.events.data.size == events.size
+                        ),
+                        limit = events.size
+                    )
+                }
+        }
 
     companion object {
         const val limitIncrement: Int = 20 //TODO: move to settings later?
