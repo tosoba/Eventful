@@ -67,6 +67,15 @@ data class PagedDataList<T>(
         status = LoadedSuccessfully,
         limit = totalItems
     )
+
+    fun <K> copyWithNewItemsDistinct(
+        newItems: List<T>, offset: Int, totalItems: Int, selector: (T) -> K
+    ): PagedDataList<T> = copy(
+        data = (data + newItems).distinctBy(selector),
+        offset = offset,
+        status = LoadedSuccessfully,
+        limit = totalItems
+    )
 }
 
 sealed class DataStatus

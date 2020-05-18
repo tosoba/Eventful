@@ -9,8 +9,8 @@ import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.PagedDataList
 import com.example.coreandroid.util.SelectableEventsSnackbarState
-import com.example.coreandroid.util.SelectableEventsState
 import com.haroldadmin.cnradapter.NetworkResponse
+import java.util.*
 
 data class SearchState(
     val searchText: String = "",
@@ -42,11 +42,13 @@ internal fun SearchState.reduce(
     text: String? = null
 ): SearchState = when (resource) {
     is Resource.Success -> copy(
-        events = events.copyWithNewItems(
+        events = events.copyWithNewItemsDistinct(
             resource.data.items.map { Selectable(Event(it)) },
             resource.data.currentPage + 1,
             resource.data.totalPages
-        ),
+        ) {
+            it.item.name.toLowerCase(Locale.getDefault()).trim()
+        },
         searchSuggestions = suggestions ?: searchSuggestions,
         searchText = text ?: searchText
     )

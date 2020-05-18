@@ -90,7 +90,7 @@ class SearchViewModel(
             currentState.events.status is Loading
                     || !currentState.events.canLoadMore
                     || currentState.events.data.isEmpty()
-        }.flatMapFirst { (_, currentState) ->
+        }.flatMapFirst { (_, currentState) -> //TODO: use another withLatestFrom here
             flow {
                 emit(currentState.copy(events = currentState.events.copyWithLoadingStatus))
                 val resource = viewModelScope.async {
@@ -101,7 +101,11 @@ class SearchViewModel(
                         )
                     }
                 }
-                emit(currentState.reduce(resource = resource.await()))
+                val newState = currentState.reduce(resource = resource.await())
+                emit(newState).also {
+                    if (newState.events.data.size == currentState.events.data.size)
+                        intentsChannel.offer(LoadMoreResults)
+                }
             }
         }
     }

@@ -8,7 +8,6 @@ import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.PagedDataList
 import com.example.coreandroid.util.SelectableEventsSnackbarState
-import com.example.coreandroid.util.SelectableEventsState
 import com.haroldadmin.cnradapter.NetworkResponse
 import java.util.*
 
@@ -38,13 +37,13 @@ internal fun NearbyState.reduce(
     resource: Resource<PagedResult<IEvent>>
 ): NearbyState = when (resource) {
     is Resource.Success -> copy(
-        events = events.copyWithNewItems(
-            //TODO: make distinctBy work on (Paged)DataList (to prevent duplicates between pages)
-            resource.data.items.map { Selectable(Event(it)) }
-                .distinctBy { it.item.name.toLowerCase(Locale.getDefault()).trim() },
+        events = events.copyWithNewItemsDistinct(
+            resource.data.items.map { Selectable(Event(it)) },
             resource.data.currentPage + 1,
             resource.data.totalPages
-        ),
+        ) {
+            it.item.name.toLowerCase(Locale.getDefault()).trim()
+        },
         snackbarState = SnackbarState.Hidden
     )
 

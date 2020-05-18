@@ -134,7 +134,7 @@ internal class SearchViewModelTest {
             val searchEvents = mockk<SearchEvents> {
                 coEvery { this@mockk(any()) } returns Resource.successWith(
                     PagedResult(
-                        relaxedMockedList<IEvent>(returnedEventsListSize),
+                        mockedList<IEvent>(returnedEventsListSize) { event(it) },
                         currentPage,
                         totalPages
                     )
@@ -238,7 +238,7 @@ internal class SearchViewModelTest {
             val searchEvents = mockk<SearchEvents> {
                 coEvery { this@mockk(any()) } returns Resource.successWith(
                     PagedResult(
-                        relaxedMockedList<IEvent>(returnedEventsListSize),
+                        mockedList<IEvent>(returnedEventsListSize) { event(it) },
                         0,
                         totalPages
                     )
@@ -246,7 +246,7 @@ internal class SearchViewModelTest {
 
                 coEvery { this@mockk(any(), 1) } returns Resource.successWith(
                     PagedResult(
-                        relaxedMockedList<IEvent>(returnedEventsListSize),
+                        mockedList<IEvent>(returnedEventsListSize) { event(it + 20) },
                         1,
                         totalPages
                     )
