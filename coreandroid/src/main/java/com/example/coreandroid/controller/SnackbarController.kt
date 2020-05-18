@@ -66,14 +66,16 @@ fun <T> T.handleSnackbarState(
             Pair(last2States.second, newState)
         }
         .drop(1)
-        .onEach { states -> transitionBetween(states.first, states.second!!) }
+        .onEach { (previous, new) ->
+            if (previous != new) transitionBetween(previous, new!!)
+        }
         .launchIn(lifecycleScope)
 
     return snackbarStateChannel
 }
 
 sealed class SnackbarState {
-    class Shown( //TODO: split Shown into Disimissable (indefinite) or non dismissable (short/long)
+    data class Shown( //TODO: split Shown into Disimissable (indefinite) or non dismissable (short/long)
         val text: String,
         @Snackbar.Duration val length: Int = Snackbar.LENGTH_INDEFINITE,
         val action: SnackbarAction? = null,
