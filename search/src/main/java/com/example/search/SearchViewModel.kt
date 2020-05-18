@@ -47,10 +47,14 @@ class SearchViewModel(
             filterIsInstance<ClearSelectionClicked>().withLatestState()
                 .processClearSelectionIntents(),
             filterIsInstance<EventLongClicked>().withLatestState().processEventLongClickedIntents(),
+            filterIsInstance<HideSnackbarIntent>().withLatestState().processHideSnackbarIntents(),
             filterIsInstance<AddToFavouritesClicked>().withLatestState()
-                .processAddToFavouritesIntentsWithSnackbar(saveEvents, ioDispatcher) {
-                    liveSignals.value = SearchSignal.FavouritesSaved
-                }
+                .processAddToFavouritesIntentsWithSnackbar(
+                    saveEvents = saveEvents,
+                    ioDispatcher = ioDispatcher,
+                    onDismissed = { viewModelScope.launch { send(HideSnackbar) } },
+                    sideEffect = { liveSignals.value = SearchSignal.FavouritesSaved }
+                )
         )
     }
 

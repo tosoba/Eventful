@@ -3,6 +3,7 @@ package com.example.coreandroid.controller
 import android.view.View
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -39,6 +40,16 @@ fun <T> T.handleSnackbarState(
                     snackbar?.dismiss()
                     snackbar = Snackbar.make(view, newState.text, newState.length).apply {
                         newState.action?.let { setAction(it.msg, it.onClickListener) }
+                        if (newState.onDismissed != null) {
+                            addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                                override fun onDismissed(
+                                    transientBottomBar: Snackbar?,
+                                    event: Int
+                                ) {
+                                    newState.onDismissed.invoke()
+                                }
+                            })
+                        }
                         show()
                     }
                 }
@@ -62,10 +73,11 @@ fun <T> T.handleSnackbarState(
 }
 
 sealed class SnackbarState {
-    data class Shown(
+    class Shown( //TODO: split Shown into Disimissable (indefinite) or non dismissable (short/long)
         val text: String,
         @Snackbar.Duration val length: Int = Snackbar.LENGTH_INDEFINITE,
-        val action: SnackbarAction? = null
+        val action: SnackbarAction? = null,
+        val onDismissed: (() -> Unit)? = null
     ) : SnackbarState()
 
     object Hidden : SnackbarState()

@@ -30,6 +30,10 @@ data class SearchState(
         events = events.transformItems(transform),
         snackbarState = snackbarState
     )
+
+    override fun copyWithSnackbarState(snackbarState: SnackbarState): SearchState = copy(
+        snackbarState = snackbarState
+    )
 }
 
 internal fun SearchState.reduce(

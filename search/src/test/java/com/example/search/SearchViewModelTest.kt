@@ -335,10 +335,9 @@ internal class SearchViewModelTest {
             val (_, _, finalEvents, finalSnackbarState) = viewModel.state
             assert(!finalEvents.data.any { it.selected })
             assert(
-                finalSnackbarState == SnackbarState.Shown(
-                    text = "2 events were added to favourites",
-                    length = Snackbar.LENGTH_SHORT
-                )
+                finalSnackbarState is SnackbarState.Shown
+                        && finalSnackbarState.text == "2 events were added to favourites"
+                        && finalSnackbarState.length == Snackbar.LENGTH_SHORT
             )
             assert(viewModel.signals.value == SearchSignal.FavouritesSaved)
         }

@@ -28,6 +28,10 @@ data class NearbyState(
         events = events.transformItems(transform),
         snackbarState = snackbarState
     )
+
+    override fun copyWithSnackbarState(snackbarState: SnackbarState): NearbyState = copy(
+        snackbarState = snackbarState
+    )
 }
 
 internal fun NearbyState.reduce(

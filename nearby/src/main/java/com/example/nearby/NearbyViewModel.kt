@@ -14,11 +14,8 @@ import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.provider.ConnectivityStateProvider
 import com.example.coreandroid.provider.LocationStateProvider
 import com.example.coreandroid.util.*
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.withContext
 
 
 @ExperimentalCoroutinesApi
@@ -44,10 +41,14 @@ class NearbyViewModel(
     private fun Flow<NearbyIntent>.processIntents(): Flow<NearbyState> = merge(
         filterIsInstance<ClearSelectionClicked>().withLatestState().processClearSelectionIntents(),
         filterIsInstance<EventLongClicked>().withLatestState().processEventLongClickedIntents(),
+        filterIsInstance<HideSnackbarIntent>().withLatestState().processHideSnackbarIntents(),
         filterIsInstance<AddToFavouritesClicked>().withLatestState()
-            .processAddToFavouritesIntentsWithSnackbar(saveEvents, ioDispatcher) {
-                liveSignals.value = NearbySignal.FavouritesSaved
-            },
+            .processAddToFavouritesIntentsWithSnackbar(
+                saveEvents = saveEvents,
+                ioDispatcher = ioDispatcher,
+                onDismissed = { viewModelScope.launch { send(HideSnackbar) } },
+                sideEffect = { liveSignals.value = NearbySignal.FavouritesSaved }
+            ),
         filterIsInstance<EventListScrolledToEnd>().withLatestState().processScrolledToEndIntents()
     )
 

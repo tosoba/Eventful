@@ -16,12 +16,18 @@ interface SelectableEventsState<S : SelectableEventsState<S>> {
 }
 
 interface SelectableEventsSnackbarState<S : SelectableEventsSnackbarState<S>> :
-    SelectableEventsState<S> {
+    SelectableEventsState<S>, HoldsSnackbarState<S> {
     fun copyWithSnackbarStateAndTransformedEvents(
         snackbarState: SnackbarState,
         transform: (Selectable<Event>) -> Selectable<Event>
     ): S
 }
+
+interface HoldsSnackbarState<S> {
+    fun copyWithSnackbarState(snackbarState: SnackbarState): S
+}
+
+interface HideSnackbarIntent
 
 interface ClearEventSelectionIntent
 
@@ -43,9 +49,14 @@ fun <I : EventSelectionToggledIntent, S : SelectableEventsState<S>> Flow<Pair<I,
     }
 }
 
+fun <I : HideSnackbarIntent, S : HoldsSnackbarState<S>> Flow<Pair<I, S>>.processHideSnackbarIntents(): Flow<S> {
+    return map { (_, state) -> state.copyWithSnackbarState(snackbarState = SnackbarState.Hidden) }
+}
+
 fun <I : AddToFavouritesIntent, S : SelectableEventsSnackbarState<S>> Flow<Pair<I, S>>.processAddToFavouritesIntentsWithSnackbar(
     saveEvents: SaveEvents,
     ioDispatcher: CoroutineDispatcher,
+    onDismissed: (() -> Unit)? = null,
     sideEffect: (() -> Unit)? = null
 ): Flow<S> = map { (_, currentState) ->
     val selectedEvents = currentState.events.data.filter { it.selected }.map { it.item }
@@ -56,7 +67,8 @@ fun <I : AddToFavouritesIntent, S : SelectableEventsSnackbarState<S>> Flow<Pair<
             """${selectedEvents.size}
                 |${if (selectedEvents.size > 1) " events were" else " event was"} 
                 |added to favourites""".trimMargin().replace("\n", ""),
-            length = Snackbar.LENGTH_SHORT
+            length = Snackbar.LENGTH_SHORT,
+            onDismissed = onDismissed
         )
     ) { event ->
         event.copy(selected = false)
