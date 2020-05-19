@@ -87,26 +87,27 @@ class SearchViewModel(
 
     private fun Flow<Pair<LoadMoreResults, SearchState>>.processLoadMoreResultsIntents(): Flow<SearchState> {
         return filterNot { (_, currentState) ->
-            currentState.events.status is Loading
-                    || !currentState.events.canLoadMore
-                    || currentState.events.data.isEmpty()
-        }.flatMapFirst { (_, currentState) -> //TODO: use another withLatestFrom here
-            flow {
-                emit(currentState.copy(events = currentState.events.copyWithLoadingStatus))
-                val resource = viewModelScope.async {
-                    withContext(ioDispatcher) {
-                        searchEvents(
-                            searchText = currentState.searchText,
-                            offset = currentState.events.offset
-                        )
+            val events = currentState.events
+            events.status is Loading || !events.canLoadMore || events.data.isEmpty()
+        }.flatMapFirst { (_, startState) ->
+            val resourceFlow = flowOf(
+                searchEvents(
+                    searchText = startState.searchText,
+                    offset = startState.events.offset
+                )
+            )
+            resourceFlow
+                .flowOn(ioDispatcher)
+                .withLatestState()
+                .map { (resource, state) -> state.reduce(resource) }
+                .onStart { emit(startState.copy(events = startState.events.copyWithLoadingStatus)) }
+                .onEach { newState ->
+                    if (newState.events.data.size == startState.events.data.size
+                        && newState.events.status is LoadedSuccessfully
+                    ) {
+                        intentsChannel.offer(LoadMoreResults)
                     }
                 }
-                val newState = currentState.reduce(resource = resource.await())
-                emit(newState).also {
-                    if (newState.events.data.size == currentState.events.data.size)
-                        intentsChannel.offer(LoadMoreResults)
-                }
-            }
         }
     }
 }

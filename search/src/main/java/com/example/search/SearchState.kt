@@ -46,8 +46,8 @@ internal fun SearchState.reduce(
             resource.data.items.map { Selectable(Event(it)) },
             resource.data.currentPage + 1,
             resource.data.totalPages
-        ) {
-            it.item.name.toLowerCase(Locale.getDefault()).trim()
+        ) { (event, _) ->
+            event.name.toLowerCase(Locale.getDefault()).trim()
         },
         searchSuggestions = suggestions ?: searchSuggestions,
         searchText = text ?: searchText
