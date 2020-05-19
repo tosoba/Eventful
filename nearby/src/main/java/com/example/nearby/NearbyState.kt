@@ -3,13 +3,13 @@ package com.example.nearby
 import com.example.core.Resource
 import com.example.core.model.PagedResult
 import com.example.core.model.ticketmaster.IEvent
+import com.example.core.model.ticketmaster.trimmedLowerCasedName
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.PagedDataList
 import com.example.coreandroid.util.SelectableEventsSnackbarState
 import com.haroldadmin.cnradapter.NetworkResponse
-import java.util.*
 
 data class NearbyState(
     override val events: PagedDataList<Selectable<Event>> = PagedDataList(),
@@ -41,9 +41,7 @@ internal fun NearbyState.reduce(
             resource.data.items.map { Selectable(Event(it)) },
             resource.data.currentPage + 1,
             resource.data.totalPages
-        ) { (event, _) ->
-            event.name.toLowerCase(Locale.getDefault()).trim()
-        },
+        ) { (event, _) -> event.trimmedLowerCasedName },
         snackbarState = SnackbarState.Hidden
     )
 

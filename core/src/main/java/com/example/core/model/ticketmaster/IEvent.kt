@@ -18,3 +18,5 @@ interface IEvent {
     val attractions: List<IAttraction>?
     val priceRanges: List<IPriceRange>?
 }
+
+val IEvent.trimmedLowerCasedName: String get() = name.toLowerCase(Locale.getDefault()).trim()

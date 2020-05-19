@@ -104,9 +104,8 @@ class NearbyViewModel(
 
     private fun Flow<Pair<EventListScrolledToEnd, NearbyState>>.processScrolledToEndIntents(): Flow<NearbyState> {
         return filterNot { (_, currentState) ->
-            currentState.events.status is Loading
-                    || currentState.events.data.isEmpty()
-                    || currentState.events.offset >= currentState.events.limit
+            val events = currentState.events
+            events.status is Loading || !events.canLoadMore || events.data.isEmpty()
         }.withLatestFrom(locationStateProvider.locationStateFlow.notNullLatLng) { intentWithState, latLng ->
             val (_, currentState) = intentWithState
             latLng to currentState
