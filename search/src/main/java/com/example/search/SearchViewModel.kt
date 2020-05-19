@@ -5,7 +5,6 @@ import com.example.core.usecase.GetSeachSuggestions
 import com.example.core.usecase.SaveEvents
 import com.example.core.usecase.SaveSuggestion
 import com.example.core.usecase.SearchEvents
-import com.example.core.util.flatMapFirst
 import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.provider.ConnectivityStateProvider
 import com.example.coreandroid.util.*
@@ -86,14 +85,16 @@ class SearchViewModel(
     }
 
     private fun Flow<Pair<LoadMoreResults, SearchState>>.processLoadMoreResultsIntents(): Flow<SearchState> {
-        return filterNot { (_, currentState) ->
+        return filterNot { (intent, currentState) ->
             val events = currentState.events
-            events.status is Loading || !events.canLoadMore || events.data.isEmpty()
-        }.flatMapFirst { (_, startState) ->
+            (events.status is Loading && intent.offset == null) //TODO: maybe get rid of that condition and flatMapFirst?
+                    || !events.canLoadMore
+                    || events.data.isEmpty()
+        }.flatMapLatest { (intent, startState) -> //TODO: latest vs first vs concat?
             val resourceFlow = flowOf(
                 searchEvents(
                     searchText = startState.searchText,
-                    offset = startState.events.offset
+                    offset = intent.offset ?: startState.events.offset
                 )
             )
             resourceFlow
@@ -105,7 +106,7 @@ class SearchViewModel(
                     if (newState.events.data.size == startState.events.data.size
                         && newState.events.status is LoadedSuccessfully
                     ) {
-                        intentsChannel.offer(LoadMoreResults)
+                        send(LoadMoreResults(newState.events.offset)) //TODO: maybe instead of sending another intent replace it with a while loop or smth
                     }
                 }
         }

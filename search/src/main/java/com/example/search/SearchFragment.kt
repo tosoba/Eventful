@@ -46,7 +46,7 @@ class SearchFragment : InjectableFragment() {
         infiniteItemListController<Selectable<Event>>(
             epoxyThreads,
             emptyText = "No events found",
-            loadMore = { lifecycleScope.launch { viewModel.send(LoadMoreResults) } }
+            loadMore = { lifecycleScope.launch { viewModel.send(LoadMoreResults()) } }
         ) { selectable ->
             selectable.listItem(
                 clicked = View.OnClickListener {
