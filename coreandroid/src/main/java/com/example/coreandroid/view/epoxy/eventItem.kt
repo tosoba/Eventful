@@ -67,7 +67,7 @@ fun Selectable<Event>.listItem(
 val Event.kindsCarousel: CarouselModel_
     get() = NestedScrollingCarouselModel()
         .id("${id}c")
-        .models(kinds.mapIndexed { index: Int, kind: String ->
+        .models(kinds?.mapIndexed { index: Int, kind: String ->
             EventKindBindingModel_().id("${id}k$index")
                 .kind(kind)
-        })
+        } ?: emptyList())

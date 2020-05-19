@@ -44,6 +44,6 @@ data class FullEventEntity(
     override val salesEndDate: Date? get() = event.salesEndDate
     override val startDate: Date? get() = event.startDate
     override val startTime: String? get() = event.startTime
-    override val kinds: List<String> get() = event.kinds
+    override val kinds: List<String>? get() = event.kinds
     override val priceRanges: List<IPriceRange>? get() = event.priceRanges
 }
