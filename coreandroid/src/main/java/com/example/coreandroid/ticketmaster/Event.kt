@@ -17,7 +17,7 @@ data class Event(
     override val salesEndDate: Date?,
     override val startDate: Date?,
     override val startTime: String?,
-    override val kinds: List<String>?,
+    override val kinds: List<String>,
     override val venues: List<Venue>?,
     override val attractions: List<Attraction>?,
     override val priceRanges: List<PriceRange>?

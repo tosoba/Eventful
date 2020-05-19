@@ -18,7 +18,7 @@ data class EventEntity(
     @ColumnInfo(name = "sales_end_date") val salesEndDate: Date?,
     @ColumnInfo(name = "start_date") val startDate: Date?,
     @ColumnInfo(name = "start_time") val startTime: String?,
-    val kinds: List<String>?,
+    val kinds: List<String>,
     @ColumnInfo(name = "price_ranges") val priceRanges: List<PriceRangeEntity>?,
     @ColumnInfo(name = "date_saved") val dateSaved: Date
 ) {

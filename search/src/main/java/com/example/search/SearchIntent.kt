@@ -8,7 +8,7 @@ import com.example.coreandroid.util.HideSnackbarIntent
 
 sealed class SearchIntent
 data class NewSearch(val text: String, val confirmed: Boolean) : SearchIntent()
-data class LoadMoreResults(val offset: Int? = null) : SearchIntent()
+object LoadMoreResults : SearchIntent()
 data class EventLongClicked(override val event: Event) : SearchIntent(), EventSelectionToggledIntent
 object ClearSelectionClicked : SearchIntent(), ClearEventSelectionIntent
 object AddToFavouritesClicked : SearchIntent(), AddToFavouritesIntent

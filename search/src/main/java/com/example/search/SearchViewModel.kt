@@ -1,6 +1,9 @@
 package com.example.search
 
 import androidx.lifecycle.viewModelScope
+import com.example.core.Resource
+import com.example.core.model.PagedResult
+import com.example.core.model.ticketmaster.IEvent
 import com.example.core.usecase.GetSeachSuggestions
 import com.example.core.usecase.SaveEvents
 import com.example.core.usecase.SaveSuggestion
@@ -39,23 +42,31 @@ class SearchViewModel(
                 currentState.reduce(resource)
             }
 
-    private fun Flow<SearchIntent>.processIntents(): Flow<SearchState> {
-        return merge(
-            filterIsInstance<NewSearch>().withLatestState().processNewSearchIntents(),
-            filterIsInstance<LoadMoreResults>().withLatestState().processLoadMoreResultsIntents(),
-            filterIsInstance<ClearSelectionClicked>().withLatestState()
-                .processClearSelectionIntents(),
-            filterIsInstance<EventLongClicked>().withLatestState().processEventLongClickedIntents(),
-            filterIsInstance<HideSnackbarIntent>().withLatestState().processHideSnackbarIntents(),
-            filterIsInstance<AddToFavouritesClicked>().withLatestState()
-                .processAddToFavouritesIntentsWithSnackbar(
-                    saveEvents = saveEvents,
-                    ioDispatcher = ioDispatcher,
-                    onDismissed = { viewModelScope.launch { send(HideSnackbar) } },
-                    sideEffect = { liveSignals.value = SearchSignal.FavouritesSaved }
-                )
-        )
-    }
+    private fun Flow<SearchIntent>.processIntents(): Flow<SearchState> = merge(
+        filterIsInstance<NewSearch>()
+            .withLatestState()
+            .processNewSearchIntents(),
+        filterIsInstance<LoadMoreResults>()
+            .withLatestState()
+            .processLoadMoreResultsIntents(),
+        filterIsInstance<ClearSelectionClicked>()
+            .withLatestState()
+            .processClearSelectionIntents(),
+        filterIsInstance<EventLongClicked>()
+            .withLatestState()
+            .processEventLongClickedIntents(),
+        filterIsInstance<HideSnackbarIntent>()
+            .withLatestState()
+            .processHideSnackbarIntents(),
+        filterIsInstance<AddToFavouritesClicked>()
+            .withLatestState()
+            .processAddToFavouritesIntentsWithSnackbar(
+                saveEvents = saveEvents,
+                ioDispatcher = ioDispatcher,
+                onDismissed = { viewModelScope.launch { send(HideSnackbar) } },
+                sideEffect = { liveSignals.value = SearchSignal.FavouritesSaved }
+            )
+    )
 
     private fun Flow<Pair<NewSearch, SearchState>>.processNewSearchIntents(): Flow<SearchState> {
         return distinctUntilChangedBy { (intent, _) -> intent }
@@ -84,67 +95,29 @@ class SearchViewModel(
             }
     }
 
-    private fun Flow<LoadMoreResults>.loadMoreResultsIntents(): Flow<SearchState> {
-        return scan(
-            Pair<LoadMoreResults?, LoadMoreResults?>(null, null)
-        ) { last2Intents, newIntent -> Pair(last2Intents.second, newIntent) }
-            .drop(1)
-            .withLatestState()
-            .filterNot { (intents, currentState) ->
-                val events = currentState.events
-                intents.second == null
-                        || (events.status is Loading && intents.first?.offset == null && intents.second?.offset == null) //TODO: maybe get rid of that condition and flatMapFirst?
-                        || !events.canLoadMore
-                        || events.data.isEmpty()
-            }
-            .map { it.first.second!! to it.second }
-            .flatMapLatest { (intent, startState) -> //TODO: latest vs first vs concat?
-                val resourceFlow = flowOf(
-                    searchEvents(
-                        searchText = startState.searchText,
-                        offset = intent.offset ?: startState.events.offset
-                    )
-                )
-                resourceFlow
-                    .flowOn(ioDispatcher)
-                    .withLatestState()
-                    .map { (resource, state) -> state.reduce(resource) }
-                    .onStart { emit(startState.copy(events = startState.events.copyWithLoadingStatus)) }
-                    .onEach { newState ->
-                        if (newState.events.data.size == startState.events.data.size
-                            && newState.events.status is LoadedSuccessfully
-                        ) {
-                            send(LoadMoreResults(newState.events.offset)) //TODO: maybe instead of sending another intent replace it with a while loop or smth
-                        }
-                    }
-            }
-    }
-
     private fun Flow<Pair<LoadMoreResults, SearchState>>.processLoadMoreResultsIntents(): Flow<SearchState> {
-        return filterNot { (intent, currentState) ->
+        return filterNot { (_, currentState) ->
             val events = currentState.events
-            (events.status is Loading && intent.offset == null) //TODO: maybe get rid of that condition and flatMapFirst?
+            events.status is Loading //TODO: maybe get rid of that condition and flatMapFirst?
                     || !events.canLoadMore
                     || events.data.isEmpty()
-        }.flatMapLatest { (intent, startState) -> //TODO: latest vs first vs concat?
-            val resourceFlow = flowOf(
-                searchEvents(
-                    searchText = startState.searchText,
-                    offset = intent.offset ?: startState.events.offset
-                )
-            )
-            resourceFlow
-                .flowOn(ioDispatcher)
-                .withLatestState()
-                .map { (resource, state) -> state.reduce(resource) }
-                .onStart { emit(startState.copy(events = startState.events.copyWithLoadingStatus)) }
-                .onEach { newState ->
-                    if (newState.events.data.size == startState.events.data.size
-                        && newState.events.status is LoadedSuccessfully
-                    ) {
-                        send(LoadMoreResults(newState.events.offset)) //TODO: maybe instead of sending another intent replace it with a while loop or smth
+        }.flatMapLatest { (_, startState) -> //TODO: latest vs first vs concat?
+            flow {
+                var offset = startState.events.offset
+                var resource: Resource<PagedResult<IEvent>>
+                do {
+                    resource = withContext(ioDispatcher) {
+                        searchEvents(searchText = startState.searchText, offset = offset)
                     }
-                }
+                    val newState = startState.reduce(resource)
+                    ++offset
+                } while (newState.events.status is LoadedSuccessfully
+                    && newState.events.data.size == startState.events.data.size
+                )
+                emit(resource)
+            }.withLatestState()
+                .map { (resource, currentState) -> currentState.reduce(resource) }
+                .onStart { emit(startState.copy(events = startState.events.copyWithLoadingStatus)) }
         }
     }
 }
