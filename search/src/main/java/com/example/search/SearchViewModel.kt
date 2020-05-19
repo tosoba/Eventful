@@ -34,10 +34,11 @@ class SearchViewModel(
 
     private val connectivityReactionFlow: Flow<SearchState>
         get() = connectivityStateProvider.isConnectedFlow
-            .withLatestFrom(states) { isConnected, currentState -> isConnected to currentState }
+            .withLatestState()
             .filter { (isConnected, currentState) ->
                 isConnected && currentState.events.loadingFailed && currentState.events.data.isEmpty()
-            }.map { (_, currentState) ->
+            }
+            .map { (_, currentState) ->
                 val resource = withContext(ioDispatcher) { searchEvents(currentState.searchText) }
                 currentState.reduce(resource)
             }
@@ -98,11 +99,9 @@ class SearchViewModel(
     private fun Flow<Pair<LoadMoreResults, SearchState>>.processLoadMoreResultsIntents(): Flow<SearchState> {
         return filterNot { (_, currentState) ->
             val events = currentState.events
-            events.status is Loading //TODO: maybe get rid of that condition and flatMapFirst?
-                    || !events.canLoadMore
-                    || events.data.isEmpty()
-        }.flatMapLatest { (_, startState) -> //TODO: latest vs first vs concat?
-            flow {
+            events.status is Loading || !events.canLoadMore || events.data.isEmpty()
+        }.flatMapLatest { (_, startState) ->
+            val nextEventsResourceFlow = flow {
                 var offset = startState.events.offset
                 var resource: Resource<PagedResult<IEvent>>
                 do {
@@ -115,7 +114,8 @@ class SearchViewModel(
                     && newState.events.data.size == startState.events.data.size
                 )
                 emit(resource)
-            }.withLatestState()
+            }
+            nextEventsResourceFlow.withLatestState()
                 .map { (resource, currentState) -> currentState.reduce(resource) }
                 .onStart { emit(startState.copy(events = startState.events.copyWithLoadingStatus)) }
         }

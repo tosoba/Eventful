@@ -2,9 +2,12 @@ package com.example.nearby
 
 import android.view.View
 import androidx.lifecycle.viewModelScope
+import com.example.core.Resource
+import com.example.core.model.PagedResult
 import com.example.core.model.app.LatLng
 import com.example.core.model.app.LocationState
 import com.example.core.model.app.LocationStatus
+import com.example.core.model.ticketmaster.IEvent
 import com.example.core.usecase.GetNearbyEvents
 import com.example.core.usecase.SaveEvents
 import com.example.core.util.flatMapFirst
@@ -53,9 +56,10 @@ class NearbyViewModel(
     )
 
     private val connectivityReactionFlow: Flow<NearbyState>
-        get() = connectivityStateProvider.isConnectedFlow.withLatestState()
-            .filter { (connected, currentState) ->
-                connected && currentState.events.data.isEmpty() && currentState.events.loadingFailed
+        get() = connectivityStateProvider.isConnectedFlow
+            .withLatestState()
+            .filter { (isConnected, currentState) ->
+                isConnected && currentState.events.loadingFailed && currentState.events.data.isEmpty()
             }
             .withLatestFrom(locationStateProvider.locationStateFlow.notNullLatLng) { connectedWithState, latLng ->
                 connectedWithState to latLng
@@ -99,7 +103,7 @@ class NearbyViewModel(
         get() = locationStateProvider.locationStateFlow
             .notNullLatLng
             .withLatestState()
-            .filter { (_, currentState) -> currentState.events.data.isEmpty() }//TODO: this won't work with refreshing with SwipeRefreshLayout
+            .filter { (_, currentState) -> currentState.events.data.isEmpty() } //TODO: this won't work with refreshing with SwipeRefreshLayout
             .flatMapConcat { (latLng, currentState) -> loadingEventsFlow(latLng, currentState) }
 
     private fun Flow<Pair<EventListScrolledToEnd, NearbyState>>.processScrolledToEndIntents(): Flow<NearbyState> {
@@ -109,25 +113,30 @@ class NearbyViewModel(
         }.withLatestFrom(locationStateProvider.locationStateFlow.notNullLatLng) { intentWithState, latLng ->
             val (_, currentState) = intentWithState
             latLng to currentState
-        }.flatMapFirst { loadingEventsFlow(it.first, it.second) }
+        }.flatMapLatest { loadingEventsFlow(it.first, it.second) }
     }
 
     private val Flow<LocationState>.notNullLatLng get() = map { it.latLng }.filterNotNull()
 
     private fun loadingEventsFlow(
-        latLng: LatLng, currentState: NearbyState
-    ): Flow<NearbyState> = flow {
-        emit(
-            currentState.copy(
-                events = currentState.events.copyWithLoadingStatus,
-                snackbarState = if (currentState.events.data.isEmpty())
-                    SnackbarState.Shown("Loading nearby events...")
-                else currentState.snackbarState
+        latLng: LatLng, startState: NearbyState
+    ): Flow<NearbyState> {
+        val nextEventsResourceFlow = flow {
+            var offset = startState.events.offset
+            var resource: Resource<PagedResult<IEvent>>
+            do {
+                resource = withContext(ioDispatcher) {
+                    getNearbyEvents(latLng.lat, latLng.lng, startState.events.offset)
+                }
+                val newState = startState.reduce(resource)
+                ++offset
+            } while (newState.events.status is LoadedSuccessfully
+                && newState.events.data.size == startState.events.data.size
             )
-        )
-        val result = withContext(ioDispatcher) {
-            getNearbyEvents(latLng.lat, latLng.lng, currentState.events.offset)
+            emit(resource)
         }
-        emit(currentState.reduce(result))
+        return nextEventsResourceFlow.withLatestState()
+            .map { (resource, currentState) -> currentState.reduce(resource) }
+            .onStart { emit(startState.copy(events = startState.events.copyWithLoadingStatus)) }
     }
 }
