@@ -84,6 +84,42 @@ class SearchViewModel(
             }
     }
 
+    private fun Flow<LoadMoreResults>.loadMoreResultsIntents(): Flow<SearchState> {
+        return scan(
+            Pair<LoadMoreResults?, LoadMoreResults?>(null, null)
+        ) { last2Intents, newIntent -> Pair(last2Intents.second, newIntent) }
+            .drop(1)
+            .withLatestState()
+            .filterNot { (intents, currentState) ->
+                val events = currentState.events
+                intents.second == null
+                        || (events.status is Loading && intents.first?.offset == null && intents.second?.offset == null) //TODO: maybe get rid of that condition and flatMapFirst?
+                        || !events.canLoadMore
+                        || events.data.isEmpty()
+            }
+            .map { it.first.second!! to it.second }
+            .flatMapLatest { (intent, startState) -> //TODO: latest vs first vs concat?
+                val resourceFlow = flowOf(
+                    searchEvents(
+                        searchText = startState.searchText,
+                        offset = intent.offset ?: startState.events.offset
+                    )
+                )
+                resourceFlow
+                    .flowOn(ioDispatcher)
+                    .withLatestState()
+                    .map { (resource, state) -> state.reduce(resource) }
+                    .onStart { emit(startState.copy(events = startState.events.copyWithLoadingStatus)) }
+                    .onEach { newState ->
+                        if (newState.events.data.size == startState.events.data.size
+                            && newState.events.status is LoadedSuccessfully
+                        ) {
+                            send(LoadMoreResults(newState.events.offset)) //TODO: maybe instead of sending another intent replace it with a while loop or smth
+                        }
+                    }
+            }
+    }
+
     private fun Flow<Pair<LoadMoreResults, SearchState>>.processLoadMoreResultsIntents(): Flow<SearchState> {
         return filterNot { (intent, currentState) ->
             val events = currentState.events
