@@ -81,7 +81,7 @@ class MainViewModel(
             .distinctUntilChanged()
             .withLatestState()
             .takeWhile { (_, currentState) -> currentState.locationState.status !is LocationStatus.Found }
-            .flatMapConcat { (locationAvailable, currentState) ->
+            .flatMapLatest { (locationAvailable, currentState) ->
                 if (locationAvailable) locationLoadingStatesFlow
                 else flowOf(
                     currentState.copy(
