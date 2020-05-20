@@ -81,22 +81,18 @@ fun <I : AddToFavouritesIntent, S : SelectableEventsSnackbarState<S>> Flow<Pair<
     }
 }
 
-fun <S : SelectableEventsState<S>> S.followingEventsFlow(
-    nextPage: Int,
-    limit: Int,
+fun <T> PagedDataList<T>.followingEventsFlow(
     dispatcher: CoroutineDispatcher,
-    //TODO: pass reduce here
+    toEvent: (T) -> IEvent,
     getEvents: suspend (Int) -> Resource<PagedResult<IEvent>>
 ): Flow<Resource<PagedResult<IEvent>>> = flow {
-    var page = nextPage
+    var page = offset
     var resource: Resource<PagedResult<IEvent>>
     do {
-        resource = withContext(dispatcher) { getEvents(page) }
-        ++page
+        resource = withContext(dispatcher) { getEvents(page++) }
     } while (resource is Resource.Success<PagedResult<IEvent>>
-        && events.data.map { (event, _) -> event.trimmedLowerCasedName }
-            .toSet()
-            .containsAll(resource.data.items.map { it.trimmedLowerCasedName })
+        && (data.map(toEvent) + resource.data.items)
+            .distinctBy { it.trimmedLowerCasedName }.size == data.size
         && page < limit
     )
     emit(resource)

@@ -97,27 +97,17 @@ class SearchViewModel(
     }
 
     private fun Flow<Pair<LoadMoreResults, SearchState>>.processLoadMoreResultsIntents(): Flow<SearchState> {
-        return filterNot { (_, currentState) ->
-            val events = currentState.events
-            events.status is Loading || !events.canLoadMore || events.data.isEmpty()
-        }.flatMapLatest { (_, startState) ->
-            val nextEventsResourceFlow = flow {
-                var offset = startState.events.offset
-                var resource: Resource<PagedResult<IEvent>>
-                do {
-                    resource = withContext(ioDispatcher) {
-                        searchEvents(searchText = startState.searchText, offset = offset)
-                    }
-                    val newState = startState.reduce(resource)
-                    ++offset
-                } while (newState.events.status is LoadedSuccessfully
-                    && newState.events.data.size == startState.events.data.size
-                )
-                emit(resource)
+        return filterCanLoadMoreEvents()
+            .flatMapLatest { (_, startState) ->
+                startState.events
+                    .followingEventsFlow(
+                        dispatcher = ioDispatcher,
+                        toEvent = { selectable -> selectable.item },
+                        getEvents = { offset -> searchEvents(startState.searchText, offset) }
+                    )
+                    .withLatestState()
+                    .map { (resource, currentState) -> currentState.reduce(resource) }
+                    .onStart { emit(startState.copy(events = startState.events.copyWithLoadingStatus)) }
             }
-            nextEventsResourceFlow.withLatestState()
-                .map { (resource, currentState) -> currentState.reduce(resource) }
-                .onStart { emit(startState.copy(events = startState.events.copyWithLoadingStatus)) }
-        }
     }
 }
