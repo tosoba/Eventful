@@ -31,7 +31,7 @@ abstract class BaseViewModel<Intent, State : Any, Signal>(initialState: State) :
         get() = intentsChannel.asFlow().withLatestFrom(states) { intent, state -> intent to state }
 
     protected fun <T> Flow<T>.withLatestState(): Flow<Pair<T, State>> {
-        return withLatestFrom(states) { intent, state -> intent to state }
+        return withLatestFrom(states) { item, state -> item to state }
     }
 
     override fun onCleared() {
