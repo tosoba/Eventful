@@ -3,6 +3,10 @@ package com.example.coreandroid.base
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.core.Resource
+import com.example.core.model.PagedResult
+import com.example.core.model.ticketmaster.IEvent
+import com.example.core.model.ticketmaster.trimmedLowerCasedName
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable

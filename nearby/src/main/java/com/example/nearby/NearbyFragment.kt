@@ -2,7 +2,6 @@ package com.example.nearby
 
 import android.os.Bundle
 import android.view.*
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.example.coreandroid.base.InjectableFragment
 import com.example.coreandroid.controller.eventsSelectionActionModeController
@@ -41,14 +40,14 @@ class NearbyFragment : InjectableFragment() {
         infiniteItemListController<Selectable<Event>>(
             epoxyThreads,
             emptyText = "No events found",
-            loadMore = { lifecycleScope.launch { viewModel.send(EventListScrolledToEnd) } }
+            loadMore = { lifecycleScope.launch { viewModel.intent(LoadMoreResults) } }
         ) { selectable ->
             selectable.listItem(
                 clicked = View.OnClickListener {
                     navigationFragment?.showFragment(fragmentFactory.eventFragment(selectable.item))
                 },
                 longClicked = View.OnLongClickListener {
-                    lifecycleScope.launch { viewModel.send(EventLongClicked(selectable.item)) }
+                    lifecycleScope.launch { viewModel.intent(EventLongClicked(selectable.item)) }
                     true
                 }
             )
@@ -60,11 +59,11 @@ class NearbyFragment : InjectableFragment() {
             menuId = R.menu.nearby_events_selection_menu,
             itemClickedCallbacks = mapOf(
                 R.id.nearby_action_add_favourite to {
-                    lifecycleScope.launch { viewModel.send(AddToFavouritesClicked) }.let { Unit }
+                    lifecycleScope.launch { viewModel.intent(AddToFavouritesClicked) }.let { Unit }
                 }
             ),
             onDestroyActionMode = {
-                lifecycleScope.launch { viewModel.send(ClearSelectionClicked) }.let { Unit }
+                lifecycleScope.launch { viewModel.intent(ClearSelectionClicked) }.let { Unit }
             }
         )
     }
@@ -103,9 +102,11 @@ class NearbyFragment : InjectableFragment() {
             .onEach { snackbarController?.transitionToSnackbarState(it) }
             .launchIn(lifecycleScope)
 
-        viewModel.signals.observe(this, Observer {
-            if (it is NearbySignal.FavouritesSaved) actionModeController.finish(false)
-        })
+        viewModel.signals
+            .onEach {
+                if (it is NearbySignal.FavouritesSaved) actionModeController.finish(false)
+            }
+            .launchIn(lifecycleScope)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

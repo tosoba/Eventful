@@ -81,7 +81,7 @@ fun <I : AddToFavouritesIntent, S : SelectableEventsSnackbarState<S>> Flow<Pair<
     }
 }
 
-fun <Event> followingEventsFlow(
+fun <Event> pagedEventsFlow(
     currentEvents: PagedDataList<Event>,
     dispatcher: CoroutineDispatcher,
     toEvent: (Event) -> IEvent,

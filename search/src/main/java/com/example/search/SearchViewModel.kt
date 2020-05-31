@@ -17,7 +17,7 @@ import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.HideSnackbarIntent
 import com.example.coreandroid.util.Loading
-import com.example.coreandroid.util.followingEventsFlow
+import com.example.coreandroid.util.pagedEventsFlow
 import com.haroldadmin.cnradapter.NetworkResponse
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -81,7 +81,7 @@ class SearchViewModel(
             events.status is Loading || !events.canLoadMore || events.data.isEmpty()
         }.flatMapLatest {
             val startState = state
-            followingEventsFlow(
+            pagedEventsFlow(
                 currentEvents = startState.events,
                 dispatcher = ioDispatcher,
                 toEvent = { selectable -> selectable.item }
