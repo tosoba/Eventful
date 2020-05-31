@@ -31,12 +31,12 @@ class MainViewModel(
 
     init {
         merge(intents.updates, getConnection().map { Update.Connection(it) })
-            .scan(initialState) { state, update -> update.applyTo(state) }
+            .scan(initialState) { state, update -> update(state) }
             .onEach { state = it }
             .launchIn(viewModelScope)
     }
 
-    override val connectedStates: Flow<Boolean> get() = states.map { it.isConnected }
+    override val connectedStates: Flow<Boolean> get() = states.map { it.connected }
 
     override val locationStates: Flow<LocationState> get() = states.map { it.locationState }
     override fun reloadLocation() = viewModelScope.launch { intent(ReloadLocation) }.let { Unit }
@@ -78,24 +78,26 @@ class MainViewModel(
 
     private sealed class Update : StateUpdate<MainState> {
         class Connection(private val connected: Boolean) : Update() {
-            override fun applyTo(state: MainState): MainState = state.copy(isConnected = connected)
+            override operator fun invoke(state: MainState): MainState = state.copy(
+                connected = connected
+            )
         }
 
         sealed class Location : Update() {
             object PermissionDenied : Update() {
-                override fun applyTo(state: MainState): MainState = state.copy(
+                override operator fun invoke(state: MainState): MainState = state.copy(
                     locationState = state.locationState.copy(status = LocationStatus.PermissionDenied)
                 )
             }
 
             object Reset : Update() {
-                override fun applyTo(state: MainState): MainState = state.copy(
+                override operator fun invoke(state: MainState): MainState = state.copy(
                     locationState = state.locationState.copy(status = LocationStatus.Initial)
                 )
             }
 
             class Result(private val result: LocationResult) : Location() {
-                override fun applyTo(state: MainState): MainState = state.copy(
+                override operator fun invoke(state: MainState): MainState = state.copy(
                     locationState = when (result) {
                         is LocationResult.Found -> state.locationState.copy(
                             latLng = result.latLng,

@@ -33,7 +33,7 @@ class FavouritesViewModel(
                 signal(FavouritesSignal.FavouritesRemoved)
             }
             .updates()
-            .scan(initialState) { state, update -> update.applyTo(state) }
+            .scan(initialState) { state, update -> update(state) }
             .onEach { state = it }
             .launchIn(viewModelScope)
     }
@@ -54,19 +54,19 @@ class FavouritesViewModel(
 
     private sealed class Update : StateUpdate<FavouritesState> {
         class ToggleEventSelection(private val event: Event) : Update() {
-            override fun applyTo(state: FavouritesState): FavouritesState = state
+            override operator fun invoke(state: FavouritesState): FavouritesState = state
                 .copyWithTransformedEvents {
                     if (it.item.id == event.id) Selectable(event, !it.selected) else it
                 }
         }
 
         object ClearSelection : Update() {
-            override fun applyTo(state: FavouritesState): FavouritesState = state
+            override operator fun invoke(state: FavouritesState): FavouritesState = state
                 .copyWithTransformedEvents { it.copy(selected = false) }
         }
 
         class Events(val events: List<IEvent>) : Update() {
-            override fun applyTo(state: FavouritesState): FavouritesState = state.copy(
+            override operator fun invoke(state: FavouritesState): FavouritesState = state.copy(
                 events = DataList(
                     data = events.map { Selectable(Event(it)) },
                     status = LoadedSuccessfully,

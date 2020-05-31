@@ -65,6 +65,6 @@ abstract class BaseStateFlowViewModel<Intent : Any, State : Any, Signal : Any>(
     }
 
     protected interface StateUpdate<State : Any> {
-        fun applyTo(state: State): State
+        operator fun invoke(state: State): State
     }
 }
