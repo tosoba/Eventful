@@ -52,19 +52,19 @@ class FavouritesViewModel(
 
     private sealed class Update : StateUpdate<FavouritesState> {
         class ToggleEventSelection(private val event: Event) : Update() {
-            override operator fun invoke(state: FavouritesState): FavouritesState = state
+            override fun invoke(state: FavouritesState): FavouritesState = state
                 .copyWithTransformedEvents {
                     if (it.item.id == event.id) Selectable(event, !it.selected) else it
                 }
         }
 
         object ClearSelection : Update() {
-            override operator fun invoke(state: FavouritesState): FavouritesState = state
+            override fun invoke(state: FavouritesState): FavouritesState = state
                 .copyWithTransformedEvents { it.copy(selected = false) }
         }
 
         class Events(private val events: List<IEvent>) : Update() {
-            override operator fun invoke(state: FavouritesState): FavouritesState = state.copy(
+            override fun invoke(state: FavouritesState): FavouritesState = state.copy(
                 events = DataList(
                     data = events.map { Selectable(Event(it)) },
                     status = LoadedSuccessfully,

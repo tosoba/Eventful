@@ -76,26 +76,26 @@ class MainViewModel(
 
     private sealed class Update : StateUpdate<MainState> {
         class Connection(private val connected: Boolean) : Update() {
-            override operator fun invoke(state: MainState): MainState = state.copy(
+            override fun invoke(state: MainState): MainState = state.copy(
                 connected = connected
             )
         }
 
         sealed class Location : Update() {
             object PermissionDenied : Update() {
-                override operator fun invoke(state: MainState): MainState = state.copy(
+                override fun invoke(state: MainState): MainState = state.copy(
                     locationState = state.locationState.copy(status = LocationStatus.PermissionDenied)
                 )
             }
 
             object Reset : Update() {
-                override operator fun invoke(state: MainState): MainState = state.copy(
+                override fun invoke(state: MainState): MainState = state.copy(
                     locationState = state.locationState.copy(status = LocationStatus.Initial)
                 )
             }
 
             class Result(private val result: LocationResult) : Location() {
-                override operator fun invoke(state: MainState): MainState = state.copy(
+                override fun invoke(state: MainState): MainState = state.copy(
                     locationState = when (result) {
                         is LocationResult.Found -> state.locationState.copy(
                             latLng = result.latLng,
