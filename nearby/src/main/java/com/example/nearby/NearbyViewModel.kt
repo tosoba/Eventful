@@ -13,8 +13,11 @@ import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.provider.ConnectedStateProvider
 import com.example.coreandroid.provider.LocationStateProvider
 import com.example.coreandroid.util.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 
 @ExperimentalCoroutinesApi
@@ -124,13 +127,12 @@ class NearbyViewModel(
 
     private fun loadingEventsFlow(
         latLng: LatLng, startState: NearbyState
-    ): Flow<NearbyState> = startState.events
-        .followingEventsFlow(
-            dispatcher = ioDispatcher,
-            toEvent = { selectable -> selectable.item },
-            getEvents = { offset -> getNearbyEvents(latLng.lat, latLng.lng, offset) }
-        )
-        .withLatestState()
+    ): Flow<NearbyState> = followingEventsFlow(
+        currentEvents = startState.events,
+        dispatcher = ioDispatcher,
+        toEvent = { selectable -> selectable.item },
+        getEvents = { offset -> getNearbyEvents(latLng.lat, latLng.lng, offset) }
+    ).withLatestState()
         .map { (resource, currentState) -> currentState.reduce(resource) }
         .onStart { emit(startState.copy(events = startState.events.copyWithLoadingStatus)) }
 }

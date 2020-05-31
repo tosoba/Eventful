@@ -4,6 +4,9 @@ import com.example.core.model.ticketmaster.IEvent
 import com.example.core.usecase.DeleteEvents
 import com.example.core.usecase.GetSavedEvents
 import com.example.coreandroid.base.BaseStateFlowViewModel
+import com.example.coreandroid.base.ClearSelectionUpdate
+import com.example.coreandroid.base.StateUpdate
+import com.example.coreandroid.base.ToggleEventSelectionUpdate
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.DataList
@@ -51,17 +54,12 @@ class FavouritesViewModel(
             }
 
     private sealed class Update : StateUpdate<FavouritesState> {
-        class ToggleEventSelection(private val event: Event) : Update() {
-            override fun invoke(state: FavouritesState): FavouritesState = state
-                .copyWithTransformedEvents {
-                    if (it.item.id == event.id) Selectable(event, !it.selected) else it
-                }
-        }
+        class ToggleEventSelection(
+            override val event: Event
+        ) : Update(),
+            ToggleEventSelectionUpdate<FavouritesState>
 
-        object ClearSelection : Update() {
-            override fun invoke(state: FavouritesState): FavouritesState = state
-                .copyWithTransformedEvents { it.copy(selected = false) }
-        }
+        object ClearSelection : Update(), ClearSelectionUpdate<FavouritesState>
 
         class Events(private val events: List<IEvent>) : Update() {
             override fun invoke(state: FavouritesState): FavouritesState = state.copy(

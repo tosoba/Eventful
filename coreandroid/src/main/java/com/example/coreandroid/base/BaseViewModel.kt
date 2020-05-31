@@ -3,7 +3,13 @@ package com.example.coreandroid.base
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.coreandroid.controller.SnackbarState
+import com.example.coreandroid.ticketmaster.Event
+import com.example.coreandroid.ticketmaster.Selectable
+import com.example.coreandroid.util.SelectableEventsSnackbarState
+import com.example.coreandroid.util.SelectableEventsState
 import com.example.coreandroid.util.withLatestFrom
+import com.google.android.material.snackbar.Snackbar
 import com.hadilq.liveevent.LiveEvent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -66,13 +72,38 @@ abstract class BaseStateFlowViewModel<Intent : Any, State : Any, Signal : Any>(
         super.onCleared()
     }
 
-    protected interface StateUpdate<State : Any> {
-        operator fun invoke(state: State): State
-    }
-
     protected fun <Update : StateUpdate<State>> Flow<Update>.applyToState(initialState: State): Job {
         return scan(initialState) { state, update -> update(state) }
             .onEach { state = it }
             .launchIn(viewModelScope)
     }
+}
+
+interface StateUpdate<State : Any> {
+    operator fun invoke(state: State): State
+}
+
+interface ClearSelectionUpdate<S : SelectableEventsState<S>> : StateUpdate<S> {
+    override fun invoke(state: S): S = state.copyWithTransformedEvents { it.copy(selected = false) }
+}
+
+interface ToggleEventSelectionUpdate<S : SelectableEventsState<S>> : StateUpdate<S> {
+    val event: Event
+    override fun invoke(state: S): S = state.copyWithTransformedEvents {
+        if (it.item.id == event.id) Selectable(event, !it.selected) else it
+    }
+}
+
+interface AddedToFavouritesUpdate<S : SelectableEventsSnackbarState<S>> : StateUpdate<S> {
+    val addedCount: Int
+    val onDismissed: () -> Unit
+    override fun invoke(state: S): S = state.copyWithSnackbarStateAndTransformedEvents(
+        snackbarState = SnackbarState.Shown(
+            """$addedCount
+                |${if (addedCount > 1) " events were" else " event was"} 
+                |added to favourites""".trimMargin().replace("\n", ""),
+            length = Snackbar.LENGTH_SHORT,
+            onDismissed = onDismissed
+        )
+    ) { event -> event.copy(selected = false) }
 }

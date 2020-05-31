@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat.getSystemService
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.example.coreandroid.base.InjectableFragment
 import com.example.coreandroid.controller.eventsSelectionActionModeController
@@ -46,14 +45,14 @@ class SearchFragment : InjectableFragment() {
         infiniteItemListController<Selectable<Event>>(
             epoxyThreads,
             emptyText = "No events found",
-            loadMore = { lifecycleScope.launch { viewModel.send(LoadMoreResults) } }
+            loadMore = { lifecycleScope.launch { viewModel.intent(LoadMoreResults) } }
         ) { selectable ->
             selectable.listItem(
                 clicked = View.OnClickListener {
                     navigationFragment?.showFragment(fragmentFactory.eventFragment(selectable.item))
                 },
                 longClicked = View.OnLongClickListener {
-                    lifecycleScope.launch { viewModel.send(EventLongClicked(selectable.item)) }
+                    lifecycleScope.launch { viewModel.intent(EventLongClicked(selectable.item)) }
                     true
                 }
             )
@@ -65,11 +64,11 @@ class SearchFragment : InjectableFragment() {
             menuId = R.menu.search_events_selection_menu,
             itemClickedCallbacks = mapOf(
                 R.id.search_action_add_favourite to {
-                    lifecycleScope.launch { viewModel.send(AddToFavouritesClicked) }.let { Unit }
+                    lifecycleScope.launch { viewModel.intent(AddToFavouritesClicked) }.let { Unit }
                 }
             ),
             onDestroyActionMode = {
-                lifecycleScope.launch { viewModel.send(ClearSelectionClicked) }.let { Unit }
+                lifecycleScope.launch { viewModel.intent(ClearSelectionClicked) }.let { Unit }
             }
         )
     }
@@ -93,18 +92,22 @@ class SearchFragment : InjectableFragment() {
         super.onResume()
         activity?.invalidateOptionsMenu()
 
-        viewModel.updates().onEach {
-            when (it) {
-                is UpdateEvents -> epoxyController.setData(it.events)
-                is UpdateSnackbar -> snackbarController?.transitionToSnackbarState(it.state)
-                is SwapCursor -> searchSuggestionsAdapter.swapCursor(it.cursor)
-                is UpdateActionMode -> actionModeController.update(it.numberOfSelectedEvents)
+        viewModel.viewUpdates
+            .onEach {
+                when (it) {
+                    is UpdateEvents -> epoxyController.setData(it.events)
+                    is UpdateSnackbar -> snackbarController?.transitionToSnackbarState(it.state)
+                    is SwapCursor -> searchSuggestionsAdapter.swapCursor(it.cursor)
+                    is UpdateActionMode -> actionModeController.update(it.numberOfSelectedEvents)
+                }
             }
-        }.launchIn(lifecycleScope)
+            .launchIn(lifecycleScope)
 
-        viewModel.signals.observe(this, Observer {
-            if (it is SearchSignal.FavouritesSaved) actionModeController.finish(false)
-        })
+        viewModel.signals
+            .onEach {
+                if (it is SearchSignal.FavouritesSaved) actionModeController.finish(false)
+            }
+            .launchIn(lifecycleScope)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -133,7 +136,7 @@ class SearchFragment : InjectableFragment() {
             .debounce(500)
             .filter { it.queryText.isNotBlank() && it.queryText.length > 2 }
             .onEach {
-                viewModel.send(
+                viewModel.intent(
                     NewSearch(
                         text = it.queryText.toString().trim(),
                         confirmed = it is QueryTextEvent.QuerySubmitted

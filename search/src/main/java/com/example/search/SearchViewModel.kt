@@ -1,13 +1,24 @@
 package com.example.search
 
 import androidx.lifecycle.viewModelScope
+import com.example.core.Resource
+import com.example.core.model.PagedResult
+import com.example.core.model.search.SearchSuggestion
+import com.example.core.model.ticketmaster.IEvent
+import com.example.core.model.ticketmaster.trimmedLowerCasedName
 import com.example.core.usecase.GetSeachSuggestions
 import com.example.core.usecase.SaveEvents
 import com.example.core.usecase.SaveSuggestion
 import com.example.core.usecase.SearchEvents
-import com.example.coreandroid.base.BaseViewModel
+import com.example.coreandroid.base.*
+import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.provider.ConnectedStateProvider
-import com.example.coreandroid.util.*
+import com.example.coreandroid.ticketmaster.Event
+import com.example.coreandroid.ticketmaster.Selectable
+import com.example.coreandroid.util.HideSnackbarIntent
+import com.example.coreandroid.util.Loading
+import com.example.coreandroid.util.followingEventsFlow
+import com.haroldadmin.cnradapter.NetworkResponse
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
@@ -18,93 +29,135 @@ class SearchViewModel(
     private val saveEvents: SaveEvents,
     private val getSearchSuggestions: GetSeachSuggestions,
     private val saveSuggestion: SaveSuggestion,
-    private val connectedStateProvider: ConnectedStateProvider,
+    connectedStateProvider: ConnectedStateProvider,
     private val ioDispatcher: CoroutineDispatcher,
     initialState: SearchState = SearchState()
-) : BaseViewModel<SearchIntent, SearchState, SearchSignal>(initialState) {
+) : BaseStateFlowViewModel<SearchIntent, SearchState, SearchSignal>(initialState) {
 
     init {
-        merge(intentsChannel.asFlow().processIntents(), connectivityReactionFlow)
-            .onEach(statesChannel::send)
-            .launchIn(viewModelScope)
+        merge(intents.updates, connectedStateProvider.updates)
+            .applyToState(initialState = initialState)
     }
 
-    private val connectivityReactionFlow: Flow<SearchState>
-        get() = connectedStateProvider.connectedStates
-            .withLatestState()
-            .filter { (isConnected, currentState) ->
-                isConnected && currentState.events.loadingFailed && currentState.events.data.isEmpty()
-            }
-            .map { (_, currentState) ->
-                val resource = withContext(ioDispatcher) { searchEvents(currentState.searchText) }
-                currentState.reduce(resource)
-            }
+    private val ConnectedStateProvider.updates: Flow<Update>
+        get() = connectedStates.filter { connected ->
+            state.run { connected && events.loadingFailed && events.data.isEmpty() }
+        }.map {
+            val resource = withContext(ioDispatcher) { searchEvents(state.searchText) }
+            Update.Events.Loaded(resource)
+        }
 
-    private fun Flow<SearchIntent>.processIntents(): Flow<SearchState> = merge(
-        filterIsInstance<NewSearch>()
-            .withLatestState()
-            .processNewSearchIntents(),
-        filterIsInstance<LoadMoreResults>()
-            .withLatestState()
-            .processLoadMoreResultsIntents(),
-        filterIsInstance<ClearSelectionClicked>()
-            .withLatestState()
-            .processClearSelectionIntents(),
-        filterIsInstance<EventLongClicked>()
-            .withLatestState()
-            .processEventLongClickedIntents(),
-        filterIsInstance<HideSnackbarIntent>()
-            .withLatestState()
-            .processHideSnackbarIntents(),
-        filterIsInstance<AddToFavouritesClicked>()
-            .withLatestState()
-            .processAddToFavouritesIntentsWithSnackbar(
-                saveEvents = saveEvents,
-                ioDispatcher = ioDispatcher,
-                onDismissed = { viewModelScope.launch { send(HideSnackbar) } },
-                sideEffect = { liveSignals.value = SearchSignal.FavouritesSaved }
-            )
-    )
+    private val Flow<SearchIntent>.updates: Flow<Update>
+        get() = merge(
+            filterIsInstance<NewSearch>().newSearchUpdates,
+            filterIsInstance<LoadMoreResults>().loadMoreResultsUpdates,
+            filterIsInstance<ClearSelectionClicked>().map { Update.ClearSelection },
+            filterIsInstance<EventLongClicked>().map { Update.ToggleEventSelection(it.event) },
+            filterIsInstance<HideSnackbarIntent>().map { Update.HideSnackbar },
+            filterIsInstance<AddToFavouritesClicked>().addToFavouritesUpdates
+        )
 
-    private fun Flow<Pair<NewSearch, SearchState>>.processNewSearchIntents(): Flow<SearchState> {
-        return distinctUntilChangedBy { (intent, _) -> intent }
-            .onEach { (intent, _) ->
+    private val Flow<NewSearch>.newSearchUpdates: Flow<Update>
+        get() = distinctUntilChanged()
+            .onEach { intent ->
                 val (text, shouldSave) = intent
                 if (shouldSave) saveSuggestion(text)
             }
-            .flatMapLatest { (intent, currentState) ->
-                val (text, _) = intent
-                flow {
-                    emit(currentState.copy(events = currentState.events.copyWithLoadingStatus))
-                    val resource = viewModelScope.async {
-                        withContext(ioDispatcher) { searchEvents(text) }
-                    }
-                    val suggestions = viewModelScope.async {
-                        withContext(ioDispatcher) { getSearchSuggestions(text) }
-                    }
-                    emit(
-                        currentState.reduce(
-                            resource = resource.await(),
-                            suggestions = suggestions.await(),
-                            text = text
-                        )
-                    )
+            .flatMapLatest { (text) ->
+                flow<Update> {
+                    emit(Update.Events.Loading(searchText = text))
+
+                    val suggestions = withContext(ioDispatcher) { getSearchSuggestions(text) }
+                    emit(Update.Suggestions(suggestions))
+
+                    val resource = withContext(ioDispatcher) { searchEvents(text) }
+                    emit(Update.Events.Loaded(resource))
                 }
             }
-    }
 
-    private fun Flow<Pair<LoadMoreResults, SearchState>>.processLoadMoreResultsIntents(): Flow<SearchState> {
-        return filterCanLoadMoreEvents()
-            .flatMapLatest { (_, startState) ->
-                startState.events
-                    .followingEventsFlow(
-                        dispatcher = ioDispatcher,
-                        toEvent = { selectable -> selectable.item },
-                        getEvents = { offset -> searchEvents(startState.searchText, offset) }
-                    )
-                    .withLatestState()
-                    .map { (resource, currentState) -> currentState.reduce(resource) }
-                    .onStart { emit(startState.copy(events = startState.events.copyWithLoadingStatus)) }
+    private val Flow<LoadMoreResults>.loadMoreResultsUpdates: Flow<Update>
+        get() = filterNot {
+            val events = state.events
+            events.status is Loading || !events.canLoadMore || events.data.isEmpty()
+        }.flatMapLatest {
+            val startState = state
+            followingEventsFlow(
+                currentEvents = startState.events,
+                dispatcher = ioDispatcher,
+                toEvent = { selectable -> selectable.item }
+            ) { offset ->
+                searchEvents(startState.searchText, offset)
+            }.onStart {
+                Update.Events.Loading()
+            }.map { Update.Events.Loaded(it) }
+        }
+
+    private val Flow<AddToFavouritesClicked>.addToFavouritesUpdates: Flow<Update>
+        get() = map {
+            val selectedEvents = state.events.data.filter { it.selected }.map { it.item }
+            withContext(ioDispatcher) { saveEvents(selectedEvents) }
+            signal(SearchSignal.FavouritesSaved)
+            Update.Events.AddedToFavourites(selectedEvents.size) {
+                viewModelScope.launch { signal(SearchSignal.FavouritesSaved) }
             }
+        }
+
+    private sealed class Update : StateUpdate<SearchState> {
+        class ToggleEventSelection(
+            override val event: Event
+        ) : Update(),
+            ToggleEventSelectionUpdate<SearchState>
+
+        object ClearSelection : Update(), ClearSelectionUpdate<SearchState>
+
+        object HideSnackbar : Update() {
+            override fun invoke(state: SearchState): SearchState = state
+                .copyWithSnackbarState(snackbarState = SnackbarState.Hidden)
+        }
+
+        class Suggestions(private val suggestions: List<SearchSuggestion>) : Update() {
+            override fun invoke(state: SearchState): SearchState = state
+                .copy(searchSuggestions = suggestions)
+        }
+
+        sealed class Events : Update() {
+            class Loading(private val searchText: String? = null) : Events() {
+                override fun invoke(state: SearchState): SearchState = state.copy(
+                    events = state.events.copyWithLoadingStatus,
+                    searchText = searchText ?: state.searchText
+                )
+            }
+
+            class Loaded(private val resource: Resource<PagedResult<IEvent>>) : Events() {
+                override fun invoke(state: SearchState): SearchState = state.run {
+                    when (resource) {
+                        is Resource.Success -> copy(
+                            events = events.copyWithNewItemsDistinct(
+                                resource.data.items.map { Selectable(Event(it)) },
+                                resource.data.currentPage + 1,
+                                resource.data.totalPages
+                            ) { (event, _) -> event.trimmedLowerCasedName }
+                        )
+
+                        is Resource.Error<PagedResult<IEvent>> -> copy(
+                            events = events.copyWithFailureStatus(resource.error),
+                            snackbarState = if (resource.error is NetworkResponse.ServerError<*>) {
+                                if ((resource.error as NetworkResponse.ServerError<*>).code in 503..504) {
+                                    SnackbarState.Shown("No connection")
+                                } else {
+                                    SnackbarState.Shown("Unknown network error.")
+                                }
+                            } else snackbarState
+                        )
+                    }
+                }
+            }
+
+            class AddedToFavourites(
+                override val addedCount: Int,
+                override val onDismissed: () -> Unit
+            ) : Update(),
+                AddedToFavouritesUpdate<SearchState>
+        }
     }
 }

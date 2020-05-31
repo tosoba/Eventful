@@ -17,27 +17,28 @@ data class SwapCursor(val cursor: MatrixCursor) : SearchUpdate()
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-internal fun SearchViewModel.updates(): Flow<SearchUpdate> = merge(
-    states.map { it.events }
-        .distinctUntilChanged()
-        .map { UpdateEvents(it) },
-    states.map { it.snackbarState }
-        .distinctUntilChanged()
-        .map { UpdateSnackbar(it) },
-    states.map { state -> state.events.data.count { it.selected } }
-        .distinctUntilChanged()
-        .map { UpdateActionMode(it) },
-    states.map { it.searchSuggestions to it.searchText }
-        .filter { (suggestions, _) -> suggestions.isNotEmpty() }
-        .distinctUntilChanged()
-        .map { (suggestions, searchText) ->
-            SwapCursor(
-                MatrixCursor(SearchSuggestionsAdapter.COLUMN_NAMES)
-                    .apply {
-                        suggestions.filter { searchText != it.searchText }
-                            .distinctBy { it.searchText }
-                            .forEach { addRow(arrayOf(it.id, it.searchText, it.timestampMs)) }
-                    }
-            )
-        }
-)
+internal val SearchViewModel.viewUpdates: Flow<SearchUpdate>
+    get() = merge(
+        states.map { it.events }
+            .distinctUntilChanged()
+            .map { UpdateEvents(it) },
+        states.map { it.snackbarState }
+            .distinctUntilChanged()
+            .map { UpdateSnackbar(it) },
+        states.map { state -> state.events.data.count { it.selected } }
+            .distinctUntilChanged()
+            .map { UpdateActionMode(it) },
+        states.map { it.searchSuggestions to it.searchText }
+            .filter { (suggestions, _) -> suggestions.isNotEmpty() }
+            .distinctUntilChanged()
+            .map { (suggestions, searchText) ->
+                SwapCursor(
+                    MatrixCursor(SearchSuggestionsAdapter.COLUMN_NAMES)
+                        .apply {
+                            suggestions.filter { searchText != it.searchText }
+                                .distinctBy { it.searchText }
+                                .forEach { addRow(arrayOf(it.id, it.searchText, it.timestampMs)) }
+                        }
+                )
+            }
+    )

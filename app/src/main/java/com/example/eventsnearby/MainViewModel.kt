@@ -9,6 +9,7 @@ import com.example.core.usecase.GetLocation
 import com.example.core.usecase.GetLocationAvailability
 import com.example.core.util.flatMapFirst
 import com.example.coreandroid.base.BaseStateFlowViewModel
+import com.example.coreandroid.base.StateUpdate
 import com.example.coreandroid.provider.ConnectedStateProvider
 import com.example.coreandroid.provider.LocationStateProvider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -76,9 +77,7 @@ class MainViewModel(
 
     private sealed class Update : StateUpdate<MainState> {
         class Connection(private val connected: Boolean) : Update() {
-            override fun invoke(state: MainState): MainState = state.copy(
-                connected = connected
-            )
+            override fun invoke(state: MainState): MainState = state.copy(connected = connected)
         }
 
         sealed class Location : Update() {
