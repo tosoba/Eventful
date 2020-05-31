@@ -5,15 +5,13 @@ import android.view.*
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.example.coreandroid.base.InjectableFragment
+import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.controller.eventsSelectionActionModeController
 import com.example.coreandroid.navigation.IFragmentFactory
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.EpoxyThreads
-import com.example.coreandroid.util.ext.menuController
-import com.example.coreandroid.util.ext.navigationFragment
-import com.example.coreandroid.util.ext.onCreateControllerView
-import com.example.coreandroid.util.ext.saveScrollPosition
+import com.example.coreandroid.util.ext.*
 import com.example.coreandroid.util.infiniteItemListController
 import com.example.coreandroid.view.epoxy.listItem
 import kotlinx.android.synthetic.main.fragment_favourites.*
@@ -89,6 +87,8 @@ class FavouritesFragment : InjectableFragment() {
     override fun onResume() {
         super.onResume()
         activity?.invalidateOptionsMenu()
+
+        snackbarController?.transitionToSnackbarState(SnackbarState.Hidden)
 
         viewModel.states
             .map { it.events }
