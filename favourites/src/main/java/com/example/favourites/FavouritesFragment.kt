@@ -2,7 +2,6 @@ package com.example.favourites
 
 import android.os.Bundle
 import android.view.*
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.example.coreandroid.base.InjectableFragment
 import com.example.coreandroid.controller.SnackbarState
@@ -42,14 +41,14 @@ class FavouritesFragment : InjectableFragment() {
         infiniteItemListController<Selectable<Event>>(
             epoxyThreads,
             emptyText = "No favourite events added yet",
-            loadMore = { lifecycleScope.launch { viewModel.send(LoadFavourites) } }
+            loadMore = { lifecycleScope.launch { viewModel.intent(LoadFavourites) } }
         ) { selectable ->
             selectable.listItem(
                 clicked = View.OnClickListener {
                     navigationFragment?.showFragment(fragmentFactory.eventFragment(selectable.item))
                 },
                 longClicked = View.OnLongClickListener {
-                    lifecycleScope.launch { viewModel.send(EventLongClicked(selectable.item)) }
+                    lifecycleScope.launch { viewModel.intent(EventLongClicked(selectable.item)) }
                     true
                 }
             )
@@ -61,12 +60,12 @@ class FavouritesFragment : InjectableFragment() {
             menuId = R.menu.favourites_events_selection_menu,
             itemClickedCallbacks = mapOf(
                 R.id.favourites_action_remove_favourite to {
-                    lifecycleScope.launch { viewModel.send(RemoveFromFavouritesClicked) }
+                    lifecycleScope.launch { viewModel.intent(RemoveFromFavouritesClicked) }
                     Unit
                 }
             ),
             onDestroyActionMode = {
-                lifecycleScope.launch { viewModel.send(ClearSelectionClicked) }.let { Unit }
+                lifecycleScope.launch { viewModel.intent(ClearSelectionClicked) }.let { Unit }
             }
         )
     }
@@ -102,9 +101,13 @@ class FavouritesFragment : InjectableFragment() {
             .onEach { actionModeController.update(it) }
             .launchIn(lifecycleScope)
 
-        viewModel.signals.observe(this, Observer {
-            if (it is FavouritesSignal.FavouritesRemoved) actionModeController.finish(false)
-        })
+        viewModel.signals
+            .onEach {
+                if (it is FavouritesSignal.FavouritesRemoved) {
+                    actionModeController.finish(false)
+                }
+            }
+            .launchIn(lifecycleScope)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

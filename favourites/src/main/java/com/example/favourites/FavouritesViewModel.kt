@@ -32,17 +32,18 @@ class FavouritesViewModel(
                 }
                 signal(FavouritesSignal.FavouritesRemoved)
             }
-            .updates()
+            .updates
             .scan(initialState) { state, update -> update(state) }
             .onEach { state = it }
             .launchIn(viewModelScope)
     }
 
-    private fun Flow<FavouritesIntent>.updates(): Flow<Update> = merge(
-        filterIsInstance<LoadFavourites>().loadFavouritesUpdates,
-        filterIsInstance<EventLongClicked>().map { Update.ToggleEventSelection(it.event) },
-        filterIsInstance<ClearSelectionClicked>().map { Update.ClearSelection }
-    )
+    private val Flow<FavouritesIntent>.updates: Flow<Update>
+        get() = merge(
+            filterIsInstance<LoadFavourites>().loadFavouritesUpdates,
+            filterIsInstance<EventLongClicked>().map { Update.ToggleEventSelection(it.event) },
+            filterIsInstance<ClearSelectionClicked>().map { Update.ClearSelection }
+        )
 
     private val Flow<LoadFavourites>.loadFavouritesUpdates: Flow<Update>
         get() = filterNot { state.events.limitHit }
@@ -65,7 +66,7 @@ class FavouritesViewModel(
                 .copyWithTransformedEvents { it.copy(selected = false) }
         }
 
-        class Events(val events: List<IEvent>) : Update() {
+        class Events(private val events: List<IEvent>) : Update() {
             override operator fun invoke(state: FavouritesState): FavouritesState = state.copy(
                 events = DataList(
                     data = events.map { Selectable(Event(it)) },
