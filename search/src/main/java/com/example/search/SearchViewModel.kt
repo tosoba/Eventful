@@ -1,15 +1,12 @@
 package com.example.search
 
 import androidx.lifecycle.viewModelScope
-import com.example.core.Resource
-import com.example.core.model.PagedResult
-import com.example.core.model.ticketmaster.IEvent
 import com.example.core.usecase.GetSeachSuggestions
 import com.example.core.usecase.SaveEvents
 import com.example.core.usecase.SaveSuggestion
 import com.example.core.usecase.SearchEvents
 import com.example.coreandroid.base.BaseViewModel
-import com.example.coreandroid.provider.ConnectivityStateProvider
+import com.example.coreandroid.provider.ConnectedStateProvider
 import com.example.coreandroid.util.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -21,7 +18,7 @@ class SearchViewModel(
     private val saveEvents: SaveEvents,
     private val getSearchSuggestions: GetSeachSuggestions,
     private val saveSuggestion: SaveSuggestion,
-    private val connectivityStateProvider: ConnectivityStateProvider,
+    private val connectedStateProvider: ConnectedStateProvider,
     private val ioDispatcher: CoroutineDispatcher,
     initialState: SearchState = SearchState()
 ) : BaseViewModel<SearchIntent, SearchState, SearchSignal>(initialState) {
@@ -33,7 +30,7 @@ class SearchViewModel(
     }
 
     private val connectivityReactionFlow: Flow<SearchState>
-        get() = connectivityStateProvider.isConnectedFlow
+        get() = connectedStateProvider.connectedStates
             .withLatestState()
             .filter { (isConnected, currentState) ->
                 isConnected && currentState.events.loadingFailed && currentState.events.data.isEmpty()

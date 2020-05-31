@@ -2,19 +2,15 @@ package com.example.nearby
 
 import android.view.View
 import androidx.lifecycle.viewModelScope
-import com.example.core.Resource
-import com.example.core.model.PagedResult
 import com.example.core.model.app.LatLng
 import com.example.core.model.app.LocationState
 import com.example.core.model.app.LocationStatus
-import com.example.core.model.ticketmaster.IEvent
 import com.example.core.usecase.GetNearbyEvents
 import com.example.core.usecase.SaveEvents
-import com.example.core.util.flatMapFirst
 import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.controller.SnackbarAction
 import com.example.coreandroid.controller.SnackbarState
-import com.example.coreandroid.provider.ConnectivityStateProvider
+import com.example.coreandroid.provider.ConnectedStateProvider
 import com.example.coreandroid.provider.LocationStateProvider
 import com.example.coreandroid.util.*
 import kotlinx.coroutines.*
@@ -26,7 +22,7 @@ import kotlinx.coroutines.flow.*
 class NearbyViewModel(
     private val getNearbyEvents: GetNearbyEvents,
     private val saveEvents: SaveEvents,
-    private val connectivityStateProvider: ConnectivityStateProvider,
+    private val connectedStateProvider: ConnectedStateProvider,
     private val locationStateProvider: LocationStateProvider,
     private val ioDispatcher: CoroutineDispatcher,
     initialState: NearbyState = NearbyState()
@@ -65,12 +61,12 @@ class NearbyViewModel(
     )
 
     private val connectivityReactionFlow: Flow<NearbyState>
-        get() = connectivityStateProvider.isConnectedFlow
+        get() = connectedStateProvider.connectedStates
             .withLatestState()
             .filter { (isConnected, currentState) ->
                 isConnected && currentState.events.loadingFailed && currentState.events.data.isEmpty()
             }
-            .withLatestFrom(locationStateProvider.locationStateFlow.notNullLatLng) { connectedWithState, latLng ->
+            .withLatestFrom(locationStateProvider.locationStates.notNullLatLng) { connectedWithState, latLng ->
                 connectedWithState to latLng
             }
             .flatMapLatest { (connectedWithState, latLng) ->
@@ -79,7 +75,7 @@ class NearbyViewModel(
             }
 
     private val locationSnackbarFlow: Flow<NearbyState> //TODO: zip this with connection status?
-        get() = locationStateProvider.locationStateFlow
+        get() = locationStateProvider.locationStates
             .filter { it.latLng == null }
             .withLatestState()
             .map { (location, currentState) ->
@@ -109,7 +105,7 @@ class NearbyViewModel(
             .filterNotNull()
 
     private val loadEventsFlow: Flow<NearbyState>
-        get() = locationStateProvider.locationStateFlow
+        get() = locationStateProvider.locationStates
             .notNullLatLng
             .withLatestState()
             .filter { (_, currentState) -> currentState.events.data.isEmpty() } //TODO: this won't work with refreshing with SwipeRefreshLayout
@@ -117,7 +113,7 @@ class NearbyViewModel(
 
     private fun Flow<Pair<EventListScrolledToEnd, NearbyState>>.processScrolledToEndIntents(): Flow<NearbyState> {
         return filterCanLoadMoreEvents()
-            .withLatestFrom(locationStateProvider.locationStateFlow.notNullLatLng) { intentWithState, latLng ->
+            .withLatestFrom(locationStateProvider.locationStates.notNullLatLng) { intentWithState, latLng ->
                 val (_, currentState) = intentWithState
                 latLng to currentState
             }

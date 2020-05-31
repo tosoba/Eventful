@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.core.usecase.GetNearbyEvents
 import com.example.core.usecase.SaveEvents
-import com.example.coreandroid.provider.ConnectivityStateProvider
+import com.example.coreandroid.provider.ConnectedStateProvider
 import com.example.coreandroid.provider.LocationStateProvider
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
@@ -35,13 +35,13 @@ abstract class NearbyModule {
         fun nearbyViewModelBase(
             getNearbyEvents: GetNearbyEvents,
             saveEvents: SaveEvents,
-            connectivityStateProvider: ConnectivityStateProvider,
+            connectedStateProvider: ConnectedStateProvider,
             locationStateProvider: LocationStateProvider,
             ioDispatcher: CoroutineDispatcher
         ): ViewModel = NearbyViewModel(
             getNearbyEvents,
             saveEvents,
-            connectivityStateProvider,
+            connectedStateProvider,
             locationStateProvider,
             ioDispatcher
         )

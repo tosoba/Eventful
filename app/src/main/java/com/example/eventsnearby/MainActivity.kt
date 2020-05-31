@@ -8,7 +8,6 @@ import com.example.coreandroid.controller.DrawerLayoutController
 import com.google.android.material.navigation.NavigationView
 import com.markodevcic.peko.ActivityRotatingException
 import com.markodevcic.peko.Peko
-import com.markodevcic.peko.PermissionRequestResult
 import com.markodevcic.peko.rationale.AlertDialogPermissionRationale
 import com.markodevcic.peko.requestPermissionsAsync
 import dagger.android.support.DaggerAppCompatActivity
@@ -22,11 +21,11 @@ import kotlin.coroutines.CoroutineContext
 @ExperimentalCoroutinesApi
 class MainActivity : DaggerAppCompatActivity(), DrawerLayoutController, CoroutineScope {
 
-    private val supervisorJob = CompletableDeferred<Any>()
+    private val supervisorJob: CompletableDeferred<Any> = CompletableDeferred()
     override val coroutineContext: CoroutineContext get() = Dispatchers.Main + supervisorJob
 
     override val drawerLayout: DrawerLayout? get() = main_drawer_layout
-    private val drawerNavigationItemSelectedListener =
+    private val drawerItemSelectedListener: NavigationView.OnNavigationItemSelectedListener =
         NavigationView.OnNavigationItemSelectedListener { item ->
             when (item.itemId) {
 
@@ -45,7 +44,7 @@ class MainActivity : DaggerAppCompatActivity(), DrawerLayoutController, Coroutin
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        main_drawer_nav_view.setNavigationItemSelectedListener(drawerNavigationItemSelectedListener)
+        main_drawer_nav_view.setNavigationItemSelectedListener(drawerItemSelectedListener)
 
         requestPermission()
     }
@@ -63,29 +62,21 @@ class MainActivity : DaggerAppCompatActivity(), DrawerLayoutController, Coroutin
         else super.onBackPressed()
     }
 
-    private fun requestPermission() {
-        if (Peko.isRequestInProgress()) launch {
-            onRequestPermissionsResult(result = Peko.resumeRequest())
-        } else launch {
-            onRequestPermissionsResult(
-                result = requestPermissionsAsync(
-                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                    rationale = AlertDialogPermissionRationale(this@MainActivity) {
-                        setTitle(getString(R.string.location_permission_needed))
-                        setMessage(getString(R.string.no_location_permission_warning))
-                    }
-                )
+    private fun requestPermission(): Job = launch {
+        val (grantedPermissions) = if (Peko.isRequestInProgress()) {
+            Peko.resumeRequest()
+        } else {
+            requestPermissionsAsync(
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                rationale = AlertDialogPermissionRationale(this@MainActivity) {
+                    setTitle(getString(R.string.location_permission_needed))
+                    setMessage(getString(R.string.no_location_permission_warning))
+                }
             )
         }
-    }
-
-    private fun onRequestPermissionsResult(result: PermissionRequestResult) {
-        val (grantedPermissions) = result
-        launch {
-            viewModel.send(
-                if (Manifest.permission.ACCESS_COARSE_LOCATION in grantedPermissions) LoadLocation
-                else PermissionDenied
-            )
-        }
+        viewModel.intent(
+            if (Manifest.permission.ACCESS_COARSE_LOCATION in grantedPermissions) LoadLocation
+            else PermissionDenied
+        )
     }
 }

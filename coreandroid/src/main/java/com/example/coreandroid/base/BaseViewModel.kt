@@ -41,7 +41,9 @@ abstract class BaseViewModel<Intent, State : Any, Signal>(initialState: State) :
 
 @FlowPreview
 @ExperimentalCoroutinesApi
-abstract class BaseFlowViewModel<Intent, State : Any, Signal>(initialState: State) : ViewModel() {
+abstract class BaseStateFlowViewModel<Intent : Any, State : Any, Signal : Any>(
+    initialState: State
+) : ViewModel() {
     private val _signals: BroadcastChannel<Signal> = BroadcastChannel(Channel.BUFFERED)
     val signals: Flow<Signal> get() = _signals.asFlow()
     protected suspend fun signal(signal: Signal) = _signals.send(signal)
@@ -60,5 +62,9 @@ abstract class BaseFlowViewModel<Intent, State : Any, Signal>(initialState: Stat
         _intents.close()
         _signals.close()
         super.onCleared()
+    }
+
+    protected interface StateUpdate<State : Any> {
+        fun applyTo(state: State): State
     }
 }

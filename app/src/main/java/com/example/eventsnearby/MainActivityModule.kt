@@ -7,7 +7,7 @@ import com.example.core.usecase.GetLocation
 import com.example.core.usecase.GetLocationAvailability
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.ActivityScoped
-import com.example.coreandroid.provider.ConnectivityStateProvider
+import com.example.coreandroid.provider.ConnectedStateProvider
 import com.example.coreandroid.provider.LocationStateProvider
 import com.example.event.EventModule
 import com.example.favourites.FavouritesModule
@@ -42,7 +42,7 @@ abstract class MainActivityModule {
     abstract fun mainActivity(): MainActivity
 
     @Binds
-    abstract fun connectivityStateProvider(mainViewModel: MainViewModel): ConnectivityStateProvider
+    abstract fun connectivityStateProvider(mainViewModel: MainViewModel): ConnectedStateProvider
 
     @Binds
     abstract fun locationStateProvider(mainViewModel: MainViewModel): LocationStateProvider

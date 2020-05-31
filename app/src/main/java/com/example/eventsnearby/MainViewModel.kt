@@ -8,8 +8,8 @@ import com.example.core.usecase.GetConnection
 import com.example.core.usecase.GetLocation
 import com.example.core.usecase.GetLocationAvailability
 import com.example.core.util.flatMapFirst
-import com.example.coreandroid.base.BaseViewModel
-import com.example.coreandroid.provider.ConnectivityStateProvider
+import com.example.coreandroid.base.BaseStateFlowViewModel
+import com.example.coreandroid.provider.ConnectedStateProvider
 import com.example.coreandroid.provider.LocationStateProvider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -23,83 +23,96 @@ import kotlinx.coroutines.launch
 class MainViewModel(
     private val getLocation: GetLocation,
     private val getLocationAvailability: GetLocationAvailability,
-    private val getConnection: GetConnection,
+    getConnection: GetConnection,
     initialState: MainState = MainState()
-) : BaseViewModel<MainIntent, MainState, Unit>(initialState),
-    ConnectivityStateProvider,
+) : BaseStateFlowViewModel<MainIntent, MainState, Unit>(initialState),
+    ConnectedStateProvider,
     LocationStateProvider {
 
     init {
-        merge(
-            intentsChannel.asFlow().processIntents(),
-            connectionReactionFlow
-        ).onEach(statesChannel::send).launchIn(viewModelScope)
+        merge(intents.updates, getConnection().map { Update.Connection(it) })
+            .scan(initialState) { state, update -> update.applyTo(state) }
+            .onEach { state = it }
+            .launchIn(viewModelScope)
     }
 
-    override val isConnectedFlow: Flow<Boolean> get() = states.map { it.isConnected }
-    override val locationStateFlow: Flow<LocationState> get() = states.map { it.locationState }
+    override val connectedStates: Flow<Boolean> get() = states.map { it.isConnected }
 
-    private val connectionReactionFlow: Flow<MainState>
-        get() = getConnection().map { state.copy(isConnected = it) }
+    override val locationStates: Flow<LocationState> get() = states.map { it.locationState }
+    override fun reloadLocation() = viewModelScope.launch { intent(ReloadLocation) }.let { Unit }
 
-    override fun reloadLocation() = viewModelScope.launch { send(ReloadLocation) }.let { Unit }
+    private val Flow<MainIntent>.updates: Flow<Update>
+        get() = merge(
+            filterIsInstance<LoadLocation>().loadLocationUpdates(),
+            filterIsInstance<ReloadLocation>().reloadLocationUpdates(),
+            filterIsInstance<PermissionDenied>().permissionDeniedUpdates()
+        )
 
-    private fun Flow<MainIntent>.processIntents(): Flow<MainState> = merge(
-        filterIsInstance<LoadLocation>().processLoadLocationIntents(),
-        filterIsInstance<ReloadLocation>().withLatestState().processReloadLocationIntents(),
-        filterIsInstance<PermissionDenied>().withLatestState().processPermissionDeniedIntents()
-    )
-
-    private val locationLoadingStatesFlow: Flow<MainState>
-        get() = flow {
-            emit(LocationResult.Loading)
-            val result = getLocation()
-            emit(result)
-        }.withLatestState()
-            .map { (result, currentState) -> currentState.reduce(result) }
-
-    //TODO: either disable swipe refresh when event list is empty or use filterNot status is Loading
-    private fun Flow<Pair<ReloadLocation, MainState>>.processReloadLocationIntents(): Flow<MainState> {
-        return flatMapFirst { (_, currentState) ->
-            flowOf(
-                currentState.copy(
-                    locationState = currentState.locationState.copy(
-                        status = LocationStatus.Initial
-                    )
-                )
-            ).onCompletion {
-                emitAll(locationLoadingFlow)
-            }
-        }
+    private fun Flow<ReloadLocation>.reloadLocationUpdates(): Flow<Update> = filterNot {
+        state.locationState.status is LocationStatus.Loading
+    }.flatMapFirst {
+        flowOf<Update>(Update.Location.Reset)
+            .onCompletion { emitAll(locationLoadingUpdates) }
     }
 
-    private fun Flow<LoadLocation>.processLoadLocationIntents(): Flow<MainState> = take(1)
-        .flatMapLatest { locationLoadingFlow }
+    private fun Flow<LoadLocation>.loadLocationUpdates(): Flow<Update> = take(1)
+        .flatMapLatest { locationLoadingUpdates }
 
-    private val locationLoadingFlow: Flow<MainState>
+    private val locationLoadingUpdates: Flow<Update>
         get() = getLocationAvailability()
             .distinctUntilChanged()
-            .combine(states) { item, state -> item to state }
-            .takeWhile { (_, currentState) -> currentState.locationState.status !is LocationStatus.Found }
-            .flatMapLatest { (locationAvailable, currentState) ->
-                if (locationAvailable) locationLoadingStatesFlow
-                else flowOf(
-                    currentState.copy(
-                        locationState = currentState.locationState.copy(
-                            status = LocationStatus.Disabled
-                        )
-                    )
+            .takeWhile { state.locationState.status !is LocationStatus.Found }
+            .flatMapLatest { locationAvailable ->
+                flow<Update> {
+                    if (locationAvailable) {
+                        emit(Update.Location.Result(LocationResult.Loading))
+                        emit(Update.Location.Result(getLocation()))
+                    } else {
+                        emit(Update.Location.Result(LocationResult.Disabled))
+                    }
+                }
+            }
+
+    private fun Flow<PermissionDenied>.permissionDeniedUpdates(): Flow<Update> = map {
+        Update.Location.PermissionDenied
+    }
+
+    private sealed class Update : StateUpdate<MainState> {
+        class Connection(private val connected: Boolean) : Update() {
+            override fun applyTo(state: MainState): MainState = state.copy(isConnected = connected)
+        }
+
+        sealed class Location : Update() {
+            object PermissionDenied : Update() {
+                override fun applyTo(state: MainState): MainState = state.copy(
+                    locationState = state.locationState.copy(status = LocationStatus.PermissionDenied)
                 )
             }
 
-    //TODO: test this
-    private fun Flow<Pair<PermissionDenied, MainState>>.processPermissionDeniedIntents(): Flow<MainState> {
-        return map { (_, currentState) ->
-            currentState.copy(
-                locationState = currentState.locationState.copy(
-                    status = LocationStatus.PermissionDenied
+            object Reset : Update() {
+                override fun applyTo(state: MainState): MainState = state.copy(
+                    locationState = state.locationState.copy(status = LocationStatus.Initial)
                 )
-            )
+            }
+
+            class Result(private val result: LocationResult) : Location() {
+                override fun applyTo(state: MainState): MainState = state.copy(
+                    locationState = when (result) {
+                        is LocationResult.Found -> state.locationState.copy(
+                            latLng = result.latLng,
+                            status = LocationStatus.Found
+                        )
+                        else -> state.locationState.copy(
+                            status = when (result) {
+                                is LocationResult.Loading -> LocationStatus.Loading
+                                is LocationResult.Disabled -> LocationStatus.Disabled
+                                is LocationResult.Error -> LocationStatus.Error(result.throwable)
+                                else -> state.locationState.status
+                            }
+                        )
+                    }
+                )
+            }
         }
     }
 }

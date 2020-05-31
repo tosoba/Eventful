@@ -10,7 +10,7 @@ import com.example.core.usecase.SaveEvents
 import com.example.core.usecase.SaveSuggestion
 import com.example.core.usecase.SearchEvents
 import com.example.coreandroid.controller.SnackbarState
-import com.example.coreandroid.provider.ConnectivityStateProvider
+import com.example.coreandroid.provider.ConnectedStateProvider
 import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.LoadedSuccessfully
 import com.example.coreandroid.util.Loading
@@ -59,14 +59,14 @@ internal class SearchViewModelTest {
         saveEvents: SaveEvents = mockk(relaxed = true),
         getSearchSuggestions: GetSeachSuggestions = mockk(relaxed = true),
         saveSuggestion: SaveSuggestion = mockk(relaxed = true),
-        connectivityStateProvider: ConnectivityStateProvider = mockk(relaxed = true),
+        connectedStateProvider: ConnectedStateProvider = mockk(relaxed = true),
         initialState: SearchState = SearchState()
     ): SearchViewModel = SearchViewModel(
         searchEvents = searchEvents,
         saveEvents = saveEvents,
         getSearchSuggestions = getSearchSuggestions,
         saveSuggestion = saveSuggestion,
-        connectivityStateProvider = connectivityStateProvider,
+        connectivityStateProvider = connectedStateProvider,
         ioDispatcher = testDispatcher,
         initialState = initialState
     )
