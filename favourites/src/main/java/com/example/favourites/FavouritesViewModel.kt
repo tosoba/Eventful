@@ -1,6 +1,5 @@
 package com.example.favourites
 
-import androidx.lifecycle.viewModelScope
 import com.example.core.model.ticketmaster.IEvent
 import com.example.core.usecase.DeleteEvents
 import com.example.core.usecase.GetSavedEvents
@@ -33,9 +32,7 @@ class FavouritesViewModel(
                 signal(FavouritesSignal.FavouritesRemoved)
             }
             .updates
-            .scan(initialState) { state, update -> update(state) }
-            .onEach { state = it }
-            .launchIn(viewModelScope)
+            .applyToState(initialState = initialState)
     }
 
     private val Flow<FavouritesIntent>.updates: Flow<Update>

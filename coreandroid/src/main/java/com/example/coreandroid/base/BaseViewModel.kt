@@ -2,10 +2,12 @@ package com.example.coreandroid.base
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.coreandroid.util.withLatestFrom
 import com.hadilq.liveevent.LiveEvent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
@@ -66,5 +68,11 @@ abstract class BaseStateFlowViewModel<Intent : Any, State : Any, Signal : Any>(
 
     protected interface StateUpdate<State : Any> {
         operator fun invoke(state: State): State
+    }
+
+    protected fun <Update : StateUpdate<State>> Flow<Update>.applyToState(initialState: State): Job {
+        return scan(initialState) { state, update -> update(state) }
+            .onEach { state = it }
+            .launchIn(viewModelScope)
     }
 }

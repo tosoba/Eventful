@@ -31,9 +31,7 @@ class MainViewModel(
 
     init {
         merge(intents.updates, getConnection().map { Update.Connection(it) })
-            .scan(initialState) { state, update -> update(state) }
-            .onEach { state = it }
-            .launchIn(viewModelScope)
+            .applyToState(initialState = initialState)
     }
 
     override val connectedStates: Flow<Boolean> get() = states.map { it.connected }
