@@ -5,8 +5,8 @@ import com.example.coreandroid.util.*
 
 sealed class SearchIntent
 data class NewSearch(val text: String, val confirmed: Boolean) : SearchIntent()
-object LoadMoreResults : SearchIntent(), LoadMoreEventsIntent
-data class EventLongClicked(override val event: Event) : SearchIntent(), EventSelectionToggledIntent
-object ClearSelectionClicked : SearchIntent(), ClearEventSelectionIntent
-object AddToFavouritesClicked : SearchIntent(), AddToFavouritesIntent
-object HideSnackbar : SearchIntent(), HideSnackbarIntent
+object LoadMoreResults : SearchIntent()
+data class EventLongClicked( val event: Event) : SearchIntent()
+object ClearSelectionClicked : SearchIntent()
+object AddToFavouritesClicked : SearchIntent()
+object HideSnackbar : SearchIntent()

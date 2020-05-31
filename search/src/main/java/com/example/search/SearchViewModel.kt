@@ -10,14 +10,12 @@ import com.example.core.usecase.GetSeachSuggestions
 import com.example.core.usecase.SaveEvents
 import com.example.core.usecase.SaveSuggestion
 import com.example.core.usecase.SearchEvents
-import com.example.coreandroid.base.*
+import com.example.coreandroid.base.BaseStateFlowViewModel
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.provider.ConnectedStateProvider
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable
-import com.example.coreandroid.util.HideSnackbarIntent
-import com.example.coreandroid.util.Loading
-import com.example.coreandroid.util.pagedEventsFlow
+import com.example.coreandroid.util.*
 import com.haroldadmin.cnradapter.NetworkResponse
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -53,7 +51,7 @@ class SearchViewModel(
             filterIsInstance<LoadMoreResults>().loadMoreResultsUpdates,
             filterIsInstance<ClearSelectionClicked>().map { Update.ClearSelection },
             filterIsInstance<EventLongClicked>().map { Update.ToggleEventSelection(it.event) },
-            filterIsInstance<HideSnackbarIntent>().map { Update.HideSnackbar },
+            filterIsInstance<HideSnackbar>().map { Update.HideSnackbar },
             filterIsInstance<AddToFavouritesClicked>().addToFavouritesUpdates
         )
 
@@ -102,13 +100,15 @@ class SearchViewModel(
             }
         }
 
-    private sealed class Update : StateUpdate<SearchState> {
+    private sealed class Update :
+        StateUpdate<SearchState> {
         class ToggleEventSelection(
             override val event: Event
         ) : Update(),
             ToggleEventSelectionUpdate<SearchState>
 
-        object ClearSelection : Update(), ClearSelectionUpdate<SearchState>
+        object ClearSelection : Update(),
+            ClearSelectionUpdate<SearchState>
 
         object HideSnackbar : Update() {
             override fun invoke(state: SearchState): SearchState = state

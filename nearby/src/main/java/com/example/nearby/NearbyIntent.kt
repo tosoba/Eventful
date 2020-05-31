@@ -1,11 +1,10 @@
 package com.example.nearby
 
 import com.example.coreandroid.ticketmaster.Event
-import com.example.coreandroid.util.*
 
 sealed class NearbyIntent
-object LoadMoreResults : NearbyIntent(), LoadMoreEventsIntent
-data class EventLongClicked(override val event: Event) : NearbyIntent(), EventSelectionToggledIntent
-object ClearSelectionClicked : NearbyIntent(), ClearEventSelectionIntent
-object AddToFavouritesClicked : NearbyIntent(), AddToFavouritesIntent
-object HideSnackbar : NearbyIntent(), HideSnackbarIntent
+object LoadMoreResults : NearbyIntent()
+data class EventLongClicked(val event: Event) : NearbyIntent()
+object ClearSelectionClicked : NearbyIntent()
+object AddToFavouritesClicked : NearbyIntent()
+object HideSnackbar : NearbyIntent()
