@@ -43,20 +43,20 @@ class MainViewModel(
 
     private val Flow<MainIntent>.updates: Flow<Update>
         get() = merge(
-            filterIsInstance<LoadLocation>().loadLocationUpdates(),
-            filterIsInstance<ReloadLocation>().reloadLocationUpdates(),
-            filterIsInstance<PermissionDenied>().permissionDeniedUpdates()
+            filterIsInstance<LoadLocation>().loadLocationUpdates,
+            filterIsInstance<ReloadLocation>().reloadLocationUpdates,
+            filterIsInstance<PermissionDenied>().permissionDeniedUpdates
         )
 
-    private fun Flow<ReloadLocation>.reloadLocationUpdates(): Flow<Update> = filterNot {
-        state.locationState.status is LocationStatus.Loading
-    }.flatMapFirst {
-        flowOf<Update>(Update.Location.Reset)
-            .onCompletion { emitAll(locationLoadingUpdates) }
-    }
+    private val Flow<LoadLocation>.loadLocationUpdates: Flow<Update>
+        get() = take(1).flatMapLatest { locationLoadingUpdates }
 
-    private fun Flow<LoadLocation>.loadLocationUpdates(): Flow<Update> = take(1)
-        .flatMapLatest { locationLoadingUpdates }
+    private val Flow<ReloadLocation>.reloadLocationUpdates: Flow<Update>
+        get() = filterNot { state.locationState.status is LocationStatus.Loading }
+            .flatMapFirst {
+                flowOf<Update>(Update.Location.Reset)
+                    .onCompletion { emitAll(locationLoadingUpdates) }
+            }
 
     private val locationLoadingUpdates: Flow<Update>
         get() = getLocationAvailability()
@@ -73,9 +73,8 @@ class MainViewModel(
                 }
             }
 
-    private fun Flow<PermissionDenied>.permissionDeniedUpdates(): Flow<Update> = map {
-        Update.Location.PermissionDenied
-    }
+    private val Flow<PermissionDenied>.permissionDeniedUpdates: Flow<Update>
+        get() = map { Update.Location.PermissionDenied }
 
     private sealed class Update : StateUpdate<MainState> {
         class Connection(private val connected: Boolean) : Update() {
