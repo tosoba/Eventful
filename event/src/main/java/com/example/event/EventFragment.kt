@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.PagerAdapter
 import com.example.coreandroid.base.InjectableFragment
@@ -75,7 +74,7 @@ class EventFragment : InjectableFragment(), SnackbarController {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_event, container, false).apply {
         event_fab.setOnClickListener {
-            lifecycleScope.launch { viewModel.send(ToggleFavourite) }
+            lifecycleScope.launch { viewModel.intent(ToggleFavourite) }
         }
 
         event_bottom_nav_view.setOnNavigationItemSelectedListener(bottomNavItemSelectedListener)
@@ -100,17 +99,19 @@ class EventFragment : InjectableFragment(), SnackbarController {
             }
             .launchIn(lifecycleScope)
 
-        viewModel.signals.observe(this, Observer {
-            if (it is EventSignal.FavouriteStateToggled) {
-                transitionToSnackbarState(
-                    SnackbarState.Shown(
-                        text = if (it.isFavourite) "Event was added to favourites"
-                        else "Event was removed from favourites",
-                        length = Snackbar.LENGTH_SHORT
+        viewModel.signals
+            .onEach {
+                if (it is EventSignal.FavouriteStateToggled) {
+                    transitionToSnackbarState(
+                        SnackbarState.Shown(
+                            text = if (it.isFavourite) "Event was added to favourites"
+                            else "Event was removed from favourites",
+                            length = Snackbar.LENGTH_SHORT
+                        )
                     )
-                )
+                }
             }
-        })
+            .launchIn(lifecycleScope)
     }
 
     override fun transitionToSnackbarState(newState: SnackbarState) {

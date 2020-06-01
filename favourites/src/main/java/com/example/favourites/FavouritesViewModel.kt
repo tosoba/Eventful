@@ -3,7 +3,7 @@ package com.example.favourites
 import com.example.core.model.ticketmaster.IEvent
 import com.example.core.usecase.DeleteEvents
 import com.example.core.usecase.GetSavedEvents
-import com.example.coreandroid.base.BaseStateFlowViewModel
+import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.util.ClearSelectionUpdate
 import com.example.coreandroid.util.StateUpdate
 import com.example.coreandroid.util.ToggleEventSelectionUpdate
@@ -24,7 +24,7 @@ class FavouritesViewModel(
     private val deleteEvents: DeleteEvents,
     private val ioDispatcher: CoroutineDispatcher,
     initialState: FavouritesState = FavouritesState()
-) : BaseStateFlowViewModel<FavouritesIntent, FavouritesState, FavouritesSignal>(initialState) {
+) : BaseViewModel<FavouritesIntent, FavouritesState, FavouritesSignal>(initialState) {
 
     init {
         intents.onStart { emit(LoadFavourites) }

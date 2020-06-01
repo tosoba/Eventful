@@ -10,7 +10,7 @@ import com.example.core.usecase.GetSeachSuggestions
 import com.example.core.usecase.SaveEvents
 import com.example.core.usecase.SaveSuggestion
 import com.example.core.usecase.SearchEvents
-import com.example.coreandroid.base.BaseStateFlowViewModel
+import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.provider.ConnectedStateProvider
 import com.example.coreandroid.ticketmaster.Event
@@ -30,7 +30,7 @@ class SearchViewModel(
     connectedStateProvider: ConnectedStateProvider,
     private val ioDispatcher: CoroutineDispatcher,
     initialState: SearchState = SearchState()
-) : BaseStateFlowViewModel<SearchIntent, SearchState, SearchSignal>(initialState) {
+) : BaseViewModel<SearchIntent, SearchState, SearchSignal>(initialState) {
 
     init {
         merge(intents.updates, connectedStateProvider.updates)

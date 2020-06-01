@@ -31,7 +31,7 @@ class WeatherFragment : InjectableFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         latLng?.let {
-            lifecycleScope.launch { viewModel.send(LoadWeather(it)) }
+            lifecycleScope.launch { viewModel.intent(LoadWeather(it)) }
         }
     }
 

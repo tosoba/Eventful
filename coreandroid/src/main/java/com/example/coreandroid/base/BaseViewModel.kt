@@ -1,50 +1,18 @@
 package com.example.coreandroid.base
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.coreandroid.util.StateUpdate
-import com.example.coreandroid.util.withLatestFrom
-import com.hadilq.liveevent.LiveEvent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.*
 
 @FlowPreview
 @ExperimentalCoroutinesApi
-abstract class BaseViewModel<Intent, State : Any, Signal>(initialState: State) : ViewModel() {
-
-    protected val statesChannel = ConflatedBroadcastChannel(value = initialState)
-    val states: Flow<State> get() = statesChannel.asFlow().distinctUntilChanged()
-    val state: State get() = statesChannel.value
-
-    protected val liveSignals = LiveEvent<Signal>()
-    val signals: LiveData<Signal> get() = liveSignals
-
-    protected val intentsChannel = BroadcastChannel<Intent>(capacity = Channel.CONFLATED)
-    suspend fun send(intent: Intent) = intentsChannel.send(intent)
-
-    protected val intentsWithLatestStates: Flow<Pair<Intent, State>>
-        get() = intentsChannel.asFlow().withLatestFrom(states) { intent, state -> intent to state }
-
-    protected fun <T> Flow<T>.withLatestState(): Flow<Pair<T, State>> {
-        return withLatestFrom(states) { item, state -> item to state }
-    }
-
-    override fun onCleared() {
-        intentsChannel.close()
-        statesChannel.close()
-        super.onCleared()
-    }
-}
-
-@FlowPreview
-@ExperimentalCoroutinesApi
-abstract class BaseStateFlowViewModel<Intent : Any, State : Any, Signal : Any>(
+abstract class BaseViewModel<Intent : Any, State : Any, Signal : Any>(
     initialState: State
 ) : ViewModel() {
     private val _signals: BroadcastChannel<Signal> = BroadcastChannel(Channel.BUFFERED)

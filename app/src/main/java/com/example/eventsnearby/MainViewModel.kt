@@ -8,7 +8,7 @@ import com.example.core.usecase.GetConnection
 import com.example.core.usecase.GetLocation
 import com.example.core.usecase.GetLocationAvailability
 import com.example.core.util.flatMapFirst
-import com.example.coreandroid.base.BaseStateFlowViewModel
+import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.util.StateUpdate
 import com.example.coreandroid.provider.ConnectedStateProvider
 import com.example.coreandroid.provider.LocationStateProvider
@@ -26,7 +26,7 @@ class MainViewModel(
     private val getLocationAvailability: GetLocationAvailability,
     getConnection: GetConnection,
     initialState: MainState = MainState()
-) : BaseStateFlowViewModel<MainIntent, MainState, Unit>(initialState),
+) : BaseViewModel<MainIntent, MainState, Unit>(initialState),
     ConnectedStateProvider,
     LocationStateProvider {
 

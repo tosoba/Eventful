@@ -12,7 +12,7 @@ import com.example.core.model.ticketmaster.trimmedLowerCasedName
 import com.example.core.usecase.GetNearbyEvents
 import com.example.core.usecase.SaveEvents
 import com.example.core.util.flatMapFirst
-import com.example.coreandroid.base.BaseStateFlowViewModel
+import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.controller.SnackbarAction
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.provider.ConnectedStateProvider
@@ -34,7 +34,7 @@ class NearbyViewModel(
     private val locationStateProvider: LocationStateProvider,
     private val ioDispatcher: CoroutineDispatcher,
     initialState: NearbyState = NearbyState()
-) : BaseStateFlowViewModel<NearbyIntent, NearbyState, NearbySignal>(initialState) {
+) : BaseViewModel<NearbyIntent, NearbyState, NearbySignal>(initialState) {
 
     init {
         merge(
