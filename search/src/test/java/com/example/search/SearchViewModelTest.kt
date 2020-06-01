@@ -27,7 +27,9 @@ import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Before
@@ -66,7 +68,7 @@ internal class SearchViewModelTest {
         saveEvents = saveEvents,
         getSearchSuggestions = getSearchSuggestions,
         saveSuggestion = saveSuggestion,
-        connectivityStateProvider = connectedStateProvider,
+        connectedStateProvider = connectedStateProvider,
         ioDispatcher = testDispatcher,
         initialState = initialState
     )
@@ -90,7 +92,7 @@ internal class SearchViewModelTest {
             )
             val searchText = "test"
 
-            viewModel.send(NewSearch(searchText, true))
+            viewModel.intent(NewSearch(searchText, true))
 
             coVerify(exactly = 1) { saveSuggestion(searchText) }
             coVerify(exactly = 1) { searchEvents(searchText) }
@@ -117,7 +119,7 @@ internal class SearchViewModelTest {
             )
             val searchText = "test"
 
-            viewModel.send(NewSearch(searchText, false))
+            viewModel.intent(NewSearch(searchText, false))
 
             coVerify(exactly = 0) { saveSuggestion(searchText) }
             coVerify(exactly = 1) { searchEvents(searchText) }
@@ -155,12 +157,12 @@ internal class SearchViewModelTest {
             val searchText = "test"
 
             val states = onPausedDispatcher {
-                viewModel.send(NewSearch(searchText, false))
+                viewModel.intent(NewSearch(searchText, false))
                 viewModel.states.takeWhileInclusive { it.events.status !is LoadedSuccessfully }
                     .toList()
             }
 
-            assert(states.size == 3)
+            assert(states.size == 4)
 
             val (
                 initialSearchText,
@@ -177,7 +179,7 @@ internal class SearchViewModelTest {
 
             val loadingState = states[1]
             assert(
-                loadingState.searchText == initialState.searchText
+                loadingState.searchText == searchText
                         && loadingState.searchSuggestions == initialState.searchSuggestions
                         && loadingState.snackbarState == initialState.snackbarState
             )
@@ -188,17 +190,30 @@ internal class SearchViewModelTest {
                         && loadingState.events.limit == initialState.events.limit
             )
 
-            val loadedState = states.last()
+            val loadedSuggestionsState = states[2]
             assert(
-                loadedState.searchText == searchText
-                        && loadedState.searchSuggestions.size == returnedSuggestionsListSize
-                        && loadedState.snackbarState == initialState.snackbarState
+                loadedSuggestionsState.searchText == searchText
+                        && loadedSuggestionsState.searchSuggestions.size == returnedSuggestionsListSize
+                        && loadedSuggestionsState.snackbarState == initialState.snackbarState
             )
             assert(
-                loadedState.events.data.size == returnedEventsListSize
-                        && loadedState.events.status is LoadedSuccessfully
-                        && loadedState.events.offset == currentPage + 1
-                        && loadedState.events.limit == totalPages
+                loadedSuggestionsState.events.data.isEmpty()
+                        && loadedSuggestionsState.events.status is Loading
+                        && loadedSuggestionsState.events.offset == initialState.events.offset
+                        && loadedSuggestionsState.events.limit == initialState.events.limit
+            )
+
+            val loadedEventsState = states.last()
+            assert(
+                loadedEventsState.searchText == searchText
+                        && loadedEventsState.searchSuggestions.size == returnedSuggestionsListSize
+                        && loadedEventsState.snackbarState == initialState.snackbarState
+            )
+            assert(
+                loadedEventsState.events.data.size == returnedEventsListSize
+                        && loadedEventsState.events.status is LoadedSuccessfully
+                        && loadedEventsState.events.offset == currentPage + 1
+                        && loadedEventsState.events.limit == totalPages
             )
         }
     }
@@ -222,8 +237,8 @@ internal class SearchViewModelTest {
             )
             val searchText = "test"
 
-            viewModel.send(NewSearch(searchText, true))
-            viewModel.send(NewSearch(searchText, true))
+            viewModel.intent(NewSearch(searchText, true))
+            viewModel.intent(NewSearch(searchText, true))
 
             coVerify(exactly = 1) { searchEvents(searchText) }
             coVerify(exactly = 1) { getSearchSuggestions(searchText) }
@@ -263,9 +278,9 @@ internal class SearchViewModelTest {
             )
             val searchText = "test"
 
-            viewModel.send(NewSearch(searchText, false))
-            viewModel.send(LoadMoreResults)
-            viewModel.send(LoadMoreResults)
+            viewModel.intent(NewSearch(searchText, false))
+            viewModel.intent(LoadMoreResults)
+            viewModel.intent(LoadMoreResults)
 
             coVerify(exactly = 1) { searchEvents(searchText, 1) }
             val (finalSearchText, _, finalEvents, _) = viewModel.state
@@ -289,10 +304,10 @@ internal class SearchViewModelTest {
                 )
             )
 
-            viewModel.send(EventLongClicked(eventsList.first()))
+            viewModel.intent(EventLongClicked(eventsList.first()))
             assert(viewModel.state.events.data.first().selected)
 
-            viewModel.send(EventLongClicked(eventsList.first()))
+            viewModel.intent(EventLongClicked(eventsList.first()))
             assert(!viewModel.state.events.data.first().selected)
         }
     }
@@ -307,9 +322,9 @@ internal class SearchViewModelTest {
                 )
             )
 
-            viewModel.send(EventLongClicked(eventsList.first()))
-            viewModel.send(EventLongClicked(eventsList.last()))
-            viewModel.send(ClearSelectionClicked)
+            viewModel.intent(EventLongClicked(eventsList.first()))
+            viewModel.intent(EventLongClicked(eventsList.last()))
+            viewModel.intent(ClearSelectionClicked)
 
             assert(!viewModel.state.events.data.any { it.selected })
         }
@@ -327,9 +342,16 @@ internal class SearchViewModelTest {
                 )
             )
 
-            viewModel.send(EventLongClicked(eventsList.first()))
-            viewModel.send(EventLongClicked(eventsList.last()))
-            viewModel.send(AddToFavouritesClicked)
+            val signals = mutableListOf<SearchSignal>()
+            val signalsJob = launch {
+                viewModel.signals.take(1).toList(signals)
+            }
+
+            viewModel.intent(EventLongClicked(eventsList.first()))
+            viewModel.intent(EventLongClicked(eventsList.last()))
+            viewModel.intent(AddToFavouritesClicked)
+
+            signalsJob.join()
 
             coVerify(exactly = 1) { saveEvents(listOf(eventsList.first(), eventsList.last())) }
             val (_, _, finalEvents, finalSnackbarState) = viewModel.state
@@ -339,7 +361,7 @@ internal class SearchViewModelTest {
                         && finalSnackbarState.text == "2 events were added to favourites"
                         && finalSnackbarState.length == Snackbar.LENGTH_SHORT
             )
-            assert(viewModel.signals.value == SearchSignal.FavouritesSaved)
+            assert(signals.size == 1 && signals.first() == SearchSignal.FavouritesSaved)
         }
     }
 }

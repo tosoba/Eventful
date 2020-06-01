@@ -25,8 +25,8 @@ abstract class BaseViewModel<Intent : Any, State : Any, Signal : Any>(
 
     private val _states: MutableStateFlow<State> = MutableStateFlow(initialState)
     val states: StateFlow<State> get() = _states
-    protected var state: State
-        set(value) = value.let { _states.value = it }
+    var state: State
+        protected set(value) = value.let { _states.value = it }
         get() = _states.value
 
     override fun onCleared() {

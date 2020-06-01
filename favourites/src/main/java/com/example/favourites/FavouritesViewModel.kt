@@ -4,13 +4,9 @@ import com.example.core.model.ticketmaster.IEvent
 import com.example.core.usecase.DeleteEvents
 import com.example.core.usecase.GetSavedEvents
 import com.example.coreandroid.base.BaseViewModel
-import com.example.coreandroid.util.ClearSelectionUpdate
-import com.example.coreandroid.util.StateUpdate
-import com.example.coreandroid.util.ToggleEventSelectionUpdate
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable
-import com.example.coreandroid.util.DataList
-import com.example.coreandroid.util.LoadedSuccessfully
+import com.example.coreandroid.util.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -28,12 +24,6 @@ class FavouritesViewModel(
 
     init {
         intents.onStart { emit(LoadFavourites) }
-            .onEach { intent ->
-                if (intent is RemoveFromFavouritesClicked) withContext(ioDispatcher) {
-                    deleteEvents(state.events.data.filter { it.selected }.map { it.item })
-                }
-                signal(FavouritesSignal.FavouritesRemoved)
-            }
             .updates
             .applyToState(initialState = initialState)
     }
@@ -42,8 +32,15 @@ class FavouritesViewModel(
         get() = merge(
             filterIsInstance<LoadFavourites>().loadFavouritesUpdates,
             filterIsInstance<EventLongClicked>().map { Update.ToggleEventSelection(it.event) },
-            filterIsInstance<ClearSelectionClicked>().map { Update.ClearSelection }
-        )
+            filterIsInstance<ClearSelectionClicked>().map { Update.ClearSelection },
+            filterIsInstance<RemoveFromFavouritesClicked>().map {
+                withContext(ioDispatcher) {
+                    deleteEvents(state.events.data.filter { it.selected }.map { it.item })
+                }
+                signal(FavouritesSignal.FavouritesRemoved)
+                null
+            }
+        ).filterNotNull()
 
     private val Flow<LoadFavourites>.loadFavouritesUpdates: Flow<Update>
         get() = filterNot { state.events.limitHit }

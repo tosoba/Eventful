@@ -19,6 +19,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.*
@@ -101,14 +102,14 @@ internal class FavouritesViewModelTest {
             val deleteEvents: DeleteEvents = mockk(relaxed = true)
             val viewModel = FavouritesViewModel(getSavedEvents, deleteEvents, testDispatcher)
 
-            viewModel.send(LoadFavourites)
+            viewModel.intent(LoadFavourites)
 
             // try load more after limit was hit
             val states = mutableListOf<FavouritesState>()
             val job = launch {
                 viewModel.states.takeWhileInclusive { !it.events.limitHit }.toList(states)
             }
-            viewModel.send(LoadFavourites)
+            viewModel.intent(LoadFavourites)
             job.join()
 
             coVerify(exactly = 1) {
@@ -146,7 +147,7 @@ internal class FavouritesViewModelTest {
             val job = launch {
                 viewModel.states.takeWhileInclusive { it.limit != afterLoadMoreSize }.toList(states)
             }
-            viewModel.send(LoadFavourites)
+            viewModel.intent(LoadFavourites)
             job.join()
 
             coVerify(exactly = 1) {
@@ -172,10 +173,10 @@ internal class FavouritesViewModelTest {
             val deleteEvents: DeleteEvents = mockk(relaxed = true)
             val viewModel = FavouritesViewModel(getSavedEvents, deleteEvents, testDispatcher)
 
-            viewModel.send(EventLongClicked(eventsList.first()))
+            viewModel.intent(EventLongClicked(eventsList.first()))
             assert(viewModel.state.events.data.first().selected)
 
-            viewModel.send(EventLongClicked(eventsList.first()))
+            viewModel.intent(EventLongClicked(eventsList.first()))
             assert(!viewModel.state.events.data.first().selected)
         }
     }
@@ -190,9 +191,9 @@ internal class FavouritesViewModelTest {
             val deleteEvents: DeleteEvents = mockk(relaxed = true)
             val viewModel = FavouritesViewModel(getSavedEvents, deleteEvents, testDispatcher)
 
-            viewModel.send(EventLongClicked(eventsList.first()))
-            viewModel.send(EventLongClicked(eventsList.last()))
-            viewModel.send(ClearSelectionClicked)
+            viewModel.intent(EventLongClicked(eventsList.first()))
+            viewModel.intent(EventLongClicked(eventsList.last()))
+            viewModel.intent(ClearSelectionClicked)
 
             assert(!viewModel.state.events.data.any { it.selected })
         }
@@ -208,12 +209,19 @@ internal class FavouritesViewModelTest {
             val deleteEvents: DeleteEvents = mockk(relaxed = true)
             val viewModel = FavouritesViewModel(getSavedEvents, deleteEvents, testDispatcher)
 
-            viewModel.send(EventLongClicked(eventsList.first()))
-            viewModel.send(EventLongClicked(eventsList.last()))
-            viewModel.send(RemoveFromFavouritesClicked)
+            val signals = mutableListOf<FavouritesSignal>()
+            val signalsJob = launch {
+                viewModel.signals.take(1).toList(signals)
+            }
+
+            viewModel.intent(EventLongClicked(eventsList.first()))
+            viewModel.intent(EventLongClicked(eventsList.last()))
+            viewModel.intent(RemoveFromFavouritesClicked)
+
+            signalsJob.join()
 
             coVerify(exactly = 1) { deleteEvents(listOf(eventsList.first(), eventsList.last())) }
-            assert(viewModel.signals.value == FavouritesSignal.FavouritesRemoved)
+            assert(signals.size == 1 && signals.first() == FavouritesSignal.FavouritesRemoved)
         }
     }
 }

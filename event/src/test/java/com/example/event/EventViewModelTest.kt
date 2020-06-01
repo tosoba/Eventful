@@ -11,10 +11,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Before
@@ -48,14 +45,14 @@ internal class EventViewModelTest {
         }
 
         val event = event()
-        val (viewModel, states) = onPausedDispatcher {
-            val eventViewModel = EventViewModel(
+
+        val states = onPausedDispatcher {
+            EventViewModel(
                 initialState = EventState(event, Data(false, Initial)),
                 isEventSaved = isEventSaved,
                 saveEvent = mockk(relaxed = true),
                 deleteEvent = mockk(relaxed = true)
-            )
-            eventViewModel to eventViewModel.states
+            ).states
                 .takeWhileInclusive { it.isFavourite.status !is LoadedSuccessfully }
                 .toList()
         }
@@ -67,7 +64,6 @@ internal class EventViewModelTest {
         assert(!initialState.isFavourite.data && initialState.isFavourite.status is Initial)
         val loadedState = states.last()
         assert(loadedState.isFavourite.data && loadedState.isFavourite.status is LoadedSuccessfully)
-        assert(viewModel.signals.value == null)
     }
 
     @Test
@@ -95,9 +91,16 @@ internal class EventViewModelTest {
                     .drop(1)
                     .takeWhileInclusive { it.isFavourite.data }.toList(states)
             }
-            viewModel.send(ToggleFavourite)
+
+            val signals = mutableListOf<EventSignal>()
+            val signalsJob = launch {
+                viewModel.signals.take(1).toList(signals)
+            }
+
+            viewModel.intent(ToggleFavourite)
             deletingEvent.complete(Unit)
             job.join()
+            signalsJob.join()
 
             coVerify(exactly = 1) { deleteEvent(event) }
 
@@ -109,7 +112,10 @@ internal class EventViewModelTest {
                 stateAfterSaving.isFavourite.status is LoadedSuccessfully
                         && !stateAfterSaving.isFavourite.data
             )
-            assert(viewModel.signals.value == EventSignal.FavouriteStateToggled(false))
+            assert(
+                signals.size == 1
+                        && signals.first() == EventSignal.FavouriteStateToggled(false)
+            )
         }
     }
 
@@ -133,14 +139,18 @@ internal class EventViewModelTest {
             )
 
             val states = mutableListOf<EventState>()
-            val job = launch {
+            val statesJob = launch {
                 viewModel.states
                     .drop(1)
                     .takeWhileInclusive { !it.isFavourite.data }.toList(states)
             }
-            viewModel.send(ToggleFavourite)
+            val signals = mutableListOf<EventSignal>()
+            val signalsJob = launch {
+                viewModel.signals.take(1).toList(signals)
+            }
+            viewModel.intent(ToggleFavourite)
             savingEvent.complete(Unit)
-            job.join()
+            statesJob.join()
 
             coVerify(exactly = 1) { saveEvent(event) }
 
@@ -152,7 +162,10 @@ internal class EventViewModelTest {
                 stateAfterSaving.isFavourite.status is LoadedSuccessfully
                         && stateAfterSaving.isFavourite.data
             )
-            assert(viewModel.signals.value == EventSignal.FavouriteStateToggled(true))
+            assert(
+                signals.size == 1 &&
+                        signals.first() == EventSignal.FavouriteStateToggled(true)
+            )
         }
     }
 }
