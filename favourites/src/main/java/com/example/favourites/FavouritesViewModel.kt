@@ -1,17 +1,16 @@
 package com.example.favourites
 
+import androidx.lifecycle.viewModelScope
 import com.example.core.model.ticketmaster.IEvent
 import com.example.core.usecase.DeleteEvents
 import com.example.core.usecase.GetSavedEvents
 import com.example.coreandroid.base.BaseViewModel
+import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.*
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.withContext
 
 @FlowPreview
 @ExperimentalCoroutinesApi
@@ -33,13 +32,8 @@ class FavouritesViewModel(
             filterIsInstance<LoadFavourites>().loadFavouritesUpdates,
             filterIsInstance<EventLongClicked>().map { Update.ToggleEventSelection(it.event) },
             filterIsInstance<ClearSelectionClicked>().map { Update.ClearSelection },
-            filterIsInstance<RemoveFromFavouritesClicked>().map {
-                withContext(ioDispatcher) {
-                    deleteEvents(state.events.data.filter { it.selected }.map { it.item })
-                }
-                signal(FavouritesSignal.FavouritesRemoved)
-                null
-            }
+            filterIsInstance<HideSnackbar>().map { Update.HideSnackbar },
+            filterIsInstance<RemoveFromFavouritesClicked>().removeFromFavouritesUpdates
         ).filterNotNull()
 
     private val Flow<LoadFavourites>.loadFavouritesUpdates: Flow<Update>
@@ -50,15 +44,29 @@ class FavouritesViewModel(
                     .map { events -> Update.Events(events) }
             }
 
-    private sealed class Update :
-        StateUpdate<FavouritesState> {
+    private val Flow<RemoveFromFavouritesClicked>.removeFromFavouritesUpdates: Flow<Update>
+        get() = map {
+            val selectedEvents = state.events.data.filter { it.selected }.map { it.item }
+            withContext(ioDispatcher) { deleteEvents(selectedEvents) }
+            signal(FavouritesSignal.FavouritesRemoved)
+            Update.RemovedFromFavourites(
+                snackbarText = removedFromFavouritesMessage(eventsCount = selectedEvents.size),
+                onSnackbarDismissed = { viewModelScope.launch { intent(HideSnackbar) } }
+            )
+        }
+
+    private sealed class Update : StateUpdate<FavouritesState> {
         class ToggleEventSelection(
             override val event: Event
         ) : Update(),
             ToggleEventSelectionUpdate<FavouritesState>
 
-        object ClearSelection : Update(),
-            ClearSelectionUpdate<FavouritesState>
+        object ClearSelection : Update(), ClearSelectionUpdate<FavouritesState>
+
+        object HideSnackbar : Update() {
+            override fun invoke(state: FavouritesState): FavouritesState = state
+                .copyWithSnackbarState(snackbarState = SnackbarState.Hidden)
+        }
 
         class Events(private val events: List<IEvent>) : Update() {
             override fun invoke(state: FavouritesState): FavouritesState = state.copy(
@@ -70,6 +78,12 @@ class FavouritesViewModel(
                 limit = events.size
             )
         }
+
+        class RemovedFromFavourites(
+            override val snackbarText: String,
+            override val onSnackbarDismissed: () -> Unit
+        ) : Update(),
+            EventSelectionConfirmedUpdate<FavouritesState>
     }
 
     companion object {

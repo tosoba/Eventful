@@ -85,9 +85,8 @@ class FavouritesFragment : InjectableFragment() {
 
     override fun onResume() {
         super.onResume()
-        activity?.invalidateOptionsMenu()
 
-        snackbarController?.transitionToSnackbarState(SnackbarState.Hidden)
+        activity?.invalidateOptionsMenu()
 
         viewModel.states
             .map { it.events }
@@ -99,6 +98,12 @@ class FavouritesFragment : InjectableFragment() {
             .map { state -> state.events.data.count { it.selected } }
             .distinctUntilChanged()
             .onEach { actionModeController.update(it) }
+            .launchIn(lifecycleScope)
+
+        viewModel.states
+            .map { it.snackbarState }
+            .distinctUntilChanged()
+            .onEach { snackbarController?.transitionToSnackbarState(it) }
             .launchIn(lifecycleScope)
 
         viewModel.signals

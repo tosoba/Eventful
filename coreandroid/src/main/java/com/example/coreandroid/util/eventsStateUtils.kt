@@ -84,4 +84,4 @@ fun addedToFavouritesMessage(eventsCount: Int): String = """$eventsCount
 
 fun removedFromFavouritesMessage(eventsCount: Int): String = """$eventsCount
             |${if (eventsCount > 1) " events were" else " event was"} 
-            |added to favourites""".trimMargin().replace("\n", "")
+            |removed from favourites""".trimMargin().replace("\n", "")
