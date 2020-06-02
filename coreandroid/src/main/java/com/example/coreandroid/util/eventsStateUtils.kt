@@ -66,16 +66,22 @@ interface ToggleEventSelectionUpdate<S : SelectableEventsState<S>> :
     }
 }
 
-interface AddedToFavouritesUpdate<S : SelectableEventsSnackbarState<S>> : StateUpdate<S> {
-    val addedCount: Int
-    val onDismissed: () -> Unit
+interface EventSelectionConfirmedUpdate<S : SelectableEventsSnackbarState<S>> : StateUpdate<S> {
+    val snackbarText: String
+    val onSnackbarDismissed: () -> Unit
     override fun invoke(state: S): S = state.copyWithSnackbarStateAndTransformedEvents(
         snackbarState = SnackbarState.Shown(
-            """$addedCount
-                |${if (addedCount > 1) " events were" else " event was"} 
-                |added to favourites""".trimMargin().replace("\n", ""),
+            text = snackbarText,
             length = Snackbar.LENGTH_SHORT,
-            onDismissed = onDismissed
+            onDismissed = onSnackbarDismissed
         )
     ) { event -> event.copy(selected = false) }
 }
+
+fun addedToFavouritesMessage(eventsCount: Int): String = """$eventsCount
+            |${if (eventsCount > 1) " events were" else " event was"} 
+            |added to favourites""".trimMargin().replace("\n", "")
+
+fun removedFromFavouritesMessage(eventsCount: Int): String = """$eventsCount
+            |${if (eventsCount > 1) " events were" else " event was"} 
+            |added to favourites""".trimMargin().replace("\n", "")

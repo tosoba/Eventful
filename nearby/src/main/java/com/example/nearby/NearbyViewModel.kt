@@ -97,9 +97,10 @@ class NearbyViewModel(
             val selectedEvents = state.events.data.filter { it.selected }.map { it.item }
             withContext(ioDispatcher) { saveEvents(selectedEvents) }
             signal(NearbySignal.FavouritesSaved)
-            Update.Events.AddedToFavourites(selectedEvents.size) {
-                viewModelScope.launch { signal(NearbySignal.FavouritesSaved) }
-            }
+            Update.Events.AddedToFavourites(
+                snackbarText = addedToFavouritesMessage(eventsCount = selectedEvents.size),
+                onSnackbarDismissed = { viewModelScope.launch { intent(HideSnackbar) } }
+            )
         }
 
     private sealed class Update : StateUpdate<NearbyState> {
@@ -175,10 +176,10 @@ class NearbyViewModel(
             }
 
             class AddedToFavourites(
-                override val addedCount: Int,
-                override val onDismissed: () -> Unit
+                override val snackbarText: String,
+                override val onSnackbarDismissed: () -> Unit
             ) : Update(),
-                AddedToFavouritesUpdate<NearbyState>
+                EventSelectionConfirmedUpdate<NearbyState>
         }
     }
 }

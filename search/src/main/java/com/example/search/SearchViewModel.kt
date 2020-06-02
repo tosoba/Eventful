@@ -95,9 +95,10 @@ class SearchViewModel(
             val selectedEvents = state.events.data.filter { it.selected }.map { it.item }
             withContext(ioDispatcher) { saveEvents(selectedEvents) }
             signal(SearchSignal.FavouritesSaved)
-            Update.Events.AddedToFavourites(selectedEvents.size) {
-                viewModelScope.launch { signal(SearchSignal.FavouritesSaved) }
-            }
+            Update.Events.AddedToFavourites(
+                snackbarText = addedToFavouritesMessage(eventsCount = selectedEvents.size),
+                onSnackbarDismissed = { viewModelScope.launch { intent(HideSnackbar) } }
+            )
         }
 
     private sealed class Update :
@@ -154,10 +155,10 @@ class SearchViewModel(
             }
 
             class AddedToFavourites(
-                override val addedCount: Int,
-                override val onDismissed: () -> Unit
+                override val snackbarText: String,
+                override val onSnackbarDismissed: () -> Unit
             ) : Update(),
-                AddedToFavouritesUpdate<SearchState>
+                EventSelectionConfirmedUpdate<SearchState>
         }
     }
 }
