@@ -1,15 +1,10 @@
 package com.example.nearby
 
-import com.example.core.Resource
-import com.example.core.model.PagedResult
-import com.example.core.model.ticketmaster.IEvent
-import com.example.core.model.ticketmaster.trimmedLowerCasedName
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.ticketmaster.Selectable
 import com.example.coreandroid.util.PagedDataList
 import com.example.coreandroid.util.SelectableEventsSnackbarState
-import com.haroldadmin.cnradapter.NetworkResponse
 
 data class NearbyState(
     override val events: PagedDataList<Selectable<Event>> = PagedDataList(),
@@ -30,27 +25,5 @@ data class NearbyState(
 
     override fun copyWithSnackbarState(snackbarState: SnackbarState): NearbyState = copy(
         snackbarState = snackbarState
-    )
-}
-
-internal fun NearbyState.reduce(
-    resource: Resource<PagedResult<IEvent>>
-): NearbyState = when (resource) {
-    is Resource.Success -> copy(
-        events = events.copyWithNewItemsDistinct(
-            resource.data.items.map { Selectable(Event(it)) },
-            resource.data.currentPage + 1,
-            resource.data.totalPages
-        ) { (event, _) -> event.trimmedLowerCasedName },
-        snackbarState = SnackbarState.Hidden
-    )
-
-    is Resource.Error<PagedResult<IEvent>> -> copy(
-        events = events.copyWithFailureStatus(resource.error),
-        snackbarState = if (resource.error is NetworkResponse.ServerError<*>) {
-            if ((resource.error as NetworkResponse.ServerError<*>).code in 503..504)
-                SnackbarState.Shown("No connection")
-            else SnackbarState.Shown("Unknown network error")
-        } else snackbarState
     )
 }
