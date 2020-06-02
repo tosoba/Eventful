@@ -59,22 +59,11 @@ data class PagedDataList<T>(
 
     fun transformItems(transform: (T) -> T): PagedDataList<T> = copy(data = data.map(transform))
 
-    fun copyWithNewItems(
-        newItems: List<T>, offset: Int, totalItems: Int
-    ): PagedDataList<T> = copy(
+    fun copyWithNewItems(newItems: List<T>, offset: Int, limit: Int): PagedDataList<T> = copy(
         data = data + newItems,
         offset = offset,
         status = LoadedSuccessfully,
-        limit = totalItems
-    )
-
-    fun <K> copyWithNewItemsDistinct(
-        newItems: List<T>, offset: Int, totalItems: Int, selector: (T) -> K
-    ): PagedDataList<T> = copy(
-        data = (data + newItems).distinctBy(selector),
-        offset = offset,
-        status = LoadedSuccessfully,
-        limit = totalItems
+        limit = limit
     )
 }
 

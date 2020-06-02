@@ -37,16 +37,23 @@ fun <Event> pagedEventsFlow(
     toEvent: (Event) -> IEvent,
     getEvents: suspend (Int) -> Resource<PagedResult<IEvent>>
 ): Flow<Resource<PagedResult<IEvent>>> = flow {
+    val currentEventNames = currentEvents.data.map(toEvent).map { it.trimmedLowerCasedName }
     var page = currentEvents.offset
     var resource: Resource<PagedResult<IEvent>>
     do {
-        //TODO: do distinct filtering here
         resource = withContext(dispatcher) { getEvents(page++) }
+            .map { result ->
+                PagedResult(
+                    items = result.items
+                        .filterNot { currentEventNames.contains(it.trimmedLowerCasedName) }
+                        .distinctBy { it.trimmedLowerCasedName },
+                    currentPage = result.currentPage,
+                    totalPages = result.totalPages
+                )
+            }
     } while (resource is Resource.Success<PagedResult<IEvent>>
-        && (currentEvents.data.map(toEvent) + resource.data.items)
-            .distinctBy { it.trimmedLowerCasedName }.size == currentEvents.data.size
-        && page < currentEvents.limit
-    )
+        && resource.data.items.isEmpty()
+        && page < currentEvents.limit)
     emit(resource)
 }
 

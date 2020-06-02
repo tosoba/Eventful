@@ -5,11 +5,11 @@ import com.example.core.Resource
 import com.example.core.model.PagedResult
 import com.example.core.model.search.SearchSuggestion
 import com.example.core.model.ticketmaster.IEvent
-import com.example.core.model.ticketmaster.trimmedLowerCasedName
 import com.example.core.usecase.GetSeachSuggestions
 import com.example.core.usecase.SaveEvents
 import com.example.core.usecase.SaveSuggestion
 import com.example.core.usecase.SearchEvents
+import com.example.core.util.flatMapFirst
 import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.provider.ConnectedStateProvider
@@ -40,9 +40,17 @@ class SearchViewModel(
     private val ConnectedStateProvider.updates: Flow<Update>
         get() = connectedStates.filter { connected ->
             state.run { connected && events.loadingFailed && events.data.isEmpty() }
-        }.map {
-            val resource = withContext(ioDispatcher) { searchEvents(state.searchText) }
-            Update.Events.Loaded(resource)
+        }.flatMapFirst {
+            val startState = state
+            pagedEventsFlow(
+                currentEvents = startState.events,
+                dispatcher = ioDispatcher,
+                toEvent = { selectable -> selectable.item }
+            ) {
+                searchEvents(startState.searchText)
+            }.onStart {
+                Update.Events.Loading()
+            }.map { Update.Events.Loaded(it, true) }
         }
 
     private val Flow<SearchIntent>.updates: Flow<Update>
@@ -67,9 +75,15 @@ class SearchViewModel(
 
                     val suggestions = withContext(ioDispatcher) { getSearchSuggestions(text) }
                     emit(Update.Suggestions(suggestions))
-
-                    val resource = withContext(ioDispatcher) { searchEvents(text) }
-                    emit(Update.Events.Loaded(resource))
+                }.onCompletion {
+                    val startState = state
+                    pagedEventsFlow(
+                        currentEvents = startState.events,
+                        dispatcher = ioDispatcher,
+                        toEvent = { selectable -> selectable.item }
+                    ) {
+                        searchEvents(startState.searchText)
+                    }.map { Update.Events.Loaded(it, true) }
                 }
             }
 
@@ -87,7 +101,7 @@ class SearchViewModel(
                 searchEvents(startState.searchText, offset)
             }.onStart {
                 Update.Events.Loading()
-            }.map { Update.Events.Loaded(it) }
+            }.map { Update.Events.Loaded(it, false) }
         }
 
     private val Flow<AddToFavouritesClicked>.addToFavouritesUpdates: Flow<Update>
@@ -101,15 +115,13 @@ class SearchViewModel(
             )
         }
 
-    private sealed class Update :
-        StateUpdate<SearchState> {
+    private sealed class Update : StateUpdate<SearchState> {
         class ToggleEventSelection(
             override val event: Event
         ) : Update(),
             ToggleEventSelectionUpdate<SearchState>
 
-        object ClearSelection : Update(),
-            ClearSelectionUpdate<SearchState>
+        object ClearSelection : Update(), ClearSelectionUpdate<SearchState>
 
         object HideSnackbar : Update() {
             override fun invoke(state: SearchState): SearchState = state
@@ -129,15 +141,23 @@ class SearchViewModel(
                 )
             }
 
-            class Loaded(private val resource: Resource<PagedResult<IEvent>>) : Events() {
+            class Loaded(
+                private val resource: Resource<PagedResult<IEvent>>,
+                private val newSearch: Boolean
+            ) : Events() {
                 override fun invoke(state: SearchState): SearchState = state.run {
                     when (resource) {
                         is Resource.Success -> copy(
-                            events = events.copyWithNewItemsDistinct(
-                                resource.data.items.map { Selectable(Event(it)) },
-                                resource.data.currentPage + 1,
-                                resource.data.totalPages
-                            ) { (event, _) -> event.trimmedLowerCasedName }
+                            events = if (newSearch) PagedDataList(
+                                data = resource.data.items.map { Selectable(Event(it)) },
+                                status = LoadedSuccessfully,
+                                offset = resource.data.currentPage + 1,
+                                limit = resource.data.totalPages
+                            ) else events.copyWithNewItems(
+                                newItems = resource.data.items.map { Selectable(Event(it)) },
+                                offset = resource.data.currentPage + 1,
+                                limit = resource.data.totalPages
+                            )
                         )
 
                         is Resource.Error<PagedResult<IEvent>> -> copy(

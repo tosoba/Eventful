@@ -8,7 +8,6 @@ import com.example.core.model.app.LatLng
 import com.example.core.model.app.LocationState
 import com.example.core.model.app.LocationStatus
 import com.example.core.model.ticketmaster.IEvent
-import com.example.core.model.ticketmaster.trimmedLowerCasedName
 import com.example.core.usecase.GetNearbyEvents
 import com.example.core.usecase.SaveEvents
 import com.example.core.util.flatMapFirst
@@ -150,16 +149,15 @@ class NearbyViewModel(
                 )
             }
 
-            //TODO: refactor this
             class Loaded(private val resource: Resource<PagedResult<IEvent>>) : Update() {
                 override fun invoke(state: NearbyState): NearbyState = state.run {
                     when (resource) {
                         is Resource.Success -> copy(
-                            events = events.copyWithNewItemsDistinct(
+                            events = events.copyWithNewItems(
                                 resource.data.items.map { Selectable(Event(it)) },
                                 resource.data.currentPage + 1,
                                 resource.data.totalPages
-                            ) { (event, _) -> event.trimmedLowerCasedName },
+                            ),
                             snackbarState = SnackbarState.Hidden
                         )
 
