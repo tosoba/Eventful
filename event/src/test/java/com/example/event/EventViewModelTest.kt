@@ -86,24 +86,20 @@ internal class EventViewModelTest {
             )
 
             val states = mutableListOf<EventState>()
-            val job = launch {
+            launch {
                 viewModel.states
                     .drop(1)
                     .takeWhileInclusive { it.isFavourite.data }.toList(states)
             }
-
             val signals = mutableListOf<EventSignal>()
-            val signalsJob = launch {
+            launch {
                 viewModel.signals.take(1).toList(signals)
             }
 
             viewModel.intent(ToggleFavourite)
             deletingEvent.complete(Unit)
-            job.join()
-            signalsJob.join()
 
             coVerify(exactly = 1) { deleteEvent(event) }
-
             assert(states.size == 2)
             val loadingState = states.first()
             assert(loadingState.isFavourite.status is Loading && loadingState.isFavourite.data)
@@ -139,21 +135,20 @@ internal class EventViewModelTest {
             )
 
             val states = mutableListOf<EventState>()
-            val statesJob = launch {
+            launch {
                 viewModel.states
                     .drop(1)
-                    .takeWhileInclusive { !it.isFavourite.data }.toList(states)
+                    .takeWhileInclusive { !it.isFavourite.data }
+                    .toList(states)
             }
             val signals = mutableListOf<EventSignal>()
-            val signalsJob = launch {
+            launch {
                 viewModel.signals.take(1).toList(signals)
             }
             viewModel.intent(ToggleFavourite)
             savingEvent.complete(Unit)
-            statesJob.join()
 
             coVerify(exactly = 1) { saveEvent(event) }
-
             assert(states.size == 2)
             val loadingState = states.first()
             assert(loadingState.isFavourite.status is Loading && !loadingState.isFavourite.data)
