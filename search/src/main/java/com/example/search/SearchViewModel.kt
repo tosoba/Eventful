@@ -37,22 +37,6 @@ class SearchViewModel(
             .applyToState(initialState = initialState)
     }
 
-    private val ConnectedStateProvider.updates: Flow<Update>
-        get() = connectedStates.filter { connected ->
-            state.run { connected && events.loadingFailed && events.data.isEmpty() }
-        }.flatMapFirst {
-            val startState = state
-            pagedEventsFlow(
-                currentEvents = startState.events,
-                dispatcher = ioDispatcher,
-                toEvent = { selectable -> selectable.item }
-            ) {
-                searchEvents(startState.searchText)
-            }.onStart {
-                Update.Events.Loading()
-            }.map { Update.Events.Loaded(it, true) }
-        }
-
     private val Flow<SearchIntent>.updates: Flow<Update>
         get() = merge(
             filterIsInstance<NewSearch>().newSearchUpdates,
@@ -63,6 +47,13 @@ class SearchViewModel(
             filterIsInstance<AddToFavouritesClicked>().addToFavouritesUpdates
         )
 
+    private val ConnectedStateProvider.updates: Flow<Update>
+        get() = connectedStates.filter { connected ->
+            state.run { connected && events.loadingFailed && events.data.isEmpty() }
+        }.flatMapFirst {
+            searchEventsUpdates(newSearch = true, startWithLoading = false)
+        }
+
     private val Flow<NewSearch>.newSearchUpdates: Flow<Update>
         get() = distinctUntilChanged()
             .onEach { intent ->
@@ -72,18 +63,10 @@ class SearchViewModel(
             .flatMapLatest { (text) ->
                 flow<Update> {
                     emit(Update.Events.Loading(searchText = text))
-
                     val suggestions = withContext(ioDispatcher) { getSearchSuggestions(text) }
                     emit(Update.Suggestions(suggestions))
                 }.onCompletion {
-                    val startState = state
-                    pagedEventsFlow(
-                        currentEvents = startState.events,
-                        dispatcher = ioDispatcher,
-                        toEvent = { selectable -> selectable.item }
-                    ) {
-                        searchEvents(startState.searchText)
-                    }.map { Update.Events.Loaded(it, true) }
+                    emitAll(searchEventsUpdates(newSearch = true, startWithLoading = false))
                 }
             }
 
@@ -91,18 +74,30 @@ class SearchViewModel(
         get() = filterNot {
             val events = state.events
             events.status is Loading || !events.canLoadMore || events.data.isEmpty()
-        }.flatMapLatest {
-            val startState = state
-            pagedEventsFlow(
-                currentEvents = startState.events,
-                dispatcher = ioDispatcher,
-                toEvent = { selectable -> selectable.item }
-            ) { offset ->
-                searchEvents(startState.searchText, offset)
-            }.onStart {
-                Update.Events.Loading()
-            }.map { Update.Events.Loaded(it, false) }
+        }.flatMapFirst {
+            searchEventsUpdates(newSearch = false, startWithLoading = true)
         }
+
+    private fun searchEventsUpdates(
+        newSearch: Boolean,
+        startWithLoading: Boolean
+    ): Flow<Update> = state.let { startState ->
+        pagedEventsFlow(
+            currentEvents = startState.events,
+            dispatcher = ioDispatcher,
+            toEvent = { selectable -> selectable.item }
+        ) { offset ->
+            searchEvents(
+                searchText = startState.searchText,
+                offset = if (newSearch) null else offset
+            )
+        }.map<Resource<PagedResult<IEvent>>, Update> {
+            Update.Events.Loaded(it, newSearch)
+        }.run {
+            if (startWithLoading) onStart { emit(Update.Events.Loading()) }
+            else this
+        }
+    }
 
     private val Flow<AddToFavouritesClicked>.addToFavouritesUpdates: Flow<Update>
         get() = map {
