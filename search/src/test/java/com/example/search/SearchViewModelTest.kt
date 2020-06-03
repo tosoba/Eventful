@@ -12,10 +12,7 @@ import com.example.core.usecase.SearchEvents
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.provider.ConnectedStateProvider
 import com.example.coreandroid.ticketmaster.Selectable
-import com.example.coreandroid.util.LoadedSuccessfully
-import com.example.coreandroid.util.Loading
-import com.example.coreandroid.util.PagedDataList
-import com.example.coreandroid.util.takeWhileInclusive
+import com.example.coreandroid.util.*
 import com.example.test.rule.event
 import com.example.test.rule.mockedList
 import com.example.test.rule.onPausedDispatcher
@@ -23,13 +20,13 @@ import com.example.test.rule.relaxedMockedList
 import com.google.android.material.snackbar.Snackbar
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Before
@@ -362,6 +359,31 @@ internal class SearchViewModelTest {
                         && finalSnackbarState.length == Snackbar.LENGTH_SHORT
             )
             assert(signals.size == 1 && signals.first() == SearchSignal.FavouritesSaved)
+        }
+    }
+
+    @Test
+    fun `GivenSearchVMWithNoEventsAndLoadingFailed WhenConnected EventsAreLoaded`() {
+        testScope.runBlockingTest {
+            val searchText = "test"
+            val searchEvents = mockk<SearchEvents> {
+                coEvery { this@mockk(any()) } returns Resource.successWith(
+                    PagedResult(relaxedMockedList<IEvent>(20), 0, 1)
+                )
+            }
+            val connectedStateProvider = mockk<ConnectedStateProvider> {
+                every { connectedStates } returns flowOf(true)
+            }
+            searchViewModel(
+                searchEvents = searchEvents,
+                connectedStateProvider = connectedStateProvider,
+                initialState = SearchState(
+                    searchText = searchText,
+                    events = PagedDataList(status = Failure(null))
+                )
+            )
+
+            coVerify(exactly = 1) { searchEvents(searchText) }
         }
     }
 }
