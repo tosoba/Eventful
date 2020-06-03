@@ -3,6 +3,7 @@ package com.example.favourites
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.example.core.usecase.DeleteEvents
 import com.example.core.usecase.GetSavedEvents
+import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.ticketmaster.Event
 import com.example.coreandroid.util.Initial
 import com.example.coreandroid.util.LoadedSuccessfully
@@ -10,6 +11,7 @@ import com.example.coreandroid.util.takeWhileInclusive
 import com.example.test.rule.event
 import com.example.test.rule.mockedList
 import com.example.test.rule.relaxedMockedList
+import com.google.android.material.snackbar.Snackbar
 import io.mockk.called
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -222,6 +224,12 @@ internal class FavouritesViewModelTest {
 
             coVerify(exactly = 1) { deleteEvents(listOf(eventsList.first(), eventsList.last())) }
             assert(signals.size == 1 && signals.first() == FavouritesSignal.FavouritesRemoved)
+            val finalSnackbarState = viewModel.state.snackbarState
+            assert(
+                finalSnackbarState is SnackbarState.Shown
+                        && finalSnackbarState.text == "2 events were removed from favourites"
+                        && finalSnackbarState.length == Snackbar.LENGTH_SHORT
+            )
         }
     }
 }
