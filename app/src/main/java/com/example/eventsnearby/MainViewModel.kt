@@ -75,8 +75,7 @@ class MainViewModel(
     private val Flow<PermissionDenied>.permissionDeniedUpdates: Flow<Update>
         get() = map { Update.Location.PermissionDenied }
 
-    private sealed class Update :
-        StateUpdate<MainState> {
+    private sealed class Update : StateUpdate<MainState> {
         class Connection(private val connected: Boolean) : Update() {
             override fun invoke(state: MainState): MainState = state.copy(connected = connected)
         }

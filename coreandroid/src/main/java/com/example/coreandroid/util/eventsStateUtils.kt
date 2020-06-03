@@ -37,7 +37,9 @@ fun <Event> pagedEventsFlow(
     toEvent: (Event) -> IEvent,
     getEvents: suspend (Int) -> Resource<PagedResult<IEvent>>
 ): Flow<Resource<PagedResult<IEvent>>> = flow {
-    val currentEventNames = currentEvents.data.map(toEvent).map { it.trimmedLowerCasedName }
+    val currentEventNames = currentEvents.data.map(toEvent)
+        .map { it.trimmedLowerCasedName }
+        .toSet()
     var page = currentEvents.offset
     var resource: Resource<PagedResult<IEvent>>
     do {
@@ -53,7 +55,8 @@ fun <Event> pagedEventsFlow(
             }
     } while (resource is Resource.Success<PagedResult<IEvent>>
         && resource.data.items.isEmpty()
-        && page < currentEvents.limit)
+        && page < currentEvents.limit
+    )
     emit(resource)
 }
 
