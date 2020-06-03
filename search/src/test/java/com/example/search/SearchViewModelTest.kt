@@ -22,11 +22,13 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Before
@@ -340,15 +342,13 @@ internal class SearchViewModelTest {
             )
 
             val signals = mutableListOf<SearchSignal>()
-            val signalsJob = launch {
+            launch {
                 viewModel.signals.take(1).toList(signals)
             }
 
             viewModel.intent(EventLongClicked(eventsList.first()))
             viewModel.intent(EventLongClicked(eventsList.last()))
             viewModel.intent(AddToFavouritesClicked)
-
-            signalsJob.join()
 
             coVerify(exactly = 1) { saveEvents(listOf(eventsList.first(), eventsList.last())) }
             val (_, _, finalEvents, finalSnackbarState) = viewModel.state
