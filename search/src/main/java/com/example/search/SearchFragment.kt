@@ -45,14 +45,16 @@ class SearchFragment : InjectableFragment() {
         infiniteItemListController<Selectable<Event>>(
             epoxyThreads,
             emptyText = "No events found",
-            loadMore = { lifecycleScope.launch { viewModel.intent(LoadMoreResults) } }
+            loadMore = { lifecycleScope.launch { viewModel.intent(SearchIntent.LoadMoreResults) } }
         ) { selectable ->
             selectable.listItem(
                 clicked = View.OnClickListener {
                     navigationFragment?.showFragment(fragmentFactory.eventFragment(selectable.item))
                 },
                 longClicked = View.OnLongClickListener {
-                    lifecycleScope.launch { viewModel.intent(EventLongClicked(selectable.item)) }
+                    lifecycleScope.launch {
+                        viewModel.intent(SearchIntent.EventLongClicked(selectable.item))
+                    }
                     true
                 }
             )
@@ -64,11 +66,13 @@ class SearchFragment : InjectableFragment() {
             menuId = R.menu.search_events_selection_menu,
             itemClickedCallbacks = mapOf(
                 R.id.search_action_add_favourite to {
-                    lifecycleScope.launch { viewModel.intent(AddToFavouritesClicked) }.let { Unit }
+                    lifecycleScope.launch { viewModel.intent(SearchIntent.AddToFavouritesClicked) }
+                    Unit
                 }
             ),
             onDestroyActionMode = {
-                lifecycleScope.launch { viewModel.intent(ClearSelectionClicked) }.let { Unit }
+                lifecycleScope.launch { viewModel.intent(SearchIntent.ClearSelectionClicked) }
+                Unit
             }
         )
     }
@@ -95,10 +99,10 @@ class SearchFragment : InjectableFragment() {
         viewModel.viewUpdates
             .onEach {
                 when (it) {
-                    is UpdateEvents -> epoxyController.setData(it.events)
-                    is UpdateSnackbar -> snackbarController?.transitionToSnackbarState(it.state)
-                    is SwapCursor -> searchSuggestionsAdapter.swapCursor(it.cursor)
-                    is UpdateActionMode -> actionModeController.update(it.numberOfSelectedEvents)
+                    is SearchViewUpdate.Events -> epoxyController.setData(it.events)
+                    is SearchViewUpdate.Snackbar -> snackbarController?.transitionToSnackbarState(it.state)
+                    is SearchViewUpdate.ActionMode -> actionModeController.update(it.numberOfSelectedEvents)
+                    is SearchViewUpdate.SwapCursor -> searchSuggestionsAdapter.swapCursor(it.cursor)
                 }
             }
             .launchIn(lifecycleScope)
@@ -112,8 +116,7 @@ class SearchFragment : InjectableFragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         menuController?.initializeMenu(R.menu.search_menu, inflater) {
-            (it.findItem(R.id.search_action)?.actionView as? SearchView)
-                ?.let(::initializeSearchView)
+            (it.findItem(R.id.search_action)?.actionView as? SearchView)?.run(::initialize)
         }
 
         super.onCreateOptionsMenu(menu, inflater)
@@ -124,20 +127,19 @@ class SearchFragment : InjectableFragment() {
         search_events_recycler_view?.saveScrollPosition(outState)
     }
 
-    private fun initializeSearchView(searchView: SearchView) {
-        searchView.maxWidth = Integer.MAX_VALUE
-        searchView.setSearchableInfo(
-            getSystemService(requireContext(), SearchManager::class.java)?.getSearchableInfo(
-                activity?.componentName
-            )
+    private fun initialize(searchView: SearchView) = searchView.apply {
+        maxWidth = Integer.MAX_VALUE
+        setSearchableInfo(
+            getSystemService(requireContext(), SearchManager::class.java)
+                ?.getSearchableInfo(activity?.componentName)
         )
-        searchView.suggestionsAdapter = searchSuggestionsAdapter
-        searchView.queryTextEvents()
+        suggestionsAdapter = searchSuggestionsAdapter
+        queryTextEvents()
             .debounce(500)
             .filter { it.queryText.isNotBlank() && it.queryText.length > 2 }
             .onEach {
                 viewModel.intent(
-                    NewSearch(
+                    SearchIntent.NewSearch(
                         text = it.queryText.toString().trim(),
                         confirmed = it is QueryTextEvent.QuerySubmitted
                     )

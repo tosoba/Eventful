@@ -39,12 +39,12 @@ class SearchViewModel(
 
     private val Flow<SearchIntent>.updates: Flow<Update>
         get() = merge(
-            filterIsInstance<NewSearch>().newSearchUpdates,
-            filterIsInstance<LoadMoreResults>().loadMoreResultsUpdates,
-            filterIsInstance<ClearSelectionClicked>().map { Update.ClearSelection },
-            filterIsInstance<EventLongClicked>().map { Update.ToggleEventSelection(it.event) },
-            filterIsInstance<HideSnackbar>().map { Update.HideSnackbar },
-            filterIsInstance<AddToFavouritesClicked>().addToFavouritesUpdates
+            filterIsInstance<SearchIntent.NewSearch>().newSearchUpdates,
+            filterIsInstance<SearchIntent.LoadMoreResults>().loadMoreResultsUpdates,
+            filterIsInstance<SearchIntent.ClearSelectionClicked>().map { Update.ClearSelection },
+            filterIsInstance<SearchIntent.EventLongClicked>().map { Update.ToggleEventSelection(it.event) },
+            filterIsInstance<SearchIntent.HideSnackbar>().map { Update.HideSnackbar },
+            filterIsInstance<SearchIntent.AddToFavouritesClicked>().addToFavouritesUpdates
         )
 
     private val ConnectedStateProvider.updates: Flow<Update>
@@ -54,7 +54,7 @@ class SearchViewModel(
             searchEventsUpdates(newSearch = true, startWithLoading = false)
         }
 
-    private val Flow<NewSearch>.newSearchUpdates: Flow<Update>
+    private val Flow<SearchIntent.NewSearch>.newSearchUpdates: Flow<Update>
         get() = distinctUntilChanged()
             .onEach { intent ->
                 val (text, shouldSave) = intent
@@ -70,7 +70,7 @@ class SearchViewModel(
                 }
             }
 
-    private val Flow<LoadMoreResults>.loadMoreResultsUpdates: Flow<Update>
+    private val Flow<SearchIntent.LoadMoreResults>.loadMoreResultsUpdates: Flow<Update>
         get() = filterNot {
             val events = state.events
             events.status is Loading || !events.canLoadMore || events.data.isEmpty()
@@ -99,14 +99,14 @@ class SearchViewModel(
         }
     }
 
-    private val Flow<AddToFavouritesClicked>.addToFavouritesUpdates: Flow<Update>
+    private val Flow<SearchIntent.AddToFavouritesClicked>.addToFavouritesUpdates: Flow<Update>
         get() = map {
             val selectedEvents = state.events.data.filter { it.selected }.map { it.item }
             withContext(ioDispatcher) { saveEvents(selectedEvents) }
             signal(SearchSignal.FavouritesSaved)
             Update.Events.AddedToFavourites(
                 snackbarText = addedToFavouritesMessage(eventsCount = selectedEvents.size),
-                onSnackbarDismissed = { viewModelScope.launch { intent(HideSnackbar) } }
+                onSnackbarDismissed = { viewModelScope.launch { intent(SearchIntent.HideSnackbar) } }
             )
         }
 

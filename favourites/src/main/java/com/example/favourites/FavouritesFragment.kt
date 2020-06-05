@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.*
 import androidx.lifecycle.lifecycleScope
 import com.example.coreandroid.base.InjectableFragment
-import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.controller.eventsSelectionActionModeController
 import com.example.coreandroid.navigation.IFragmentFactory
 import com.example.coreandroid.ticketmaster.Event

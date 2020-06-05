@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import androidx.cursoradapter.widget.CursorAdapter
 import kotlinx.android.synthetic.main.search_suggestion.view.*
 
-class SearchSuggestionsAdapter(
+internal class SearchSuggestionsAdapter(
     context: Context, cursor: Cursor?
 ) : CursorAdapter(context, cursor, false) {
 

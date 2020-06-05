@@ -9,30 +9,31 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 
-sealed class SearchUpdate
-data class UpdateEvents(val events: PagedDataList<Selectable<Event>>) : SearchUpdate()
-data class UpdateSnackbar(val state: SnackbarState) : SearchUpdate()
-data class UpdateActionMode(val numberOfSelectedEvents: Int) : SearchUpdate()
-data class SwapCursor(val cursor: MatrixCursor) : SearchUpdate()
+internal sealed class SearchViewUpdate {
+    data class Events(val events: PagedDataList<Selectable<Event>>) : SearchViewUpdate()
+    data class Snackbar(val state: SnackbarState) : SearchViewUpdate()
+    data class ActionMode(val numberOfSelectedEvents: Int) : SearchViewUpdate()
+    data class SwapCursor(val cursor: MatrixCursor) : SearchViewUpdate()
+}
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-internal val SearchViewModel.viewUpdates: Flow<SearchUpdate>
+internal val SearchViewModel.viewUpdates: Flow<SearchViewUpdate>
     get() = merge(
         states.map { it.events }
             .distinctUntilChanged()
-            .map { UpdateEvents(it) },
+            .map { SearchViewUpdate.Events(it) },
         states.map { it.snackbarState }
             .distinctUntilChanged()
-            .map { UpdateSnackbar(it) },
+            .map { SearchViewUpdate.Snackbar(it) },
         states.map { state -> state.events.data.count { it.selected } }
             .distinctUntilChanged()
-            .map { UpdateActionMode(it) },
+            .map { SearchViewUpdate.ActionMode(it) },
         states.map { it.searchSuggestions to it.searchText }
             .filter { (suggestions, _) -> suggestions.isNotEmpty() }
             .distinctUntilChanged()
             .map { (suggestions, searchText) ->
-                SwapCursor(
+                SearchViewUpdate.SwapCursor(
                     MatrixCursor(SearchSuggestionsAdapter.COLUMN_NAMES)
                         .apply {
                             suggestions.filter { searchText != it.searchText }
