@@ -21,7 +21,7 @@ buildscript {
         reactiveNetworkVersion = '3.0.2'
 
         coroutinesVersion = '1.3.6'
-        coroutinesRx2Version = '1.3.2'
+        coroutinesRx2Version = '1.3.7'
 
         coreKtxVersion = '1.1.0'
         liveDataKtxVersion = '2.3.0-alpha01'
