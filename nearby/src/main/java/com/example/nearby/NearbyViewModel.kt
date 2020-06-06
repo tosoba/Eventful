@@ -39,7 +39,8 @@ class NearbyViewModel(
         merge(
             intents.updates,
             connectedStateProvider.updates,
-            locationStateProvider.locationUpdates,
+            connectedStateProvider.snackbarUpdates,
+            locationStateProvider.updates,
             locationStateProvider.snackbarUpdates
         ).applyToState(initialState = initialState)
     }
@@ -60,15 +61,21 @@ class NearbyViewModel(
             locationStateProvider.locationStates.notNullLatLng.take(1)
         }.flatMapLatest { latLng -> loadingEventsUpdates(latLng) }
 
-    private val LocationStateProvider.snackbarUpdates: Flow<Update> //TODO: zip this with connection status?
+    private val ConnectedStateProvider.snackbarUpdates: Flow<Update>
+        get() = connectedStates.filter { connected ->
+            state.run { !connected && events.loadingFailed }
+        }.flatMapFirst {
+            locationStateProvider.locationStates.notNullLatLng.take(1)
+        }.map { Update.NoConnectionSnackbar }
+
+    private val LocationStateProvider.snackbarUpdates: Flow<Update>
         get() = locationStates
             .filter { it.latLng == null }
             .map { (_, status) ->
-                Update.LocationSnackbar(status, locationStateProvider::reloadLocation)
+                Update.LocationSnackbar(status, locationStateProvider::reloadLocation) //TODO: emit loading on reload location click
             }
-            .filterNotNull()
 
-    private val LocationStateProvider.locationUpdates: Flow<Update>
+    private val LocationStateProvider.updates: Flow<Update>
         get() = locationStates.notNullLatLng
             .filter { state.events.data.isEmpty() } //TODO: this won't work with refreshing with SwipeRefreshLayout
             .flatMapLatest { latLng -> loadingEventsUpdates(latLng) }
@@ -109,6 +116,12 @@ class NearbyViewModel(
             ToggleEventSelectionUpdate<NearbyState>
 
         object ClearSelection : Update(), ClearSelectionUpdate<NearbyState>
+
+        object NoConnectionSnackbar : Update() {
+            override fun invoke(state: NearbyState): NearbyState = NearbyState(
+                snackbarState = SnackbarState.Shown("No connection.")
+            )
+        }
 
         class LocationSnackbar(
             private val status: LocationStatus,

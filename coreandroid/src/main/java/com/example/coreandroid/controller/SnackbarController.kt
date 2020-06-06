@@ -18,14 +18,22 @@ interface SnackbarController {
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-fun <T> T.handleSnackbarState(
-    view: View
-): SendChannel<SnackbarState> where T : SnackbarController, T : LifecycleOwner {
+fun <T> T.handleSnackbarState(view: View): SendChannel<SnackbarState>
+        where T : SnackbarController, T : LifecycleOwner {
     val snackbarStateChannel: BroadcastChannel<SnackbarState> = BroadcastChannel(
         capacity = Channel.CONFLATED
     )
 
     var snackbar: Snackbar? = null
+
+    fun Snackbar.shownWith(state: SnackbarState.Shown) {
+        state.action?.let { setAction(it.msg, it.onClickListener) }
+        state.onDismissed?.let { onDismissed ->
+            addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                override fun onDismissed(transientBottomBar: Snackbar?, event: Int) = onDismissed()
+            })
+        }
+    }
 
     fun transitionBetween(previousState: SnackbarState?, newState: SnackbarState) {
         when (newState) {
@@ -35,21 +43,14 @@ fun <T> T.handleSnackbarState(
                     && snackbar?.duration == Snackbar.LENGTH_INDEFINITE
                     && previousState is SnackbarState.Shown
                 ) {
-                    snackbar?.setText(newState.text)
+                    snackbar?.run {
+                        setText(newState.text)
+                        shownWith(newState)
+                    }
                 } else {
                     snackbar?.dismiss()
                     snackbar = Snackbar.make(view, newState.text, newState.length).apply {
-                        newState.action?.let { setAction(it.msg, it.onClickListener) }
-                        if (newState.onDismissed != null) {
-                            addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
-                                override fun onDismissed(
-                                    transientBottomBar: Snackbar?,
-                                    event: Int
-                                ) {
-                                    newState.onDismissed.invoke()
-                                }
-                            })
-                        }
+                        shownWith(newState)
                         show()
                     }
                 }
