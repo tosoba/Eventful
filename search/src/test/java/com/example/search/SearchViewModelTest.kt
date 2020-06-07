@@ -1,18 +1,18 @@
 package com.example.search
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.example.core.model.Resource
 import com.example.core.model.PagedResult
-import com.example.core.model.search.SearchSuggestion
+import com.example.core.model.Resource
 import com.example.core.model.event.IEvent
-import com.example.core.usecase.GetSearchSuggestions
-import com.example.core.usecase.SaveEvents
-import com.example.core.usecase.SaveSearchSuggestion
-import com.example.core.usecase.SearchEvents
-import com.example.core.util.*
+import com.example.core.model.search.SearchSuggestion
+import com.example.core.provider.ConnectedStateProvider
+import com.example.core.usecase.*
+import com.example.core.util.Failure
+import com.example.core.util.LoadedSuccessfully
+import com.example.core.util.Loading
+import com.example.core.util.PagedDataList
 import com.example.core.util.ext.takeWhileInclusive
 import com.example.coreandroid.controller.SnackbarState
-import com.example.core.provider.ConnectedStateProvider
 import com.example.coreandroid.model.Selectable
 import com.example.test.rule.event
 import com.example.test.rule.mockedList
@@ -58,6 +58,7 @@ internal class SearchViewModelTest {
 
     private fun searchViewModel(
         searchEvents: SearchEvents = mockk(relaxed = true),
+        getPagedEventsFlow: GetPagedEventsFlow = GetPagedEventsFlow(testDispatcher),
         saveEvents: SaveEvents = mockk(relaxed = true),
         getSearchSuggestions: GetSearchSuggestions = mockk(relaxed = true),
         saveSearchSuggestion: SaveSearchSuggestion = mockk(relaxed = true),
@@ -65,9 +66,10 @@ internal class SearchViewModelTest {
         initialState: SearchState = SearchState()
     ): SearchViewModel = SearchViewModel(
         searchEvents = searchEvents,
+        getPagedEventsFlow = getPagedEventsFlow,
         saveEvents = saveEvents,
         getSearchSuggestions = getSearchSuggestions,
-        saveSuggestion = saveSearchSuggestion,
+        saveSearchSuggestion = saveSearchSuggestion,
         connectedStateProvider = connectedStateProvider,
         ioDispatcher = testDispatcher,
         initialState = initialState
@@ -92,7 +94,7 @@ internal class SearchViewModelTest {
             )
             val searchText = "test"
 
-            viewModel.intent(NewSearch(searchText, true))
+            viewModel.intent(SearchIntent.NewSearch(searchText, true))
 
             coVerify(exactly = 1) { saveSuggestion(searchText) }
             coVerify(exactly = 1) { searchEvents(searchText) }
@@ -119,7 +121,7 @@ internal class SearchViewModelTest {
             )
             val searchText = "test"
 
-            viewModel.intent(NewSearch(searchText, false))
+            viewModel.intent(SearchIntent.NewSearch(searchText, false))
 
             coVerify(exactly = 0) { saveSuggestion(searchText) }
             coVerify(exactly = 1) { searchEvents(searchText) }
@@ -157,7 +159,7 @@ internal class SearchViewModelTest {
             val searchText = "test"
 
             val states = onPausedDispatcher {
-                viewModel.intent(NewSearch(searchText, false))
+                viewModel.intent(SearchIntent.NewSearch(searchText, false))
                 viewModel.states.takeWhileInclusive { it.events.status !is LoadedSuccessfully }
                     .toList()
             }
@@ -237,8 +239,8 @@ internal class SearchViewModelTest {
             )
             val searchText = "test"
 
-            viewModel.intent(NewSearch(searchText, true))
-            viewModel.intent(NewSearch(searchText, true))
+            viewModel.intent(SearchIntent.NewSearch(searchText, true))
+            viewModel.intent(SearchIntent.NewSearch(searchText, true))
 
             coVerify(exactly = 1) { searchEvents(searchText) }
             coVerify(exactly = 1) { getSearchSuggestions(searchText) }
@@ -278,9 +280,9 @@ internal class SearchViewModelTest {
             )
             val searchText = "test"
 
-            viewModel.intent(NewSearch(searchText, false))
-            viewModel.intent(LoadMoreResults)
-            viewModel.intent(LoadMoreResults)
+            viewModel.intent(SearchIntent.NewSearch(searchText, false))
+            viewModel.intent(SearchIntent.LoadMoreResults)
+            viewModel.intent(SearchIntent.LoadMoreResults)
 
             coVerify(exactly = 1) { searchEvents(searchText, 1) }
             val (finalSearchText, _, finalEvents, _) = viewModel.state
@@ -300,18 +302,14 @@ internal class SearchViewModelTest {
             val eventsList = mockedList(20) { event(it) }
             val viewModel = searchViewModel(
                 initialState = SearchState(
-                    events = PagedDataList(eventsList.map {
-                        Selectable(
-                            it
-                        )
-                    })
+                    events = PagedDataList(eventsList.map { Selectable(it) })
                 )
             )
 
-            viewModel.intent(EventLongClicked(eventsList.first()))
+            viewModel.intent(SearchIntent.EventLongClicked(eventsList.first()))
             assert(viewModel.state.events.data.first().selected)
 
-            viewModel.intent(EventLongClicked(eventsList.first()))
+            viewModel.intent(SearchIntent.EventLongClicked(eventsList.first()))
             assert(!viewModel.state.events.data.first().selected)
         }
     }
@@ -322,17 +320,13 @@ internal class SearchViewModelTest {
             val eventsList = mockedList(20) { event(it) }
             val viewModel = searchViewModel(
                 initialState = SearchState(
-                    events = PagedDataList(eventsList.map {
-                        Selectable(
-                            it
-                        )
-                    })
+                    events = PagedDataList(eventsList.map { Selectable(it) })
                 )
             )
 
-            viewModel.intent(EventLongClicked(eventsList.first()))
-            viewModel.intent(EventLongClicked(eventsList.last()))
-            viewModel.intent(ClearSelectionClicked)
+            viewModel.intent(SearchIntent.EventLongClicked(eventsList.first()))
+            viewModel.intent(SearchIntent.EventLongClicked(eventsList.last()))
+            viewModel.intent(SearchIntent.ClearSelectionClicked)
 
             assert(!viewModel.state.events.data.any { it.selected })
         }
@@ -346,11 +340,7 @@ internal class SearchViewModelTest {
             val viewModel = searchViewModel(
                 saveEvents = saveEvents,
                 initialState = SearchState(
-                    events = PagedDataList(eventsList.map {
-                        Selectable(
-                            it
-                        )
-                    })
+                    events = PagedDataList(eventsList.map { Selectable(it) })
                 )
             )
 
@@ -359,9 +349,9 @@ internal class SearchViewModelTest {
                 viewModel.signals.take(1).toList(signals)
             }
 
-            viewModel.intent(EventLongClicked(eventsList.first()))
-            viewModel.intent(EventLongClicked(eventsList.last()))
-            viewModel.intent(AddToFavouritesClicked)
+            viewModel.intent(SearchIntent.EventLongClicked(eventsList.first()))
+            viewModel.intent(SearchIntent.EventLongClicked(eventsList.last()))
+            viewModel.intent(SearchIntent.AddToFavouritesClicked)
 
             coVerify(exactly = 1) { saveEvents(listOf(eventsList.first(), eventsList.last())) }
             val (_, _, finalEvents, finalSnackbarState) = viewModel.state
@@ -392,11 +382,7 @@ internal class SearchViewModelTest {
                 connectedStateProvider = connectedStateProvider,
                 initialState = SearchState(
                     searchText = searchText,
-                    events = PagedDataList(
-                        status = Failure(
-                            null
-                        )
-                    )
+                    events = PagedDataList(status = Failure(null))
                 )
             )
 

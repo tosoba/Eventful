@@ -1,10 +1,11 @@
 package com.example.search
 
 import androidx.lifecycle.viewModelScope
-import com.example.core.model.Resource
 import com.example.core.model.PagedResult
-import com.example.core.model.search.SearchSuggestion
+import com.example.core.model.Resource
 import com.example.core.model.event.IEvent
+import com.example.core.model.search.SearchSuggestion
+import com.example.core.provider.ConnectedStateProvider
 import com.example.core.usecase.*
 import com.example.core.util.LoadedSuccessfully
 import com.example.core.util.Loading
@@ -12,7 +13,6 @@ import com.example.core.util.PagedDataList
 import com.example.core.util.ext.flatMapFirst
 import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.controller.SnackbarState
-import com.example.core.provider.ConnectedStateProvider
 import com.example.coreandroid.model.Event
 import com.example.coreandroid.model.Selectable
 import com.example.coreandroid.util.*
@@ -56,11 +56,8 @@ class SearchViewModel(
         }
 
     private val Flow<SearchIntent.NewSearch>.newSearchUpdates: Flow<Update>
-        get() = distinctUntilChanged()
-            .onEach { intent ->
-                val (text, shouldSave) = intent
-                if (shouldSave) saveSearchSuggestion(text)
-            }
+        get() = onEach { (text, shouldSave) -> if (shouldSave) saveSearchSuggestion(text) }
+            .distinctUntilChangedBy { it.text }
             .flatMapLatest { (text) ->
                 flow<Update> {
                     emit(Update.Events.Loading(searchText = text))
