@@ -10,7 +10,10 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 interface SnackbarController {
     fun transitionToSnackbarState(newState: SnackbarState)
@@ -26,46 +29,33 @@ fun <T> T.handleSnackbarState(view: View): SendChannel<SnackbarState>
 
     var snackbar: Snackbar? = null
 
-    fun Snackbar.shownWith(state: SnackbarState.Shown) {
-        state.action?.let { setAction(it.msg, it.onClickListener) }
-        state.onDismissed?.let { onDismissed ->
-            addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
-                override fun onDismissed(transientBottomBar: Snackbar?, event: Int) = onDismissed()
-            })
-        }
-    }
-
-    fun transitionBetween(previousState: SnackbarState?, newState: SnackbarState) {
+    fun transitionTo(newState: SnackbarState) {
+        snackbar?.dismiss()
         snackbar = when (newState) {
-            is SnackbarState.Shown -> {
-                snackbar?.dismiss()
-                Snackbar.make(view, newState.text, newState.length).apply {
-                    shownWith(newState)
-                    show()
+            is SnackbarState.Shown -> Snackbar.make(view, newState.text, newState.length).apply {
+                newState.action?.let { setAction(it.msg, it.onClickListener) }
+                newState.onDismissed?.let { onDismissed ->
+                    addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                        override fun onDismissed(transientBottomBar: Snackbar?, event: Int) =
+                            onDismissed()
+                    })
                 }
+                show()
             }
-            is SnackbarState.Hidden -> {
-                snackbar?.dismiss()
-                null
-            }
+            is SnackbarState.Hidden -> null
         }
     }
 
     snackbarStateChannel.asFlow()
-        .scan(Pair<SnackbarState?, SnackbarState?>(null, null)) { last2States, newState ->
-            Pair(last2States.second, newState)
-        }
-        .drop(1)
-        .onEach { (previous, new) ->
-            if (previous != new) transitionBetween(previous, new!!)
-        }
+        .distinctUntilChanged()
+        .onEach { transitionTo(it) }
         .launchIn(lifecycleScope)
 
     return snackbarStateChannel
 }
 
 sealed class SnackbarState {
-    data class Shown( //TODO: split Shown into Disimissable (indefinite) or non dismissable (short/long)
+    data class Shown(
         val text: String,
         @Snackbar.Duration val length: Int = Snackbar.LENGTH_INDEFINITE,
         val action: SnackbarAction? = null,
