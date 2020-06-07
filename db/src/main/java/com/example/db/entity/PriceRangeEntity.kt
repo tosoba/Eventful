@@ -1,6 +1,6 @@
 package com.example.db.entity
 
-import com.example.core.model.ticketmaster.IPriceRange
+import com.example.core.model.event.IPriceRange
 
 data class PriceRangeEntity(
     override val type: String,

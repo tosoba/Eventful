@@ -1,7 +1,7 @@
 package com.example.db.dao
 
 import androidx.room.*
-import com.example.core.model.ticketmaster.IEvent
+import com.example.core.model.event.IEvent
 import com.example.db.Tables
 import com.example.db.entity.*
 import kotlinx.coroutines.flow.Flow

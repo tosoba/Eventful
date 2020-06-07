@@ -1,18 +1,19 @@
 package com.example.search
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.example.core.Resource
+import com.example.core.model.Resource
 import com.example.core.model.PagedResult
 import com.example.core.model.search.SearchSuggestion
-import com.example.core.model.ticketmaster.IEvent
-import com.example.core.usecase.GetSeachSuggestions
+import com.example.core.model.event.IEvent
+import com.example.core.usecase.GetSearchSuggestions
 import com.example.core.usecase.SaveEvents
 import com.example.core.usecase.SaveSuggestion
 import com.example.core.usecase.SearchEvents
+import com.example.core.util.*
+import com.example.core.util.ext.takeWhileInclusive
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.provider.ConnectedStateProvider
-import com.example.coreandroid.ticketmaster.Selectable
-import com.example.coreandroid.util.*
+import com.example.coreandroid.model.Selectable
 import com.example.test.rule.event
 import com.example.test.rule.mockedList
 import com.example.test.rule.onPausedDispatcher
@@ -58,7 +59,7 @@ internal class SearchViewModelTest {
     private fun searchViewModel(
         searchEvents: SearchEvents = mockk(relaxed = true),
         saveEvents: SaveEvents = mockk(relaxed = true),
-        getSearchSuggestions: GetSeachSuggestions = mockk(relaxed = true),
+        getSearchSuggestions: GetSearchSuggestions = mockk(relaxed = true),
         saveSuggestion: SaveSuggestion = mockk(relaxed = true),
         connectedStateProvider: ConnectedStateProvider = mockk(relaxed = true),
         initialState: SearchState = SearchState()
@@ -81,7 +82,7 @@ internal class SearchViewModelTest {
                 )
             }
             val saveSuggestion = mockk<SaveSuggestion>(relaxed = true)
-            val getSearchSuggestions = mockk<GetSeachSuggestions> {
+            val getSearchSuggestions = mockk<GetSearchSuggestions> {
                 coEvery { this@mockk(any()) } returns emptyList<SearchSuggestion>()
             }
             val viewModel = searchViewModel(
@@ -108,7 +109,7 @@ internal class SearchViewModelTest {
                 )
             }
             val saveSuggestion = mockk<SaveSuggestion>(relaxed = true)
-            val getSearchSuggestions = mockk<GetSeachSuggestions> {
+            val getSearchSuggestions = mockk<GetSearchSuggestions> {
                 coEvery { this@mockk(any()) } returns emptyList<SearchSuggestion>()
             }
             val viewModel = searchViewModel(
@@ -142,7 +143,7 @@ internal class SearchViewModelTest {
                 )
             }
             val returnedSuggestionsListSize = 20
-            val getSearchSuggestions = mockk<GetSeachSuggestions> {
+            val getSearchSuggestions = mockk<GetSearchSuggestions> {
                 coEvery { this@mockk(any()) } returns relaxedMockedList<SearchSuggestion>(
                     returnedSuggestionsListSize
                 )
@@ -225,7 +226,7 @@ internal class SearchViewModelTest {
                     PagedResult(relaxedMockedList<IEvent>(20), 0, 1)
                 )
             }
-            val getSearchSuggestions = mockk<GetSeachSuggestions> {
+            val getSearchSuggestions = mockk<GetSearchSuggestions> {
                 coEvery { this@mockk(any()) } returns relaxedMockedList<SearchSuggestion>(20)
             }
             val initialState = SearchState()
@@ -266,7 +267,7 @@ internal class SearchViewModelTest {
                     )
                 )
             }
-            val getSearchSuggestions = mockk<GetSeachSuggestions> {
+            val getSearchSuggestions = mockk<GetSearchSuggestions> {
                 coEvery { this@mockk(any()) } returns relaxedMockedList<SearchSuggestion>(1)
             }
             val initialState = SearchState()
@@ -299,7 +300,11 @@ internal class SearchViewModelTest {
             val eventsList = mockedList(20) { event(it) }
             val viewModel = searchViewModel(
                 initialState = SearchState(
-                    events = PagedDataList(eventsList.map { Selectable(it) })
+                    events = PagedDataList(eventsList.map {
+                        Selectable(
+                            it
+                        )
+                    })
                 )
             )
 
@@ -317,7 +322,11 @@ internal class SearchViewModelTest {
             val eventsList = mockedList(20) { event(it) }
             val viewModel = searchViewModel(
                 initialState = SearchState(
-                    events = PagedDataList(eventsList.map { Selectable(it) })
+                    events = PagedDataList(eventsList.map {
+                        Selectable(
+                            it
+                        )
+                    })
                 )
             )
 
@@ -337,7 +346,11 @@ internal class SearchViewModelTest {
             val viewModel = searchViewModel(
                 saveEvents = saveEvents,
                 initialState = SearchState(
-                    events = PagedDataList(eventsList.map { Selectable(it) })
+                    events = PagedDataList(eventsList.map {
+                        Selectable(
+                            it
+                        )
+                    })
                 )
             )
 
@@ -379,7 +392,11 @@ internal class SearchViewModelTest {
                 connectedStateProvider = connectedStateProvider,
                 initialState = SearchState(
                     searchText = searchText,
-                    events = PagedDataList(status = Failure(null))
+                    events = PagedDataList(
+                        status = Failure(
+                            null
+                        )
+                    )
                 )
             )
 

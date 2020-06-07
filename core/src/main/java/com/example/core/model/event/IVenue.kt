@@ -1,4 +1,4 @@
-package com.example.core.model.ticketmaster
+package com.example.core.model.event
 
 interface IVenue {
     val id: String

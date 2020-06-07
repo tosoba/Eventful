@@ -20,10 +20,6 @@ val Context.isConnected: Boolean
         return activeNetwork != null && activeNetwork.isConnected
     }
 
-fun Context.toDp(px: Float): Float {
-    return px / resources.displayMetrics.density
-}
+fun Context.toDp(px: Float): Float = px / resources.displayMetrics.density
 
-fun Context.toPx(dp: Float): Float {
-    return dp * resources.displayMetrics.density
-}
+fun Context.toPx(dp: Float): Float = dp * resources.displayMetrics.density

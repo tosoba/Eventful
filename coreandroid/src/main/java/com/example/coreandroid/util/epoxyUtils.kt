@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.airbnb.epoxy.*
+import com.example.core.util.*
 import com.example.coreandroid.LoadingMoreIndicatorBindingModel_
 import com.example.coreandroid.loadingIndicator
 import com.example.coreandroid.noItemsText

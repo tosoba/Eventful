@@ -1,7 +1,7 @@
 package com.example.ticketmasterapi.model
 
-import com.example.core.model.ticketmaster.ILink
-import com.example.core.model.ticketmaster.LinkType
+import com.example.core.model.event.ILink
+import com.example.core.model.event.LinkType
 import com.google.gson.annotations.SerializedName
 
 data class ExternalLinks(

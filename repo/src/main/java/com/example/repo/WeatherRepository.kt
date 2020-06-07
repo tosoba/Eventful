@@ -1,6 +1,6 @@
 package com.example.repo
 
-import com.example.core.Resource
+import com.example.core.model.Resource
 import com.example.core.model.weather.Forecast
 import com.example.core.repo.IWeatherRepository
 import com.example.weatherapi.model.DarkSkyApi

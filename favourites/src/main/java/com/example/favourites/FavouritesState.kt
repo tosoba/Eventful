@@ -1,9 +1,9 @@
 package com.example.favourites
 
 import com.example.coreandroid.controller.SnackbarState
-import com.example.coreandroid.ticketmaster.Event
-import com.example.coreandroid.ticketmaster.Selectable
-import com.example.coreandroid.util.DataList
+import com.example.coreandroid.model.Event
+import com.example.coreandroid.model.Selectable
+import com.example.core.util.DataList
 import com.example.coreandroid.util.SelectableEventsSnackbarState
 
 data class FavouritesState(

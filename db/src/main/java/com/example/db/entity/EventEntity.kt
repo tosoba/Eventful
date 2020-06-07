@@ -2,7 +2,7 @@ package com.example.db.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import com.example.core.model.ticketmaster.IEvent
+import com.example.core.model.event.IEvent
 import com.example.db.Tables
 import java.util.*
 

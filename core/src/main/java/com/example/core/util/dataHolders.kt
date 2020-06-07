@@ -1,4 +1,4 @@
-package com.example.coreandroid.util
+package com.example.core.util
 
 interface HoldsData<T> {
     val data: T
@@ -53,9 +53,7 @@ data class PagedDataList<T>(
 
     override val canLoadMore: Boolean get() = offset < limit
     override val copyWithLoadingStatus: PagedDataList<T> get() = copy(status = Loading)
-    override fun copyWithFailureStatus(error: Any?): PagedDataList<T> {
-        return copy(status = Failure(error))
-    }
+    override fun copyWithFailureStatus(error: Any?): PagedDataList<T> = copy(status = Failure(error))
 
     fun transformItems(transform: (T) -> T): PagedDataList<T> = copy(data = data.map(transform))
 

@@ -1,6 +1,6 @@
 package com.example.core.usecase
 
-import com.example.core.model.ticketmaster.IEvent
+import com.example.core.model.event.IEvent
 import com.example.core.repo.IEventRepository
 import javax.inject.Inject
 

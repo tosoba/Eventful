@@ -1,8 +1,8 @@
 package com.example.eventsnearby.di
 
 import android.content.Context
-import com.example.core.retrofit.offlineCacheInterceptor
-import com.example.core.retrofit.onlineCacheInterceptor
+import com.example.core.util.offlineCacheInterceptor
+import com.example.core.util.onlineCacheInterceptor
 import com.example.coreandroid.di.Dependencies
 import com.example.coreandroid.util.ext.isConnected
 import dagger.Module

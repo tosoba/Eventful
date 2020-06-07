@@ -1,7 +1,7 @@
-package com.example.coreandroid.ticketmaster
+package com.example.coreandroid.model
 
 import android.os.Parcelable
-import com.example.core.model.ticketmaster.IVenue
+import com.example.core.model.event.IVenue
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.android.parcel.Parcelize
 

@@ -1,4 +1,4 @@
-package com.example.coreandroid.view
+package com.example.coreandroid.view.ext
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 

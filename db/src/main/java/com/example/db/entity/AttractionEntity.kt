@@ -2,7 +2,7 @@ package com.example.db.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import com.example.core.model.ticketmaster.IAttraction
+import com.example.core.model.event.IAttraction
 import com.example.db.Tables
 
 @Entity(tableName = Tables.ATTRACTION, primaryKeys = ["id"])

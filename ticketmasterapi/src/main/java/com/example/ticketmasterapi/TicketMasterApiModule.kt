@@ -1,6 +1,6 @@
 package com.example.ticketmasterapi
 
-import com.example.core.retrofit.retrofitWith
+import com.example.core.util.retrofitWith
 import com.haroldadmin.cnradapter.CoroutinesNetworkResponseAdapterFactory
 import dagger.Module
 import dagger.Provides

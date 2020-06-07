@@ -1,6 +1,6 @@
 package com.example.test.rule
 
-import com.example.coreandroid.ticketmaster.Event
+import com.example.coreandroid.model.Event
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineScope

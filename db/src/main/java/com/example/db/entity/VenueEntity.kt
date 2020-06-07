@@ -1,7 +1,7 @@
 package com.example.db.entity
 
 import androidx.room.Entity
-import com.example.core.model.ticketmaster.IVenue
+import com.example.core.model.event.IVenue
 import com.example.db.Tables
 
 @Entity(tableName = Tables.VENUE, primaryKeys = ["id"])

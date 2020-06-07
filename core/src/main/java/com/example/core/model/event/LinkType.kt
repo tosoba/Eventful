@@ -1,4 +1,6 @@
-package com.example.core.model.ticketmaster
+package com.example.core.model.event
+
+import java.util.*
 
 enum class LinkType(private val typeStr: String) {
     YOUTUBE("youtube"),
@@ -12,6 +14,6 @@ enum class LinkType(private val typeStr: String) {
 
     companion object {
         fun fromString(str: String): LinkType? = values()
-            .find { it.typeStr.toLowerCase() == str.toLowerCase() }
+            .find { it.typeStr.toLowerCase(Locale.getDefault()) == str.toLowerCase(Locale.getDefault()) }
     }
 }

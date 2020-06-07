@@ -1,20 +1,20 @@
 package com.example.search
 
 import androidx.lifecycle.viewModelScope
-import com.example.core.Resource
+import com.example.core.model.Resource
 import com.example.core.model.PagedResult
 import com.example.core.model.search.SearchSuggestion
-import com.example.core.model.ticketmaster.IEvent
-import com.example.core.usecase.GetSeachSuggestions
-import com.example.core.usecase.SaveEvents
-import com.example.core.usecase.SaveSuggestion
-import com.example.core.usecase.SearchEvents
-import com.example.core.util.flatMapFirst
+import com.example.core.model.event.IEvent
+import com.example.core.usecase.*
+import com.example.core.util.LoadedSuccessfully
+import com.example.core.util.Loading
+import com.example.core.util.PagedDataList
+import com.example.core.util.ext.flatMapFirst
 import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.provider.ConnectedStateProvider
-import com.example.coreandroid.ticketmaster.Event
-import com.example.coreandroid.ticketmaster.Selectable
+import com.example.coreandroid.model.Event
+import com.example.coreandroid.model.Selectable
 import com.example.coreandroid.util.*
 import com.haroldadmin.cnradapter.NetworkResponse
 import kotlinx.coroutines.*
@@ -24,8 +24,9 @@ import kotlinx.coroutines.flow.*
 @FlowPreview
 class SearchViewModel(
     private val searchEvents: SearchEvents,
+    private val getPagedEventsFlow: GetPagedEventsFlow,
     private val saveEvents: SaveEvents,
-    private val getSearchSuggestions: GetSeachSuggestions,
+    private val getSearchSuggestions: GetSearchSuggestions,
     private val saveSuggestion: SaveSuggestion,
     connectedStateProvider: ConnectedStateProvider,
     private val ioDispatcher: CoroutineDispatcher,
@@ -82,9 +83,8 @@ class SearchViewModel(
         newSearch: Boolean,
         startWithLoading: Boolean
     ): Flow<Update> = state.let { startState ->
-        pagedEventsFlow(
+        getPagedEventsFlow(
             currentEvents = startState.events,
-            dispatcher = ioDispatcher,
             toEvent = { selectable -> selectable.item }
         ) { offset ->
             searchEvents(

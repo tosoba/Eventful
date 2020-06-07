@@ -5,8 +5,8 @@ import com.airbnb.epoxy.CarouselModel_
 import com.airbnb.epoxy.EpoxyModelGroup
 import com.airbnb.epoxy.ModelGroupHolder
 import com.example.coreandroid.*
-import com.example.coreandroid.ticketmaster.Event
-import com.example.coreandroid.ticketmaster.Selectable
+import com.example.coreandroid.model.Event
+import com.example.coreandroid.model.Selectable
 import com.example.coreandroid.util.NestedScrollingCarouselModel
 
 open class EventItem(
@@ -67,7 +67,7 @@ fun Selectable<Event>.listItem(
 val Event.kindsCarousel: CarouselModel_
     get() = NestedScrollingCarouselModel()
         .id("${id}c")
-        .models(kinds?.mapIndexed { index: Int, kind: String ->
+        .models(kinds.mapIndexed { index: Int, kind: String ->
             EventKindBindingModel_().id("${id}k$index")
                 .kind(kind)
-        } ?: emptyList())
+        })

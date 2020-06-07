@@ -1,9 +1,9 @@
 package com.example.weather
 
-import com.example.core.Resource
+import com.example.core.model.Resource
 import com.example.core.model.weather.Forecast
 import com.example.core.usecase.GetForecast
-import com.example.core.util.flatMapFirst
+import com.example.core.util.ext.flatMapFirst
 import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.util.StateUpdate
 import kotlinx.coroutines.CoroutineDispatcher

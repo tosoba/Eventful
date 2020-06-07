@@ -1,6 +1,6 @@
 package com.example.ticketmasterapi.model
 
-import com.example.core.model.ticketmaster.IPriceRange
+import com.example.core.model.event.IPriceRange
 
 data class PriceRange(
     override val type: String,

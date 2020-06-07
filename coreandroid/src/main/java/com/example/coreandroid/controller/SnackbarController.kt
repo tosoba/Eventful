@@ -36,28 +36,17 @@ fun <T> T.handleSnackbarState(view: View): SendChannel<SnackbarState>
     }
 
     fun transitionBetween(previousState: SnackbarState?, newState: SnackbarState) {
-        when (newState) {
+        snackbar = when (newState) {
             is SnackbarState.Shown -> {
-                if (snackbar != null
-                    && snackbar?.isShown != false
-                    && snackbar?.duration == Snackbar.LENGTH_INDEFINITE
-                    && previousState is SnackbarState.Shown
-                ) {
-                    snackbar?.run {
-                        setText(newState.text)
-                        shownWith(newState)
-                    }
-                } else {
-                    snackbar?.dismiss()
-                    snackbar = Snackbar.make(view, newState.text, newState.length).apply {
-                        shownWith(newState)
-                        show()
-                    }
+                snackbar?.dismiss()
+                Snackbar.make(view, newState.text, newState.length).apply {
+                    shownWith(newState)
+                    show()
                 }
             }
             is SnackbarState.Hidden -> {
                 snackbar?.dismiss()
-                snackbar = null
+                null
             }
         }
     }

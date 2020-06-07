@@ -1,7 +1,7 @@
-package com.example.coreandroid.ticketmaster
+package com.example.coreandroid.model
 
 import android.os.Parcelable
-import com.example.core.model.ticketmaster.IAttraction
+import com.example.core.model.event.IAttraction
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize

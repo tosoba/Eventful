@@ -1,7 +1,7 @@
 package com.example.db.entity
 
-import com.example.core.model.ticketmaster.ILink
-import com.example.core.model.ticketmaster.LinkType
+import com.example.core.model.event.ILink
+import com.example.core.model.event.LinkType
 
 data class LinkEntity(
     override val url: String,

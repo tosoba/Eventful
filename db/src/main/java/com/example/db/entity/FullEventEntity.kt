@@ -3,8 +3,8 @@ package com.example.db.entity
 import androidx.room.Embedded
 import androidx.room.Junction
 import androidx.room.Relation
-import com.example.core.model.ticketmaster.IEvent
-import com.example.core.model.ticketmaster.IPriceRange
+import com.example.core.model.event.IEvent
+import com.example.core.model.event.IPriceRange
 import java.util.*
 
 data class FullEventEntity(

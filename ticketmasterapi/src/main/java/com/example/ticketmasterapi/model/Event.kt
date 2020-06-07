@@ -1,8 +1,8 @@
 package com.example.ticketmasterapi.model
 
-import com.example.core.model.ticketmaster.IAttraction
-import com.example.core.model.ticketmaster.IEvent
-import com.example.core.model.ticketmaster.IVenue
+import com.example.core.model.event.IAttraction
+import com.example.core.model.event.IEvent
+import com.example.core.model.event.IVenue
 import com.example.ticketmasterapi.imageUrl
 import com.example.ticketmasterapi.kinds
 import com.google.gson.annotations.SerializedName

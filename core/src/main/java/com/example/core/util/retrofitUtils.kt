@@ -1,4 +1,4 @@
-package com.example.core.retrofit
+package com.example.core.util
 
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient

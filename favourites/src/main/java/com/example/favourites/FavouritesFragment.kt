@@ -6,8 +6,8 @@ import androidx.lifecycle.lifecycleScope
 import com.example.coreandroid.base.InjectableFragment
 import com.example.coreandroid.controller.eventsSelectionActionModeController
 import com.example.coreandroid.navigation.IFragmentFactory
-import com.example.coreandroid.ticketmaster.Event
-import com.example.coreandroid.ticketmaster.Selectable
+import com.example.coreandroid.model.Event
+import com.example.coreandroid.model.Selectable
 import com.example.coreandroid.util.EpoxyThreads
 import com.example.coreandroid.util.ext.*
 import com.example.coreandroid.util.infiniteItemListController

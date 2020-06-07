@@ -2,9 +2,10 @@ package com.example.event
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.example.core.usecase.DeleteEvent
-import com.example.core.usecase.IsEventSaved
+import com.example.core.usecase.IsEventSavedFlow
 import com.example.core.usecase.SaveEvent
-import com.example.coreandroid.util.*
+import com.example.core.util.*
+import com.example.core.util.ext.takeWhileInclusive
 import com.example.test.rule.event
 import com.example.test.rule.onPausedDispatcher
 import io.mockk.coEvery
@@ -40,7 +41,7 @@ internal class EventViewModelTest {
 
     @Test
     fun `GivenEventVM WhenInitialized IsFavouriteIsCalled`() = testScope.runBlockingTest {
-        val isEventSaved: IsEventSaved = mockk {
+        val isEventSavedFlow: IsEventSavedFlow = mockk {
             coEvery { this@mockk(any()) } returns flowOf(true)
         }
 
@@ -48,8 +49,13 @@ internal class EventViewModelTest {
 
         val states = onPausedDispatcher {
             EventViewModel(
-                initialState = EventState(event, Data(false, Initial)),
-                isEventSaved = isEventSaved,
+                initialState = EventState(event,
+                    Data(
+                        false,
+                        Initial
+                    )
+                ),
+                isEventSaved = isEventSavedFlow,
                 saveEvent = mockk(relaxed = true),
                 deleteEvent = mockk(relaxed = true)
             ).states
@@ -57,7 +63,7 @@ internal class EventViewModelTest {
                 .toList()
         }
 
-        coVerify(exactly = 1) { isEventSaved(event.id) }
+        coVerify(exactly = 1) { isEventSavedFlow(event.id) }
 
         assert(states.size == 2)
         val initialState = states.first()
@@ -73,7 +79,12 @@ internal class EventViewModelTest {
             val event = event()
             val deletingEvent = CompletableDeferred<Unit>()
             val viewModel = EventViewModel(
-                initialState = EventState(event, Data(false, Initial)),
+                initialState = EventState(event,
+                    Data(
+                        false,
+                        Initial
+                    )
+                ),
                 isEventSaved = mockk {
                     coEvery { this@mockk(any()) } returns flow {
                         emit(true)
@@ -122,7 +133,12 @@ internal class EventViewModelTest {
             val event = event()
             val savingEvent = CompletableDeferred<Unit>()
             val viewModel = EventViewModel(
-                initialState = EventState(event, Data(false, Initial)),
+                initialState = EventState(event,
+                    Data(
+                        false,
+                        Initial
+                    )
+                ),
                 isEventSaved = mockk {
                     coEvery { this@mockk(any()) } returns flow {
                         emit(false)

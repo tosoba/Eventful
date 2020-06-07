@@ -1,7 +1,7 @@
 package com.example.ticketmasterapi.model
 
-import com.example.core.model.ticketmaster.IAttraction
-import com.example.core.model.ticketmaster.ILink
+import com.example.core.model.event.IAttraction
+import com.example.core.model.event.ILink
 import com.example.ticketmasterapi.imageUrl
 import com.example.ticketmasterapi.kind
 

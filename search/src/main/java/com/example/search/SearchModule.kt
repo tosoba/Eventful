@@ -2,10 +2,7 @@ package com.example.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.core.usecase.GetSeachSuggestions
-import com.example.core.usecase.SaveEvents
-import com.example.core.usecase.SaveSuggestion
-import com.example.core.usecase.SearchEvents
+import com.example.core.usecase.*
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
 import com.example.coreandroid.provider.ConnectedStateProvider
@@ -34,15 +31,17 @@ abstract class SearchModule {
         @ViewModelKey(SearchViewModel::class)
         fun searchViewModelBase(
             searchEvents: SearchEvents,
+            getPagedEventsFlow: GetPagedEventsFlow,
             saveEvents: SaveEvents,
-            getSeachSuggestions: GetSeachSuggestions,
+            getSearchSuggestions: GetSearchSuggestions,
             saveSuggestion: SaveSuggestion,
             connectedStateProvider: ConnectedStateProvider,
             ioDispatcher: CoroutineDispatcher
         ): ViewModel = SearchViewModel(
             searchEvents,
+            getPagedEventsFlow,
             saveEvents,
-            getSeachSuggestions,
+            getSearchSuggestions,
             saveSuggestion,
             connectedStateProvider,
             ioDispatcher

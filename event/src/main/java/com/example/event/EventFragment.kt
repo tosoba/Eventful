@@ -11,12 +11,12 @@ import com.example.coreandroid.base.InjectableFragment
 import com.example.coreandroid.controller.SnackbarController
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.controller.handleSnackbarState
-import com.example.coreandroid.ticketmaster.Event
-import com.example.coreandroid.util.LoadedSuccessfully
+import com.example.coreandroid.model.Event
+import com.example.core.util.LoadedSuccessfully
 import com.example.coreandroid.util.delegate.FragmentArgument
 import com.example.coreandroid.view.TitledFragmentsPagerAdapter
 import com.example.coreandroid.view.ViewPagerPageSelectedListener
-import com.example.coreandroid.view.hideAndShow
+import com.example.coreandroid.view.ext.hideAndShow
 import com.example.weather.WeatherFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton

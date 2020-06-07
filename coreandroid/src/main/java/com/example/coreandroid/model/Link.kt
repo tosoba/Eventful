@@ -1,8 +1,8 @@
-package com.example.coreandroid.ticketmaster
+package com.example.coreandroid.model
 
 import android.os.Parcelable
-import com.example.core.model.ticketmaster.ILink
-import com.example.core.model.ticketmaster.LinkType
+import com.example.core.model.event.ILink
+import com.example.core.model.event.LinkType
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize

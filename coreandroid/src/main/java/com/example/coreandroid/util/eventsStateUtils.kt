@@ -1,17 +1,10 @@
 package com.example.coreandroid.util
 
-import com.example.core.Resource
-import com.example.core.model.PagedResult
-import com.example.core.model.ticketmaster.IEvent
-import com.example.core.model.ticketmaster.trimmedLowerCasedName
+import com.example.core.util.HoldsList
 import com.example.coreandroid.controller.SnackbarState
-import com.example.coreandroid.ticketmaster.Event
-import com.example.coreandroid.ticketmaster.Selectable
+import com.example.coreandroid.model.Event
+import com.example.coreandroid.model.Selectable
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.withContext
 
 interface SelectableEventsState<S : SelectableEventsState<S>> {
     val events: HoldsList<Selectable<Event>>
@@ -29,35 +22,6 @@ interface SelectableEventsSnackbarState<S : SelectableEventsSnackbarState<S>> :
 
 interface HoldsSnackbarState<S> {
     fun copyWithSnackbarState(snackbarState: SnackbarState): S
-}
-
-fun <Event> pagedEventsFlow(
-    currentEvents: PagedDataList<Event>,
-    dispatcher: CoroutineDispatcher,
-    toEvent: (Event) -> IEvent,
-    getEvents: suspend (Int) -> Resource<PagedResult<IEvent>>
-): Flow<Resource<PagedResult<IEvent>>> = flow {
-    val currentEventNames = currentEvents.data.map(toEvent)
-        .map { it.trimmedLowerCasedName }
-        .toSet()
-    var page = currentEvents.offset
-    var resource: Resource<PagedResult<IEvent>>
-    do {
-        resource = withContext(dispatcher) { getEvents(page++) }
-            .map { result ->
-                PagedResult(
-                    items = result.items
-                        .filterNot { currentEventNames.contains(it.trimmedLowerCasedName) }
-                        .distinctBy { it.trimmedLowerCasedName },
-                    currentPage = result.currentPage,
-                    totalPages = result.totalPages
-                )
-            }
-    } while (resource is Resource.Success<PagedResult<IEvent>>
-        && resource.data.items.isEmpty()
-        && page < currentEvents.limit
-    )
-    emit(resource)
 }
 
 interface StateUpdate<State : Any> {

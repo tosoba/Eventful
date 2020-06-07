@@ -1,10 +1,11 @@
 package com.example.eventsnearby
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.core.usecase.GetConnection
 import com.example.core.usecase.GetLocation
-import com.example.core.usecase.GetLocationAvailability
+import com.example.core.usecase.IsConnectedFlow
+import com.example.core.usecase.IsLocationAvailableFlow
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.ActivityScoped
 import com.example.coreandroid.provider.ConnectedStateProvider
@@ -55,9 +56,15 @@ abstract class MainActivityModule {
         @ViewModelKey(MainViewModel::class)
         fun mainViewModel(
             getLocation: GetLocation,
-            getLocationAvailability: GetLocationAvailability,
-            getConnection: GetConnection
-        ): ViewModel = MainViewModel(getLocation, getLocationAvailability, getConnection)
+            isConnectedFlow: IsConnectedFlow,
+            isLocationAvailableFlow: IsLocationAvailableFlow,
+            appContext: Context
+        ): ViewModel = MainViewModel(
+            getLocation,
+            isConnectedFlow,
+            isLocationAvailableFlow,
+            appContext
+        )
     }
 
     @Module

@@ -38,14 +38,13 @@ class AppRepository(
             .subscribeOn(Schedulers.computation())
             .startWith(0)
             .map { appContext.isLocationAvailable }
-            .distinctUntilChanged()
             .onErrorReturn { false }
+            .distinctUntilChanged()
             .asFlow()
 
     override val connected: Flow<Boolean>
         @SuppressLint("MissingPermission")
-        get() = ReactiveNetwork
-            .observeInternetConnectivity()
+        get() = ReactiveNetwork.observeInternetConnectivity()
             .subscribeOn(Schedulers.computation())
             .distinctUntilChanged()
             .onErrorReturn { false }

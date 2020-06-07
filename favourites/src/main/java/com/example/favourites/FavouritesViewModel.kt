@@ -1,13 +1,15 @@
 package com.example.favourites
 
 import androidx.lifecycle.viewModelScope
-import com.example.core.model.ticketmaster.IEvent
+import com.example.core.model.event.IEvent
 import com.example.core.usecase.DeleteEvents
-import com.example.core.usecase.GetSavedEvents
+import com.example.core.usecase.GetSavedEventsFlow
+import com.example.core.util.DataList
+import com.example.core.util.LoadedSuccessfully
 import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.controller.SnackbarState
-import com.example.coreandroid.ticketmaster.Event
-import com.example.coreandroid.ticketmaster.Selectable
+import com.example.coreandroid.model.Event
+import com.example.coreandroid.model.Selectable
 import com.example.coreandroid.util.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -15,7 +17,7 @@ import kotlinx.coroutines.flow.*
 @FlowPreview
 @ExperimentalCoroutinesApi
 class FavouritesViewModel(
-    private val getSavedEvents: GetSavedEvents,
+    private val getSavedEventsFlow: GetSavedEventsFlow,
     private val deleteEvents: DeleteEvents,
     private val ioDispatcher: CoroutineDispatcher,
     initialState: FavouritesState = FavouritesState()
@@ -39,7 +41,7 @@ class FavouritesViewModel(
     private val Flow<LoadFavourites>.loadFavouritesUpdates: Flow<Update>
         get() = filterNot { state.events.limitHit }
             .flatMapLatest {
-                getSavedEvents(state.limit + limitIncrement)
+                getSavedEventsFlow(state.limit + limitIncrement)
                     .flowOn(ioDispatcher)
                     .map { events -> Update.Events(events) }
             }

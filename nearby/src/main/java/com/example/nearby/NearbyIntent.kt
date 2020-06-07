@@ -1,6 +1,6 @@
 package com.example.nearby
 
-import com.example.coreandroid.ticketmaster.Event
+import com.example.coreandroid.model.Event
 
 sealed class NearbyIntent
 object LoadMoreResults : NearbyIntent()

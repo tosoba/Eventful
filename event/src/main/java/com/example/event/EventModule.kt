@@ -3,12 +3,12 @@ package com.example.event
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.core.usecase.DeleteEvent
-import com.example.core.usecase.IsEventSaved
+import com.example.core.usecase.IsEventSavedFlow
 import com.example.core.usecase.SaveEvent
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
-import com.example.coreandroid.util.Data
-import com.example.coreandroid.util.Initial
+import com.example.core.util.Data
+import com.example.core.util.Initial
 import dagger.Module
 import dagger.Provides
 import dagger.android.ContributesAndroidInjector
@@ -33,15 +33,20 @@ abstract class EventModule {
         @ViewModelKey(EventViewModel::class)
         fun eventViewModelBase(
             initialState: EventState,
-            isEventSaved: IsEventSaved,
+            isEventSavedFlow: IsEventSavedFlow,
             saveEvent: SaveEvent,
             deleteEvent: DeleteEvent
-        ): ViewModel = EventViewModel(initialState, isEventSaved, saveEvent, deleteEvent)
+        ): ViewModel = EventViewModel(initialState, isEventSavedFlow, saveEvent, deleteEvent)
 
         @Provides
         fun eventInitialState(
             fragment: EventFragment
-        ): EventState = EventState(fragment.event, Data(false, Initial))
+        ): EventState = EventState(fragment.event,
+            Data(
+                false,
+                Initial
+            )
+        )
 
         @Provides
         fun eventViewModel(

@@ -1,6 +1,6 @@
 package com.example.favourites
 
-import com.example.coreandroid.ticketmaster.Event
+import com.example.coreandroid.model.Event
 
 sealed class FavouritesIntent
 object LoadFavourites : FavouritesIntent()

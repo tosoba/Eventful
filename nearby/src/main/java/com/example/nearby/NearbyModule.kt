@@ -3,11 +3,12 @@ package com.example.nearby
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.core.usecase.GetNearbyEvents
+import com.example.core.usecase.GetPagedEventsFlow
 import com.example.core.usecase.SaveEvents
-import com.example.coreandroid.provider.ConnectedStateProvider
-import com.example.coreandroid.provider.LocationStateProvider
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
+import com.example.coreandroid.provider.ConnectedStateProvider
+import com.example.coreandroid.provider.LocationStateProvider
 import dagger.Module
 import dagger.Provides
 import dagger.android.ContributesAndroidInjector
@@ -35,12 +36,14 @@ abstract class NearbyModule {
         fun nearbyViewModelBase(
             getNearbyEvents: GetNearbyEvents,
             saveEvents: SaveEvents,
+            getPagedEventsFlow: GetPagedEventsFlow,
             connectedStateProvider: ConnectedStateProvider,
             locationStateProvider: LocationStateProvider,
             ioDispatcher: CoroutineDispatcher
         ): ViewModel = NearbyViewModel(
             getNearbyEvents,
             saveEvents,
+            getPagedEventsFlow,
             connectedStateProvider,
             locationStateProvider,
             ioDispatcher

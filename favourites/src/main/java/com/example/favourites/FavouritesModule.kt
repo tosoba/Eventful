@@ -3,7 +3,7 @@ package com.example.favourites
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.core.usecase.DeleteEvents
-import com.example.core.usecase.GetSavedEvents
+import com.example.core.usecase.GetSavedEventsFlow
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
 import dagger.Module
@@ -30,10 +30,10 @@ abstract class FavouritesModule {
         @IntoMap
         @ViewModelKey(FavouritesViewModel::class)
         fun favouritesViewModelBase(
-            getSavedEvents: GetSavedEvents,
+            getSavedEventsFlow: GetSavedEventsFlow,
             deleteEvents: DeleteEvents,
             ioDispatcher: CoroutineDispatcher
-        ): ViewModel = FavouritesViewModel(getSavedEvents, deleteEvents, ioDispatcher)
+        ): ViewModel = FavouritesViewModel(getSavedEventsFlow, deleteEvents, ioDispatcher)
 
         @Provides
         fun favouritesViewModel(

@@ -1,9 +1,9 @@
 package com.example.core.repo
 
-import com.example.core.Resource
+import com.example.core.model.Resource
 import com.example.core.model.PagedResult
 import com.example.core.model.search.SearchSuggestion
-import com.example.core.model.ticketmaster.IEvent
+import com.example.core.model.event.IEvent
 import kotlinx.coroutines.flow.Flow
 
 interface IEventRepository {

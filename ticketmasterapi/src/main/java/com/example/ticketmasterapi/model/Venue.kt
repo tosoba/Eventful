@@ -1,6 +1,6 @@
 package com.example.ticketmasterapi.model
 
-import com.example.core.model.ticketmaster.IVenue
+import com.example.core.model.event.IVenue
 import com.google.gson.annotations.SerializedName
 
 data class Venue(

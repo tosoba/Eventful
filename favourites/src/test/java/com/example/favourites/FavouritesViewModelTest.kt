@@ -2,12 +2,12 @@ package com.example.favourites
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.example.core.usecase.DeleteEvents
-import com.example.core.usecase.GetSavedEvents
+import com.example.core.usecase.GetSavedEventsFlow
 import com.example.coreandroid.controller.SnackbarState
-import com.example.coreandroid.ticketmaster.Event
-import com.example.coreandroid.util.Initial
-import com.example.coreandroid.util.LoadedSuccessfully
-import com.example.coreandroid.util.takeWhileInclusive
+import com.example.coreandroid.model.Event
+import com.example.core.util.Initial
+import com.example.core.util.LoadedSuccessfully
+import com.example.core.util.ext.takeWhileInclusive
 import com.example.test.rule.event
 import com.example.test.rule.mockedList
 import com.example.test.rule.relaxedMockedList
@@ -58,7 +58,7 @@ internal class FavouritesViewModelTest {
     @Test
     fun `GivenFavouritesVM WhenInitializedAndGetSavedEventsReturnsSuccessfully ThenEventsAreStored`() {
         testScope.runBlockingTest {
-            val getSavedEvents: GetSavedEvents = mockk {
+            val getSavedEventsFlow: GetSavedEventsFlow = mockk {
                 coEvery { this@mockk(any()) } returns flowOf(
                     relaxedMockedList<Event>(initialEventsSize)
                 )
@@ -66,13 +66,13 @@ internal class FavouritesViewModelTest {
             val deleteEvents: DeleteEvents = mockk(relaxed = true)
 
             pauseDispatcher()
-            val viewModel = FavouritesViewModel(getSavedEvents, deleteEvents, testDispatcher)
+            val viewModel = FavouritesViewModel(getSavedEventsFlow, deleteEvents, testDispatcher)
             val states = viewModel.states
                 .onEach { if (it.events.status is Initial) resumeDispatcher() }
                 .takeWhileInclusive { it.events.status !is LoadedSuccessfully }
                 .toList()
 
-            coVerify(exactly = 1) { getSavedEvents(FavouritesViewModel.limitIncrement) }
+            coVerify(exactly = 1) { getSavedEventsFlow(FavouritesViewModel.limitIncrement) }
             assert(states.size == 2)
             val initialState = states.first()
             assert(
@@ -94,7 +94,7 @@ internal class FavouritesViewModelTest {
     @Test
     fun `GivenFavouritesVM WhenThereAreNoMoreEventsToLoad SameEventsAreReturned`() {
         testScope.runBlockingTest {
-            val getSavedEvents: GetSavedEvents = mockk {
+            val getSavedEventsFlow: GetSavedEventsFlow = mockk {
                 coEvery { this@mockk(any()) } returns flowOf(
                     relaxedMockedList<Event>(
                         initialEventsSize
@@ -102,7 +102,7 @@ internal class FavouritesViewModelTest {
                 )
             }
             val deleteEvents: DeleteEvents = mockk(relaxed = true)
-            val viewModel = FavouritesViewModel(getSavedEvents, deleteEvents, testDispatcher)
+            val viewModel = FavouritesViewModel(getSavedEventsFlow, deleteEvents, testDispatcher)
 
             viewModel.intent(LoadFavourites)
 
@@ -114,10 +114,10 @@ internal class FavouritesViewModelTest {
             viewModel.intent(LoadFavourites)
 
             coVerify(exactly = 1) {
-                getSavedEvents(initialEventsSize + FavouritesViewModel.limitIncrement)
+                getSavedEventsFlow(initialEventsSize + FavouritesViewModel.limitIncrement)
             }
             coVerify {
-                getSavedEvents(initialEventsSize + 2 * FavouritesViewModel.limitIncrement) wasNot called
+                getSavedEventsFlow(initialEventsSize + 2 * FavouritesViewModel.limitIncrement) wasNot called
             }
             val finalState = states.last()
             assert(
@@ -132,7 +132,7 @@ internal class FavouritesViewModelTest {
     @Test
     fun `GivenFavouritesVM WhenThereAreMoreEventsToLoad MoreEventsAreReturned`() {
         testScope.runBlockingTest {
-            val getSavedEvents: GetSavedEvents = mockk {
+            val getSavedEventsFlow: GetSavedEventsFlow = mockk {
                 coEvery { this@mockk(FavouritesViewModel.limitIncrement) } returns flowOf(
                     relaxedMockedList<Event>(initialEventsSize)
                 )
@@ -142,7 +142,7 @@ internal class FavouritesViewModelTest {
             }
             val deleteEvents: DeleteEvents = mockk(relaxed = true)
 
-            val viewModel = FavouritesViewModel(getSavedEvents, deleteEvents, testDispatcher)
+            val viewModel = FavouritesViewModel(getSavedEventsFlow, deleteEvents, testDispatcher)
 
             val states = mutableListOf<FavouritesState>()
             launch {
@@ -151,7 +151,7 @@ internal class FavouritesViewModelTest {
             viewModel.intent(LoadFavourites)
 
             coVerify(exactly = 1) {
-                getSavedEvents(initialEventsSize + FavouritesViewModel.limitIncrement)
+                getSavedEventsFlow(initialEventsSize + FavouritesViewModel.limitIncrement)
             }
             val finalState = states.last()
             assert(
@@ -167,11 +167,11 @@ internal class FavouritesViewModelTest {
     fun `GivenFavouritesVMWithInitialEvents WhenEventIsLongClicked EventSelectionChanges`() {
         testScope.runBlockingTest {
             val eventsList = relaxedMockedList<Event>(initialEventsSize)
-            val getSavedEvents: GetSavedEvents = mockk {
+            val getSavedEventsFlow: GetSavedEventsFlow = mockk {
                 coEvery { this@mockk(any()) } returns flowOf(eventsList)
             }
             val deleteEvents: DeleteEvents = mockk(relaxed = true)
-            val viewModel = FavouritesViewModel(getSavedEvents, deleteEvents, testDispatcher)
+            val viewModel = FavouritesViewModel(getSavedEventsFlow, deleteEvents, testDispatcher)
 
             viewModel.intent(EventLongClicked(eventsList.first()))
             assert(viewModel.state.events.data.first().selected)
@@ -185,11 +185,11 @@ internal class FavouritesViewModelTest {
     fun `GivenFavouritesVMWithInitialEvents WhenClearSelectionClicked NoEventsAreSelected`() {
         testScope.runBlockingTest {
             val eventsList = mockedList(initialEventsSize) { event(it) }
-            val getSavedEvents: GetSavedEvents = mockk {
+            val getSavedEventsFlow: GetSavedEventsFlow = mockk {
                 coEvery { this@mockk(any()) } returns flowOf(eventsList)
             }
             val deleteEvents: DeleteEvents = mockk(relaxed = true)
-            val viewModel = FavouritesViewModel(getSavedEvents, deleteEvents, testDispatcher)
+            val viewModel = FavouritesViewModel(getSavedEventsFlow, deleteEvents, testDispatcher)
 
             viewModel.intent(EventLongClicked(eventsList.first()))
             viewModel.intent(EventLongClicked(eventsList.last()))
@@ -203,11 +203,11 @@ internal class FavouritesViewModelTest {
     fun `GivenFavouritesVMWithInitialEvents WhenRemoveFromFavouritesClicked DeleteEventsIsCalled`() {
         testScope.runBlockingTest {
             val eventsList = mockedList(initialEventsSize) { event(it) }
-            val getSavedEvents: GetSavedEvents = mockk {
+            val getSavedEventsFlow: GetSavedEventsFlow = mockk {
                 coEvery { this@mockk(any()) } returns flowOf(eventsList)
             }
             val deleteEvents: DeleteEvents = mockk(relaxed = true)
-            val viewModel = FavouritesViewModel(getSavedEvents, deleteEvents, testDispatcher)
+            val viewModel = FavouritesViewModel(getSavedEventsFlow, deleteEvents, testDispatcher)
 
             val signals = mutableListOf<FavouritesSignal>()
             launch {

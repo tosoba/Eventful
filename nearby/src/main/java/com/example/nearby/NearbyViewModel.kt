@@ -2,33 +2,35 @@ package com.example.nearby
 
 import android.view.View
 import androidx.lifecycle.viewModelScope
-import com.example.core.Resource
+import com.example.core.model.Resource
 import com.example.core.model.PagedResult
 import com.example.core.model.app.LatLng
 import com.example.core.model.app.LocationState
 import com.example.core.model.app.LocationStatus
-import com.example.core.model.ticketmaster.IEvent
+import com.example.core.model.event.IEvent
 import com.example.core.usecase.GetNearbyEvents
+import com.example.core.usecase.GetPagedEventsFlow
 import com.example.core.usecase.SaveEvents
-import com.example.core.util.flatMapFirst
+import com.example.core.util.Loading
+import com.example.core.util.ext.flatMapFirst
 import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.controller.SnackbarAction
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.provider.ConnectedStateProvider
 import com.example.coreandroid.provider.LocationStateProvider
-import com.example.coreandroid.ticketmaster.Event
-import com.example.coreandroid.ticketmaster.Selectable
+import com.example.coreandroid.model.Event
+import com.example.coreandroid.model.Selectable
 import com.example.coreandroid.util.*
 import com.haroldadmin.cnradapter.NetworkResponse
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-
 
 @ExperimentalCoroutinesApi
 @FlowPreview
 class NearbyViewModel(
     private val getNearbyEvents: GetNearbyEvents,
     private val saveEvents: SaveEvents,
+    private val getPagedEventsFlow: GetPagedEventsFlow,
     connectedStateProvider: ConnectedStateProvider,
     private val locationStateProvider: LocationStateProvider,
     private val ioDispatcher: CoroutineDispatcher,
@@ -69,10 +71,9 @@ class NearbyViewModel(
         }.map { Update.NoConnectionSnackbar }
 
     private val LocationStateProvider.snackbarUpdates: Flow<Update>
-        get() = locationStates
-            .filter { it.latLng == null }
+        get() = locationStates.filter { it.latLng == null }
             .map { (_, status) ->
-                Update.LocationSnackbar(status, locationStateProvider::reloadLocation) //TODO: emit loading on reload location click
+                Update.LocationSnackbar(status, locationStateProvider::reloadLocation)
             }
 
     private val LocationStateProvider.updates: Flow<Update>
@@ -90,13 +91,14 @@ class NearbyViewModel(
 
     private val Flow<LocationState>.notNullLatLng get() = map { it.latLng }.filterNotNull()
 
-    private fun loadingEventsUpdates(latLng: LatLng): Flow<Update> = pagedEventsFlow(
+    private fun loadingEventsUpdates(latLng: LatLng): Flow<Update> = getPagedEventsFlow(
         currentEvents = state.events,
-        dispatcher = ioDispatcher,
-        toEvent = { selectable -> selectable.item },
-        getEvents = { offset -> getNearbyEvents(latLng.lat, latLng.lng, offset) }
-    ).map { resource -> Update.Events.Loaded(resource) }
-        .onStart<Update> { emit(Update.Events.Loading) }
+        toEvent = { selectable -> selectable.item }
+    ) { offset ->
+        getNearbyEvents(latLng.lat, latLng.lng, offset)
+    }.map { resource ->
+        Update.Events.Loaded(resource)
+    }.onStart<Update> { emit(Update.Events.Loading) }
 
     private val Flow<AddToFavouritesClicked>.addToFavouritesUpdates: Flow<Update>
         get() = map {
@@ -129,17 +131,17 @@ class NearbyViewModel(
         ) : Update() {
             override fun invoke(state: NearbyState): NearbyState = when (status) {
                 is LocationStatus.PermissionDenied -> state.copy(
-                    snackbarState = SnackbarState.Shown("No location permission")
+                    snackbarState = SnackbarState.Shown("No location permission.")
                 )
                 is LocationStatus.Disabled -> state.copy(
-                    snackbarState = SnackbarState.Shown("Location disabled")
+                    snackbarState = SnackbarState.Shown("Location disabled.")
                 )
                 is LocationStatus.Loading -> state.copy(
                     snackbarState = SnackbarState.Shown("Loading location...")
                 )
                 is LocationStatus.Error -> state.copy(
                     snackbarState = SnackbarState.Shown(
-                        "Unable to load location - error occurred",
+                        "Unable to load location.",
                         action = SnackbarAction(
                             "Retry",
                             View.OnClickListener { reloadLocation() }
@@ -177,9 +179,11 @@ class NearbyViewModel(
                         is Resource.Error<PagedResult<IEvent>> -> copy(
                             events = events.copyWithFailureStatus(resource.error),
                             snackbarState = if (resource.error is NetworkResponse.ServerError<*>) {
-                                if ((resource.error as NetworkResponse.ServerError<*>).code in 503..504)
-                                    SnackbarState.Shown("No connection")
-                                else SnackbarState.Shown("Unknown network error")
+                                if ((resource.error as NetworkResponse.ServerError<*>).code in 503..504) {
+                                    SnackbarState.Shown("No connection.")
+                                } else {
+                                    SnackbarState.Shown("Unknown network error.")
+                                }
                             } else snackbarState
                         )
                     }
