@@ -1,4 +1,4 @@
-package com.example.coreandroid.provider
+package com.example.core.provider
 
 import kotlinx.coroutines.flow.Flow
 

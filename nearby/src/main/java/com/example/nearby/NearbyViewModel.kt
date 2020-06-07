@@ -16,8 +16,8 @@ import com.example.core.util.ext.flatMapFirst
 import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.controller.SnackbarAction
 import com.example.coreandroid.controller.SnackbarState
-import com.example.coreandroid.provider.ConnectedStateProvider
-import com.example.coreandroid.provider.LocationStateProvider
+import com.example.core.provider.ConnectedStateProvider
+import com.example.core.provider.LocationStateProvider
 import com.example.coreandroid.model.Event
 import com.example.coreandroid.model.Selectable
 import com.example.coreandroid.util.*

@@ -12,7 +12,7 @@ import com.example.core.util.PagedDataList
 import com.example.core.util.ext.flatMapFirst
 import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.controller.SnackbarState
-import com.example.coreandroid.provider.ConnectedStateProvider
+import com.example.core.provider.ConnectedStateProvider
 import com.example.coreandroid.model.Event
 import com.example.coreandroid.model.Selectable
 import com.example.coreandroid.util.*
@@ -27,7 +27,7 @@ class SearchViewModel(
     private val getPagedEventsFlow: GetPagedEventsFlow,
     private val saveEvents: SaveEvents,
     private val getSearchSuggestions: GetSearchSuggestions,
-    private val saveSuggestion: SaveSuggestion,
+    private val saveSearchSuggestion: SaveSearchSuggestion,
     connectedStateProvider: ConnectedStateProvider,
     private val ioDispatcher: CoroutineDispatcher,
     initialState: SearchState = SearchState()
@@ -59,7 +59,7 @@ class SearchViewModel(
         get() = distinctUntilChanged()
             .onEach { intent ->
                 val (text, shouldSave) = intent
-                if (shouldSave) saveSuggestion(text)
+                if (shouldSave) saveSearchSuggestion(text)
             }
             .flatMapLatest { (text) ->
                 flow<Update> {

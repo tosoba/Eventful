@@ -8,8 +8,8 @@ import com.example.core.usecase.IsConnectedFlow
 import com.example.core.usecase.IsLocationAvailableFlow
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.ActivityScoped
-import com.example.coreandroid.provider.ConnectedStateProvider
-import com.example.coreandroid.provider.LocationStateProvider
+import com.example.core.provider.ConnectedStateProvider
+import com.example.core.provider.LocationStateProvider
 import com.example.event.EventModule
 import com.example.favourites.FavouritesModule
 import com.example.nearby.NearbyModule

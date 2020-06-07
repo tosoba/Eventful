@@ -7,8 +7,8 @@ import com.example.core.usecase.GetPagedEventsFlow
 import com.example.core.usecase.SaveEvents
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
-import com.example.coreandroid.provider.ConnectedStateProvider
-import com.example.coreandroid.provider.LocationStateProvider
+import com.example.core.provider.ConnectedStateProvider
+import com.example.core.provider.LocationStateProvider
 import dagger.Module
 import dagger.Provides
 import dagger.android.ContributesAndroidInjector

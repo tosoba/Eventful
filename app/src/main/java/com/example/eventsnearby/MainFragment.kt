@@ -22,9 +22,7 @@ import kotlinx.coroutines.channels.SendChannel
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class MainFragment : InjectableFragment(),
-    MenuController,
-    SnackbarController {
+class MainFragment : InjectableFragment(), MenuController, SnackbarController {
 
     private val bottomNavItemSelectedListener = BottomNavigationView
         .OnNavigationItemSelectedListener { item ->

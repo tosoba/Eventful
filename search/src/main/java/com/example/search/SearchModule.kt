@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.core.usecase.*
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
-import com.example.coreandroid.provider.ConnectedStateProvider
+import com.example.core.provider.ConnectedStateProvider
 import dagger.Module
 import dagger.Provides
 import dagger.android.ContributesAndroidInjector
@@ -34,7 +34,7 @@ abstract class SearchModule {
             getPagedEventsFlow: GetPagedEventsFlow,
             saveEvents: SaveEvents,
             getSearchSuggestions: GetSearchSuggestions,
-            saveSuggestion: SaveSuggestion,
+            saveSearchSuggestion: SaveSearchSuggestion,
             connectedStateProvider: ConnectedStateProvider,
             ioDispatcher: CoroutineDispatcher
         ): ViewModel = SearchViewModel(
@@ -42,7 +42,7 @@ abstract class SearchModule {
             getPagedEventsFlow,
             saveEvents,
             getSearchSuggestions,
-            saveSuggestion,
+            saveSearchSuggestion,
             connectedStateProvider,
             ioDispatcher
         )

@@ -11,8 +11,8 @@ import com.example.core.usecase.IsLocationAvailableFlow
 import com.example.core.util.ext.flatMapFirst
 import com.example.core.util.ext.takeWhileInclusive
 import com.example.coreandroid.base.BaseViewModel
-import com.example.coreandroid.provider.ConnectedStateProvider
-import com.example.coreandroid.provider.LocationStateProvider
+import com.example.core.provider.ConnectedStateProvider
+import com.example.core.provider.LocationStateProvider
 import com.example.coreandroid.util.StateUpdate
 import com.example.coreandroid.util.ext.isLocationAvailable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
