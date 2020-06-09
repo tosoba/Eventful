@@ -16,8 +16,7 @@ import ss.com.bannerslider.Slider
 class EventfulApp : DaggerApplication() {
 
     override fun applicationInjector(): AndroidInjector<out DaggerApplication> = DaggerAppComponent
-        .builder()
-        .application(this)
+        .factory()
         .create(this)
 
     override fun onCreate() {
