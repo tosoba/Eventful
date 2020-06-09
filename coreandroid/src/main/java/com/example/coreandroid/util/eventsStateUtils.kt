@@ -32,8 +32,7 @@ interface ClearSelectionUpdate<S : SelectableEventsState<S>> : StateUpdate<S> {
     override fun invoke(state: S): S = state.copyWithTransformedEvents { it.copy(selected = false) }
 }
 
-interface ToggleEventSelectionUpdate<S : SelectableEventsState<S>> :
-    StateUpdate<S> {
+interface ToggleEventSelectionUpdate<S : SelectableEventsState<S>> : StateUpdate<S> {
     val event: Event
     override fun invoke(state: S): S = state.copyWithTransformedEvents {
         if (it.item.id == event.id) Selectable(event, !it.selected) else it

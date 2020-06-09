@@ -36,7 +36,7 @@ class FavouritesViewModel(
             filterIsInstance<ClearSelectionClicked>().map { Update.ClearSelection },
             filterIsInstance<HideSnackbar>().map { Update.HideSnackbar },
             filterIsInstance<RemoveFromFavouritesClicked>().removeFromFavouritesUpdates
-        ).filterNotNull()
+        )
 
     private val Flow<LoadFavourites>.loadFavouritesUpdates: Flow<Update>
         get() = filterNot { state.events.limitHit }
