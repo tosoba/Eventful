@@ -1,28 +1,31 @@
 package com.example.eventsnearby.di
 
-import android.app.Application
 import android.content.Context
 import com.example.core.util.offlineCacheInterceptor
 import com.example.core.util.onlineCacheInterceptor
 import com.example.coreandroid.util.ext.isConnected
+import com.example.eventsnearby.EventfulApp
 import com.flickr4java.flickr.Flickr
 import com.flickr4java.flickr.REST
 import com.patloew.rxlocation.RxLocation
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import javax.inject.Singleton
 
-@Module(includes = [AppModule.Providers::class])
+@FlowPreview
+@ExperimentalCoroutinesApi
+@Module
 abstract class AppModule {
 
     @Binds
-    abstract fun applicationContext(application: Application): Context
+    abstract fun applicationContext(application: EventfulApp): Context
 
-    @Module
-    class Providers {
+    companion object {
 
         @Provides
         @Singleton

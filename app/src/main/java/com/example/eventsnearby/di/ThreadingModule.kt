@@ -21,7 +21,8 @@ class ThreadingModule {
         builder = Handler(
             HandlerThread(Dependencies.EPOXY_BUILDING_THREAD)
                 .apply(HandlerThread::start).looper
-        ), differ = Handler(
+        ),
+        differ = Handler(
             HandlerThread(Dependencies.EPOXY_DIFFING_THREAD)
                 .apply(HandlerThread::start).looper
         )

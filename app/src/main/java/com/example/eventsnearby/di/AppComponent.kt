@@ -2,6 +2,7 @@ package com.example.eventsnearby.di
 
 import com.example.db.DbModule
 import com.example.eventsnearby.EventfulApp
+import com.example.eventsnearby.MainActivityModule
 import com.example.repo.RepoModule
 import com.example.ticketmasterapi.TicketMasterApiModule
 import com.example.weatherapi.model.DarkSkyApiModule
@@ -23,7 +24,8 @@ import javax.inject.Singleton
         DarkSkyApiModule::class,
         DbModule::class,
         RepoModule::class,
-        AndroidSupportInjectionModule::class
+        AndroidSupportInjectionModule::class,
+        MainActivityModule::class
     ]
 )
 interface AppComponent : AndroidInjector<EventfulApp> {
