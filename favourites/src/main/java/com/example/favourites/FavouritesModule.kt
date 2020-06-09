@@ -20,11 +20,11 @@ import kotlinx.coroutines.FlowPreview
 abstract class FavouritesModule {
 
     @FragmentScoped
-    @ContributesAndroidInjector(modules = [ModuleProvides::class])
+    @ContributesAndroidInjector(modules = [FavouritesViewModelModule::class])
     abstract fun favouritesFragment(): FavouritesFragment
 
     @Module
-    class ModuleProvides {
+    object FavouritesViewModelModule {
 
         @Provides
         @IntoMap

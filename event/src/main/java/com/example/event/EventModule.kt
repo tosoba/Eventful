@@ -22,11 +22,11 @@ import kotlinx.coroutines.FlowPreview
 abstract class EventModule {
 
     @FragmentScoped
-    @ContributesAndroidInjector(modules = [ModuleProvides::class])
+    @ContributesAndroidInjector(modules = [EventViewModelModule::class])
     abstract fun eventFragment(): EventFragment
 
     @Module
-    class ModuleProvides {
+    object EventViewModelModule {
 
         @Provides
         @IntoMap
@@ -41,12 +41,7 @@ abstract class EventModule {
         @Provides
         fun eventInitialState(
             fragment: EventFragment
-        ): EventState = EventState(fragment.event,
-            Data(
-                false,
-                Initial
-            )
-        )
+        ): EventState = EventState(fragment.event, Data(false, Initial))
 
         @Provides
         fun eventViewModel(

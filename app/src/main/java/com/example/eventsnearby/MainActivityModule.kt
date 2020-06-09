@@ -3,14 +3,14 @@ package com.example.eventsnearby
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.core.provider.ConnectedStateProvider
+import com.example.core.provider.LocationStateProvider
 import com.example.core.usecase.GetLocation
 import com.example.core.usecase.IsConnectedFlow
 import com.example.core.usecase.IsLocationAvailableFlow
+import com.example.coreandroid.di.ViewModelFactory
 import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.ActivityScoped
-import com.example.core.provider.ConnectedStateProvider
-import com.example.core.provider.LocationStateProvider
-import com.example.coreandroid.di.ViewModelFactory
 import com.example.coreandroid.navigation.IFragmentFactory
 import com.example.event.EventModule
 import com.example.favourites.FavouritesModule
@@ -54,21 +54,6 @@ abstract class MainActivityModule {
     companion object {
 
         @Provides
-        @IntoMap
-        @ViewModelKey(MainViewModel::class)
-        fun mainViewModel(
-            getLocation: GetLocation,
-            isConnectedFlow: IsConnectedFlow,
-            isLocationAvailableFlow: IsLocationAvailableFlow,
-            appContext: Context
-        ): ViewModel = MainViewModel(
-            getLocation,
-            isConnectedFlow,
-            isLocationAvailableFlow,
-            appContext
-        )
-
-        @Provides
         fun viewModelFactory(
             providers: Map<Class<out ViewModel>, @JvmSuppressWildcards Provider<ViewModel>>
         ): ViewModelProvider.Factory = ViewModelFactory(providers)
@@ -79,6 +64,21 @@ abstract class MainActivityModule {
 
     @Module
     object MainViewModelModule {
+
+        @Provides
+        @IntoMap
+        @ViewModelKey(MainViewModel::class)
+        fun mainViewModelBase(
+            getLocation: GetLocation,
+            isConnectedFlow: IsConnectedFlow,
+            isLocationAvailableFlow: IsLocationAvailableFlow,
+            appContext: Context
+        ): ViewModel = MainViewModel(
+            getLocation,
+            isConnectedFlow,
+            isLocationAvailableFlow,
+            appContext
+        )
 
         @Provides
         fun mainViewModel(

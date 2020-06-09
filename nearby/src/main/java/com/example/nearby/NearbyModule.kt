@@ -24,11 +24,11 @@ import kotlinx.coroutines.FlowPreview
 abstract class NearbyModule {
 
     @FragmentScoped
-    @ContributesAndroidInjector(modules = [ModuleProvides::class])
+    @ContributesAndroidInjector(modules = [NearbyViewModelModule::class])
     abstract fun nearbyFragment(): NearbyFragment
 
     @Module
-    class ModuleProvides {
+    object NearbyViewModelModule {
 
         @Provides
         @IntoMap

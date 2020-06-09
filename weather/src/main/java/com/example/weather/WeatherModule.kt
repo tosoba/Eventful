@@ -15,27 +15,23 @@ import kotlinx.coroutines.FlowPreview
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-@Module(includes = [WeatherModule.Providers::class])
+@Module
 abstract class WeatherModule {
 
     @FragmentScoped
-    @ContributesAndroidInjector(modules = [SubProviders::class])
+    @ContributesAndroidInjector(modules = [WeatherViewModelModule::class])
     abstract fun weatherFragment(): WeatherFragment
 
     @Module
-    class Providers {
+    object WeatherViewModelModule {
 
         @Provides
         @IntoMap
         @ViewModelKey(WeatherViewModel::class)
-        fun weatherViewModel(
+        fun weatherViewModelBase(
             getForecast: GetForecast,
             ioDispatcher: CoroutineDispatcher
         ): ViewModel = WeatherViewModel(getForecast, ioDispatcher)
-    }
-
-    @Module
-    class SubProviders {
 
         @Provides
         fun weatherViewModel(
