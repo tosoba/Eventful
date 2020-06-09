@@ -10,6 +10,8 @@ import com.example.coreandroid.di.ViewModelKey
 import com.example.coreandroid.di.scope.ActivityScoped
 import com.example.core.provider.ConnectedStateProvider
 import com.example.core.provider.LocationStateProvider
+import com.example.coreandroid.di.ViewModelFactory
+import com.example.coreandroid.navigation.IFragmentFactory
 import com.example.event.EventModule
 import com.example.favourites.FavouritesModule
 import com.example.nearby.NearbyModule
@@ -22,16 +24,17 @@ import dagger.android.ContributesAndroidInjector
 import dagger.multibindings.IntoMap
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import javax.inject.Provider
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-@Module(includes = [MainActivityModule.Providers::class])
+@Module
 abstract class MainActivityModule {
 
     @ActivityScoped
     @ContributesAndroidInjector(
         modules = [
-            SubProviders::class,
+            MainViewModelModule::class,
             NearbyModule::class,
             SearchModule::class,
             FavouritesModule::class,
@@ -48,8 +51,7 @@ abstract class MainActivityModule {
     @Binds
     abstract fun locationStateProvider(mainViewModel: MainViewModel): LocationStateProvider
 
-    @Module
-    class Providers {
+    companion object {
 
         @Provides
         @IntoMap
@@ -65,10 +67,18 @@ abstract class MainActivityModule {
             isLocationAvailableFlow,
             appContext
         )
+
+        @Provides
+        fun viewModelFactory(
+            providers: Map<Class<out ViewModel>, @JvmSuppressWildcards Provider<ViewModel>>
+        ): ViewModelProvider.Factory = ViewModelFactory(providers)
+
+        @Provides
+        fun fragmentProvider(): IFragmentFactory = FragmentFactory
     }
 
     @Module
-    class SubProviders {
+    object MainViewModelModule {
 
         @Provides
         fun mainViewModel(

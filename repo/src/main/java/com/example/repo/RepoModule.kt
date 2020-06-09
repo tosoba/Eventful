@@ -11,11 +11,13 @@ import com.example.weatherapi.model.DarkSkyApi
 import com.patloew.rxlocation.RxLocation
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Singleton
 
 @Module
 class RepoModule {
 
+    @ExperimentalCoroutinesApi
     @Provides
     @Singleton
     fun appRepository(

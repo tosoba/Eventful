@@ -35,7 +35,7 @@ buildscript {
         playServicesLocationVersion = '16.0.0'
 
         bannerSliderVersion = '2.0.0'
-        daggerVersion = '2.21'
+        daggerVersion = '2.28'
         epoxyVersion = '3.7.0'
         flickrVersion = '3.0.1'
         flowBindingVersion = '0.10.2'

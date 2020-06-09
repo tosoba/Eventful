@@ -10,15 +10,17 @@ import dagger.BindsInstance
 import dagger.Component
 import dagger.android.AndroidInjector
 import dagger.android.support.AndroidSupportInjectionModule
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import javax.inject.Singleton
 
+@FlowPreview
+@ExperimentalCoroutinesApi
 @Singleton
 @Component(
     modules = [
-        UiModule::class,
         ThreadingModule::class,
         AppModule::class,
-        NetworkModule::class,
         TicketMasterApiModule::class,
         DarkSkyApiModule::class,
         DbModule::class,
@@ -27,7 +29,6 @@ import javax.inject.Singleton
     ]
 )
 interface AppComponent : AndroidInjector<EventfulApp> {
-
     @Component.Builder
     abstract class Builder : AndroidInjector.Builder<EventfulApp>() {
         @BindsInstance

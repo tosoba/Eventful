@@ -27,7 +27,7 @@ class AppRepository(
         if (appContext.isLocationAvailable) rxLocation.currentLocation()?.let {
             LocationResult.Found(it.latLng)
         } ?: run {
-            LocationResult.Error(FailedToFindLocationException())
+            LocationResult.Error(FailedToFindLocationException)
         } else LocationResult.Disabled
     } catch (e: Exception) {
         LocationResult.Error(e)

@@ -5,12 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
-import com.example.coreandroid.base.InjectableFragment
 import com.example.coreandroid.util.delegate.NullableFragmentArgument
 import com.example.coreandroid.util.ext.setupToolbar
 import com.example.coreandroid.util.ext.setupToolbarWithDrawerToggle
 import com.example.coreandroid.util.ext.showBackNavArrow
 import com.google.android.gms.maps.model.LatLng
+import dagger.android.support.DaggerFragment
 import kotlinx.android.synthetic.main.fragment_weather.*
 import kotlinx.android.synthetic.main.fragment_weather.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -21,7 +21,7 @@ import javax.inject.Inject
 
 @FlowPreview
 @ExperimentalCoroutinesApi
-class WeatherFragment : InjectableFragment() {
+class WeatherFragment : DaggerFragment() {
 
     @Inject
     lateinit var viewModel: WeatherViewModel

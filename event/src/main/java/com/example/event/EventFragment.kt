@@ -7,12 +7,11 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.PagerAdapter
-import com.example.coreandroid.base.InjectableFragment
+import com.example.core.util.LoadedSuccessfully
 import com.example.coreandroid.controller.SnackbarController
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.controller.handleSnackbarState
 import com.example.coreandroid.model.Event
-import com.example.core.util.LoadedSuccessfully
 import com.example.coreandroid.util.delegate.FragmentArgument
 import com.example.coreandroid.view.TitledFragmentsPagerAdapter
 import com.example.coreandroid.view.ViewPagerPageSelectedListener
@@ -23,6 +22,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
+import dagger.android.support.DaggerFragment
 import kotlinx.android.synthetic.main.fragment_event.*
 import kotlinx.android.synthetic.main.fragment_event.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -37,7 +37,7 @@ import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class EventFragment : InjectableFragment(), SnackbarController {
+class EventFragment : DaggerFragment(), SnackbarController {
 
     var event: Event by FragmentArgument()
         private set

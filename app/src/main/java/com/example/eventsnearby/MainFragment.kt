@@ -2,7 +2,6 @@ package com.example.eventsnearby
 
 import android.os.Bundle
 import android.view.*
-import com.example.coreandroid.base.InjectableFragment
 import com.example.coreandroid.controller.*
 import com.example.coreandroid.util.ext.setupToolbar
 import com.example.coreandroid.util.ext.setupToolbarWithDrawerToggle
@@ -14,6 +13,7 @@ import com.example.search.SearchFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
+import dagger.android.support.DaggerFragment
 import kotlinx.android.synthetic.main.fragment_main.*
 import kotlinx.android.synthetic.main.fragment_main.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -22,7 +22,7 @@ import kotlinx.coroutines.channels.SendChannel
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class MainFragment : InjectableFragment(), MenuController, SnackbarController {
+class MainFragment : DaggerFragment(), MenuController, SnackbarController {
 
     private val bottomNavItemSelectedListener = BottomNavigationView
         .OnNavigationItemSelectedListener { item ->

@@ -3,15 +3,15 @@ package com.example.favourites
 import android.os.Bundle
 import android.view.*
 import androidx.lifecycle.lifecycleScope
-import com.example.coreandroid.base.InjectableFragment
 import com.example.coreandroid.controller.eventsSelectionActionModeController
-import com.example.coreandroid.navigation.IFragmentFactory
 import com.example.coreandroid.model.Event
 import com.example.coreandroid.model.Selectable
+import com.example.coreandroid.navigation.IFragmentFactory
 import com.example.coreandroid.util.EpoxyThreads
 import com.example.coreandroid.util.ext.*
 import com.example.coreandroid.util.infiniteItemListController
 import com.example.coreandroid.view.epoxy.listItem
+import dagger.android.support.DaggerFragment
 import kotlinx.android.synthetic.main.fragment_favourites.*
 import kotlinx.android.synthetic.main.fragment_favourites.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -25,7 +25,7 @@ import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class FavouritesFragment : InjectableFragment() {
+class FavouritesFragment : DaggerFragment() {
 
     @Inject
     internal lateinit var fragmentFactory: IFragmentFactory
