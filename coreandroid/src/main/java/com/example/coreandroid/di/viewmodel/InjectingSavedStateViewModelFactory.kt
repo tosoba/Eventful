@@ -14,9 +14,6 @@ class InjectingSavedStateViewModelFactory @Inject constructor(
     private val assistedFactories: Map<Class<out ViewModel>, @JvmSuppressWildcards AssistedSavedStateViewModelFactory<out ViewModel>>,
     private val viewModelProviders: Map<Class<out ViewModel>, @JvmSuppressWildcards Provider<ViewModel>>
 ) {
-    /**
-     * Creates instance of ViewModel either annotated with @AssistedInject or @Inject and passes dependencies it needs.
-     */
     fun create(
         owner: SavedStateRegistryOwner,
         defaultArgs: Bundle? = null
@@ -38,9 +35,6 @@ class InjectingSavedStateViewModelFactory @Inject constructor(
         }
     }
 
-    /**
-     * Creates ViewModel based on @AssistedInject constructor and its factory
-     */
     private fun <T : ViewModel?> createAssistedInjectViewModel(
         modelClass: Class<T>,
         handle: SavedStateHandle
@@ -49,19 +43,14 @@ class InjectingSavedStateViewModelFactory @Inject constructor(
             ?: assistedFactories.asIterable()
                 .firstOrNull { modelClass.isAssignableFrom(it.key) }?.value
             ?: return null
-
         return creator.create(handle)
     }
 
-    /**
-     * Creates ViewModel based on regular Dagger @Inject constructor
-     */
     private fun <T : ViewModel?> createInjectViewModel(modelClass: Class<T>): ViewModel? {
         val creator = viewModelProviders[modelClass]
             ?: viewModelProviders.asIterable()
                 .firstOrNull { modelClass.isAssignableFrom(it.key) }?.value
             ?: return null
-
         return creator.get()
     }
 }

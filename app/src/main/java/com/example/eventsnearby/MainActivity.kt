@@ -4,7 +4,9 @@ import android.Manifest
 import android.os.Bundle
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import com.example.coreandroid.base.DaggerViewModelActivity
 import com.example.coreandroid.controller.DrawerLayoutController
+import com.example.coreandroid.view.binding.viewBinding
 import com.google.android.material.navigation.NavigationView
 import com.markodevcic.peko.ActivityRotatingException
 import com.markodevcic.peko.Peko
@@ -20,7 +22,7 @@ import kotlin.coroutines.CoroutineContext
 
 @FlowPreview
 @ExperimentalCoroutinesApi
-class MainActivity : DaggerAppCompatActivity(), DrawerLayoutController, CoroutineScope {
+class MainActivity : DaggerViewModelActivity<MainViewModel>(), DrawerLayoutController, CoroutineScope {
 
     private val supervisorJob: CompletableDeferred<Any> = CompletableDeferred()
     override val coroutineContext: CoroutineContext get() = Dispatchers.Main + supervisorJob
@@ -38,9 +40,6 @@ class MainActivity : DaggerAppCompatActivity(), DrawerLayoutController, Coroutin
     private val mainNavigationFragment: MainNavigationFragment? by lazy(LazyThreadSafetyMode.NONE) {
         supportFragmentManager.findFragmentById(R.id.main_navigation_fragment) as? MainNavigationFragment
     }
-
-    @Inject
-    internal lateinit var viewModel: Provider<MainViewModel>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,7 +74,7 @@ class MainActivity : DaggerAppCompatActivity(), DrawerLayoutController, Coroutin
                 }
             )
         }
-        viewModel.get().intent(
+        viewModel.intent(
             if (Manifest.permission.ACCESS_COARSE_LOCATION in grantedPermissions) LoadLocation
             else PermissionDenied
         )

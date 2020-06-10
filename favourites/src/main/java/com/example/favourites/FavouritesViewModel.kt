@@ -1,5 +1,6 @@
 package com.example.favourites
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.example.core.model.event.IEvent
 import com.example.core.usecase.DeleteEvents
@@ -8,25 +9,35 @@ import com.example.core.util.DataList
 import com.example.core.util.LoadedSuccessfully
 import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.controller.SnackbarState
+import com.example.coreandroid.di.viewmodel.AssistedSavedStateViewModelFactory
 import com.example.coreandroid.model.Event
 import com.example.coreandroid.model.Selectable
 import com.example.coreandroid.util.*
+import com.squareup.inject.assisted.Assisted
+import com.squareup.inject.assisted.AssistedInject
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
 @FlowPreview
 @ExperimentalCoroutinesApi
-class FavouritesViewModel(
+class FavouritesViewModel @AssistedInject constructor(
     private val getSavedEventsFlow: GetSavedEventsFlow,
     private val deleteEvents: DeleteEvents,
     private val ioDispatcher: CoroutineDispatcher,
-    initialState: FavouritesState = FavouritesState()
-) : BaseViewModel<FavouritesIntent, FavouritesState, FavouritesSignal>(initialState) {
+    @Assisted private val savedStateHandle: SavedStateHandle
+) : BaseViewModel<FavouritesIntent, FavouritesState, FavouritesSignal>(
+    savedStateHandle["initialState"] ?: FavouritesState()
+) {
+
+    @AssistedInject.Factory
+    interface Factory : AssistedSavedStateViewModelFactory<FavouritesViewModel> {
+        override fun create(savedStateHandle: SavedStateHandle): FavouritesViewModel
+    }
 
     init {
         intents.onStart { emit(LoadFavourites) }
             .updates
-            .applyToState(initialState = initialState)
+            .applyToState(initialState = savedStateHandle["initialState"] ?: FavouritesState())
     }
 
     private val Flow<FavouritesIntent>.updates: Flow<Update>

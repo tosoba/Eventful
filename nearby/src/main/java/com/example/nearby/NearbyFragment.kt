@@ -2,10 +2,9 @@ package com.example.nearby
 
 import android.os.Bundle
 import android.view.*
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.example.coreandroid.base.DaggerViewModelFragment
 import com.example.coreandroid.controller.eventsSelectionActionModeController
-import com.example.coreandroid.di.viewmodel.InjectingSavedStateViewModelFactory
 import com.example.coreandroid.model.Event
 import com.example.coreandroid.model.Selectable
 import com.example.coreandroid.navigation.IFragmentFactory
@@ -13,7 +12,6 @@ import com.example.coreandroid.util.EpoxyThreads
 import com.example.coreandroid.util.ext.*
 import com.example.coreandroid.util.infiniteItemListController
 import com.example.coreandroid.view.epoxy.listItem
-import dagger.android.support.DaggerFragment
 import kotlinx.android.synthetic.main.fragment_nearby.*
 import kotlinx.android.synthetic.main.fragment_nearby.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -27,17 +25,10 @@ import javax.inject.Inject
 
 @FlowPreview
 @ExperimentalCoroutinesApi
-class NearbyFragment : DaggerFragment() {
+class NearbyFragment : DaggerViewModelFragment<NearbyViewModel>() {
 
     @Inject
     internal lateinit var fragmentFactory: IFragmentFactory
-
-    @Inject
-    lateinit var factory: InjectingSavedStateViewModelFactory
-
-    private val viewModel: NearbyViewModel by lazy(LazyThreadSafetyMode.NONE) {
-        ViewModelProvider(this, factory.create(this))[NearbyViewModel::class.java]
-    }
 
     @Inject
     internal lateinit var epoxyThreads: EpoxyThreads

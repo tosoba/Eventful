@@ -1,11 +1,15 @@
 package com.example.weather
 
+import androidx.lifecycle.SavedStateHandle
 import com.example.core.model.Resource
 import com.example.core.model.weather.Forecast
 import com.example.core.usecase.GetForecast
 import com.example.core.util.ext.flatMapFirst
 import com.example.coreandroid.base.BaseViewModel
+import com.example.coreandroid.di.viewmodel.AssistedSavedStateViewModelFactory
 import com.example.coreandroid.util.StateUpdate
+import com.squareup.inject.assisted.Assisted
+import com.squareup.inject.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -15,11 +19,19 @@ import kotlinx.coroutines.withContext
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class WeatherViewModel(
+class WeatherViewModel @AssistedInject constructor(
     private val getForecast: GetForecast,
     private val ioDispatcher: CoroutineDispatcher,
-    initialState: WeatherState = WeatherState()
-) : BaseViewModel<WeatherIntent, WeatherState, Unit>(initialState) {
+    @Assisted private val savedStateHandle: SavedStateHandle
+) : BaseViewModel<WeatherIntent, WeatherState, Unit>(
+    savedStateHandle["initialState"] ?: WeatherState()
+) {
+
+    @AssistedInject.Factory
+    interface Factory : AssistedSavedStateViewModelFactory<WeatherViewModel> {
+        override fun create(savedStateHandle: SavedStateHandle): WeatherViewModel
+    }
+
     init {
         intents.filterIsInstance<LoadWeather>()
             .flatMapFirst { intent ->
@@ -34,7 +46,7 @@ class WeatherViewModel(
                     emit(Update.Weather.Loaded(resource))
                 }
             }
-            .applyToState(initialState = initialState)
+            .applyToState(initialState = savedStateHandle["initialState"] ?: WeatherState())
     }
 
     private sealed class Update : StateUpdate<WeatherState> {

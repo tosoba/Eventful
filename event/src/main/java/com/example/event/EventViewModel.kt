@@ -1,15 +1,14 @@
 package com.example.event
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.core.usecase.DeleteEvent
 import com.example.core.usecase.IsEventSavedFlow
 import com.example.core.usecase.SaveEvent
-import com.example.coreandroid.base.BaseViewModel
 import com.example.core.util.Data
 import com.example.core.util.Initial
 import com.example.core.util.LoadedSuccessfully
+import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.di.viewmodel.AssistedSavedStateViewModelFactory
 import com.example.coreandroid.util.StateUpdate
 import com.squareup.inject.assisted.Assisted

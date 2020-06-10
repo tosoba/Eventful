@@ -5,10 +5,9 @@ import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat.getSystemService
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.example.coreandroid.base.DaggerViewModelFragment
 import com.example.coreandroid.controller.eventsSelectionActionModeController
-import com.example.coreandroid.di.viewmodel.InjectingSavedStateViewModelFactory
 import com.example.coreandroid.model.Event
 import com.example.coreandroid.model.Selectable
 import com.example.coreandroid.navigation.IFragmentFactory
@@ -16,7 +15,6 @@ import com.example.coreandroid.util.EpoxyThreads
 import com.example.coreandroid.util.ext.*
 import com.example.coreandroid.util.infiniteItemListController
 import com.example.coreandroid.view.epoxy.listItem
-import dagger.android.support.DaggerFragment
 import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.fragment_search.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -32,17 +30,10 @@ import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class SearchFragment : DaggerFragment() {
+class SearchFragment : DaggerViewModelFragment<SearchViewModel>() {
 
     @Inject
     internal lateinit var fragmentFactory: IFragmentFactory
-
-    @Inject
-    internal lateinit var factory: InjectingSavedStateViewModelFactory
-
-    private val viewModel: SearchViewModel by lazy(LazyThreadSafetyMode.NONE) {
-        ViewModelProvider(this, factory.create(this))[SearchViewModel::class.java]
-    }
 
     @Inject
     internal lateinit var epoxyThreads: EpoxyThreads

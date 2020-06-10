@@ -1,9 +1,9 @@
 package com.example.eventsnearby
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import com.example.core.provider.ConnectedStateProvider
 import com.example.core.provider.LocationStateProvider
+import com.example.coreandroid.base.savedStateViewModelFrom
 import com.example.coreandroid.di.scope.ActivityScoped
 import com.example.coreandroid.di.viewmodel.AssistedSavedStateViewModelFactory
 import com.example.coreandroid.di.viewmodel.InjectingSavedStateViewModelFactory
@@ -20,9 +20,9 @@ import dagger.Module
 import dagger.Provides
 import dagger.android.ContributesAndroidInjector
 import dagger.multibindings.IntoMap
+import dagger.multibindings.Multibinds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import javax.inject.Provider
 
 @ExperimentalCoroutinesApi
 @FlowPreview
@@ -43,6 +43,12 @@ abstract class MainActivityModule {
     )
     abstract fun mainActivity(): MainActivity
 
+    @Multibinds
+    abstract fun viewModels(): Map<Class<out ViewModel>, @JvmSuppressWildcards ViewModel>
+
+    @Multibinds
+    abstract fun assistedViewModelFactories(): Map<Class<out ViewModel>, @JvmSuppressWildcards AssistedSavedStateViewModelFactory<out ViewModel>>
+
     @Binds
     @IntoMap
     @ViewModelKey(MainViewModel::class)
@@ -57,24 +63,11 @@ abstract class MainActivityModule {
     abstract fun locationStateProvider(mainViewModel: MainViewModel): LocationStateProvider
 
     companion object {
-
         @Provides
         fun mainViewModel(
             mainActivity: MainActivity,
             factory: InjectingSavedStateViewModelFactory
-        ): MainViewModel = ViewModelProvider(
-            mainActivity,
-            factory.create(mainActivity)
-        )[MainViewModel::class.java]
-
-        @Provides
-        fun viewModelFactory(
-            assistedFactories: Map<Class<out ViewModel>, @JvmSuppressWildcards AssistedSavedStateViewModelFactory<out ViewModel>>,
-            viewModelProviders: Map<Class<out ViewModel>, @JvmSuppressWildcards Provider<ViewModel>>
-        ): InjectingSavedStateViewModelFactory = InjectingSavedStateViewModelFactory(
-            assistedFactories,
-            viewModelProviders
-        )
+        ): MainViewModel = mainActivity.savedStateViewModelFrom(factory)
 
         @Provides
         fun fragmentProvider(): IFragmentFactory = FragmentFactory

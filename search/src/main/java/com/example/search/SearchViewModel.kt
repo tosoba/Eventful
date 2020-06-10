@@ -1,5 +1,6 @@
 package com.example.search
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.example.core.model.PagedResult
 import com.example.core.model.Resource
@@ -13,16 +14,19 @@ import com.example.core.util.PagedDataList
 import com.example.core.util.ext.flatMapFirst
 import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.controller.SnackbarState
+import com.example.coreandroid.di.viewmodel.AssistedSavedStateViewModelFactory
 import com.example.coreandroid.model.Event
 import com.example.coreandroid.model.Selectable
 import com.example.coreandroid.util.*
 import com.haroldadmin.cnradapter.NetworkResponse
+import com.squareup.inject.assisted.Assisted
+import com.squareup.inject.assisted.AssistedInject
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class SearchViewModel(
+class SearchViewModel @AssistedInject constructor(
     private val searchEvents: SearchEvents,
     private val getPagedEventsFlow: GetPagedEventsFlow,
     private val saveEvents: SaveEvents,
@@ -30,12 +34,19 @@ class SearchViewModel(
     private val saveSearchSuggestion: SaveSearchSuggestion,
     connectedStateProvider: ConnectedStateProvider,
     private val ioDispatcher: CoroutineDispatcher,
-    initialState: SearchState = SearchState()
-) : BaseViewModel<SearchIntent, SearchState, SearchSignal>(initialState) {
+    @Assisted private val savedStateHandle: SavedStateHandle
+) : BaseViewModel<SearchIntent, SearchState, SearchSignal>(
+    savedStateHandle["initialState"] ?: SearchState()
+) {
+
+    @AssistedInject.Factory
+    interface Factory : AssistedSavedStateViewModelFactory<SearchViewModel> {
+        override fun create(savedStateHandle: SavedStateHandle): SearchViewModel
+    }
 
     init {
         merge(intents.updates, connectedStateProvider.updates)
-            .applyToState(initialState = initialState)
+            .applyToState(initialState = savedStateHandle["initialState"] ?: SearchState())
     }
 
     private val Flow<SearchIntent>.updates: Flow<Update>

@@ -1,16 +1,11 @@
 package com.example.event
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import com.example.core.usecase.DeleteEvent
-import com.example.core.usecase.IsEventSavedFlow
-import com.example.core.usecase.SaveEvent
-import com.example.coreandroid.di.viewmodel.ViewModelKey
+import com.example.coreandroid.base.savedStateViewModelFrom
 import com.example.coreandroid.di.scope.FragmentScoped
-import com.example.core.util.Data
-import com.example.core.util.Initial
 import com.example.coreandroid.di.viewmodel.AssistedSavedStateViewModelFactory
 import com.example.coreandroid.di.viewmodel.InjectingSavedStateViewModelFactory
+import com.example.coreandroid.di.viewmodel.ViewModelKey
 import com.squareup.inject.assisted.dagger2.AssistedModule
 import dagger.Binds
 import dagger.Module
@@ -36,4 +31,12 @@ abstract class EventModule {
     abstract fun eventViewModelFactory(
         factory: EventViewModel.Factory
     ): AssistedSavedStateViewModelFactory<out ViewModel>
+
+    companion object {
+        @Provides
+        fun eventViewModel(
+            eventFragment: EventFragment,
+            factory: InjectingSavedStateViewModelFactory
+        ): EventViewModel = eventFragment.savedStateViewModelFrom(factory)
+    }
 }

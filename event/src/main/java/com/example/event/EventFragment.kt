@@ -6,14 +6,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.PagerAdapter
 import com.example.core.util.LoadedSuccessfully
+import com.example.coreandroid.base.DaggerViewModelFragment
+import com.example.coreandroid.base.HasArgs
 import com.example.coreandroid.controller.SnackbarController
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.controller.handleSnackbarState
-import com.example.coreandroid.di.viewmodel.InjectingSavedStateViewModelFactory
 import com.example.coreandroid.model.Event
 import com.example.coreandroid.util.delegate.FragmentArgument
 import com.example.coreandroid.view.TitledFragmentsPagerAdapter
@@ -25,7 +25,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
-import dagger.android.support.DaggerFragment
 import kotlinx.android.synthetic.main.fragment_event.*
 import kotlinx.android.synthetic.main.fragment_event.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -36,14 +35,13 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class EventFragment : DaggerFragment(), SnackbarController {
+class EventFragment : DaggerViewModelFragment<EventViewModel>(), SnackbarController, HasArgs {
 
-    var event: Event by FragmentArgument()
-        private set
+    private var event: Event by FragmentArgument()
+    override val args: Bundle get() = bundleOf("initialState" to event)
 
     private val eventViewPagerAdapter: PagerAdapter by lazy(LazyThreadSafetyMode.NONE) {
         TitledFragmentsPagerAdapter(
@@ -67,14 +65,6 @@ class EventFragment : DaggerFragment(), SnackbarController {
                 true
             } ?: false
         }
-
-    @Inject
-    internal lateinit var factory: InjectingSavedStateViewModelFactory
-
-    private val viewModel: EventViewModel by lazy(LazyThreadSafetyMode.NONE) {
-        val fac = factory.create(this, bundleOf("initialState" to event))
-        ViewModelProvider(this, fac)[EventViewModel::class.java]
-    }
 
     private lateinit var snackbarStateChannel: SendChannel<SnackbarState>
 

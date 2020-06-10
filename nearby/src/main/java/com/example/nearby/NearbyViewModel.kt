@@ -1,13 +1,16 @@
 package com.example.nearby
 
 import android.view.View
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.example.core.model.Resource
 import com.example.core.model.PagedResult
+import com.example.core.model.Resource
 import com.example.core.model.app.LatLng
 import com.example.core.model.app.LocationState
 import com.example.core.model.app.LocationStatus
 import com.example.core.model.event.IEvent
+import com.example.core.provider.ConnectedStateProvider
+import com.example.core.provider.LocationStateProvider
 import com.example.core.usecase.GetNearbyEvents
 import com.example.core.usecase.GetPagedEventsFlow
 import com.example.core.usecase.SaveEvents
@@ -16,26 +19,34 @@ import com.example.core.util.ext.flatMapFirst
 import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.controller.SnackbarAction
 import com.example.coreandroid.controller.SnackbarState
-import com.example.core.provider.ConnectedStateProvider
-import com.example.core.provider.LocationStateProvider
+import com.example.coreandroid.di.viewmodel.AssistedSavedStateViewModelFactory
 import com.example.coreandroid.model.Event
 import com.example.coreandroid.model.Selectable
 import com.example.coreandroid.util.*
 import com.haroldadmin.cnradapter.NetworkResponse
+import com.squareup.inject.assisted.Assisted
+import com.squareup.inject.assisted.AssistedInject
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class NearbyViewModel(
+class NearbyViewModel @AssistedInject constructor(
     private val getNearbyEvents: GetNearbyEvents,
     private val saveEvents: SaveEvents,
     private val getPagedEventsFlow: GetPagedEventsFlow,
     connectedStateProvider: ConnectedStateProvider,
     private val locationStateProvider: LocationStateProvider,
     private val ioDispatcher: CoroutineDispatcher,
-    initialState: NearbyState = NearbyState()
-) : BaseViewModel<NearbyIntent, NearbyState, NearbySignal>(initialState) {
+    @Assisted private val savedStateHandle: SavedStateHandle
+) : BaseViewModel<NearbyIntent, NearbyState, NearbySignal>(
+    savedStateHandle["initialState"] ?: NearbyState()
+) {
+
+    @AssistedInject.Factory
+    interface Factory : AssistedSavedStateViewModelFactory<NearbyViewModel> {
+        override fun create(savedStateHandle: SavedStateHandle): NearbyViewModel
+    }
 
     init {
         merge(
@@ -44,7 +55,7 @@ class NearbyViewModel(
             connectedStateProvider.snackbarUpdates,
             locationStateProvider.updates,
             locationStateProvider.snackbarUpdates
-        ).applyToState(initialState = initialState)
+        ).applyToState(initialState = savedStateHandle["initialState"] ?: NearbyState())
     }
 
     private val Flow<NearbyIntent>.updates: Flow<Update>
