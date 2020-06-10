@@ -4,9 +4,7 @@ import android.Manifest
 import android.os.Bundle
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.lifecycle.ViewModelProvider
 import com.example.coreandroid.controller.DrawerLayoutController
-import com.example.coreandroid.di.viewmodel.InjectingSavedStateViewModelFactory
 import com.google.android.material.navigation.NavigationView
 import com.markodevcic.peko.ActivityRotatingException
 import com.markodevcic.peko.Peko
@@ -16,6 +14,7 @@ import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 
@@ -41,11 +40,7 @@ class MainActivity : DaggerAppCompatActivity(), DrawerLayoutController, Coroutin
     }
 
     @Inject
-    internal lateinit var factory: InjectingSavedStateViewModelFactory
-
-    private val viewModel: MainViewModel by lazy(LazyThreadSafetyMode.NONE) {
-        ViewModelProvider(this, factory.create(this))[MainViewModel::class.java]
-    }
+    internal lateinit var viewModel: Provider<MainViewModel>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,7 +75,7 @@ class MainActivity : DaggerAppCompatActivity(), DrawerLayoutController, Coroutin
                 }
             )
         }
-        viewModel.intent(
+        viewModel.get().intent(
             if (Manifest.permission.ACCESS_COARSE_LOCATION in grantedPermissions) LoadLocation
             else PermissionDenied
         )

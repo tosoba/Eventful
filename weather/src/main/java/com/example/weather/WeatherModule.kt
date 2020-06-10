@@ -1,12 +1,9 @@
 package com.example.weather
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import com.example.core.usecase.GetForecast
-import com.example.coreandroid.di.viewmodel.InjectingSavedStateViewModelFactory
-import com.example.coreandroid.di.viewmodel.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
-import dagger.Binds
+import com.example.coreandroid.di.viewmodel.ViewModelKey
 import dagger.Module
 import dagger.Provides
 import dagger.android.ContributesAndroidInjector

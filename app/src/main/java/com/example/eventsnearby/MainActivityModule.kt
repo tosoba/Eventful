@@ -1,6 +1,7 @@
 package com.example.eventsnearby
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.example.core.provider.ConnectedStateProvider
 import com.example.core.provider.LocationStateProvider
 import com.example.coreandroid.di.scope.ActivityScoped
@@ -56,6 +57,15 @@ abstract class MainActivityModule {
     abstract fun locationStateProvider(mainViewModel: MainViewModel): LocationStateProvider
 
     companion object {
+
+        @Provides
+        fun mainViewModel(
+            mainActivity: MainActivity,
+            factory: InjectingSavedStateViewModelFactory
+        ): MainViewModel = ViewModelProvider(
+            mainActivity,
+            factory.create(mainActivity)
+        )[MainViewModel::class.java]
 
         @Provides
         fun viewModelFactory(
