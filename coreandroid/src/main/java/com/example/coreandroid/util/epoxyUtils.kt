@@ -11,7 +11,12 @@ import com.example.coreandroid.loadingIndicator
 import com.example.coreandroid.noItemsText
 import com.example.coreandroid.reloadControl
 
-class EpoxyThreads(val builder: Handler, val differ: Handler)
+class EpoxyThreads(val builder: Handler, val differ: Handler) {
+    enum class Names(val value: String) {
+        DIFFING("epoxy-diffing-thread"),
+        BUILDING("epoxy-building-thread")
+    }
+}
 
 fun Fragment.simpleController(
     build: EpoxyController.() -> Unit

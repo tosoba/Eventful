@@ -5,12 +5,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.PagerAdapter
 import com.example.core.util.LoadedSuccessfully
 import com.example.coreandroid.controller.SnackbarController
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.controller.handleSnackbarState
+import com.example.coreandroid.di.viewmodel.InjectingSavedStateViewModelFactory
 import com.example.coreandroid.model.Event
 import com.example.coreandroid.util.delegate.FragmentArgument
 import com.example.coreandroid.view.TitledFragmentsPagerAdapter
@@ -66,7 +69,12 @@ class EventFragment : DaggerFragment(), SnackbarController {
         }
 
     @Inject
-    internal lateinit var viewModel: EventViewModel
+    internal lateinit var factory: InjectingSavedStateViewModelFactory
+
+    private val viewModel: EventViewModel by lazy(LazyThreadSafetyMode.NONE) {
+        val fac = factory.create(this, bundleOf("initialState" to event))
+        ViewModelProvider(this, fac)[EventViewModel::class.java]
+    }
 
     private lateinit var snackbarStateChannel: SendChannel<SnackbarState>
 

@@ -8,8 +8,9 @@ import com.example.core.provider.LocationStateProvider
 import com.example.core.usecase.GetLocation
 import com.example.core.usecase.IsConnectedFlow
 import com.example.core.usecase.IsLocationAvailableFlow
-import com.example.coreandroid.di.ViewModelFactory
-import com.example.coreandroid.di.ViewModelKey
+import com.example.coreandroid.di.viewmodel.AssistedSavedStateViewModelFactory
+import com.example.coreandroid.di.viewmodel.InjectingSavedStateViewModelFactory
+import com.example.coreandroid.di.viewmodel.ViewModelKey
 import com.example.coreandroid.di.scope.ActivityScoped
 import com.example.coreandroid.navigation.IFragmentFactory
 import com.example.event.EventModule
@@ -34,7 +35,6 @@ abstract class MainActivityModule {
     @ActivityScoped
     @ContributesAndroidInjector(
         modules = [
-            MainViewModelModule::class,
             NearbyModule::class,
             SearchModule::class,
             FavouritesModule::class,
@@ -46,6 +46,11 @@ abstract class MainActivityModule {
     abstract fun mainActivity(): MainActivity
 
     @Binds
+    @IntoMap
+    @ViewModelKey(MainViewModel::class)
+    abstract fun mainViewModelBase(viewModel: MainViewModel): ViewModel
+
+    @Binds
     abstract fun connectivityStateProvider(mainViewModel: MainViewModel): ConnectedStateProvider
 
     @Binds
@@ -54,26 +59,12 @@ abstract class MainActivityModule {
     companion object {
 
         @Provides
-        fun viewModelFactory(
-            providers: Map<Class<out ViewModel>, @JvmSuppressWildcards Provider<ViewModel>>
-        ): ViewModelProvider.Factory = ViewModelFactory(providers)
-
-        @Provides
-        fun fragmentProvider(): IFragmentFactory = FragmentFactory
-    }
-
-    @Module
-    object MainViewModelModule {
-
-        @Provides
-        @IntoMap
-        @ViewModelKey(MainViewModel::class)
-        fun mainViewModelBase(
+        fun mainViewModel(
             getLocation: GetLocation,
             isConnectedFlow: IsConnectedFlow,
             isLocationAvailableFlow: IsLocationAvailableFlow,
             appContext: Context
-        ): ViewModel = MainViewModel(
+        ): MainViewModel = MainViewModel(
             getLocation,
             isConnectedFlow,
             isLocationAvailableFlow,
@@ -81,8 +72,14 @@ abstract class MainActivityModule {
         )
 
         @Provides
-        fun mainViewModel(
-            factory: ViewModelProvider.Factory, target: MainActivity
-        ): MainViewModel = ViewModelProvider(target, factory).get(MainViewModel::class.java)
+        fun viewModelFactory(
+            viewModelProviders: Map<Class<out ViewModel>, @JvmSuppressWildcards Provider<ViewModel>>
+        ): InjectingSavedStateViewModelFactory = InjectingSavedStateViewModelFactory(
+            emptyMap(),
+            viewModelProviders
+        )
+
+        @Provides
+        fun fragmentProvider(): IFragmentFactory = FragmentFactory
     }
 }

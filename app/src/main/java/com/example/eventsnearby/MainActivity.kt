@@ -4,7 +4,9 @@ import android.Manifest
 import android.os.Bundle
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.ViewModelProvider
 import com.example.coreandroid.controller.DrawerLayoutController
+import com.example.coreandroid.di.viewmodel.InjectingSavedStateViewModelFactory
 import com.google.android.material.navigation.NavigationView
 import com.markodevcic.peko.ActivityRotatingException
 import com.markodevcic.peko.Peko
@@ -39,7 +41,11 @@ class MainActivity : DaggerAppCompatActivity(), DrawerLayoutController, Coroutin
     }
 
     @Inject
-    lateinit var viewModel: MainViewModel
+    internal lateinit var factory: InjectingSavedStateViewModelFactory
+
+    private val viewModel: MainViewModel by lazy(LazyThreadSafetyMode.NONE) {
+        ViewModelProvider(this, factory.create(this))[MainViewModel::class.java]
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

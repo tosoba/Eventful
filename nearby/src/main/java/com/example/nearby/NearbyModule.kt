@@ -5,10 +5,12 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.core.usecase.GetNearbyEvents
 import com.example.core.usecase.GetPagedEventsFlow
 import com.example.core.usecase.SaveEvents
-import com.example.coreandroid.di.ViewModelKey
+import com.example.coreandroid.di.viewmodel.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
 import com.example.core.provider.ConnectedStateProvider
 import com.example.core.provider.LocationStateProvider
+import com.example.coreandroid.di.viewmodel.InjectingSavedStateViewModelFactory
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.android.ContributesAndroidInjector
@@ -24,16 +26,14 @@ import kotlinx.coroutines.FlowPreview
 abstract class NearbyModule {
 
     @FragmentScoped
-    @ContributesAndroidInjector(modules = [NearbyViewModelModule::class])
+    @ContributesAndroidInjector
     abstract fun nearbyFragment(): NearbyFragment
 
-    @Module
-    object NearbyViewModelModule {
-
+    companion object {
         @Provides
         @IntoMap
         @ViewModelKey(NearbyViewModel::class)
-        fun nearbyViewModelBase(
+        fun nearbyViewModel(
             getNearbyEvents: GetNearbyEvents,
             saveEvents: SaveEvents,
             getPagedEventsFlow: GetPagedEventsFlow,
@@ -48,11 +48,5 @@ abstract class NearbyModule {
             locationStateProvider,
             ioDispatcher
         )
-
-        @Provides
-        fun nearbyViewModel(
-            factory: ViewModelProvider.Factory,
-            target: NearbyFragment
-        ): NearbyViewModel = ViewModelProvider(target, factory).get(NearbyViewModel::class.java)
     }
 }

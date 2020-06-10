@@ -4,7 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.example.coreandroid.di.viewmodel.InjectingSavedStateViewModelFactory
 import com.example.coreandroid.util.delegate.NullableFragmentArgument
 import com.example.coreandroid.util.ext.setupToolbar
 import com.example.coreandroid.util.ext.setupToolbarWithDrawerToggle
@@ -24,7 +26,11 @@ import javax.inject.Inject
 class WeatherFragment : DaggerFragment() {
 
     @Inject
-    lateinit var viewModel: WeatherViewModel
+    internal lateinit var factory: InjectingSavedStateViewModelFactory
+
+    private val viewModel: WeatherViewModel by lazy(LazyThreadSafetyMode.NONE) {
+        ViewModelProvider(this, factory.create(this))[WeatherViewModel::class.java]
+    }
 
     private var latLng: LatLng? by NullableFragmentArgument()
 

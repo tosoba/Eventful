@@ -5,8 +5,10 @@ import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat.getSystemService
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.coreandroid.controller.eventsSelectionActionModeController
+import com.example.coreandroid.di.viewmodel.InjectingSavedStateViewModelFactory
 import com.example.coreandroid.model.Event
 import com.example.coreandroid.model.Selectable
 import com.example.coreandroid.navigation.IFragmentFactory
@@ -36,7 +38,11 @@ class SearchFragment : DaggerFragment() {
     internal lateinit var fragmentFactory: IFragmentFactory
 
     @Inject
-    internal lateinit var viewModel: SearchViewModel
+    internal lateinit var factory: InjectingSavedStateViewModelFactory
+
+    private val viewModel: SearchViewModel by lazy(LazyThreadSafetyMode.NONE) {
+        ViewModelProvider(this, factory.create(this))[SearchViewModel::class.java]
+    }
 
     @Inject
     internal lateinit var epoxyThreads: EpoxyThreads

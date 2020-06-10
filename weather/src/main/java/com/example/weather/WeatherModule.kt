@@ -3,8 +3,10 @@ package com.example.weather
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.core.usecase.GetForecast
-import com.example.coreandroid.di.ViewModelKey
+import com.example.coreandroid.di.viewmodel.InjectingSavedStateViewModelFactory
+import com.example.coreandroid.di.viewmodel.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.android.ContributesAndroidInjector
@@ -19,24 +21,16 @@ import kotlinx.coroutines.FlowPreview
 abstract class WeatherModule {
 
     @FragmentScoped
-    @ContributesAndroidInjector(modules = [WeatherViewModelModule::class])
+    @ContributesAndroidInjector
     abstract fun weatherFragment(): WeatherFragment
 
-    @Module
-    object WeatherViewModelModule {
-
+    companion object {
         @Provides
         @IntoMap
         @ViewModelKey(WeatherViewModel::class)
-        fun weatherViewModelBase(
+        fun weatherViewModel(
             getForecast: GetForecast,
             ioDispatcher: CoroutineDispatcher
         ): ViewModel = WeatherViewModel(getForecast, ioDispatcher)
-
-        @Provides
-        fun weatherViewModel(
-            factory: ViewModelProvider.Factory,
-            target: WeatherFragment
-        ): WeatherViewModel = ViewModelProvider(target, factory).get(WeatherViewModel::class.java)
     }
 }

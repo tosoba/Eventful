@@ -5,10 +5,14 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.core.usecase.DeleteEvent
 import com.example.core.usecase.IsEventSavedFlow
 import com.example.core.usecase.SaveEvent
-import com.example.coreandroid.di.ViewModelKey
+import com.example.coreandroid.di.viewmodel.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
 import com.example.core.util.Data
 import com.example.core.util.Initial
+import com.example.coreandroid.di.viewmodel.AssistedSavedStateViewModelFactory
+import com.example.coreandroid.di.viewmodel.InjectingSavedStateViewModelFactory
+import com.squareup.inject.assisted.dagger2.AssistedModule
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.android.ContributesAndroidInjector
@@ -18,34 +22,16 @@ import kotlinx.coroutines.FlowPreview
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-@Module
+@AssistedModule
+@Module(includes = [AssistedInject_EventModule::class])
 abstract class EventModule {
 
     @FragmentScoped
-    @ContributesAndroidInjector(modules = [EventViewModelModule::class])
+    @ContributesAndroidInjector
     abstract fun eventFragment(): EventFragment
 
-    @Module
-    object EventViewModelModule {
-
-        @Provides
-        @IntoMap
-        @ViewModelKey(EventViewModel::class)
-        fun eventViewModelBase(
-            initialState: EventState,
-            isEventSavedFlow: IsEventSavedFlow,
-            saveEvent: SaveEvent,
-            deleteEvent: DeleteEvent
-        ): ViewModel = EventViewModel(initialState, isEventSavedFlow, saveEvent, deleteEvent)
-
-        @Provides
-        fun eventInitialState(
-            fragment: EventFragment
-        ): EventState = EventState(fragment.event, Data(false, Initial))
-
-        @Provides
-        fun eventViewModel(
-            factory: ViewModelProvider.Factory, target: EventFragment
-        ): EventViewModel = ViewModelProvider(target, factory).get(EventViewModel::class.java)
-    }
+    @Binds
+    @IntoMap
+    @ViewModelKey(EventViewModel::class)
+    abstract fun eventViewModelFactory(factory: EventViewModel.Factory): AssistedSavedStateViewModelFactory<out ViewModel>
 }

@@ -34,6 +34,7 @@ buildscript {
         playServicesMapsVersion = '16.1.0'
         playServicesLocationVersion = '16.0.0'
 
+        assistedInjectVersion = '0.5.2'
         bannerSliderVersion = '2.0.0'
         daggerVersion = '2.28'
         epoxyVersion = '3.7.0'

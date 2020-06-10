@@ -4,8 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.core.provider.ConnectedStateProvider
 import com.example.core.usecase.*
-import com.example.coreandroid.di.ViewModelKey
+import com.example.coreandroid.di.viewmodel.InjectingSavedStateViewModelFactory
+import com.example.coreandroid.di.viewmodel.ViewModelKey
 import com.example.coreandroid.di.scope.FragmentScoped
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.android.ContributesAndroidInjector
@@ -20,16 +22,14 @@ import kotlinx.coroutines.FlowPreview
 abstract class SearchModule {
 
     @FragmentScoped
-    @ContributesAndroidInjector(modules = [SearchViewModelModule::class])
+    @ContributesAndroidInjector
     abstract fun searchFragment(): SearchFragment
 
-    @Module
-    object SearchViewModelModule {
-
+    companion object {
         @Provides
         @IntoMap
         @ViewModelKey(SearchViewModel::class)
-        fun searchViewModelBase(
+        fun searchViewModel(
             searchEvents: SearchEvents,
             getPagedEventsFlow: GetPagedEventsFlow,
             saveEvents: SaveEvents,
@@ -46,11 +46,5 @@ abstract class SearchModule {
             connectedStateProvider,
             ioDispatcher
         )
-
-        @Provides
-        fun searchViewModel(
-            factory: ViewModelProvider.Factory,
-            target: SearchFragment
-        ): SearchViewModel = ViewModelProvider(target, factory).get(SearchViewModel::class.java)
     }
 }

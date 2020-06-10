@@ -2,8 +2,10 @@ package com.example.favourites
 
 import android.os.Bundle
 import android.view.*
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.coreandroid.controller.eventsSelectionActionModeController
+import com.example.coreandroid.di.viewmodel.InjectingSavedStateViewModelFactory
 import com.example.coreandroid.model.Event
 import com.example.coreandroid.model.Selectable
 import com.example.coreandroid.navigation.IFragmentFactory
@@ -31,7 +33,11 @@ class FavouritesFragment : DaggerFragment() {
     internal lateinit var fragmentFactory: IFragmentFactory
 
     @Inject
-    internal lateinit var viewModel: FavouritesViewModel
+    internal lateinit var factory: InjectingSavedStateViewModelFactory
+
+    private val viewModel: FavouritesViewModel by lazy(LazyThreadSafetyMode.NONE) {
+        ViewModelProvider(this, factory.create(this))[FavouritesViewModel::class.java]
+    }
 
     @Inject
     internal lateinit var epoxyThreads: EpoxyThreads

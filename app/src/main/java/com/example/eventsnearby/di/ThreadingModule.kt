@@ -2,7 +2,6 @@ package com.example.eventsnearby.di
 
 import android.os.Handler
 import android.os.HandlerThread
-import com.example.coreandroid.di.Dependencies
 import com.example.coreandroid.util.EpoxyThreads
 import dagger.Module
 import dagger.Provides
@@ -19,11 +18,11 @@ class ThreadingModule {
     @Singleton
     fun epoxyThreads(): EpoxyThreads = EpoxyThreads(
         builder = Handler(
-            HandlerThread(Dependencies.EPOXY_BUILDING_THREAD)
+            HandlerThread(EpoxyThreads.Names.BUILDING.value)
                 .apply(HandlerThread::start).looper
         ),
         differ = Handler(
-            HandlerThread(Dependencies.EPOXY_DIFFING_THREAD)
+            HandlerThread(EpoxyThreads.Names.DIFFING.value)
                 .apply(HandlerThread::start).looper
         )
     )

@@ -1,5 +1,7 @@
 package com.example.event
 
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.core.usecase.DeleteEvent
 import com.example.core.usecase.IsEventSavedFlow
@@ -8,7 +10,10 @@ import com.example.coreandroid.base.BaseViewModel
 import com.example.core.util.Data
 import com.example.core.util.Initial
 import com.example.core.util.LoadedSuccessfully
+import com.example.coreandroid.di.viewmodel.AssistedSavedStateViewModelFactory
 import com.example.coreandroid.util.StateUpdate
+import com.squareup.inject.assisted.Assisted
+import com.squareup.inject.assisted.AssistedInject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
@@ -16,12 +21,17 @@ import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class EventViewModel(
-    initialState: EventState,
+class EventViewModel @AssistedInject constructor(
     private val isEventSavedFlow: IsEventSavedFlow,
     private val saveEvent: SaveEvent,
-    private val deleteEvent: DeleteEvent
-) : BaseViewModel<EventIntent, EventState, EventSignal>(initialState) {
+    private val deleteEvent: DeleteEvent,
+    @Assisted private val savedStateHandle: SavedStateHandle
+) : BaseViewModel<EventIntent, EventState, EventSignal>(savedStateHandle["initialState"]!!) {
+
+    @AssistedInject.Factory
+    interface Factory : AssistedSavedStateViewModelFactory<EventViewModel> {
+        override fun create(savedStateHandle: SavedStateHandle): EventViewModel
+    }
 
     init {
         merge(
@@ -43,7 +53,7 @@ class EventViewModel(
                         signal(EventSignal.FavouriteStateToggled(it))
                     Update.FavouriteStatus.Loaded(favourite = it)
                 }
-        ).applyToState(initialState = initialState)
+        ).applyToState(initialState = savedStateHandle["initialState"]!!)
     }
 
     private sealed class Update : StateUpdate<EventState> {
