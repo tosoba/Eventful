@@ -33,5 +33,7 @@ abstract class EventModule {
     @Binds
     @IntoMap
     @ViewModelKey(EventViewModel::class)
-    abstract fun eventViewModelFactory(factory: EventViewModel.Factory): AssistedSavedStateViewModelFactory<out ViewModel>
+    abstract fun eventViewModelFactory(
+        factory: EventViewModel.Factory
+    ): AssistedSavedStateViewModelFactory<out ViewModel>
 }

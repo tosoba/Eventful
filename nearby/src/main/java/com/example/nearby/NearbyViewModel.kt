@@ -71,7 +71,7 @@ class NearbyViewModel(
         }.map { Update.NoConnectionSnackbar }
 
     private val LocationStateProvider.snackbarUpdates: Flow<Update>
-        get() = locationStates.filter { it.latLng == null }
+        get() = locationStates.filter { it.latLng == null && it.status !is LocationStatus.Initial }
             .map { (_, status) ->
                 Update.LocationSnackbar(status, locationStateProvider::reloadLocation)
             }

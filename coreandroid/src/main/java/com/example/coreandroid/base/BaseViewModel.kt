@@ -1,5 +1,6 @@
 package com.example.coreandroid.base
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.coreandroid.util.StateUpdate
@@ -35,9 +36,13 @@ abstract class BaseViewModel<Intent : Any, State : Any, Signal : Any>(
         super.onCleared()
     }
 
-    protected fun <Update : StateUpdate<State>> Flow<Update>.applyToState(initialState: State): Job {
-        return scan(initialState) { state, update -> update(state) }
-            .onEach { state = it }
-            .launchIn(viewModelScope)
-    }
+    protected fun <Update : StateUpdate<State>> Flow<Update>.applyToState(
+        initialState: State
+    ): Job = onEach { Log.e("UPDATE", it.toString()) }
+        .scan(initialState) { state, update -> update(state) }
+        .onEach {
+            Log.e("STATE", it.toString())
+            state = it
+        }
+        .launchIn(viewModelScope)
 }

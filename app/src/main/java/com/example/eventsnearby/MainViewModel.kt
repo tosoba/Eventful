@@ -1,44 +1,52 @@
 package com.example.eventsnearby
 
-import android.content.Context
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.example.core.model.app.LocationResult
 import com.example.core.model.app.LocationState
 import com.example.core.model.app.LocationStatus
+import com.example.core.provider.ConnectedStateProvider
+import com.example.core.provider.LocationStateProvider
 import com.example.core.usecase.GetLocation
 import com.example.core.usecase.IsConnectedFlow
 import com.example.core.usecase.IsLocationAvailableFlow
 import com.example.core.util.ext.flatMapFirst
 import com.example.core.util.ext.takeWhileInclusive
 import com.example.coreandroid.base.BaseViewModel
-import com.example.core.provider.ConnectedStateProvider
-import com.example.core.provider.LocationStateProvider
+import com.example.coreandroid.di.viewmodel.AssistedSavedStateViewModelFactory
 import com.example.coreandroid.util.StateUpdate
-import com.example.coreandroid.util.ext.isLocationAvailable
+import com.squareup.inject.assisted.Assisted
+import com.squareup.inject.assisted.AssistedInject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import javax.inject.Inject
+
+private val SavedStateHandle.initialState: MainState
+    get() = get<MainState>("initialState") ?: MainState()
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class MainViewModel(
+class MainViewModel @AssistedInject constructor(
     private val getLocation: GetLocation,
     isConnectedFlow: IsConnectedFlow,
     private val isLocationAvailableFlow: IsLocationAvailableFlow,
-    private val appContext: Context,
-    initialState: MainState = MainState()
-) : BaseViewModel<MainIntent, MainState, Unit>(initialState),
+    @Assisted private val savedStateHandle: SavedStateHandle
+) : BaseViewModel<MainIntent, MainState, Unit>(savedStateHandle.initialState),
     ConnectedStateProvider,
     LocationStateProvider {
+
+    @AssistedInject.Factory
+    interface Factory : AssistedSavedStateViewModelFactory<MainViewModel> {
+        override fun create(savedStateHandle: SavedStateHandle): MainViewModel
+    }
 
     init {
         merge(
             intents.updates,
-            isConnectedFlow().map { Update.Connection(it) },
+            isConnectedFlow().distinctUntilChanged().map { Update.Connection(it) },
             locationAvailabilityUpdates
-        ).applyToState(initialState = initialState)
+        ).applyToState(initialState = savedStateHandle.initialState)
     }
 
     override val connectedStates: Flow<Boolean> get() = states.map { it.connected }
@@ -66,12 +74,8 @@ class MainViewModel(
 
     private val locationLoadingUpdates: Flow<Update>
         get() = flow<Update> {
-            if (appContext.isLocationAvailable) {
-                emit(Update.Location.Result(LocationResult.Loading))
-                emit(Update.Location.Result(getLocation()))
-            } else {
-                emit(Update.Location.Result(LocationResult.Disabled))
-            }
+            emit(Update.Location.Result(LocationResult.Loading))
+            emit(Update.Location.Result(getLocation()))
         }
 
     private sealed class Update : StateUpdate<MainState> {
@@ -94,20 +98,17 @@ class MainViewModel(
 
             class Result(private val result: LocationResult) : Location() {
                 override fun invoke(state: MainState): MainState = state.copy(
-                    locationState = when (result) {
-                        is LocationResult.Found -> state.locationState.copy(
-                            latLng = result.latLng,
-                            status = LocationStatus.Found
-                        )
-                        else -> state.locationState.copy(
-                            status = when (result) {
-                                is LocationResult.Loading -> LocationStatus.Loading
-                                is LocationResult.Disabled -> LocationStatus.Disabled
-                                is LocationResult.Error -> LocationStatus.Error(result.throwable)
-                                else -> state.locationState.status
-                            }
-                        )
-                    }
+                    locationState = if (result is LocationResult.Found) state.locationState.copy(
+                        latLng = result.latLng,
+                        status = LocationStatus.Found
+                    ) else state.locationState.copy(
+                        status = when (result) {
+                            is LocationResult.Loading -> LocationStatus.Loading
+                            is LocationResult.Disabled -> LocationStatus.Disabled
+                            is LocationResult.Error -> LocationStatus.Error(result.throwable)
+                            else -> throw IllegalArgumentException()
+                        }
+                    )
                 )
             }
         }

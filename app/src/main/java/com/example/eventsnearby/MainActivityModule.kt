@@ -1,23 +1,19 @@
 package com.example.eventsnearby
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import com.example.core.provider.ConnectedStateProvider
 import com.example.core.provider.LocationStateProvider
-import com.example.core.usecase.GetLocation
-import com.example.core.usecase.IsConnectedFlow
-import com.example.core.usecase.IsLocationAvailableFlow
+import com.example.coreandroid.di.scope.ActivityScoped
 import com.example.coreandroid.di.viewmodel.AssistedSavedStateViewModelFactory
 import com.example.coreandroid.di.viewmodel.InjectingSavedStateViewModelFactory
 import com.example.coreandroid.di.viewmodel.ViewModelKey
-import com.example.coreandroid.di.scope.ActivityScoped
 import com.example.coreandroid.navigation.IFragmentFactory
 import com.example.event.EventModule
 import com.example.favourites.FavouritesModule
 import com.example.nearby.NearbyModule
 import com.example.search.SearchModule
 import com.example.weather.WeatherModule
+import com.squareup.inject.assisted.dagger2.AssistedModule
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -29,7 +25,8 @@ import javax.inject.Provider
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-@Module
+@AssistedModule
+@Module(includes = [AssistedInject_MainActivityModule::class])
 abstract class MainActivityModule {
 
     @ActivityScoped
@@ -48,7 +45,9 @@ abstract class MainActivityModule {
     @Binds
     @IntoMap
     @ViewModelKey(MainViewModel::class)
-    abstract fun mainViewModelBase(viewModel: MainViewModel): ViewModel
+    abstract fun mainViewModelFactory(
+        factory: MainViewModel.Factory
+    ): AssistedSavedStateViewModelFactory<out ViewModel>
 
     @Binds
     abstract fun connectivityStateProvider(mainViewModel: MainViewModel): ConnectedStateProvider
@@ -59,23 +58,11 @@ abstract class MainActivityModule {
     companion object {
 
         @Provides
-        fun mainViewModel(
-            getLocation: GetLocation,
-            isConnectedFlow: IsConnectedFlow,
-            isLocationAvailableFlow: IsLocationAvailableFlow,
-            appContext: Context
-        ): MainViewModel = MainViewModel(
-            getLocation,
-            isConnectedFlow,
-            isLocationAvailableFlow,
-            appContext
-        )
-
-        @Provides
         fun viewModelFactory(
+            assistedFactories: Map<Class<out ViewModel>, @JvmSuppressWildcards AssistedSavedStateViewModelFactory<out ViewModel>>,
             viewModelProviders: Map<Class<out ViewModel>, @JvmSuppressWildcards Provider<ViewModel>>
         ): InjectingSavedStateViewModelFactory = InjectingSavedStateViewModelFactory(
-            emptyMap(),
+            assistedFactories,
             viewModelProviders
         )
 
