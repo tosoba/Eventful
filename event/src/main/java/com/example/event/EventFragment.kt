@@ -72,7 +72,7 @@ class EventFragment : DaggerViewModelFragment<EventViewModel>(), SnackbarControl
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_event, container, false).apply {
         event_fab.setOnClickListener {
-            lifecycleScope.launch { viewModel.intent(ToggleFavourite) }
+            lifecycleScope.launch { viewModel.intent(EventIntent.ToggleFavourite) }
         }
 
         event_bottom_nav_view.setOnNavigationItemSelectedListener(bottomNavItemSelectedListener)

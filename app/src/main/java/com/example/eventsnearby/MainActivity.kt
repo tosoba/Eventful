@@ -6,23 +6,20 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.example.coreandroid.base.DaggerViewModelActivity
 import com.example.coreandroid.controller.DrawerLayoutController
-import com.example.coreandroid.view.binding.viewBinding
 import com.google.android.material.navigation.NavigationView
 import com.markodevcic.peko.ActivityRotatingException
 import com.markodevcic.peko.Peko
 import com.markodevcic.peko.rationale.AlertDialogPermissionRationale
 import com.markodevcic.peko.requestPermissionsAsync
-import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
-import javax.inject.Inject
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 
 @FlowPreview
 @ExperimentalCoroutinesApi
-class MainActivity : DaggerViewModelActivity<MainViewModel>(), DrawerLayoutController, CoroutineScope {
+class MainActivity : DaggerViewModelActivity<MainViewModel>(), DrawerLayoutController,
+    CoroutineScope {
 
     private val supervisorJob: CompletableDeferred<Any> = CompletableDeferred()
     override val coroutineContext: CoroutineContext get() = Dispatchers.Main + supervisorJob
@@ -75,8 +72,8 @@ class MainActivity : DaggerViewModelActivity<MainViewModel>(), DrawerLayoutContr
             )
         }
         viewModel.intent(
-            if (Manifest.permission.ACCESS_COARSE_LOCATION in grantedPermissions) LoadLocation
-            else PermissionDenied
+            if (Manifest.permission.ACCESS_COARSE_LOCATION in grantedPermissions) MainIntent.LoadLocation
+            else MainIntent.PermissionDenied
         )
     }
 }

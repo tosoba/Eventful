@@ -37,14 +37,16 @@ class FavouritesFragment : DaggerViewModelFragment<FavouritesViewModel>() {
         infiniteItemListController<Selectable<Event>>(
             epoxyThreads,
             emptyText = "No favourite events added yet",
-            loadMore = { lifecycleScope.launch { viewModel.intent(LoadFavourites) } }
+            loadMore = { lifecycleScope.launch { viewModel.intent(FavouritesIntent.LoadFavourites) } }
         ) { selectable ->
             selectable.listItem(
                 clicked = View.OnClickListener {
                     navigationFragment?.showFragment(fragmentFactory.eventFragment(selectable.item))
                 },
                 longClicked = View.OnLongClickListener {
-                    lifecycleScope.launch { viewModel.intent(EventLongClicked(selectable.item)) }
+                    lifecycleScope.launch {
+                        viewModel.intent(FavouritesIntent.EventLongClicked(selectable.item))
+                    }
                     true
                 }
             )
@@ -56,12 +58,15 @@ class FavouritesFragment : DaggerViewModelFragment<FavouritesViewModel>() {
             menuId = R.menu.favourites_events_selection_menu,
             itemClickedCallbacks = mapOf(
                 R.id.favourites_action_remove_favourite to {
-                    lifecycleScope.launch { viewModel.intent(RemoveFromFavouritesClicked) }
+                    lifecycleScope.launch {
+                        viewModel.intent(FavouritesIntent.RemoveFromFavouritesClicked)
+                    }
                     Unit
                 }
             ),
             onDestroyActionMode = {
-                lifecycleScope.launch { viewModel.intent(ClearSelectionClicked) }.let { Unit }
+                lifecycleScope.launch { viewModel.intent(FavouritesIntent.ClearSelectionClicked) }
+                Unit
             }
         )
     }

@@ -14,7 +14,7 @@ import com.example.core.util.Loading
 import com.example.core.util.ext.flatMapFirst
 import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.di.viewmodel.AssistedSavedStateViewModelFactory
-import com.example.coreandroid.util.*
+import com.example.coreandroid.util.addedToFavouritesMessage
 import com.squareup.inject.assisted.Assisted
 import com.squareup.inject.assisted.AssistedInject
 import kotlinx.coroutines.*
@@ -54,12 +54,14 @@ class NearbyViewModel @AssistedInject constructor(
 
     private val Flow<NearbyIntent>.updates: Flow<NearbyStateUpdate>
         get() = merge(
-            filterIsInstance<ClearSelectionClicked>().map { NearbyStateUpdate.ClearSelection },
-            filterIsInstance<EventLongClicked>()
+            filterIsInstance<NearbyIntent.ClearSelectionClicked>()
+                .map { NearbyStateUpdate.ClearSelection },
+            filterIsInstance<NearbyIntent.EventLongClicked>()
                 .map { NearbyStateUpdate.ToggleEventSelection(it.event) },
-            filterIsInstance<HideSnackbar>().map { NearbyStateUpdate.HideSnackbar },
-            filterIsInstance<LoadMoreResults>().loadMoreResultsUpdates,
-            filterIsInstance<AddToFavouritesClicked>().addToFavouritesUpdates
+            filterIsInstance<NearbyIntent.HideSnackbar>()
+                .map { NearbyStateUpdate.HideSnackbar },
+            filterIsInstance<NearbyIntent.LoadMoreResults>().loadMoreResultsUpdates,
+            filterIsInstance<NearbyIntent.AddToFavouritesClicked>().addToFavouritesUpdates
         )
 
     private val ConnectedStateProvider.updates: Flow<NearbyStateUpdate>
@@ -87,7 +89,7 @@ class NearbyViewModel @AssistedInject constructor(
             .filter { state.events.data.isEmpty() } //TODO: this won't work with refreshing with SwipeRefreshLayout
             .flatMapLatest { latLng -> loadingEventsUpdates(latLng) }
 
-    private val Flow<LoadMoreResults>.loadMoreResultsUpdates: Flow<NearbyStateUpdate>
+    private val Flow<NearbyIntent.LoadMoreResults>.loadMoreResultsUpdates: Flow<NearbyStateUpdate>
         get() = filterNot {
             val events = state.events
             events.status is Loading || !events.canLoadMore || events.data.isEmpty()
@@ -106,14 +108,14 @@ class NearbyViewModel @AssistedInject constructor(
         NearbyStateUpdate.Events.Loaded(resource)
     }.onStart<NearbyStateUpdate> { emit(NearbyStateUpdate.Events.Loading) }
 
-    private val Flow<AddToFavouritesClicked>.addToFavouritesUpdates: Flow<NearbyStateUpdate>
+    private val Flow<NearbyIntent.AddToFavouritesClicked>.addToFavouritesUpdates: Flow<NearbyStateUpdate>
         get() = map {
             val selectedEvents = state.events.data.filter { it.selected }.map { it.item }
             withContext(ioDispatcher) { saveEvents(selectedEvents) }
             signal(NearbySignal.FavouritesSaved)
             NearbyStateUpdate.Events.AddedToFavourites(
                 snackbarText = addedToFavouritesMessage(eventsCount = selectedEvents.size),
-                onSnackbarDismissed = { viewModelScope.launch { intent(HideSnackbar) } }
+                onSnackbarDismissed = { viewModelScope.launch { intent(NearbyIntent.HideSnackbar) } }
             )
         }
 }

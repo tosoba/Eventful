@@ -51,16 +51,20 @@ class MainViewModel @AssistedInject constructor(
     override val connectedStates: Flow<Boolean> get() = states.map { it.connected }
 
     override val locationStates: Flow<LocationState> get() = states.map { it.locationState }
-    override fun reloadLocation() = viewModelScope.launch { intent(ReloadLocation) }.let { Unit }
+    override fun reloadLocation() {
+        viewModelScope.launch { intent(MainIntent.ReloadLocation) }
+    }
 
     private val Flow<MainIntent>.updates: Flow<MainStateUpdate>
         get() = merge(
-            filterIsInstance<LoadLocation>().take(1).flatMapLatest { locationLoadingUpdates },
-            filterIsInstance<ReloadLocation>().reloadLocationUpdates,
-            filterIsInstance<PermissionDenied>().map { MainStateUpdate.Location.PermissionDenied }
+            filterIsInstance<MainIntent.LoadLocation>()
+                .take(1)
+                .flatMapLatest { locationLoadingUpdates },
+            filterIsInstance<MainIntent.ReloadLocation>().reloadLocationUpdates,
+            filterIsInstance<MainIntent.PermissionDenied>().map { MainStateUpdate.Location.PermissionDenied }
         )
 
-    private val Flow<ReloadLocation>.reloadLocationUpdates: Flow<MainStateUpdate>
+    private val Flow<MainIntent.ReloadLocation>.reloadLocationUpdates: Flow<MainStateUpdate>
         get() = filterNot { state.locationState.status is LocationStatus.Loading }
             .flatMapFirst { locationLoadingUpdates.onStart { emit(MainStateUpdate.Location.Reset) } }
 

@@ -26,7 +26,7 @@ class WeatherFragment : DaggerViewModelFragment<WeatherViewModel>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //TODO: move this logic to viewModel (inject latLng to VM through SavedStateHandle + create an event in case latLng == null)
-        latLng?.let { lifecycleScope.launch { viewModel.intent(LoadWeather(it)) } }
+        latLng?.let { lifecycleScope.launch { viewModel.intent(WeatherIntent.LoadWeather(it)) } }
     }
 
     override fun onCreateView(

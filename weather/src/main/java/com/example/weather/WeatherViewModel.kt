@@ -35,7 +35,7 @@ class WeatherViewModel @AssistedInject constructor(
     }
 
     override val updates: Flow<WeatherStateUpdate>
-        get() = intents.filterIsInstance<LoadWeather>()
+        get() = intents.filterIsInstance<WeatherIntent.LoadWeather>()
             .flatMapFirst { intent ->
                 flow<WeatherStateUpdate> {
                     emit(WeatherStateUpdate.Weather.Loading)

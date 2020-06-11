@@ -37,14 +37,16 @@ class NearbyFragment : DaggerViewModelFragment<NearbyViewModel>() {
         infiniteItemListController<Selectable<Event>>(
             epoxyThreads,
             emptyText = "No events found",
-            loadMore = { lifecycleScope.launch { viewModel.intent(LoadMoreResults) } }
+            loadMore = { lifecycleScope.launch { viewModel.intent(NearbyIntent.LoadMoreResults) } }
         ) { selectable ->
             selectable.listItem(
                 clicked = View.OnClickListener {
                     navigationFragment?.showFragment(fragmentFactory.eventFragment(selectable.item))
                 },
                 longClicked = View.OnLongClickListener {
-                    lifecycleScope.launch { viewModel.intent(EventLongClicked(selectable.item)) }
+                    lifecycleScope.launch {
+                        viewModel.intent(NearbyIntent.EventLongClicked(selectable.item))
+                    }
                     true
                 }
             )
@@ -56,11 +58,13 @@ class NearbyFragment : DaggerViewModelFragment<NearbyViewModel>() {
             menuId = R.menu.nearby_events_selection_menu,
             itemClickedCallbacks = mapOf(
                 R.id.nearby_action_add_favourite to {
-                    lifecycleScope.launch { viewModel.intent(AddToFavouritesClicked) }.let { Unit }
+                    lifecycleScope.launch { viewModel.intent(NearbyIntent.AddToFavouritesClicked) }
+                    Unit
                 }
             ),
             onDestroyActionMode = {
-                lifecycleScope.launch { viewModel.intent(ClearSelectionClicked) }.let { Unit }
+                lifecycleScope.launch { viewModel.intent(NearbyIntent.ClearSelectionClicked) }
+                Unit
             }
         )
     }

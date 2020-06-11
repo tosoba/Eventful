@@ -35,7 +35,7 @@ class EventViewModel @AssistedInject constructor(
 
     override val updates: Flow<EventStateUpdate>
         get() = merge(
-            intents.filterIsInstance<ToggleFavourite>()
+            intents.filterIsInstance<EventIntent.ToggleFavourite>()
                 .onEach {
                     viewModelScope.launch {
                         state.run {

@@ -6,7 +6,7 @@ import com.example.core.usecase.DeleteEvents
 import com.example.core.usecase.GetSavedEventsFlow
 import com.example.coreandroid.base.BaseViewModel
 import com.example.coreandroid.di.viewmodel.AssistedSavedStateViewModelFactory
-import com.example.coreandroid.util.*
+import com.example.coreandroid.util.removedFromFavouritesMessage
 import com.squareup.inject.assisted.Assisted
 import com.squareup.inject.assisted.AssistedInject
 import kotlinx.coroutines.*
@@ -32,18 +32,23 @@ class FavouritesViewModel @AssistedInject constructor(
         start()
     }
 
-    override val updates: Flow<FavouritesStateUpdate> get() = intents.onStart { emit(LoadFavourites) }.updates
+    override val updates: Flow<FavouritesStateUpdate>
+        get() = intents.onStart { emit(FavouritesIntent.LoadFavourites) }.updates
 
     private val Flow<FavouritesIntent>.updates: Flow<FavouritesStateUpdate>
         get() = merge(
-            filterIsInstance<LoadFavourites>().loadFavouritesUpdates,
-            filterIsInstance<EventLongClicked>().map { FavouritesStateUpdate.ToggleEventSelection(it.event) },
-            filterIsInstance<ClearSelectionClicked>().map { FavouritesStateUpdate.ClearSelection },
-            filterIsInstance<HideSnackbar>().map { FavouritesStateUpdate.HideSnackbar },
-            filterIsInstance<RemoveFromFavouritesClicked>().removeFromFavouritesUpdates
+            filterIsInstance<FavouritesIntent.LoadFavourites>().loadFavouritesUpdates,
+            filterIsInstance<FavouritesIntent.EventLongClicked>()
+                .map { FavouritesStateUpdate.ToggleEventSelection(it.event) },
+            filterIsInstance<FavouritesIntent.ClearSelectionClicked>()
+                .map { FavouritesStateUpdate.ClearSelection },
+            filterIsInstance<FavouritesIntent.HideSnackbar>()
+                .map { FavouritesStateUpdate.HideSnackbar },
+            filterIsInstance<FavouritesIntent.RemoveFromFavouritesClicked>()
+                .removeFromFavouritesUpdates
         )
 
-    private val Flow<LoadFavourites>.loadFavouritesUpdates: Flow<FavouritesStateUpdate>
+    private val Flow<FavouritesIntent.LoadFavourites>.loadFavouritesUpdates: Flow<FavouritesStateUpdate>
         get() = filterNot { state.events.limitHit }
             .flatMapLatest {
                 getSavedEventsFlow(state.limit + limitIncrement)
@@ -51,14 +56,16 @@ class FavouritesViewModel @AssistedInject constructor(
                     .map { events -> FavouritesStateUpdate.Events(events) }
             }
 
-    private val Flow<RemoveFromFavouritesClicked>.removeFromFavouritesUpdates: Flow<FavouritesStateUpdate>
+    private val Flow<FavouritesIntent.RemoveFromFavouritesClicked>.removeFromFavouritesUpdates: Flow<FavouritesStateUpdate>
         get() = map {
             val selectedEvents = state.events.data.filter { it.selected }.map { it.item }
             withContext(ioDispatcher) { deleteEvents(selectedEvents) }
             signal(FavouritesSignal.FavouritesRemoved)
             FavouritesStateUpdate.RemovedFromFavourites(
                 snackbarText = removedFromFavouritesMessage(eventsCount = selectedEvents.size),
-                onSnackbarDismissed = { viewModelScope.launch { intent(HideSnackbar) } }
+                onSnackbarDismissed = {
+                    viewModelScope.launch { intent(FavouritesIntent.HideSnackbar) }
+                }
             )
         }
 
