@@ -22,7 +22,7 @@ import kotlinx.coroutines.FlowPreview
 abstract class EventModule {
 
     @FragmentScoped
-    @ContributesAndroidInjector
+    @ContributesAndroidInjector(modules = [EventViewModelModule::class])
     abstract fun eventFragment(): EventFragment
 
     @Binds
@@ -32,7 +32,8 @@ abstract class EventModule {
         factory: EventViewModel.Factory
     ): AssistedSavedStateViewModelFactory<out ViewModel>
 
-    companion object {
+    @Module
+    object EventViewModelModule {
         @Provides
         fun eventViewModel(
             eventFragment: EventFragment,

@@ -22,7 +22,7 @@ import kotlinx.coroutines.FlowPreview
 abstract class NearbyModule {
 
     @FragmentScoped
-    @ContributesAndroidInjector
+    @ContributesAndroidInjector(modules = [NearbyViewModelModule::class])
     abstract fun nearbyFragment(): NearbyFragment
 
     @Binds
@@ -32,7 +32,8 @@ abstract class NearbyModule {
         factory: NearbyViewModel.Factory
     ): AssistedSavedStateViewModelFactory<out ViewModel>
 
-    companion object {
+    @Module
+    object NearbyViewModelModule {
         @Provides
         fun nearbyViewModel(
             nearbyFragment: NearbyFragment,

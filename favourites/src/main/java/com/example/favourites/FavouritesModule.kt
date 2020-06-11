@@ -22,7 +22,7 @@ import kotlinx.coroutines.FlowPreview
 abstract class FavouritesModule {
 
     @FragmentScoped
-    @ContributesAndroidInjector
+    @ContributesAndroidInjector(modules = [FavouritesViewModelModule::class])
     abstract fun favouritesFragment(): FavouritesFragment
 
     @Binds
@@ -32,7 +32,8 @@ abstract class FavouritesModule {
         factory: FavouritesViewModel.Factory
     ): AssistedSavedStateViewModelFactory<out ViewModel>
 
-    companion object {
+    @Module
+    object FavouritesViewModelModule {
         @Provides
         fun favouritesViewModel(
             favouritesFragment: FavouritesFragment,

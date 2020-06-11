@@ -22,7 +22,7 @@ import kotlinx.coroutines.FlowPreview
 abstract class SearchModule {
 
     @FragmentScoped
-    @ContributesAndroidInjector
+    @ContributesAndroidInjector(modules = [SearchViewModelModule::class])
     abstract fun searchFragment(): SearchFragment
 
     @Binds
@@ -32,7 +32,8 @@ abstract class SearchModule {
         factory: SearchViewModel.Factory
     ): AssistedSavedStateViewModelFactory<out ViewModel>
 
-    companion object {
+    @Module
+    object SearchViewModelModule {
         @Provides
         fun searchViewModel(
             searchFragment: SearchFragment,

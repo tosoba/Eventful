@@ -22,7 +22,7 @@ import kotlinx.coroutines.FlowPreview
 abstract class WeatherModule {
 
     @FragmentScoped
-    @ContributesAndroidInjector
+    @ContributesAndroidInjector(modules = [WeatherViewModelModule::class])
     abstract fun weatherFragment(): WeatherFragment
 
     @Binds
@@ -32,7 +32,8 @@ abstract class WeatherModule {
         factory: WeatherViewModel.Factory
     ): AssistedSavedStateViewModelFactory<out ViewModel>
 
-    companion object {
+    @Module
+    object WeatherViewModelModule {
         @Provides
         fun weatherViewModel(
             weatherFragment: WeatherFragment,

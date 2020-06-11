@@ -14,7 +14,6 @@ open class DaggerViewModelFragment<VM> : DaggerFragment {
 
     @Inject
     internal lateinit var viewModelProvider: Provider<VM>
-
     protected val viewModel: VM get() = viewModelProvider.get()
 }
 
