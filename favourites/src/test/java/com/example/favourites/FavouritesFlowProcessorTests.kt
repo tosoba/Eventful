@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.example.core.usecase.DeleteEvents
 import com.example.core.usecase.GetSavedEventsFlow
 import com.example.core.util.DataList
+import com.example.test.rule.event
 import com.example.test.rule.mockLog
 import io.mockk.every
 import io.mockk.mockk
@@ -16,6 +17,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Before
@@ -45,11 +47,13 @@ class FavouritesFlowProcessorTests {
     private fun flowProcessor(
         getSavedEventsFlow: GetSavedEventsFlow = mockk(relaxed = true),
         deleteEvents: DeleteEvents = mockk(relaxed = true),
-        ioDispatcher: CoroutineDispatcher = testDispatcher
+        ioDispatcher: CoroutineDispatcher = testDispatcher,
+        loadFavouritesOnStart: Boolean = false
     ): FavouritesFlowProcessor = FavouritesFlowProcessor(
         getSavedEventsFlow,
         deleteEvents,
-        ioDispatcher
+        ioDispatcher,
+        loadFavouritesOnStart
     )
 
     private fun FavouritesFlowProcessor.updates(
@@ -62,6 +66,10 @@ class FavouritesFlowProcessorTests {
         return updates(testScope, intents, currentState, intent, signal, savedStateHandle)
     }
 
+    fun loadFavouritesTest() {
+
+    }
+
     @Test
     fun loadFavouritesLimitHitTest() = testScope.runBlockingTest {
         val getSavedEventsFlow = mockk<GetSavedEventsFlow>(relaxed = true)
@@ -72,12 +80,25 @@ class FavouritesFlowProcessorTests {
 
         processor
             .updates(
-                intents = flowOf(),
+                intents = flowOf(FavouritesIntent.LoadFavourites),
                 currentState = currentState
             )
             .launchIn(testScope)
 
         verify(exactly = 1) { currentState() }
         verify(exactly = 0) { getSavedEventsFlow(any()) }
+    }
+
+    @Test
+    fun eventLongClickedTest() = testScope.runBlockingTest {
+        val processor = flowProcessor()
+        val event = event()
+
+        val updates = processor
+            .updates(intents = flowOf(FavouritesIntent.EventLongClicked(event)))
+            .toList()
+
+        assert(updates.size == 1)
+        assert(updates.first() == FavouritesStateUpdate.ToggleEventSelection(event))
     }
 }

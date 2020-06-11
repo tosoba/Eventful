@@ -13,7 +13,7 @@ import com.example.coreandroid.util.ToggleEventSelectionUpdate
 
 sealed class FavouritesStateUpdate :
     StateUpdate<FavouritesState> {
-    class ToggleEventSelection(
+    data class ToggleEventSelection(
         override val event: Event
     ) : FavouritesStateUpdate(),
         ToggleEventSelectionUpdate<FavouritesState>
@@ -27,7 +27,7 @@ sealed class FavouritesStateUpdate :
             .copyWithSnackbarState(snackbarState = SnackbarState.Hidden)
     }
 
-    class Events(private val events: List<IEvent>) : FavouritesStateUpdate() {
+    data class Events(private val events: List<IEvent>) : FavouritesStateUpdate() {
         override fun invoke(state: FavouritesState): FavouritesState = state.copy(
             events = DataList(
                 data = events.map {
@@ -42,7 +42,7 @@ sealed class FavouritesStateUpdate :
         )
     }
 
-    class RemovedFromFavourites(
+    data class RemovedFromFavourites(
         override val snackbarText: String,
         override val onSnackbarDismissed: () -> Unit
     ) : FavouritesStateUpdate(),

@@ -14,7 +14,8 @@ import javax.inject.Inject
 class FavouritesFlowProcessor @Inject constructor(
     private val getSavedEventsFlow: GetSavedEventsFlow,
     private val deleteEvents: DeleteEvents,
-    private val ioDispatcher: CoroutineDispatcher
+    private val ioDispatcher: CoroutineDispatcher,
+    private val loadFavouritesOnStart: Boolean = true
 ) : FlowProcessor<FavouritesIntent, FavouritesStateUpdate, FavouritesState, FavouritesSignal> {
 
     override fun updates(
@@ -24,7 +25,11 @@ class FavouritesFlowProcessor @Inject constructor(
         intent: suspend (FavouritesIntent) -> Unit,
         signal: suspend (FavouritesSignal) -> Unit,
         savedStateHandle: SavedStateHandle
-    ): Flow<FavouritesStateUpdate> = intents.onStart { emit(FavouritesIntent.LoadFavourites) }
+    ): Flow<FavouritesStateUpdate> = intents
+        .run {
+            if (loadFavouritesOnStart) onStart { emit(FavouritesIntent.LoadFavourites) }
+            else this
+        }
         .updates(coroutineScope, currentState, intent, signal)
 
     private fun Flow<FavouritesIntent>.updates(

@@ -1,6 +1,8 @@
 package com.example.favourites
 
 import androidx.lifecycle.ViewModel
+import com.example.core.usecase.DeleteEvents
+import com.example.core.usecase.GetSavedEventsFlow
 import com.example.coreandroid.base.savedStateViewModelFrom
 import com.example.coreandroid.di.scope.FragmentScoped
 import com.example.coreandroid.di.viewmodel.AssistedSavedStateViewModelFactory
@@ -12,6 +14,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.android.ContributesAndroidInjector
 import dagger.multibindings.IntoMap
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 
@@ -31,6 +34,19 @@ abstract class FavouritesModule {
     abstract fun favouritesViewModelFactory(
         factory: FavouritesViewModel.Factory
     ): AssistedSavedStateViewModelFactory<out ViewModel>
+
+    companion object {
+        @Provides
+        fun favouritesFlowProcessor(
+            getSavedEventsFlow: GetSavedEventsFlow,
+            deleteEvents: DeleteEvents,
+            ioDispatcher: CoroutineDispatcher
+        ): FavouritesFlowProcessor = FavouritesFlowProcessor(
+            getSavedEventsFlow,
+            deleteEvents,
+            ioDispatcher
+        )
+    }
 
     @Module
     object FavouritesViewModelModule {
