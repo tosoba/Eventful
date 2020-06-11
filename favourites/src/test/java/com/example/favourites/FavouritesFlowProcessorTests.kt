@@ -91,14 +91,23 @@ class FavouritesFlowProcessorTests {
 
     @Test
     fun eventLongClickedTest() = testScope.runBlockingTest {
-        val processor = flowProcessor()
         val event = event()
 
-        val updates = processor
+        val updates = flowProcessor()
             .updates(intents = flowOf(FavouritesIntent.EventLongClicked(event)))
             .toList()
 
         assert(updates.size == 1)
         assert(updates.first() == FavouritesStateUpdate.ToggleEventSelection(event))
+    }
+
+    @Test
+    fun clearSelectionTest() = testScope.runBlockingTest {
+        val updates = flowProcessor()
+            .updates(intents = flowOf(FavouritesIntent.ClearSelectionClicked))
+            .toList()
+
+        assert(updates.size == 1)
+        assert(updates.first() == FavouritesStateUpdate.ClearSelection)
     }
 }
