@@ -9,11 +9,14 @@ import androidx.cursoradapter.widget.CursorAdapter
 import kotlinx.android.synthetic.main.search_suggestion.view.*
 
 internal class SearchSuggestionsAdapter(
-    context: Context, cursor: Cursor?
+    context: Context,
+    cursor: Cursor?
 ) : CursorAdapter(context, cursor, false) {
 
     override fun newView(
-        context: Context, cursor: Cursor?, parent: ViewGroup
+        context: Context,
+        cursor: Cursor?,
+        parent: ViewGroup
     ): View? = cursor?.let {
         LayoutInflater.from(context).inflate(
             R.layout.search_suggestion, parent, false

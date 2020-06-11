@@ -1,14 +1,16 @@
 package com.example.favourites
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.SavedStateHandle
 import com.example.core.usecase.DeleteEvents
 import com.example.core.usecase.GetSavedEventsFlow
-import com.example.coreandroid.controller.SnackbarState
-import com.example.coreandroid.model.Event
 import com.example.core.util.Initial
 import com.example.core.util.LoadedSuccessfully
 import com.example.core.util.ext.takeWhileInclusive
+import com.example.coreandroid.controller.SnackbarState
+import com.example.coreandroid.model.Event
 import com.example.test.rule.event
+import com.example.test.rule.mockLog
 import com.example.test.rule.mockedList
 import com.example.test.rule.relaxedMockedList
 import com.google.android.material.snackbar.Snackbar
@@ -16,14 +18,11 @@ import io.mockk.called
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Before
@@ -48,12 +47,25 @@ internal class FavouritesViewModelTest {
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
+        mockLog()
     }
 
     @After
     fun cleanUp() {
         Dispatchers.resetMain()
     }
+
+    private fun favouritesViewModel(
+        getSavedEventsFlow: GetSavedEventsFlow = mockk(relaxed = true),
+        deleteEvents: DeleteEvents = mockk(relaxed = true),
+        ioDispatcher: CoroutineDispatcher = testDispatcher,
+        initialState: FavouritesState = FavouritesState()
+    ): FavouritesViewModel = FavouritesViewModel(
+        getSavedEventsFlow, deleteEvents, ioDispatcher,
+        SavedStateHandle(
+            mapOf("initialState" to initialState)
+        )
+    )
 
     @Test
     fun `GivenFavouritesVM WhenInitializedAndGetSavedEventsReturnsSuccessfully ThenEventsAreStored`() {
@@ -66,7 +78,7 @@ internal class FavouritesViewModelTest {
             val deleteEvents: DeleteEvents = mockk(relaxed = true)
 
             pauseDispatcher()
-            val viewModel = FavouritesViewModel(getSavedEventsFlow, deleteEvents, testDispatcher)
+            val viewModel = favouritesViewModel(getSavedEventsFlow, deleteEvents, testDispatcher)
             val states = viewModel.states
                 .onEach { if (it.events.status is Initial) resumeDispatcher() }
                 .takeWhileInclusive { it.events.status !is LoadedSuccessfully }
@@ -76,17 +88,17 @@ internal class FavouritesViewModelTest {
             assert(states.size == 2)
             val initialState = states.first()
             assert(
-                initialState.events.data.isEmpty()
-                        && initialState.events.status is Initial
-                        && initialState.limit == 0
-                        && !initialState.events.limitHit
+                initialState.events.data.isEmpty() &&
+                    initialState.events.status is Initial &&
+                    initialState.limit == 0 &&
+                    !initialState.events.limitHit
             )
             val loadedState = states.last()
             assert(
-                loadedState.events.data.size == initialEventsSize
-                        && loadedState.events.status is LoadedSuccessfully
-                        && loadedState.limit == initialEventsSize
-                        && !loadedState.events.limitHit
+                loadedState.events.data.size == initialEventsSize &&
+                    loadedState.events.status is LoadedSuccessfully &&
+                    loadedState.limit == initialEventsSize &&
+                    !loadedState.events.limitHit
             )
         }
     }
@@ -102,16 +114,16 @@ internal class FavouritesViewModelTest {
                 )
             }
             val deleteEvents: DeleteEvents = mockk(relaxed = true)
-            val viewModel = FavouritesViewModel(getSavedEventsFlow, deleteEvents, testDispatcher)
+            val viewModel = favouritesViewModel(getSavedEventsFlow, deleteEvents, testDispatcher)
 
-            viewModel.intent(LoadFavourites)
+            viewModel.intent(FavouritesIntent.LoadFavourites)
 
             // try load more after limit was hit
             val states = mutableListOf<FavouritesState>()
             launch {
                 viewModel.states.takeWhileInclusive { !it.events.limitHit }.toList(states)
             }
-            viewModel.intent(LoadFavourites)
+            viewModel.intent(FavouritesIntent.LoadFavourites)
 
             coVerify(exactly = 1) {
                 getSavedEventsFlow(initialEventsSize + FavouritesViewModel.limitIncrement)
@@ -121,10 +133,10 @@ internal class FavouritesViewModelTest {
             }
             val finalState = states.last()
             assert(
-                finalState.events.status is LoadedSuccessfully
-                        && finalState.events.data.size == initialEventsSize
-                        && finalState.limit == initialEventsSize
-                        && finalState.events.limitHit
+                finalState.events.status is LoadedSuccessfully &&
+                    finalState.events.data.size == initialEventsSize &&
+                    finalState.limit == initialEventsSize &&
+                    finalState.events.limitHit
             )
         }
     }
@@ -142,23 +154,23 @@ internal class FavouritesViewModelTest {
             }
             val deleteEvents: DeleteEvents = mockk(relaxed = true)
 
-            val viewModel = FavouritesViewModel(getSavedEventsFlow, deleteEvents, testDispatcher)
+            val viewModel = favouritesViewModel(getSavedEventsFlow, deleteEvents, testDispatcher)
 
             val states = mutableListOf<FavouritesState>()
             launch {
                 viewModel.states.takeWhileInclusive { it.limit != afterLoadMoreSize }.toList(states)
             }
-            viewModel.intent(LoadFavourites)
+            viewModel.intent(FavouritesIntent.LoadFavourites)
 
             coVerify(exactly = 1) {
                 getSavedEventsFlow(initialEventsSize + FavouritesViewModel.limitIncrement)
             }
             val finalState = states.last()
             assert(
-                finalState.events.status is LoadedSuccessfully
-                        && finalState.events.data.size == afterLoadMoreSize
-                        && finalState.limit == afterLoadMoreSize
-                        && !finalState.events.limitHit
+                finalState.events.status is LoadedSuccessfully &&
+                    finalState.events.data.size == afterLoadMoreSize &&
+                    finalState.limit == afterLoadMoreSize &&
+                    !finalState.events.limitHit
             )
         }
     }
@@ -171,12 +183,12 @@ internal class FavouritesViewModelTest {
                 coEvery { this@mockk(any()) } returns flowOf(eventsList)
             }
             val deleteEvents: DeleteEvents = mockk(relaxed = true)
-            val viewModel = FavouritesViewModel(getSavedEventsFlow, deleteEvents, testDispatcher)
+            val viewModel = favouritesViewModel(getSavedEventsFlow, deleteEvents, testDispatcher)
 
-            viewModel.intent(EventLongClicked(eventsList.first()))
+            viewModel.intent(FavouritesIntent.EventLongClicked(eventsList.first()))
             assert(viewModel.state.events.data.first().selected)
 
-            viewModel.intent(EventLongClicked(eventsList.first()))
+            viewModel.intent(FavouritesIntent.EventLongClicked(eventsList.first()))
             assert(!viewModel.state.events.data.first().selected)
         }
     }
@@ -189,11 +201,11 @@ internal class FavouritesViewModelTest {
                 coEvery { this@mockk(any()) } returns flowOf(eventsList)
             }
             val deleteEvents: DeleteEvents = mockk(relaxed = true)
-            val viewModel = FavouritesViewModel(getSavedEventsFlow, deleteEvents, testDispatcher)
+            val viewModel = favouritesViewModel(getSavedEventsFlow, deleteEvents, testDispatcher)
 
-            viewModel.intent(EventLongClicked(eventsList.first()))
-            viewModel.intent(EventLongClicked(eventsList.last()))
-            viewModel.intent(ClearSelectionClicked)
+            viewModel.intent(FavouritesIntent.EventLongClicked(eventsList.first()))
+            viewModel.intent(FavouritesIntent.EventLongClicked(eventsList.last()))
+            viewModel.intent(FavouritesIntent.ClearSelectionClicked)
 
             assert(!viewModel.state.events.data.any { it.selected })
         }
@@ -207,24 +219,24 @@ internal class FavouritesViewModelTest {
                 coEvery { this@mockk(any()) } returns flowOf(eventsList)
             }
             val deleteEvents: DeleteEvents = mockk(relaxed = true)
-            val viewModel = FavouritesViewModel(getSavedEventsFlow, deleteEvents, testDispatcher)
+            val viewModel = favouritesViewModel(getSavedEventsFlow, deleteEvents, testDispatcher)
 
             val signals = mutableListOf<FavouritesSignal>()
             launch {
                 viewModel.signals.take(1).toList(signals)
             }
 
-            viewModel.intent(EventLongClicked(eventsList.first()))
-            viewModel.intent(EventLongClicked(eventsList.last()))
-            viewModel.intent(RemoveFromFavouritesClicked)
+            viewModel.intent(FavouritesIntent.EventLongClicked(eventsList.first()))
+            viewModel.intent(FavouritesIntent.EventLongClicked(eventsList.last()))
+            viewModel.intent(FavouritesIntent.RemoveFromFavouritesClicked)
 
             coVerify(exactly = 1) { deleteEvents(listOf(eventsList.first(), eventsList.last())) }
             assert(signals.size == 1 && signals.first() == FavouritesSignal.FavouritesRemoved)
             val finalSnackbarState = viewModel.state.snackbarState
             assert(
-                finalSnackbarState is SnackbarState.Shown
-                        && finalSnackbarState.text == "2 events were removed from favourites"
-                        && finalSnackbarState.length == Snackbar.LENGTH_SHORT
+                finalSnackbarState is SnackbarState.Shown &&
+                    finalSnackbarState.text == "2 events were removed from favourites" &&
+                    finalSnackbarState.length == Snackbar.LENGTH_SHORT
             )
         }
     }

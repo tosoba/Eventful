@@ -1,10 +1,10 @@
 package com.example.search
 
 import com.example.core.model.search.SearchSuggestion
+import com.example.core.util.PagedDataList
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.model.Event
 import com.example.coreandroid.model.Selectable
-import com.example.core.util.PagedDataList
 import com.example.coreandroid.util.SelectableEventsSnackbarState
 
 data class SearchState(

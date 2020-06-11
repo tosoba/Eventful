@@ -20,7 +20,6 @@ import com.example.coreandroid.view.epoxy.kindsCarousel
 import com.example.event.databinding.FragmentEventDetailsBinding
 import kotlinx.android.synthetic.main.fragment_event_details.*
 
-
 class EventDetailsFragment : Fragment() {
 
     private var event: Event by FragmentArgument()
@@ -42,7 +41,9 @@ class EventDetailsFragment : Fragment() {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? = DataBindingUtil.inflate<FragmentEventDetailsBinding>(
         inflater, R.layout.fragment_event_details, container, false
     ).apply {

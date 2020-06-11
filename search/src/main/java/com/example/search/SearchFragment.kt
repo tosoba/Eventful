@@ -84,7 +84,9 @@ class SearchFragment : DaggerViewModelFragment<SearchViewModel>() {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_search, container, false).apply {
         this.search_events_recycler_view.onCreateControllerView(epoxyController, savedInstanceState)
     }

@@ -1,10 +1,10 @@
 package com.example.search
 
 import android.database.MatrixCursor
+import com.example.core.util.PagedDataList
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.model.Event
 import com.example.coreandroid.model.Selectable
-import com.example.core.util.PagedDataList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*

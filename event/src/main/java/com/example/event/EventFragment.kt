@@ -45,7 +45,8 @@ class EventFragment : DaggerViewModelFragment<EventViewModel>(), SnackbarControl
 
     private val eventViewPagerAdapter: PagerAdapter by lazy(LazyThreadSafetyMode.NONE) {
         TitledFragmentsPagerAdapter(
-            childFragmentManager, arrayOf(
+            childFragmentManager,
+            arrayOf(
                 "Details" to EventDetailsFragment.new(event),
                 "Weather" to WeatherFragment.new(event.venues?.firstOrNull()?.latLng)
             )
@@ -69,7 +70,9 @@ class EventFragment : DaggerViewModelFragment<EventViewModel>(), SnackbarControl
     private lateinit var snackbarStateChannel: SendChannel<SnackbarState>
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_event, container, false).apply {
         event_fab.setOnClickListener {
             lifecycleScope.launch { viewModel.intent(EventIntent.ToggleFavourite) }
@@ -82,6 +85,11 @@ class EventFragment : DaggerViewModelFragment<EventViewModel>(), SnackbarControl
         event_view_pager.offscreenPageLimit = 2
 
         snackbarStateChannel = handleSnackbarState(event_fab)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        snackbarStateChannel.close()
     }
 
     override fun onResume() {

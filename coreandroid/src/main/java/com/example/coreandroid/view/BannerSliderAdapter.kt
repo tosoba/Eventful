@@ -4,7 +4,6 @@ import androidx.annotation.DrawableRes
 import ss.com.bannerslider.adapters.SliderAdapter
 import ss.com.bannerslider.viewholder.ImageSlideViewHolder
 
-
 class BannerSliderAdapter(
     private val urls: Collection<String>,
     @DrawableRes private val placeHolder: Int,

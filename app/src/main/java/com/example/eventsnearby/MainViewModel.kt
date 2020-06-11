@@ -30,7 +30,9 @@ class MainViewModel @AssistedInject constructor(
     @Assisted private val savedStateHandle: SavedStateHandle
 ) : BaseViewModel<MainIntent, MainStateUpdate, MainState, Unit>(
     initialState = savedStateHandle["initialState"] ?: MainState()
-), ConnectedStateProvider, LocationStateProvider {
+),
+    ConnectedStateProvider,
+    LocationStateProvider {
 
     @AssistedInject.Factory
     interface Factory : AssistedSavedStateViewModelFactory<MainViewModel> {

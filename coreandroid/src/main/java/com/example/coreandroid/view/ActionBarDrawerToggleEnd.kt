@@ -10,7 +10,6 @@ import androidx.drawerlayout.widget.DrawerLayout
 import kotlin.math.max
 import kotlin.math.min
 
-
 class ActionBarDrawerToggleEnd(
     activity: Activity,
     private val drawerLayout: DrawerLayout,

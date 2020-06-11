@@ -10,7 +10,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import ss.com.bannerslider.Slider
 
-
 @ExperimentalCoroutinesApi
 @FlowPreview
 class EventfulApp : DaggerApplication() {

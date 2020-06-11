@@ -4,7 +4,6 @@ import android.widget.ImageView
 import com.bumptech.glide.Glide
 import ss.com.bannerslider.ImageLoadingService
 
-
 object BannerSliderImageLoadingService : ImageLoadingService {
     override fun loadImage(url: String, imageView: ImageView) {
         Glide.with(imageView).load(url).into(imageView)

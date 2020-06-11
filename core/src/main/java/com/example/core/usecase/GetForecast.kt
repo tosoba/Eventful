@@ -7,6 +7,7 @@ import javax.inject.Inject
 
 class GetForecast @Inject constructor(private val repo: IWeatherRepository) {
     suspend operator fun invoke(
-        lat: Double, lon: Double
+        lat: Double,
+        lon: Double
     ): Resource<Forecast> = repo.getForecast(lat, lon)
 }

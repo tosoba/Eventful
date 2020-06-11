@@ -1,7 +1,7 @@
 package com.example.core.usecase
 
-import com.example.core.model.Resource
 import com.example.core.model.PagedResult
+import com.example.core.model.Resource
 import com.example.core.model.event.IEvent
 import com.example.core.model.event.trimmedLowerCasedName
 import com.example.core.util.PagedDataList
@@ -33,9 +33,9 @@ class GetPagedEventsFlow @Inject constructor(private val dispatcher: CoroutineDi
                         totalPages = result.totalPages
                     )
                 }
-        } while (resource is Resource.Success<PagedResult<IEvent>>
-            && resource.data.items.isEmpty()
-            && page < currentEvents.limit
+        } while (resource is Resource.Success<PagedResult<IEvent>> &&
+            resource.data.items.isEmpty() &&
+            page < currentEvents.limit
         )
         emit(resource)
     }

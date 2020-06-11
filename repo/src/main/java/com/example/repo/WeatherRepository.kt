@@ -9,7 +9,8 @@ import com.haroldadmin.cnradapter.NetworkResponse
 class WeatherRepository(private val api: DarkSkyApi) : IWeatherRepository {
 
     override suspend fun getForecast(
-        lat: Double, lon: Double
+        lat: Double,
+        lon: Double
     ): Resource<Forecast> = when (val response = api.loadForecast(lat, lon).await()) {
         is NetworkResponse.Success -> Resource.Success(response.body)
         is NetworkResponse.ServerError -> Resource.Error(response.body)

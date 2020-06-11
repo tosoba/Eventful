@@ -65,7 +65,7 @@ fun Fragment.eventsSelectionActionModeController(
         }
     }
 
-    //TODO: replace this with DefaultLifecycleObserver
+    // TODO: replace this with DefaultLifecycleObserver
     lifecycle += object : LifecycleObserver {
         @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
         fun finishOnPause() {
@@ -75,4 +75,3 @@ fun Fragment.eventsSelectionActionModeController(
 
     return controller
 }
-

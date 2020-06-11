@@ -18,7 +18,8 @@ sealed class FavouritesStateUpdate :
     ) : FavouritesStateUpdate(),
         ToggleEventSelectionUpdate<FavouritesState>
 
-    object ClearSelection : FavouritesStateUpdate(),
+    object ClearSelection :
+        FavouritesStateUpdate(),
         ClearSelectionUpdate<FavouritesState>
 
     object HideSnackbar : FavouritesStateUpdate() {

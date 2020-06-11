@@ -22,7 +22,8 @@ sealed class SearchStateUpdate :
     ) : SearchStateUpdate(),
         ToggleEventSelectionUpdate<SearchState>
 
-    object ClearSelection : SearchStateUpdate(),
+    object ClearSelection :
+        SearchStateUpdate(),
         ClearSelectionUpdate<SearchState>
 
     object HideSnackbar : SearchStateUpdate() {

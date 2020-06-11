@@ -40,7 +40,8 @@ class MainFragment : DaggerFragment(), MenuController, SnackbarController {
 
     private val mainViewPagerAdapter: TitledFragmentsPagerAdapter by lazy(LazyThreadSafetyMode.NONE) {
         TitledFragmentsPagerAdapter(
-            childFragmentManager, arrayOf(
+            childFragmentManager,
+            arrayOf(
                 getString(R.string.nearby) to NearbyFragment(),
                 getString(R.string.search) to SearchFragment(),
                 getString(R.string.favourites) to FavouritesFragment()
@@ -59,7 +60,9 @@ class MainFragment : DaggerFragment(), MenuController, SnackbarController {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_main, container, false).apply {
         setupToolbar(main_toolbar)
         setupToolbarWithDrawerToggle(main_toolbar)

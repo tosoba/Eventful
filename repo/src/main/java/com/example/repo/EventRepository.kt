@@ -1,9 +1,9 @@
 package com.example.repo
 
-import com.example.core.model.Resource
 import com.example.core.model.PagedResult
-import com.example.core.model.search.SearchSuggestion
+import com.example.core.model.Resource
 import com.example.core.model.event.IEvent
+import com.example.core.model.search.SearchSuggestion
 import com.example.core.repo.IEventRepository
 import com.example.db.dao.EventDao
 import com.example.db.dao.SearchSuggestionDao
@@ -24,7 +24,9 @@ class EventRepository(
 ) : IEventRepository {
 
     override suspend fun getNearbyEvents(
-        lat: Double, lon: Double, offset: Int?
+        lat: Double,
+        lon: Double,
+        offset: Int?
     ): Resource<PagedResult<IEvent>> = ticketMasterApi.searchEvents(
         radius = DEFAULT_RADIUS,
         radiusUnit = RadiusUnit.KM,

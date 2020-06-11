@@ -17,7 +17,8 @@ class MainDispatcherRule : TestRule {
     private val mainThreadSurrogate = newSingleThreadContext("Main Thread")
 
     override fun apply(
-        base: Statement, description: Description?
+        base: Statement,
+        description: Description?
     ): Statement = AlteredStatement(base)
 
     inner class AlteredStatement(private val base: Statement) : Statement() {

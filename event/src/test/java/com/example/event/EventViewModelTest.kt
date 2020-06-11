@@ -1,12 +1,17 @@
 package com.example.event
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.SavedStateHandle
 import com.example.core.usecase.DeleteEvent
 import com.example.core.usecase.IsEventSavedFlow
 import com.example.core.usecase.SaveEvent
-import com.example.core.util.*
+import com.example.core.util.Data
+import com.example.core.util.Initial
+import com.example.core.util.LoadedSuccessfully
+import com.example.core.util.Loading
 import com.example.core.util.ext.takeWhileInclusive
 import com.example.test.rule.event
+import com.example.test.rule.mockLog
 import com.example.test.rule.onPausedDispatcher
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -32,12 +37,25 @@ internal class EventViewModelTest {
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
+        mockLog()
     }
 
     @After
     fun cleanUp() {
         Dispatchers.resetMain()
     }
+
+    private fun eventViewModel(
+        isEventSavedFlow: IsEventSavedFlow = mockk(relaxed = true),
+        saveEvent: SaveEvent = mockk(relaxed = true),
+        deleteEvent: DeleteEvent = mockk(relaxed = true),
+        initialState: EventState
+    ): EventViewModel = EventViewModel(
+        isEventSavedFlow,
+        saveEvent,
+        deleteEvent,
+        SavedStateHandle(mapOf("initialState" to initialState))
+    )
 
     @Test
     fun `GivenEventVM WhenInitialized IsFavouriteIsCalled`() = testScope.runBlockingTest {
@@ -48,16 +66,15 @@ internal class EventViewModelTest {
         val event = event()
 
         val states = onPausedDispatcher {
-            EventViewModel(
-                initialState = EventState(event,
+            eventViewModel(
+                initialState = EventState(
+                    event,
                     Data(
                         false,
                         Initial
                     )
                 ),
-                isEventSaved = isEventSavedFlow,
-                saveEvent = mockk(relaxed = true),
-                deleteEvent = mockk(relaxed = true)
+                isEventSavedFlow = isEventSavedFlow
             ).states
                 .takeWhileInclusive { it.isFavourite.status !is LoadedSuccessfully }
                 .toList()
@@ -78,21 +95,21 @@ internal class EventViewModelTest {
             val deleteEvent: DeleteEvent = mockk(relaxed = true)
             val event = event()
             val deletingEvent = CompletableDeferred<Unit>()
-            val viewModel = EventViewModel(
-                initialState = EventState(event,
+            val viewModel = eventViewModel(
+                initialState = EventState(
+                    event,
                     Data(
                         false,
                         Initial
                     )
                 ),
-                isEventSaved = mockk {
+                isEventSavedFlow = mockk {
                     coEvery { this@mockk(any()) } returns flow {
                         emit(true)
                         deletingEvent.await()
                         emit(false)
                     }
                 },
-                saveEvent = mockk(relaxed = true),
                 deleteEvent = deleteEvent
             )
 
@@ -107,7 +124,7 @@ internal class EventViewModelTest {
                 viewModel.signals.take(1).toList(signals)
             }
 
-            viewModel.intent(ToggleFavourite)
+            viewModel.intent(EventIntent.ToggleFavourite)
             deletingEvent.complete(Unit)
 
             coVerify(exactly = 1) { deleteEvent(event) }
@@ -116,12 +133,12 @@ internal class EventViewModelTest {
             assert(loadingState.isFavourite.status is Loading && loadingState.isFavourite.data)
             val stateAfterSaving = states.last()
             assert(
-                stateAfterSaving.isFavourite.status is LoadedSuccessfully
-                        && !stateAfterSaving.isFavourite.data
+                stateAfterSaving.isFavourite.status is LoadedSuccessfully &&
+                        !stateAfterSaving.isFavourite.data
             )
             assert(
-                signals.size == 1
-                        && signals.first() == EventSignal.FavouriteStateToggled(false)
+                signals.size == 1 &&
+                        signals.first() == EventSignal.FavouriteStateToggled(false)
             )
         }
     }
@@ -132,14 +149,15 @@ internal class EventViewModelTest {
             val saveEvent: SaveEvent = mockk(relaxed = true)
             val event = event()
             val savingEvent = CompletableDeferred<Unit>()
-            val viewModel = EventViewModel(
-                initialState = EventState(event,
+            val viewModel = eventViewModel(
+                initialState = EventState(
+                    event,
                     Data(
                         false,
                         Initial
                     )
                 ),
-                isEventSaved = mockk {
+                isEventSavedFlow = mockk {
                     coEvery { this@mockk(any()) } returns flow {
                         emit(false)
                         savingEvent.await()
@@ -161,7 +179,7 @@ internal class EventViewModelTest {
             launch {
                 viewModel.signals.take(1).toList(signals)
             }
-            viewModel.intent(ToggleFavourite)
+            viewModel.intent(EventIntent.ToggleFavourite)
             savingEvent.complete(Unit)
 
             coVerify(exactly = 1) { saveEvent(event) }
@@ -170,8 +188,8 @@ internal class EventViewModelTest {
             assert(loadingState.isFavourite.status is Loading && !loadingState.isFavourite.data)
             val stateAfterSaving = states.last()
             assert(
-                stateAfterSaving.isFavourite.status is LoadedSuccessfully
-                        && stateAfterSaving.isFavourite.data
+                stateAfterSaving.isFavourite.status is LoadedSuccessfully &&
+                        stateAfterSaving.isFavourite.data
             )
             assert(
                 signals.size == 1 &&

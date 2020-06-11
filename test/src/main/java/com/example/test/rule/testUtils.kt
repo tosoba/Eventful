@@ -1,7 +1,10 @@
 package com.example.test.rule
 
+import android.util.Log
 import com.example.coreandroid.model.Event
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineScope
 
@@ -34,4 +37,12 @@ inline fun <T> TestCoroutineScope.onPausedDispatcher(block: () -> T): T {
     val result = block()
     resumeDispatcher()
     return result
+}
+
+fun mockLog() {
+    mockkStatic(Log::class)
+    every { Log.v(any(), any()) } returns 0
+    every { Log.d(any(), any()) } returns 0
+    every { Log.i(any(), any()) } returns 0
+    every { Log.e(any(), any()) } returns 0
 }

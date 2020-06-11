@@ -15,10 +15,11 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
-
 @FlowPreview
 @ExperimentalCoroutinesApi
-class MainActivity : DaggerViewModelActivity<MainViewModel>(), DrawerLayoutController,
+class MainActivity :
+    DaggerViewModelActivity<MainViewModel>(),
+    DrawerLayoutController,
     CoroutineScope {
 
     private val supervisorJob: CompletableDeferred<Any> = CompletableDeferred()
@@ -28,7 +29,6 @@ class MainActivity : DaggerViewModelActivity<MainViewModel>(), DrawerLayoutContr
     private val drawerItemSelectedListener: NavigationView.OnNavigationItemSelectedListener =
         NavigationView.OnNavigationItemSelectedListener { item ->
             when (item.itemId) {
-
             }
             main_drawer_layout.closeDrawer(GravityCompat.END)
             true

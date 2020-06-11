@@ -15,7 +15,7 @@ interface DarkSkyApi {
         @Path("latitude") latitude: Double,
         @Path("longitude") longitude: Double,
         @Path("key") key: String = WeatherAuth.KEY,
-        @Query("units") units: String = "si", //TODO: move this to settings
+        @Query("units") units: String = "si", // TODO: move this to settings
         @Query("lang") language: String = Locale.getDefault().language,
         @Query("exclude") exclude: String = "flags"
     ): Deferred<NetworkResponse<Forecast, DarkSkyError>>

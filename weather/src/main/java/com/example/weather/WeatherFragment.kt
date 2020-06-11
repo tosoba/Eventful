@@ -25,14 +25,16 @@ class WeatherFragment : DaggerViewModelFragment<WeatherViewModel>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //TODO: move this logic to viewModel (inject latLng to VM through SavedStateHandle + create an event in case latLng == null)
+        // TODO: move this logic to viewModel (inject latLng to VM through SavedStateHandle + create an event in case latLng == null)
         latLng?.let { lifecycleScope.launch { viewModel.intent(WeatherIntent.LoadWeather(it)) } }
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_weather, container, false).apply {
-        //TODO: if latLng == null show some error that no venue is available for event...
+        // TODO: if latLng == null show some error that no venue is available for event...
         setupToolbarWithDrawerToggle(weather_toolbar)
     }
 

@@ -51,10 +51,12 @@ interface EventSelectionConfirmedUpdate<S : SelectableEventsSnackbarState<S>> : 
     ) { event -> event.copy(selected = false) }
 }
 
-fun addedToFavouritesMessage(eventsCount: Int): String = """$eventsCount
+fun addedToFavouritesMessage(eventsCount: Int): String =
+    """$eventsCount
             |${if (eventsCount > 1) " events were" else " event was"} 
             |added to favourites""".trimMargin().replace("\n", "")
 
-fun removedFromFavouritesMessage(eventsCount: Int): String = """$eventsCount
+fun removedFromFavouritesMessage(eventsCount: Int): String =
+    """$eventsCount
             |${if (eventsCount > 1) " events were" else " event was"} 
             |removed from favourites""".trimMargin().replace("\n", "")

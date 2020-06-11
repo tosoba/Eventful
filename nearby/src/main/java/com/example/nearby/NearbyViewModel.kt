@@ -86,7 +86,7 @@ class NearbyViewModel @AssistedInject constructor(
 
     private val LocationStateProvider.updates: Flow<NearbyStateUpdate>
         get() = locationStates.notNullLatLng
-            .filter { state.events.data.isEmpty() } //TODO: this won't work with refreshing with SwipeRefreshLayout
+            .filter { state.events.data.isEmpty() } // TODO: this won't work with refreshing with SwipeRefreshLayout
             .flatMapLatest { latLng -> loadingEventsUpdates(latLng) }
 
     private val Flow<NearbyIntent.LoadMoreResults>.loadMoreResultsUpdates: Flow<NearbyStateUpdate>

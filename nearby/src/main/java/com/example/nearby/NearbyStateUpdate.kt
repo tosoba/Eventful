@@ -22,7 +22,8 @@ sealed class NearbyStateUpdate :
     ) : NearbyStateUpdate(),
         ToggleEventSelectionUpdate<NearbyState>
 
-    object ClearSelection : NearbyStateUpdate(),
+    object ClearSelection :
+        NearbyStateUpdate(),
         ClearSelectionUpdate<NearbyState>
 
     object NoConnectionSnackbar : NearbyStateUpdate() {

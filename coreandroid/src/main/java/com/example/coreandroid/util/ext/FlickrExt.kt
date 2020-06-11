@@ -7,7 +7,10 @@ import com.flickr4java.flickr.photos.SearchParameters
 import com.google.android.gms.maps.model.LatLng
 
 fun Flickr.loadPhotosUrlsForLocation(
-    latLng: LatLng, searchText: String, numberOfPhotos: Int, size: PhotoSize
+    latLng: LatLng,
+    searchText: String,
+    numberOfPhotos: Int,
+    size: PhotoSize
 ): List<String> {
     fun searchParametersWith(accuracy: Int, searchText: String? = null) = SearchParameters().apply {
         latitude = latLng.latitude.toString()

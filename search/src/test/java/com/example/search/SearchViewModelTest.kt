@@ -1,6 +1,7 @@
 package com.example.search
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.SavedStateHandle
 import com.example.core.model.PagedResult
 import com.example.core.model.Resource
 import com.example.core.model.event.IEvent
@@ -14,10 +15,7 @@ import com.example.core.util.PagedDataList
 import com.example.core.util.ext.takeWhileInclusive
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.model.Selectable
-import com.example.test.rule.event
-import com.example.test.rule.mockedList
-import com.example.test.rule.onPausedDispatcher
-import com.example.test.rule.relaxedMockedList
+import com.example.test.rule.*
 import com.google.android.material.snackbar.Snackbar
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -49,6 +47,7 @@ internal class SearchViewModelTest {
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
+        mockLog()
     }
 
     @After
@@ -72,7 +71,7 @@ internal class SearchViewModelTest {
         saveSearchSuggestion = saveSearchSuggestion,
         connectedStateProvider = connectedStateProvider,
         ioDispatcher = testDispatcher,
-        initialState = initialState
+        savedStateHandle = SavedStateHandle(mapOf("initialState" to initialState))
     )
 
     @Test
@@ -173,49 +172,49 @@ internal class SearchViewModelTest {
                 initialSnackbarState
             ) = states.first()
             assert(
-                initialSearchText == initialState.searchText
-                        && initialSuggestions == initialState.searchSuggestions
-                        && initialEvents == initialState.events
-                        && initialSnackbarState == initialState.snackbarState
+                initialSearchText == initialState.searchText &&
+                    initialSuggestions == initialState.searchSuggestions &&
+                    initialEvents == initialState.events &&
+                    initialSnackbarState == initialState.snackbarState
             )
 
             val loadingState = states[1]
             assert(
-                loadingState.searchText == searchText
-                        && loadingState.searchSuggestions == initialState.searchSuggestions
-                        && loadingState.snackbarState == initialState.snackbarState
+                loadingState.searchText == searchText &&
+                    loadingState.searchSuggestions == initialState.searchSuggestions &&
+                    loadingState.snackbarState == initialState.snackbarState
             )
             assert(
-                loadingState.events.data.isEmpty()
-                        && loadingState.events.status is Loading
-                        && loadingState.events.offset == initialState.events.offset
-                        && loadingState.events.limit == initialState.events.limit
+                loadingState.events.data.isEmpty() &&
+                    loadingState.events.status is Loading &&
+                    loadingState.events.offset == initialState.events.offset &&
+                    loadingState.events.limit == initialState.events.limit
             )
 
             val loadedSuggestionsState = states[2]
             assert(
-                loadedSuggestionsState.searchText == searchText
-                        && loadedSuggestionsState.searchSuggestions.size == returnedSuggestionsListSize
-                        && loadedSuggestionsState.snackbarState == initialState.snackbarState
+                loadedSuggestionsState.searchText == searchText &&
+                    loadedSuggestionsState.searchSuggestions.size == returnedSuggestionsListSize &&
+                    loadedSuggestionsState.snackbarState == initialState.snackbarState
             )
             assert(
-                loadedSuggestionsState.events.data.isEmpty()
-                        && loadedSuggestionsState.events.status is Loading
-                        && loadedSuggestionsState.events.offset == initialState.events.offset
-                        && loadedSuggestionsState.events.limit == initialState.events.limit
+                loadedSuggestionsState.events.data.isEmpty() &&
+                    loadedSuggestionsState.events.status is Loading &&
+                    loadedSuggestionsState.events.offset == initialState.events.offset &&
+                    loadedSuggestionsState.events.limit == initialState.events.limit
             )
 
             val loadedEventsState = states.last()
             assert(
-                loadedEventsState.searchText == searchText
-                        && loadedEventsState.searchSuggestions.size == returnedSuggestionsListSize
-                        && loadedEventsState.snackbarState == initialState.snackbarState
+                loadedEventsState.searchText == searchText &&
+                    loadedEventsState.searchSuggestions.size == returnedSuggestionsListSize &&
+                    loadedEventsState.snackbarState == initialState.snackbarState
             )
             assert(
-                loadedEventsState.events.data.size == returnedEventsListSize
-                        && loadedEventsState.events.status is LoadedSuccessfully
-                        && loadedEventsState.events.offset == currentPage + 1
-                        && loadedEventsState.events.limit == totalPages
+                loadedEventsState.events.data.size == returnedEventsListSize &&
+                    loadedEventsState.events.status is LoadedSuccessfully &&
+                    loadedEventsState.events.offset == currentPage + 1 &&
+                    loadedEventsState.events.limit == totalPages
             )
         }
     }
@@ -287,11 +286,11 @@ internal class SearchViewModelTest {
             coVerify(exactly = 1) { searchEvents(searchText, 1) }
             val (finalSearchText, _, finalEvents, _) = viewModel.state
             assert(
-                finalSearchText == searchText
-                        && !finalEvents.canLoadMore
-                        && finalEvents.offset == totalPages
-                        && finalEvents.status is LoadedSuccessfully
-                        && finalEvents.data.size == returnedEventsListSize * 2
+                finalSearchText == searchText &&
+                    !finalEvents.canLoadMore &&
+                    finalEvents.offset == totalPages &&
+                    finalEvents.status is LoadedSuccessfully &&
+                    finalEvents.data.size == returnedEventsListSize * 2
             )
         }
     }
@@ -357,9 +356,9 @@ internal class SearchViewModelTest {
             val (_, _, finalEvents, finalSnackbarState) = viewModel.state
             assert(!finalEvents.data.any { it.selected })
             assert(
-                finalSnackbarState is SnackbarState.Shown
-                        && finalSnackbarState.text == "2 events were added to favourites"
-                        && finalSnackbarState.length == Snackbar.LENGTH_SHORT
+                finalSnackbarState is SnackbarState.Shown &&
+                    finalSnackbarState.text == "2 events were added to favourites" &&
+                    finalSnackbarState.length == Snackbar.LENGTH_SHORT
             )
             assert(signals.size == 1 && signals.first() == SearchSignal.FavouritesSaved)
         }
