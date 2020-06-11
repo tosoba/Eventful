@@ -7,7 +7,7 @@ import dagger.android.support.DaggerAppCompatActivity
 import javax.inject.Inject
 import javax.inject.Provider
 
-open class DaggerViewModelActivity<VM> : DaggerAppCompatActivity {
+open class DaggerViewModelActivity<VM : ViewModel> : DaggerAppCompatActivity {
     constructor() : super()
     constructor(contentLayoutId: Int) : super(contentLayoutId)
 

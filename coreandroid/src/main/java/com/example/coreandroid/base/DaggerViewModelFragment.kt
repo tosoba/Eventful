@@ -8,7 +8,7 @@ import dagger.android.support.DaggerFragment
 import javax.inject.Inject
 import javax.inject.Provider
 
-open class DaggerViewModelFragment<VM> : DaggerFragment {
+open class DaggerViewModelFragment<VM : ViewModel> : DaggerFragment {
     constructor() : super()
     constructor(contentLayoutId: Int) : super(contentLayoutId)
 
