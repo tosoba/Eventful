@@ -13,9 +13,10 @@ import kotlinx.coroutines.flow.*
 
 @FlowPreview
 @ExperimentalCoroutinesApi
-abstract class BaseViewModel<Intent : Any, State : Any, Signal : Any>(
-    initialState: State
+abstract class BaseViewModel<Intent : Any, Update : StateUpdate<State>, State : Any, Signal : Any>(
+    private val initialState: State
 ) : ViewModel() {
+
     private val _signals: BroadcastChannel<Signal> = BroadcastChannel(Channel.BUFFERED)
     val signals: Flow<Signal> get() = _signals.asFlow()
     protected suspend fun signal(signal: Signal) = _signals.send(signal)
@@ -30,19 +31,20 @@ abstract class BaseViewModel<Intent : Any, State : Any, Signal : Any>(
         protected set(value) = value.let { _states.value = it }
         get() = _states.value
 
-    override fun onCleared() {
-        _intents.close()
-        _signals.close()
-        super.onCleared()
-    }
+    protected abstract val updates: Flow<Update>
 
-    protected fun <Update : StateUpdate<State>> Flow<Update>.applyToState(
-        initialState: State
-    ): Job = onEach { Log.e("UPDATE", it.toString()) }
+    protected fun start(): Job = updates
+        .onEach { Log.e("UPDATE", it.toString()) }
         .scan(initialState) { state, update -> update(state) }
         .onEach {
             Log.e("STATE", it.toString())
             state = it
         }
         .launchIn(viewModelScope)
+
+    override fun onCleared() {
+        _intents.close()
+        _signals.close()
+        super.onCleared()
+    }
 }
