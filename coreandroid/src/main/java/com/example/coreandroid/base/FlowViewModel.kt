@@ -37,6 +37,7 @@ abstract class FlowViewModel<Intent : Any, Update : StateUpdate<State>, State : 
                 coroutineScope = viewModelScope,
                 intents = _intents.asFlow(),
                 currentState = states::value,
+                states = states,
                 intent = ::intent,
                 signal = _signals::send,
                 savedStateHandle = savedStateHandle

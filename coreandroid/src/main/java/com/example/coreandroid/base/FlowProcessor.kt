@@ -5,6 +5,7 @@ import com.example.coreandroid.util.StateUpdate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 @ExperimentalCoroutinesApi
 interface FlowProcessor<Intent : Any, Update : StateUpdate<State>, State : Any, Signal : Any> {
@@ -12,6 +13,7 @@ interface FlowProcessor<Intent : Any, Update : StateUpdate<State>, State : Any, 
         coroutineScope: CoroutineScope,
         intents: Flow<Intent>,
         currentState: () -> State,
+        states: StateFlow<State>,
         intent: suspend (Intent) -> Unit,
         signal: suspend (Signal) -> Unit,
         savedStateHandle: SavedStateHandle

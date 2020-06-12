@@ -7,11 +7,10 @@ import com.example.coreandroid.base.FlowProcessor
 import com.example.coreandroid.util.removedFromFavouritesMessage
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import javax.inject.Inject
 
 @FlowPreview
 @ExperimentalCoroutinesApi
-class FavouritesFlowProcessor @Inject constructor(
+class FavouritesFlowProcessor(
     private val getSavedEventsFlow: GetSavedEventsFlow,
     private val deleteEvents: DeleteEvents,
     private val ioDispatcher: CoroutineDispatcher,
@@ -22,6 +21,7 @@ class FavouritesFlowProcessor @Inject constructor(
         coroutineScope: CoroutineScope,
         intents: Flow<FavouritesIntent>,
         currentState: () -> FavouritesState,
+        states: StateFlow<FavouritesState>,
         intent: suspend (FavouritesIntent) -> Unit,
         signal: suspend (FavouritesSignal) -> Unit,
         savedStateHandle: SavedStateHandle
