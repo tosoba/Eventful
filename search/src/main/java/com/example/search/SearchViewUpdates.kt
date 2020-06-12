@@ -12,8 +12,9 @@ import kotlinx.coroutines.flow.*
 internal sealed class SearchViewUpdate {
     data class Events(val events: PagedDataList<Selectable<Event>>) : SearchViewUpdate()
     data class Snackbar(val state: SnackbarState) : SearchViewUpdate()
-    data class ActionMode(val numberOfSelectedEvents: Int) : SearchViewUpdate()
+    data class UpdateActionMode(val numberOfSelectedEvents: Int) : SearchViewUpdate()
     data class SwapCursor(val cursor: MatrixCursor) : SearchViewUpdate()
+    object FinishActionMode : SearchViewUpdate()
 }
 
 @ExperimentalCoroutinesApi
@@ -28,7 +29,7 @@ internal val SearchViewModel.viewUpdates: Flow<SearchViewUpdate>
             .map { SearchViewUpdate.Snackbar(it) },
         states.map { state -> state.events.data.count { it.selected } }
             .distinctUntilChanged()
-            .map { SearchViewUpdate.ActionMode(it) },
+            .map { SearchViewUpdate.UpdateActionMode(it) },
         states.map { it.searchSuggestions to it.searchText }
             .filter { (suggestions, _) -> suggestions.isNotEmpty() }
             .distinctUntilChanged()
@@ -41,5 +42,7 @@ internal val SearchViewModel.viewUpdates: Flow<SearchViewUpdate>
                                 .forEach { addRow(arrayOf(it.id, it.searchText, it.timestampMs)) }
                         }
                 )
-            }
+            },
+        signals.filterIsInstance<SearchSignal.FavouritesSaved>()
+            .map { SearchViewUpdate.FinishActionMode }
     )

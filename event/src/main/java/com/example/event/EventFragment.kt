@@ -8,7 +8,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.PagerAdapter
-import com.example.core.util.LoadedSuccessfully
 import com.example.coreandroid.base.DaggerViewModelFragment
 import com.example.coreandroid.base.HasArgs
 import com.example.coreandroid.controller.SnackbarController
@@ -30,9 +29,7 @@ import kotlinx.android.synthetic.main.fragment_event.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
@@ -95,20 +92,13 @@ class EventFragment : DaggerViewModelFragment<EventViewModel>(), SnackbarControl
     override fun onResume() {
         super.onResume()
 
-        viewModel.states
-            .map { it.isFavourite }
-            .distinctUntilChanged()
-            .onEach { (isFavourite, status) ->
-                when (status) {
-                    is LoadedSuccessfully -> event_fab?.updateDrawable(isFavourite)
-                }
-            }
-            .launchIn(lifecycleScope)
-
-        viewModel.signals
+        viewModel.viewUpdates
             .onEach {
-                if (it is EventSignal.FavouriteStateToggled) {
-                    transitionToSnackbarState(
+                when (it) {
+                    is EventViewUpdate.FloatingActionButtonDrawable -> event_fab?.updateDrawable(
+                        it.isFavourite
+                    )
+                    is EventViewUpdate.FavouriteStatusSnackbar -> transitionToSnackbarState(
                         SnackbarState.Shown(
                             text = if (it.isFavourite) "Event was added to favourites"
                             else "Event was removed from favourites",

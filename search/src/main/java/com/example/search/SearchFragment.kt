@@ -100,15 +100,10 @@ class SearchFragment : DaggerViewModelFragment<SearchViewModel>() {
                 when (it) {
                     is SearchViewUpdate.Events -> epoxyController.setData(it.events)
                     is SearchViewUpdate.Snackbar -> snackbarController?.transitionToSnackbarState(it.state)
-                    is SearchViewUpdate.ActionMode -> actionModeController.update(it.numberOfSelectedEvents)
+                    is SearchViewUpdate.UpdateActionMode -> actionModeController.update(it.numberOfSelectedEvents)
                     is SearchViewUpdate.SwapCursor -> searchSuggestionsAdapter.swapCursor(it.cursor)
+                    is SearchViewUpdate.FinishActionMode -> actionModeController.finish(false)
                 }
-            }
-            .launchIn(lifecycleScope)
-
-        viewModel.signals
-            .onEach {
-                if (it is SearchSignal.FavouritesSaved) actionModeController.finish(false)
             }
             .launchIn(lifecycleScope)
     }

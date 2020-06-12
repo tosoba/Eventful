@@ -16,9 +16,7 @@ import kotlinx.android.synthetic.main.fragment_favourites.*
 import kotlinx.android.synthetic.main.fragment_favourites.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -88,31 +86,17 @@ class FavouritesFragment : DaggerViewModelFragment<FavouritesViewModel>() {
 
     override fun onResume() {
         super.onResume()
-
         activity?.invalidateOptionsMenu()
 
-        viewModel.states
-            .map { it.events }
-            .distinctUntilChanged()
-            .onEach { epoxyController.setData(it) }
-            .launchIn(lifecycleScope)
-
-        viewModel.states
-            .map { state -> state.events.data.count { it.selected } }
-            .distinctUntilChanged()
-            .onEach { actionModeController.update(it) }
-            .launchIn(lifecycleScope)
-
-        viewModel.states
-            .map { it.snackbarState }
-            .distinctUntilChanged()
-            .onEach { snackbarController?.transitionToSnackbarState(it) }
-            .launchIn(lifecycleScope)
-
-        viewModel.signals
+        viewModel.viewUpdates
             .onEach {
-                if (it is FavouritesSignal.FavouritesRemoved) {
-                    actionModeController.finish(false)
+                when (it) {
+                    is FavouritesViewUpdate.Events -> epoxyController.setData(it.events)
+                    is FavouritesViewUpdate.Snackbar -> snackbarController?.transitionToSnackbarState(
+                        it.state
+                    )
+                    is FavouritesViewUpdate.UpdateActionMode -> actionModeController.update(it.numberOfSelectedEvents)
+                    is FavouritesViewUpdate.FinishActionMode -> actionModeController.finish(false)
                 }
             }
             .launchIn(lifecycleScope)
