@@ -27,13 +27,13 @@ class WeatherFlowProcessor @Inject constructor(
         signal: suspend (Unit) -> Unit,
         savedStateHandle: SavedStateHandle
     ): Flow<WeatherStateUpdate> = intents.filterIsInstance<WeatherIntent.LoadWeather>()
-        .flatMapFirst { (latLng) ->
+        .flatMapFirst {
             flow<WeatherStateUpdate> {
                 emit(WeatherStateUpdate.Weather.Loading)
                 val resource = withContext(ioDispatcher) {
                     getForecast(
-                        lat = latLng.latitude,
-                        lon = latLng.longitude
+                        lat = it.latLng.latitude,
+                        lon = it.latLng.longitude
                     )
                 }
                 emit(WeatherStateUpdate.Weather.Loaded(resource))
