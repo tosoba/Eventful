@@ -8,6 +8,8 @@
     <string name="unable_to_retrieve_location">Unable to retrieve location.</string>
     <string name="unknown_network_error">Unknown network error.</string>
 
+    <string name="no_events_found">No events found.</string>
+
     <string name="favourite">favourite</string>
     <string name="clear">Clear</string>
     <string name="delete">delete</string>

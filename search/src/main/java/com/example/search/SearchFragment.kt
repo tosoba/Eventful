@@ -6,15 +6,8 @@ import android.view.*
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.lifecycleScope
-import com.example.coreandroid.base.DaggerViewModelFragment
-import com.example.coreandroid.controller.eventsSelectionActionModeController
-import com.example.coreandroid.model.Event
-import com.example.coreandroid.model.Selectable
-import com.example.coreandroid.navigation.IFragmentFactory
-import com.example.coreandroid.util.EpoxyThreads
+import com.example.coreandroid.base.SelectableEventListFragment
 import com.example.coreandroid.util.ext.*
-import com.example.coreandroid.util.infiniteItemListController
-import com.example.coreandroid.view.epoxy.listItem
 import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.fragment_search.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -23,71 +16,30 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import reactivecircus.flowbinding.appcompat.QueryTextEvent
 import reactivecircus.flowbinding.appcompat.queryTextEvents
-import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class SearchFragment : DaggerViewModelFragment<SearchViewModel>() {
-
-    @Inject
-    internal lateinit var fragmentFactory: IFragmentFactory
-
-    @Inject
-    internal lateinit var epoxyThreads: EpoxyThreads
-
-    private val epoxyController by lazy(LazyThreadSafetyMode.NONE) {
-        infiniteItemListController<Selectable<Event>>(
-            epoxyThreads,
-            emptyText = "No events found",
-            loadMore = { lifecycleScope.launch { viewModel.intent(SearchIntent.LoadMoreResults) } }
-        ) { selectable ->
-            selectable.listItem(
-                clicked = View.OnClickListener {
-                    navigationFragment?.showFragment(fragmentFactory.eventFragment(selectable.item))
-                },
-                longClicked = View.OnLongClickListener {
-                    lifecycleScope.launch {
-                        viewModel.intent(SearchIntent.EventLongClicked(selectable.item))
-                    }
-                    true
-                }
-            )
-        }
-    }
-
-    private val actionModeController by lazy(LazyThreadSafetyMode.NONE) {
-        eventsSelectionActionModeController(
-            menuId = R.menu.search_events_selection_menu,
-            itemClickedCallbacks = mapOf(
-                R.id.search_action_add_favourite to {
-                    lifecycleScope.launch { viewModel.intent(SearchIntent.AddToFavouritesClicked) }
-                    Unit
-                }
-            ),
-            onDestroyActionMode = {
-                lifecycleScope.launch { viewModel.intent(SearchIntent.ClearSelectionClicked) }
-                Unit
-            }
-        )
-    }
-
+class SearchFragment : SelectableEventListFragment<SearchIntent, SearchViewModel>(
+    layoutRes = R.layout.fragment_search,
+    menuRes = R.menu.search_events_selection_menu,
+    emptyListTextRes = R.string.no_events_found,
+    selectionConfirmedActionId = R.id.search_action_add_favourite,
+    loadMoreResultsIntent = SearchIntent.LoadMoreResults,
+    selectionConfirmedIntent = SearchIntent.AddToFavouritesClicked,
+    clearSelectionIntent = SearchIntent.ClearSelectionClicked,
+    eventSelectedIntent = { SearchIntent.EventLongClicked(it) }
+) {
     private val searchSuggestionsAdapter by lazy(LazyThreadSafetyMode.NONE) {
         SearchSuggestionsAdapter(requireContext(), null)
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_search, container, false).apply {
+    ): View? = super.onCreateView(inflater, container, savedInstanceState)?.apply {
         this.search_events_recycler_view.onCreateControllerView(epoxyController, savedInstanceState)
     }
 
