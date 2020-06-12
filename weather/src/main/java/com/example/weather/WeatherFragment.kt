@@ -4,8 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.coreandroid.base.DaggerViewModelFragment
+import com.example.coreandroid.util.delegate.NullableFragmentArg
 import com.example.coreandroid.util.delegate.NullableFragmentArgument
 import com.example.coreandroid.util.ext.setupToolbar
 import com.example.coreandroid.util.ext.setupToolbarWithDrawerToggle
@@ -16,12 +18,16 @@ import kotlinx.android.synthetic.main.fragment_weather.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.launch
+import javax.inject.Inject
+import javax.inject.Provider
 
 @FlowPreview
 @ExperimentalCoroutinesApi
-class WeatherFragment : DaggerViewModelFragment<WeatherViewModel>() {
+class WeatherFragment @Inject constructor(
+    viewModelProvider: Provider<WeatherViewModel>
+) : DaggerViewModelFragment<WeatherViewModel>(viewModelProvider, R.layout.fragment_weather) {
 
-    private var latLng: LatLng? by NullableFragmentArgument()
+    private val latLng: LatLng? by NullableFragmentArg()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +39,7 @@ class WeatherFragment : DaggerViewModelFragment<WeatherViewModel>() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_weather, container, false).apply {
+    ): View? = super.onCreateView(inflater, container, savedInstanceState).apply {
         // TODO: if latLng == null show some error that no venue is available for event...
         setupToolbarWithDrawerToggle(weather_toolbar)
     }
@@ -43,12 +49,6 @@ class WeatherFragment : DaggerViewModelFragment<WeatherViewModel>() {
         weather_toolbar?.let {
             setupToolbar(it)
             showBackNavArrow()
-        }
-    }
-
-    companion object {
-        fun new(latLng: LatLng?): WeatherFragment = WeatherFragment().apply {
-            this.latLng = latLng
         }
     }
 }

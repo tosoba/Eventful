@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.*
 import androidx.lifecycle.lifecycleScope
 import com.example.coreandroid.base.SelectableEventListFragment
+import com.example.coreandroid.navigation.EventFragmentClassProvider
+import com.example.coreandroid.util.EpoxyThreads
 import com.example.coreandroid.util.ext.*
 import kotlinx.android.synthetic.main.fragment_nearby.*
 import kotlinx.android.synthetic.main.fragment_nearby.view.*
@@ -11,18 +13,27 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import javax.inject.Inject
+import javax.inject.Provider
 
 @FlowPreview
 @ExperimentalCoroutinesApi
-class NearbyFragment : SelectableEventListFragment<NearbyIntent, NearbyViewModel>(
+class NearbyFragment @Inject constructor(
+    viewModelProvider: Provider<NearbyViewModel>,
+    epoxyThreads: EpoxyThreads,
+    fragmentClassProvider: EventFragmentClassProvider
+) : SelectableEventListFragment<NearbyIntent, NearbyViewModel>(
+    viewModelProvider = viewModelProvider,
     layoutRes = R.layout.fragment_nearby,
     menuRes = R.menu.nearby_events_selection_menu,
-    emptyListTextRes = R.string.no_events_found,
     selectionConfirmedActionId = R.id.nearby_action_add_favourite,
+    emptyListTextRes = R.string.no_events_found,
     loadMoreResultsIntent = NearbyIntent.LoadMoreResults,
     selectionConfirmedIntent = NearbyIntent.AddToFavouritesClicked,
     clearSelectionIntent = NearbyIntent.ClearSelectionClicked,
-    eventSelectedIntent = { NearbyIntent.EventLongClicked(it) }
+    eventSelectedIntent = { NearbyIntent.EventLongClicked(it) },
+    epoxyThreads = epoxyThreads,
+    fragmentClassProvider = fragmentClassProvider
 ) {
     override fun onCreateView(
         inflater: LayoutInflater,

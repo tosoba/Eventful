@@ -7,6 +7,8 @@ import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.lifecycleScope
 import com.example.coreandroid.base.SelectableEventListFragment
+import com.example.coreandroid.navigation.EventFragmentClassProvider
+import com.example.coreandroid.util.EpoxyThreads
 import com.example.coreandroid.util.ext.*
 import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.fragment_search.view.*
@@ -18,18 +20,27 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import reactivecircus.flowbinding.appcompat.QueryTextEvent
 import reactivecircus.flowbinding.appcompat.queryTextEvents
+import javax.inject.Inject
+import javax.inject.Provider
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class SearchFragment : SelectableEventListFragment<SearchIntent, SearchViewModel>(
+class SearchFragment @Inject constructor(
+    viewModelProvider: Provider<SearchViewModel>,
+    epoxyThreads: EpoxyThreads,
+    fragmentClassProvider: EventFragmentClassProvider
+) : SelectableEventListFragment<SearchIntent, SearchViewModel>(
+    viewModelProvider = viewModelProvider,
     layoutRes = R.layout.fragment_search,
     menuRes = R.menu.search_events_selection_menu,
-    emptyListTextRes = R.string.no_events_found,
     selectionConfirmedActionId = R.id.search_action_add_favourite,
+    emptyListTextRes = R.string.no_events_found,
     loadMoreResultsIntent = SearchIntent.LoadMoreResults,
     selectionConfirmedIntent = SearchIntent.AddToFavouritesClicked,
     clearSelectionIntent = SearchIntent.ClearSelectionClicked,
-    eventSelectedIntent = { SearchIntent.EventLongClicked(it) }
+    eventSelectedIntent = { SearchIntent.EventLongClicked(it) },
+    epoxyThreads = epoxyThreads,
+    fragmentClassProvider = fragmentClassProvider
 ) {
     private val searchSuggestionsAdapter by lazy(LazyThreadSafetyMode.NONE) {
         SearchSuggestionsAdapter(requireContext(), null)

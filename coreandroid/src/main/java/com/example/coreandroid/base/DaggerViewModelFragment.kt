@@ -5,15 +5,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.coreandroid.di.viewmodel.InjectingSavedStateViewModelFactory
 import dagger.android.support.DaggerFragment
-import javax.inject.Inject
 import javax.inject.Provider
 
 open class DaggerViewModelFragment<VM : ViewModel> : DaggerFragment {
-    constructor() : super()
-    constructor(contentLayoutId: Int) : super(contentLayoutId)
+    private val viewModelProvider: Provider<VM>
 
-    @Inject
-    internal lateinit var viewModelProvider: Provider<VM>
+    constructor(viewModelProvider: Provider<VM>) : super() {
+        this.viewModelProvider = viewModelProvider
+    }
+
+    constructor(viewModelProvider: Provider<VM>, contentLayoutId: Int) : super(contentLayoutId) {
+        this.viewModelProvider = viewModelProvider
+    }
+
     protected val viewModel: VM get() = viewModelProvider.get()
 }
 
