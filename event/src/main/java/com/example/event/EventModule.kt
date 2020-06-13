@@ -1,9 +1,7 @@
 package com.example.event
 
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import com.example.coreandroid.base.savedStateViewModelFrom
-import com.example.coreandroid.di.fragment.FragmentKey
 import com.example.coreandroid.di.scope.FragmentScoped
 import com.example.coreandroid.di.viewmodel.AssistedSavedStateViewModelFactory
 import com.example.coreandroid.di.viewmodel.InjectingSavedStateViewModelFactory
@@ -26,7 +24,6 @@ abstract class EventModule {
     @FragmentScoped
     @ContributesAndroidInjector(modules = [EventViewModelModule::class])
     abstract fun eventFragment(): EventFragment
-
 
     @Binds
     @IntoMap

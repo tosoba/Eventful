@@ -10,7 +10,6 @@ import com.airbnb.epoxy.AsyncEpoxyController
 import com.example.coreandroid.description
 import com.example.coreandroid.eventInfo
 import com.example.coreandroid.model.Event
-import com.example.coreandroid.util.delegate.FragmentArg
 import com.example.coreandroid.util.delegate.FragmentArgument
 import com.example.coreandroid.util.ext.setupToolbar
 import com.example.coreandroid.util.ext.setupToolbarWithDrawerToggle
@@ -23,7 +22,7 @@ import kotlinx.android.synthetic.main.fragment_event_details.*
 
 class EventDetailsFragment : Fragment() {
 
-    private val event: Event by FragmentArg()
+    private var event: Event by FragmentArgument()
 
     private val epoxyController: AsyncEpoxyController by lazy(LazyThreadSafetyMode.NONE) {
         simpleController {
@@ -64,6 +63,12 @@ class EventDetailsFragment : Fragment() {
             setupToolbar(it)
             showBackNavArrow()
             it.title = event.name
+        }
+    }
+
+    companion object {
+        fun new(event: Event): EventDetailsFragment = EventDetailsFragment().apply {
+            this.event = event
         }
     }
 }

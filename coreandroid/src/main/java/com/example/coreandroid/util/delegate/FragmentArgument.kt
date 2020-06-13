@@ -3,7 +3,6 @@ package com.example.coreandroid.util.delegate
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import com.example.coreandroid.util.ext.putAny
-import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -25,24 +24,5 @@ class FragmentArgument<T : Any> : ReadWriteProperty<Fragment, T> {
         check(this.value == null) { "Argument value cannot be overridden once it is set." }
         if (thisRef.arguments == null) thisRef.arguments = Bundle()
         thisRef.arguments!!.putAny(property.name, value)
-    }
-}
-
-class FragmentArg<T : Any>(
-    private val key: String? = null
-) : ReadOnlyProperty<Fragment, T> {
-    override fun getValue(thisRef: Fragment, property: KProperty<*>): T {
-        @Suppress("UNCHECKED_CAST")
-        return thisRef.arguments?.get(key ?: property.name) as? T
-            ?: throw IllegalStateException("Argument not found.")
-    }
-}
-
-class NullableFragmentArg<T : Any?>(
-    private val key: String? = null
-) : ReadOnlyProperty<Fragment, T?> {
-    override fun getValue(thisRef: Fragment, property: KProperty<*>): T? {
-        @Suppress("UNCHECKED_CAST")
-        return thisRef.arguments?.get(key ?: property.name) as? T
     }
 }

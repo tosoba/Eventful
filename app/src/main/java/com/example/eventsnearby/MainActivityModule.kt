@@ -1,21 +1,14 @@
 package com.example.eventsnearby
 
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentFactory
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import com.example.core.provider.ConnectedStateProvider
 import com.example.core.provider.LocationStateProvider
 import com.example.coreandroid.base.savedStateViewModelFrom
-import com.example.coreandroid.di.fragment.AppFragmentFactory
-import com.example.coreandroid.di.fragment.FragmentKey
 import com.example.coreandroid.di.scope.ActivityScoped
-import com.example.coreandroid.di.scope.FragmentScoped
 import com.example.coreandroid.di.viewmodel.AssistedSavedStateViewModelFactory
 import com.example.coreandroid.di.viewmodel.InjectingSavedStateViewModelFactory
 import com.example.coreandroid.di.viewmodel.ViewModelKey
-import com.example.coreandroid.navigation.EventFragmentClassProvider
-import com.example.event.EventFragment
+import com.example.coreandroid.navigation.IFragmentFactory
 import com.example.event.EventModule
 import com.example.favourites.FavouritesModule
 import com.example.nearby.NearbyModule
@@ -50,22 +43,6 @@ abstract class MainActivityModule {
     )
     abstract fun mainActivity(): MainActivity
 
-    @Binds
-    abstract fun fragmentFactory(factory: AppFragmentFactory): FragmentFactory
-
-    @Binds
-    @IntoMap
-    @FragmentKey(MainFragment::class)
-    abstract fun bindMainFragment(fragment: MainFragment): Fragment
-
-    @Binds
-    @IntoMap
-    @FragmentKey(EventFragment::class)
-    abstract fun bindEventFragment(fragment: EventFragment): Fragment
-
-    @Multibinds
-    abstract fun fragments(): Map<Class<out ViewModel>, @JvmSuppressWildcards Fragment>
-
     @Multibinds
     abstract fun viewModels(): Map<Class<out ViewModel>, @JvmSuppressWildcards ViewModel>
 
@@ -90,10 +67,9 @@ abstract class MainActivityModule {
         fun mainViewModel(
             mainActivity: MainActivity,
             factory: InjectingSavedStateViewModelFactory
-        ): MainViewModel =
-            ViewModelProvider(mainActivity, factory.create(mainActivity))[MainViewModel::class.java]
+        ): MainViewModel = mainActivity.savedStateViewModelFrom(factory)
 
         @Provides
-        fun fragmentProvider(): EventFragmentClassProvider = FragmentClassProvider
+        fun fragmentProvider(): IFragmentFactory = FragmentFactory
     }
 }

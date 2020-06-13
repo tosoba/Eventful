@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.PagerAdapter
 import com.example.coreandroid.base.DaggerViewModelFragment
@@ -15,9 +14,7 @@ import com.example.coreandroid.controller.SnackbarController
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.controller.handleSnackbarState
 import com.example.coreandroid.model.Event
-import com.example.coreandroid.util.delegate.FragmentArg
 import com.example.coreandroid.util.delegate.FragmentArgument
-import com.example.coreandroid.view.TitledFragmentData
 import com.example.coreandroid.view.TitledFragmentsPagerAdapter
 import com.example.coreandroid.view.ViewPagerPageSelectedListener
 import com.example.coreandroid.view.ext.hideAndShow
@@ -35,35 +32,20 @@ import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import javax.inject.Provider
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class EventFragment @Inject constructor(
-    viewModelProvider: Provider<EventViewModel>
-) : DaggerViewModelFragment<EventViewModel>(viewModelProvider, R.layout.fragment_event),
-    SnackbarController,
-    HasArgs {
+class EventFragment : DaggerViewModelFragment<EventViewModel>(), SnackbarController, HasArgs {
 
-    private val event: Event by FragmentArg()
+    private var event: Event by FragmentArgument()
     override val args: Bundle get() = bundleOf("initialState" to event)
 
     private val eventViewPagerAdapter: PagerAdapter by lazy(LazyThreadSafetyMode.NONE) {
         TitledFragmentsPagerAdapter(
-            requireContext().classLoader,
             childFragmentManager,
             arrayOf(
-                TitledFragmentData(
-                    EventDetailsFragment::class.java,
-                    "Details",
-                    bundleOf("event" to event)
-                ),
-                TitledFragmentData(
-                    WeatherFragment::class.java,
-                    "Weather",
-                    bundleOf("latLng" to event.venues?.firstOrNull()?.latLng)
-                )
+                "Details" to EventDetailsFragment.new(event),
+                "Weather" to WeatherFragment.new(event.venues?.firstOrNull()?.latLng)
             )
         )
     }
@@ -88,7 +70,7 @@ class EventFragment @Inject constructor(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = super.onCreateView(inflater, container, savedInstanceState).apply {
+    ): View? = inflater.inflate(R.layout.fragment_event, container, false).apply {
         event_fab.setOnClickListener {
             lifecycleScope.launch { viewModel.intent(EventIntent.ToggleFavourite) }
         }
@@ -145,6 +127,10 @@ class EventFragment @Inject constructor(
     }
 
     companion object {
+        fun new(event: Event): EventFragment = EventFragment().apply {
+            this.event = event
+        }
+
         private val viewPagerItems: BiMap<Int, Int> = HashBiMap.create<Int, Int>().apply {
             put(R.id.bottom_nav_event_details, 0)
             put(R.id.bottom_nav_weather, 1)

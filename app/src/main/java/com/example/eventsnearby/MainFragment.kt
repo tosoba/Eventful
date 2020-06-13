@@ -5,7 +5,6 @@ import android.view.*
 import com.example.coreandroid.controller.*
 import com.example.coreandroid.util.ext.setupToolbar
 import com.example.coreandroid.util.ext.setupToolbarWithDrawerToggle
-import com.example.coreandroid.view.TitledFragmentData
 import com.example.coreandroid.view.TitledFragmentsPagerAdapter
 import com.example.coreandroid.view.ViewPagerPageSelectedListener
 import com.example.favourites.FavouritesFragment
@@ -20,14 +19,10 @@ import kotlinx.android.synthetic.main.fragment_main.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.SendChannel
-import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class MainFragment @Inject constructor() :
-    DaggerFragment(R.layout.fragment_main),
-    MenuController,
-    SnackbarController {
+class MainFragment : DaggerFragment(), MenuController, SnackbarController {
 
     private val bottomNavItemSelectedListener = BottomNavigationView
         .OnNavigationItemSelectedListener { item ->
@@ -45,12 +40,11 @@ class MainFragment @Inject constructor() :
 
     private val mainViewPagerAdapter: TitledFragmentsPagerAdapter by lazy(LazyThreadSafetyMode.NONE) {
         TitledFragmentsPagerAdapter(
-            requireContext().classLoader,
             childFragmentManager,
             arrayOf(
-                TitledFragmentData(NearbyFragment::class.java, getString(R.string.nearby)),
-                TitledFragmentData(SearchFragment::class.java, getString(R.string.search)),
-                TitledFragmentData(FavouritesFragment::class.java, getString(R.string.favourites))
+                getString(R.string.nearby) to NearbyFragment(),
+                getString(R.string.search) to SearchFragment(),
+                getString(R.string.favourites) to FavouritesFragment()
             )
         )
     }
@@ -69,7 +63,7 @@ class MainFragment @Inject constructor() :
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = super.onCreateView(inflater, container, savedInstanceState).apply {
+    ): View? = inflater.inflate(R.layout.fragment_main, container, false).apply {
         setupToolbar(main_toolbar)
         setupToolbarWithDrawerToggle(main_toolbar)
 
