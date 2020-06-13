@@ -6,12 +6,13 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.example.coreandroid.base.DaggerViewModelActivity
 import com.example.coreandroid.controller.DrawerLayoutController
+import com.example.coreandroid.view.binding.viewBinding
+import com.example.eventsnearby.databinding.ActivityMainBinding
 import com.google.android.material.navigation.NavigationView
 import com.markodevcic.peko.ActivityRotatingException
 import com.markodevcic.peko.Peko
 import com.markodevcic.peko.rationale.AlertDialogPermissionRationale
 import com.markodevcic.peko.requestPermissionsAsync
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
@@ -25,12 +26,14 @@ class MainActivity :
     private val supervisorJob: CompletableDeferred<Any> = CompletableDeferred()
     override val coroutineContext: CoroutineContext get() = Dispatchers.Main + supervisorJob
 
-    override val drawerLayout: DrawerLayout? get() = main_drawer_layout
+    private val binding: ActivityMainBinding by viewBinding(ActivityMainBinding::inflate)
+
+    override val drawerLayout: DrawerLayout? get() = binding.mainDrawerLayout
     private val drawerItemSelectedListener: NavigationView.OnNavigationItemSelectedListener =
         NavigationView.OnNavigationItemSelectedListener { item ->
             when (item.itemId) {
             }
-            main_drawer_layout.closeDrawer(GravityCompat.END)
+            binding.mainDrawerLayout.closeDrawer(GravityCompat.END)
             true
         }
 
@@ -41,7 +44,7 @@ class MainActivity :
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        main_drawer_nav_view.setNavigationItemSelectedListener(drawerItemSelectedListener)
+        binding.mainDrawerNavView.setNavigationItemSelectedListener(drawerItemSelectedListener)
 
         requestPermission()
     }

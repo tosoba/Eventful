@@ -1,64 +1,45 @@
 package com.example.favourites
 
-import android.os.Bundle
-import android.view.*
-import androidx.lifecycle.lifecycleScope
+import android.view.Menu
+import android.view.MenuInflater
 import com.example.coreandroid.base.SelectableEventListFragment
-import com.example.coreandroid.util.ext.*
-import kotlinx.android.synthetic.main.fragment_favourites.*
-import kotlinx.android.synthetic.main.fragment_favourites.view.*
+import com.example.coreandroid.util.ext.menuController
+import com.example.coreandroid.util.ext.snackbarController
+import com.example.favourites.databinding.FragmentFavouritesBinding
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class FavouritesFragment : SelectableEventListFragment<FavouritesIntent, FavouritesViewModel>(
-    layoutRes = R.layout.fragment_favourites,
-    menuRes = R.menu.favourites_events_selection_menu,
-    emptyListTextRes = R.string.no_favourite_events_added_yet,
-    selectionConfirmedActionId = R.id.favourites_action_remove_favourite,
-    loadMoreResultsIntent = FavouritesIntent.LoadFavourites,
-    selectionConfirmedIntent = FavouritesIntent.RemoveFromFavouritesClicked,
-    clearSelectionIntent = FavouritesIntent.ClearSelectionClicked,
-    eventSelectedIntent = { FavouritesIntent.EventLongClicked(it) }
-) {
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? = super.onCreateView(inflater, container, savedInstanceState)?.apply {
-        this.favourite_events_recycler_view.onCreateControllerView(
-            epoxyController, savedInstanceState
-        )
-    }
+class FavouritesFragment :
+    SelectableEventListFragment<FragmentFavouritesBinding, FavouritesIntent, FavouritesViewModel, FavouritesViewUpdate>(
+        layoutRes = R.layout.fragment_favourites,
+        viewBindingFactory = FragmentFavouritesBinding::bind,
+        epoxyRecyclerView = FragmentFavouritesBinding::favouriteEventsRecyclerView,
+        menuRes = R.menu.favourites_events_selection_menu,
+        emptyListTextRes = R.string.no_favourite_events_added_yet,
+        selectionConfirmedActionId = R.id.favourites_action_remove_favourite,
+        loadMoreResultsIntent = FavouritesIntent.LoadFavourites,
+        selectionConfirmedIntent = FavouritesIntent.RemoveFromFavouritesClicked,
+        clearSelectionIntent = FavouritesIntent.ClearSelectionClicked,
+        eventSelectedIntent = { FavouritesIntent.EventLongClicked(it) },
+        viewUpdates = FavouritesViewModel::viewUpdates
+    ) {
 
-    override fun onResume() {
-        super.onResume()
-        activity?.invalidateOptionsMenu()
-
-        viewModel.viewUpdates
-            .onEach {
-                when (it) {
-                    is FavouritesViewUpdate.Events -> epoxyController.setData(it.events)
-                    is FavouritesViewUpdate.Snackbar -> snackbarController?.transitionToSnackbarState(
-                        it.state
-                    )
-                    is FavouritesViewUpdate.UpdateActionMode -> actionModeController.update(it.numberOfSelectedEvents)
-                    is FavouritesViewUpdate.FinishActionMode -> actionModeController.finish(false)
-                }
-            }
-            .launchIn(lifecycleScope)
+    override suspend fun onViewUpdate(viewUpdate: FavouritesViewUpdate) {
+        when (viewUpdate) {
+            is FavouritesViewUpdate.Events -> epoxyController.setData(viewUpdate.events)
+            is FavouritesViewUpdate.Snackbar -> snackbarController?.transitionToSnackbarState(
+                viewUpdate.state
+            )
+            is FavouritesViewUpdate.UpdateActionMode -> actionModeController.update(
+                viewUpdate.numberOfSelectedEvents
+            )
+            is FavouritesViewUpdate.FinishActionMode -> actionModeController.finish(false)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
         menuController?.clearMenu()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        favourite_events_recycler_view?.saveScrollPosition(outState)
     }
 }

@@ -17,15 +17,15 @@ import com.example.coreandroid.model.Event
 import com.example.coreandroid.util.delegate.FragmentArgument
 import com.example.coreandroid.view.TitledFragmentsPagerAdapter
 import com.example.coreandroid.view.ViewPagerPageSelectedListener
+import com.example.coreandroid.view.binding.viewBinding
 import com.example.coreandroid.view.ext.hideAndShow
+import com.example.event.databinding.FragmentEventBinding
 import com.example.weather.WeatherFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
-import kotlinx.android.synthetic.main.fragment_event.*
-import kotlinx.android.synthetic.main.fragment_event.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.SendChannel
@@ -35,10 +35,15 @@ import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class EventFragment : DaggerViewModelFragment<EventViewModel>(), SnackbarController, HasArgs {
+class EventFragment :
+    DaggerViewModelFragment<EventViewModel>(R.layout.fragment_event),
+    SnackbarController,
+    HasArgs {
 
     private var event: Event by FragmentArgument()
     override val args: Bundle get() = bundleOf("initialState" to event)
+
+    private val binding: FragmentEventBinding by viewBinding(FragmentEventBinding::bind)
 
     private val eventViewPagerAdapter: PagerAdapter by lazy(LazyThreadSafetyMode.NONE) {
         TitledFragmentsPagerAdapter(
@@ -52,36 +57,33 @@ class EventFragment : DaggerViewModelFragment<EventViewModel>(), SnackbarControl
 
     private val viewPagerSwipedListener = object : ViewPagerPageSelectedListener {
         override fun onPageSelected(position: Int) {
-            event_bottom_nav_view.selectedItemId = viewPagerItems.inverse()[position]!!
+            binding.eventBottomNavView.selectedItemId = viewPagerItems.inverse()[position]!!
         }
     }
 
     private val bottomNavItemSelectedListener = BottomNavigationView
         .OnNavigationItemSelectedListener { item ->
             viewPagerItems[item.itemId]?.let {
-                event_view_pager?.currentItem = it
+                binding.eventViewPager.currentItem = it
                 true
             } ?: false
         }
 
     private lateinit var snackbarStateChannel: SendChannel<SnackbarState>
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_event, container, false).apply {
-        event_fab.setOnClickListener {
-            lifecycleScope.launch { viewModel.intent(EventIntent.ToggleFavourite) }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        with(binding) {
+            eventBottomNavView.setOnNavigationItemSelectedListener(bottomNavItemSelectedListener)
+
+            eventViewPager.adapter = eventViewPagerAdapter
+            eventViewPager.addOnPageChangeListener(viewPagerSwipedListener)
+            eventViewPager.offscreenPageLimit = 2
+
+            eventFab.setOnClickListener {
+                lifecycleScope.launch { viewModel.intent(EventIntent.ToggleFavourite) }
+            }
+            snackbarStateChannel = handleSnackbarState(eventFab)
         }
-
-        event_bottom_nav_view.setOnNavigationItemSelectedListener(bottomNavItemSelectedListener)
-
-        event_view_pager.adapter = eventViewPagerAdapter
-        event_view_pager.addOnPageChangeListener(viewPagerSwipedListener)
-        event_view_pager.offscreenPageLimit = 2
-
-        snackbarStateChannel = handleSnackbarState(event_fab)
     }
 
     override fun onDestroyView() {
@@ -95,9 +97,8 @@ class EventFragment : DaggerViewModelFragment<EventViewModel>(), SnackbarControl
         viewModel.viewUpdates
             .onEach {
                 when (it) {
-                    is EventViewUpdate.FloatingActionButtonDrawable -> event_fab?.updateDrawable(
-                        it.isFavourite
-                    )
+                    is EventViewUpdate.FloatingActionButtonDrawable ->
+                        binding.eventFab.updateDrawable(it.isFavourite)
                     is EventViewUpdate.FavouriteStatusSnackbar -> transitionToSnackbarState(
                         SnackbarState.Shown(
                             text = if (it.isFavourite) "Event was added to favourites"

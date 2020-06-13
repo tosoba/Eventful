@@ -27,7 +27,7 @@ private fun RecyclerView.restoreScrollPosition(
     epoxyController.addInterceptor(interceptor)
 }
 
-fun EpoxyRecyclerView.onCreateControllerView(
+fun EpoxyRecyclerView.setControllerWithSavedState(
     epoxyController: EpoxyController,
     savedInstanceState: Bundle?
 ) {

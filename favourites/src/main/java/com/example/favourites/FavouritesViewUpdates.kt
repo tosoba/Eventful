@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.map
 
-internal sealed class FavouritesViewUpdate {
+sealed class FavouritesViewUpdate {
     data class Events(val events: DataList<Selectable<Event>>) : FavouritesViewUpdate()
     data class Snackbar(val state: SnackbarState) : FavouritesViewUpdate()
     data class UpdateActionMode(val numberOfSelectedEvents: Int) : FavouritesViewUpdate()
@@ -20,7 +20,7 @@ internal sealed class FavouritesViewUpdate {
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-internal val FavouritesViewModel.viewUpdates: Flow<FavouritesViewUpdate>
+val FavouritesViewModel.viewUpdates: Flow<FavouritesViewUpdate>
     get() = kotlinx.coroutines.flow.merge(
         states.map { it.events }
             .distinctUntilChanged()

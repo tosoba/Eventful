@@ -9,7 +9,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 
-internal sealed class SearchViewUpdate {
+sealed class SearchViewUpdate {
     data class Events(val events: PagedDataList<Selectable<Event>>) : SearchViewUpdate()
     data class Snackbar(val state: SnackbarState) : SearchViewUpdate()
     data class UpdateActionMode(val numberOfSelectedEvents: Int) : SearchViewUpdate()
@@ -19,7 +19,7 @@ internal sealed class SearchViewUpdate {
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-internal val SearchViewModel.viewUpdates: Flow<SearchViewUpdate>
+val SearchViewModel.viewUpdates: Flow<SearchViewUpdate>
     get() = merge(
         states.map { it.events }
             .distinctUntilChanged()
