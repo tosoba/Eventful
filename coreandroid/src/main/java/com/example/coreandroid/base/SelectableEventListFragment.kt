@@ -22,6 +22,7 @@ import com.example.coreandroid.util.delegate.viewBinding
 import com.example.coreandroid.view.epoxy.listItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -104,10 +105,19 @@ abstract class SelectableEventListFragment<Binding : ViewBinding, Intent : Any, 
         binding.epoxyRecyclerView().saveScrollPosition(outState)
     }
 
+    private var viewUpdatesJob: Job? = null
+
+    @CallSuper
     override fun onResume() {
         super.onResume()
         activity?.invalidateOptionsMenu()
-        viewModel.viewUpdates().onEach(::onViewUpdate).launchIn(lifecycleScope)
+        viewUpdatesJob = viewModel.viewUpdates().onEach(::onViewUpdate).launchIn(lifecycleScope)
+    }
+
+    @CallSuper
+    override fun onPause() {
+        viewUpdatesJob?.cancel()
+        super.onPause()
     }
 
     protected abstract suspend fun onViewUpdate(viewUpdate: ViewUpdate)
