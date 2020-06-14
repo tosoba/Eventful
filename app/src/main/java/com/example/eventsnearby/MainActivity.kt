@@ -6,7 +6,7 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.example.coreandroid.base.DaggerViewModelActivity
 import com.example.coreandroid.controller.DrawerLayoutController
-import com.example.coreandroid.view.binding.viewBinding
+import com.example.coreandroid.util.delegate.viewBinding
 import com.example.eventsnearby.databinding.ActivityMainBinding
 import com.google.android.material.navigation.NavigationView
 import com.markodevcic.peko.ActivityRotatingException

@@ -1,9 +1,7 @@
 package com.example.event
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
@@ -15,10 +13,12 @@ import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.controller.handleSnackbarState
 import com.example.coreandroid.model.Event
 import com.example.coreandroid.util.delegate.FragmentArgument
-import com.example.coreandroid.view.TitledFragmentsPagerAdapter
+import com.example.coreandroid.util.delegate.bottomNavItemSelectedViewPagerListener
+import com.example.coreandroid.util.delegate.viewBinding
+import com.example.coreandroid.util.delegate.viewPagerPageSelectedBottomNavListener
 import com.example.coreandroid.view.ViewPagerPageSelectedListener
-import com.example.coreandroid.view.binding.viewBinding
 import com.example.coreandroid.view.ext.hideAndShow
+import com.example.coreandroid.view.titledFragmentsPagerAdapter
 import com.example.event.databinding.FragmentEventBinding
 import com.example.weather.WeatherFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -45,29 +45,18 @@ class EventFragment :
 
     private val binding: FragmentEventBinding by viewBinding(FragmentEventBinding::bind)
 
-    private val eventViewPagerAdapter: PagerAdapter by lazy(LazyThreadSafetyMode.NONE) {
-        TitledFragmentsPagerAdapter(
-            childFragmentManager,
-            arrayOf(
-                "Details" to EventDetailsFragment.new(event),
-                "Weather" to WeatherFragment.new(event.venues?.firstOrNull()?.latLng)
-            )
+    private val eventViewPagerAdapter: PagerAdapter by titledFragmentsPagerAdapter {
+        arrayOf(
+            getString(R.string.details) to EventDetailsFragment.new(event),
+            getString(R.string.weather) to WeatherFragment.new(event.venues?.firstOrNull()?.latLng)
         )
     }
 
-    private val viewPagerSwipedListener = object : ViewPagerPageSelectedListener {
-        override fun onPageSelected(position: Int) {
-            binding.eventBottomNavView.selectedItemId = viewPagerItems.inverse()[position]!!
-        }
-    }
+    private val viewPagerSwipedListener: ViewPagerPageSelectedListener
+            by viewPagerPageSelectedBottomNavListener(navigationItems.inverse()) { binding.eventBottomNavView }
 
-    private val bottomNavItemSelectedListener = BottomNavigationView
-        .OnNavigationItemSelectedListener { item ->
-            viewPagerItems[item.itemId]?.let {
-                binding.eventViewPager.currentItem = it
-                true
-            } ?: false
-        }
+    private val bottomNavItemSelectedListener: BottomNavigationView.OnNavigationItemSelectedListener
+            by bottomNavItemSelectedViewPagerListener(navigationItems) { binding.eventViewPager }
 
     private lateinit var snackbarStateChannel: SendChannel<SnackbarState>
 
@@ -132,7 +121,7 @@ class EventFragment :
             this.event = event
         }
 
-        private val viewPagerItems: BiMap<Int, Int> = HashBiMap.create<Int, Int>().apply {
+        private val navigationItems: BiMap<Int, Int> = HashBiMap.create<Int, Int>().apply {
             put(R.id.bottom_nav_event_details, 0)
             put(R.id.bottom_nav_weather, 1)
         }

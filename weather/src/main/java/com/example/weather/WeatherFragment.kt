@@ -8,7 +8,7 @@ import com.example.coreandroid.util.delegate.NullableFragmentArgument
 import com.example.coreandroid.util.ext.setupToolbar
 import com.example.coreandroid.util.ext.setupToolbarWithDrawerToggle
 import com.example.coreandroid.util.ext.showBackNavArrow
-import com.example.coreandroid.view.binding.viewBinding
+import com.example.coreandroid.util.delegate.viewBinding
 import com.example.weather.databinding.FragmentWeatherBinding
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.ExperimentalCoroutinesApi

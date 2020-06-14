@@ -18,7 +18,7 @@ import com.example.coreandroid.util.ext.navigationFragment
 import com.example.coreandroid.util.ext.saveScrollPosition
 import com.example.coreandroid.util.ext.setControllerWithSavedState
 import com.example.coreandroid.util.infiniteItemListController
-import com.example.coreandroid.view.binding.viewBinding
+import com.example.coreandroid.util.delegate.viewBinding
 import com.example.coreandroid.view.epoxy.listItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview

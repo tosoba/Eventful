@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">coreandroid</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
@@ -13,4 +12,7 @@
     <string name="favourite">favourite</string>
     <string name="clear">Clear</string>
     <string name="delete">delete</string>
+
+    <string name="details">Details</string>
+    <string name="weather">Weather</string>
 </resources>

@@ -4,12 +4,15 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
+import androidx.viewpager.widget.PagerAdapter
 import com.example.coreandroid.controller.*
+import com.example.coreandroid.util.delegate.bottomNavItemSelectedViewPagerListener
+import com.example.coreandroid.util.delegate.viewBinding
+import com.example.coreandroid.util.delegate.viewPagerPageSelectedBottomNavListener
 import com.example.coreandroid.util.ext.setupToolbar
 import com.example.coreandroid.util.ext.setupToolbarWithDrawerToggle
-import com.example.coreandroid.view.TitledFragmentsPagerAdapter
 import com.example.coreandroid.view.ViewPagerPageSelectedListener
-import com.example.coreandroid.view.binding.viewBinding
+import com.example.coreandroid.view.titledFragmentsPagerAdapter
 import com.example.eventsnearby.databinding.FragmentMainBinding
 import com.example.favourites.FavouritesFragment
 import com.example.nearby.NearbyFragment
@@ -28,28 +31,17 @@ class MainFragment : DaggerFragment(R.layout.fragment_main), MenuController, Sna
 
     private val binding: FragmentMainBinding by viewBinding(FragmentMainBinding::bind)
 
-    private val bottomNavItemSelectedListener = BottomNavigationView
-        .OnNavigationItemSelectedListener { item ->
-            navigationItems[item.itemId]?.let {
-                binding.mainViewPager.currentItem = it
-                true
-            } ?: false
-        }
+    private val bottomNavItemSelectedListener: BottomNavigationView.OnNavigationItemSelectedListener
+            by bottomNavItemSelectedViewPagerListener(navigationItems) { binding.mainViewPager }
 
-    private val viewPagerSwipedListener = object : ViewPagerPageSelectedListener {
-        override fun onPageSelected(position: Int) {
-            binding.mainBottomNavView.selectedItemId = navigationItems.inverse()[position]!!
-        }
-    }
+    private val viewPagerSwipedListener: ViewPagerPageSelectedListener
+            by viewPagerPageSelectedBottomNavListener(navigationItems.inverse()) { binding.mainBottomNavView }
 
-    private val mainViewPagerAdapter: TitledFragmentsPagerAdapter by lazy(LazyThreadSafetyMode.NONE) {
-        TitledFragmentsPagerAdapter(
-            childFragmentManager,
-            arrayOf(
-                getString(R.string.nearby) to NearbyFragment(),
-                getString(R.string.search) to SearchFragment(),
-                getString(R.string.favourites) to FavouritesFragment()
-            )
+    private val mainViewPagerAdapter: PagerAdapter by titledFragmentsPagerAdapter {
+        arrayOf(
+            getString(R.string.nearby) to NearbyFragment(),
+            getString(R.string.search) to SearchFragment(),
+            getString(R.string.favourites) to FavouritesFragment()
         )
     }
 
