@@ -33,12 +33,12 @@ android {
         targetCompatibility 1.8
     }
 
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
+    buildFeatures {
+        kotlinOptions {
+            jvmTarget = "1.8"
+        }
 
-    dataBinding {
-        enabled = true
+        dataBinding true
     }
 }
 
