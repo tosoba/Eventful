@@ -1,6 +1,5 @@
 package com.example.weather
 
-import androidx.lifecycle.SavedStateHandle
 import com.example.core.usecase.GetForecast
 import com.example.core.util.ext.flatMapFirst
 import com.example.coreandroid.base.FlowProcessor
@@ -24,8 +23,7 @@ class WeatherFlowProcessor @Inject constructor(
         currentState: () -> WeatherState,
         states: StateFlow<WeatherState>,
         intent: suspend (WeatherIntent) -> Unit,
-        signal: suspend (Unit) -> Unit,
-        savedStateHandle: SavedStateHandle
+        signal: suspend (Unit) -> Unit
     ): Flow<WeatherStateUpdate> = intents.filterIsInstance<WeatherIntent.LoadWeather>()
         .flatMapFirst {
             flow<WeatherStateUpdate> {

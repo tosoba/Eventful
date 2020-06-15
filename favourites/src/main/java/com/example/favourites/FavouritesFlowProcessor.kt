@@ -1,6 +1,5 @@
 package com.example.favourites
 
-import androidx.lifecycle.SavedStateHandle
 import com.example.core.usecase.DeleteEvents
 import com.example.core.usecase.GetSavedEventsFlow
 import com.example.coreandroid.base.FlowProcessor
@@ -23,8 +22,7 @@ class FavouritesFlowProcessor(
         currentState: () -> FavouritesState,
         states: StateFlow<FavouritesState>,
         intent: suspend (FavouritesIntent) -> Unit,
-        signal: suspend (FavouritesSignal) -> Unit,
-        savedStateHandle: SavedStateHandle
+        signal: suspend (FavouritesSignal) -> Unit
     ): Flow<FavouritesStateUpdate> = intents
         .run {
             if (loadFavouritesOnStart) onStart { emit(FavouritesIntent.LoadFavourites) }

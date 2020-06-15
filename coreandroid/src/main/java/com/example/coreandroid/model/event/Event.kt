@@ -1,4 +1,4 @@
-package com.example.coreandroid.model
+package com.example.coreandroid.model.event
 
 import android.os.Parcelable
 import com.example.core.model.event.IEvent
@@ -36,8 +36,16 @@ data class Event(
         other.startTime,
         other.kinds,
         other.venues?.map { Venue(it) },
-        other.attractions?.map { Attraction(it) },
-        other.priceRanges?.map { PriceRange(it) }
+        other.attractions?.map {
+            Attraction(
+                it
+            )
+        },
+        other.priceRanges?.map {
+            PriceRange(
+                it
+            )
+        }
     )
 
     val formattedAddress: String

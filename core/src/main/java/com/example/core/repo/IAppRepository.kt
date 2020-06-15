@@ -1,6 +1,6 @@
 package com.example.core.repo
 
-import com.example.core.model.app.LocationResult
+import com.example.core.model.location.LocationResult
 import kotlinx.coroutines.flow.Flow
 
 interface IAppRepository {

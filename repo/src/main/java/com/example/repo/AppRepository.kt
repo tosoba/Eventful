@@ -2,12 +2,11 @@ package com.example.repo
 
 import android.annotation.SuppressLint
 import android.content.Context
-import com.example.core.model.app.FailedToFindLocationException
-import com.example.core.model.app.LocationResult
+import com.example.core.model.location.FailedToFindLocationException
+import com.example.core.model.location.LocationResult
 import com.example.core.repo.IAppRepository
 import com.example.coreandroid.util.ext.currentLocation
 import com.example.coreandroid.util.ext.isLocationAvailable
-import com.example.coreandroid.util.ext.latLng
 import com.github.pwittchen.reactivenetwork.library.rx2.ReactiveNetwork
 import com.patloew.rxlocation.RxLocation
 import io.reactivex.Observable
@@ -25,7 +24,7 @@ class AppRepository(
 
     override suspend fun usersLocation(): LocationResult = try {
         if (appContext.isLocationAvailable) rxLocation.currentLocation()?.let {
-            LocationResult.Found(it.latLng)
+            LocationResult.Found(it.latitude, it.longitude)
         } ?: run {
             LocationResult.Error(FailedToFindLocationException)
         } else LocationResult.Disabled

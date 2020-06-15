@@ -1,6 +1,5 @@
 package com.example.event
 
-import androidx.lifecycle.SavedStateHandle
 import com.example.core.usecase.DeleteEvent
 import com.example.core.usecase.IsEventSavedFlow
 import com.example.core.usecase.SaveEvent
@@ -27,8 +26,7 @@ class EventFlowProcessor @Inject constructor(
         currentState: () -> EventState,
         states: StateFlow<EventState>,
         intent: suspend (EventIntent) -> Unit,
-        signal: suspend (EventSignal) -> Unit,
-        savedStateHandle: SavedStateHandle
+        signal: suspend (EventSignal) -> Unit
     ): Flow<EventStateUpdate> = merge(
         intents.filterIsInstance<EventIntent.ToggleFavourite>()
             .onEach {

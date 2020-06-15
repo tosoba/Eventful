@@ -5,7 +5,7 @@
 
         <variable
             name="event"
-            type="com.example.coreandroid.model.Event" />
+            type="com.example.coreandroid.model.event.Event" />
 
         <import type="android.view.View" />
     </data>

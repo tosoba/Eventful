@@ -5,7 +5,7 @@ import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.coreandroid.R
-import com.example.coreandroid.model.Event
+import com.example.coreandroid.model.event.Event
 
 private val eventRequestOptions by lazy {
     RequestOptions()

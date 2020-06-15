@@ -1,14 +1,13 @@
 package com.example.search
 
-import androidx.lifecycle.SavedStateHandle
 import com.example.core.model.PagedResult
 import com.example.core.model.Resource
 import com.example.core.model.event.IEvent
-import com.example.core.provider.ConnectedStateProvider
 import com.example.core.usecase.*
 import com.example.core.util.Loading
 import com.example.core.util.ext.flatMapFirst
 import com.example.coreandroid.base.FlowProcessor
+import com.example.coreandroid.provider.ConnectedStateProvider
 import com.example.coreandroid.util.addedToFavouritesMessage
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -32,8 +31,7 @@ class SearchFlowProcessor @Inject constructor(
         currentState: () -> SearchState,
         states: StateFlow<SearchState>,
         intent: suspend (SearchIntent) -> Unit,
-        signal: suspend (SearchSignal) -> Unit,
-        savedStateHandle: SavedStateHandle
+        signal: suspend (SearchSignal) -> Unit
     ): Flow<SearchStateUpdate> = merge(
         intents.updates(coroutineScope, currentState, intent, signal),
         connectedStateProvider.updates(currentState)

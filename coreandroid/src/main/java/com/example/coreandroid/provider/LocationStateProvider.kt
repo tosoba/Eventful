@@ -1,6 +1,6 @@
-package com.example.core.provider
+package com.example.coreandroid.provider
 
-import com.example.core.model.app.LocationState
+import com.example.coreandroid.model.location.LocationState
 import kotlinx.coroutines.flow.Flow
 
 interface LocationStateProvider {

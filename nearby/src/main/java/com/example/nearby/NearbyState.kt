@@ -2,8 +2,8 @@ package com.example.nearby
 
 import com.example.core.util.PagedDataList
 import com.example.coreandroid.controller.SnackbarState
-import com.example.coreandroid.model.Event
-import com.example.coreandroid.model.Selectable
+import com.example.coreandroid.model.event.Event
+import com.example.coreandroid.model.event.Selectable
 import com.example.coreandroid.util.SelectableEventsSnackbarState
 
 data class NearbyState(

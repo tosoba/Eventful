@@ -1,11 +1,11 @@
 package com.example.eventsnearby
 
-import com.example.core.model.app.LocationResult
-import com.example.core.model.app.LocationStatus
+import com.example.core.model.location.LocationResult
+import com.example.coreandroid.model.location.LocationStatus
 import com.example.coreandroid.util.StateUpdate
+import com.google.android.gms.maps.model.LatLng
 
-sealed class MainStateUpdate :
-    StateUpdate<MainState> {
+sealed class MainStateUpdate : StateUpdate<MainState> {
     class Connection(private val connected: Boolean) : MainStateUpdate() {
         override fun invoke(state: MainState): MainState = state.copy(connected = connected)
     }
@@ -26,15 +26,13 @@ sealed class MainStateUpdate :
         class Result(private val result: LocationResult) : Location() {
             override fun invoke(state: MainState): MainState = state.copy(
                 locationState = if (result is LocationResult.Found) state.locationState.copy(
-                    latLng = result.latLng,
+                    latLng = LatLng(result.latitude, result.longitude),
                     status = LocationStatus.Found
                 ) else state.locationState.copy(
                     status = when (result) {
                         is LocationResult.Loading -> LocationStatus.Loading
                         is LocationResult.Disabled -> LocationStatus.Disabled
-                        is LocationResult.Error -> LocationStatus.Error(
-                            result.throwable
-                        )
+                        is LocationResult.Error -> LocationStatus.Error(result.throwable)
                         else -> throw IllegalArgumentException()
                     }
                 )

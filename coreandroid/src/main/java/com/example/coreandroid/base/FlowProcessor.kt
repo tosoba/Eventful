@@ -15,7 +15,13 @@ interface FlowProcessor<Intent : Any, Update : StateUpdate<State>, State : Any, 
         currentState: () -> State,
         states: StateFlow<State>,
         intent: suspend (Intent) -> Unit,
-        signal: suspend (Signal) -> Unit,
-        savedStateHandle: SavedStateHandle
+        signal: suspend (Signal) -> Unit
     ): Flow<Update>
+
+    fun stateWillUpdate(
+        currentState: State,
+        nextState: State,
+        update: Update,
+        savedStateHandle: SavedStateHandle
+    ) = Unit
 }

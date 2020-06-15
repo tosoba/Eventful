@@ -1,6 +1,6 @@
 package com.example.core.usecase
 
-import com.example.core.model.app.LocationResult
+import com.example.core.model.location.LocationResult
 import com.example.core.repo.IAppRepository
 import javax.inject.Inject
 

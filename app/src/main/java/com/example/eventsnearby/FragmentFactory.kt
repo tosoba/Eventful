@@ -1,7 +1,7 @@
 package com.example.eventsnearby
 
 import androidx.fragment.app.Fragment
-import com.example.coreandroid.model.Event
+import com.example.coreandroid.model.event.Event
 import com.example.coreandroid.navigation.IFragmentFactory
 import com.example.event.EventFragment
 import kotlinx.coroutines.ExperimentalCoroutinesApi

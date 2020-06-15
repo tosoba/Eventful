@@ -1,18 +1,17 @@
 package com.example.nearby
 
-import androidx.lifecycle.SavedStateHandle
-import com.example.core.model.app.LatLng
-import com.example.core.model.app.LocationState
-import com.example.core.model.app.LocationStatus
-import com.example.core.provider.ConnectedStateProvider
-import com.example.core.provider.LocationStateProvider
 import com.example.core.usecase.GetNearbyEvents
 import com.example.core.usecase.GetPagedEventsFlow
 import com.example.core.usecase.SaveEvents
 import com.example.core.util.Loading
 import com.example.core.util.ext.flatMapFirst
 import com.example.coreandroid.base.FlowProcessor
+import com.example.coreandroid.model.location.LocationState
+import com.example.coreandroid.model.location.LocationStatus
+import com.example.coreandroid.provider.ConnectedStateProvider
+import com.example.coreandroid.provider.LocationStateProvider
 import com.example.coreandroid.util.addedToFavouritesMessage
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
@@ -34,8 +33,7 @@ class NearbyFlowProcessor @Inject constructor(
         currentState: () -> NearbyState,
         states: StateFlow<NearbyState>,
         intent: suspend (NearbyIntent) -> Unit,
-        signal: suspend (NearbySignal) -> Unit,
-        savedStateHandle: SavedStateHandle
+        signal: suspend (NearbySignal) -> Unit
     ): Flow<NearbyStateUpdate> = merge(
         intents.updates(coroutineScope, currentState, intent, signal),
         connectedStateProvider.updates(currentState),
@@ -108,7 +106,7 @@ class NearbyFlowProcessor @Inject constructor(
         currentEvents = currentState().events,
         toEvent = { selectable -> selectable.item }
     ) { offset ->
-        getNearbyEvents(latLng.lat, latLng.lng, offset)
+        getNearbyEvents(latLng.latitude, latLng.longitude, offset)
     }.map { resource ->
         NearbyStateUpdate.Events.Loaded(resource)
     }.onStart<NearbyStateUpdate> { emit(NearbyStateUpdate.Events.Loading) }

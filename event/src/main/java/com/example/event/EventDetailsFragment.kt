@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment
 import com.airbnb.epoxy.AsyncEpoxyController
 import com.example.coreandroid.description
 import com.example.coreandroid.eventInfo
-import com.example.coreandroid.model.Event
+import com.example.coreandroid.model.event.Event
 import com.example.coreandroid.util.delegate.FragmentArgument
 import com.example.coreandroid.util.ext.setupToolbar
 import com.example.coreandroid.util.ext.setupToolbarWithDrawerToggle

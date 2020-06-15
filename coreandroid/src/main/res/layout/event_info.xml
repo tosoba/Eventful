@@ -6,7 +6,7 @@
 
         <variable
             name="event"
-            type="com.example.coreandroid.model.Event" />
+            type="com.example.coreandroid.model.event.Event" />
 
         <variable
             name="margin"

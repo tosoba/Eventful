@@ -29,15 +29,16 @@ fun <T> T.handleSnackbarState(view: View): SendChannel<SnackbarState>
 
     var snackbar: Snackbar? = null
 
-    fun transitionTo(newState: SnackbarState) {
+    suspend fun transitionTo(newState: SnackbarState) {
         snackbar?.dismiss()
         snackbar = when (newState) {
             is SnackbarState.Shown -> Snackbar.make(view, newState.text, newState.length).apply {
                 newState.action?.let { setAction(it.msg, it.onClickListener) }
                 newState.onDismissed?.let { onDismissed ->
                     addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
-                        override fun onDismissed(transientBottomBar: Snackbar?, event: Int) =
+                        override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                             onDismissed()
+                        }
                     })
                 }
                 show()
@@ -48,7 +49,7 @@ fun <T> T.handleSnackbarState(view: View): SendChannel<SnackbarState>
 
     snackbarStateChannel.asFlow()
         .distinctUntilChanged()
-        .onEach { transitionTo(it) }
+        .onEach(::transitionTo)
         .launchIn(lifecycleScope)
 
     return snackbarStateChannel

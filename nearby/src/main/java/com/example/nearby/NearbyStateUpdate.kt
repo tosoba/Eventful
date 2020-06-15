@@ -3,12 +3,12 @@ package com.example.nearby
 import android.view.View
 import com.example.core.model.PagedResult
 import com.example.core.model.Resource
-import com.example.core.model.app.LocationStatus
 import com.example.core.model.event.IEvent
 import com.example.coreandroid.controller.SnackbarAction
 import com.example.coreandroid.controller.SnackbarState
-import com.example.coreandroid.model.Event
-import com.example.coreandroid.model.Selectable
+import com.example.coreandroid.model.event.Event
+import com.example.coreandroid.model.event.Selectable
+import com.example.coreandroid.model.location.LocationStatus
 import com.example.coreandroid.util.ClearSelectionUpdate
 import com.example.coreandroid.util.EventSelectionConfirmedUpdate
 import com.example.coreandroid.util.StateUpdate

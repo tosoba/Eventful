@@ -39,11 +39,14 @@ abstract class FlowViewModel<Intent : Any, Update : StateUpdate<State>, State : 
                 currentState = states::value,
                 states = states,
                 intent = ::intent,
-                signal = _signals::send,
-                savedStateHandle = savedStateHandle
+                signal = _signals::send
             )
             .onEach { Log.e("UPDATE", it.toString()) }
-            .scan(initialState) { state, update -> update(state) }
+            .scan(initialState) { currentState, update ->
+                val nextState = update(currentState)
+                processor.stateWillUpdate(currentState, nextState, update, savedStateHandle)
+                nextState
+            }
             .onEach {
                 Log.e("STATE", it.toString())
                 state = it

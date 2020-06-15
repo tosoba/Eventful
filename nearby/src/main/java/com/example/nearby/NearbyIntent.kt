@@ -1,6 +1,6 @@
 package com.example.nearby
 
-import com.example.coreandroid.model.Event
+import com.example.coreandroid.model.event.Event
 
 sealed class NearbyIntent {
     object LoadMoreResults : NearbyIntent()

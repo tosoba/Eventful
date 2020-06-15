@@ -1,14 +1,14 @@
 package com.example.eventsnearby
 
 import androidx.lifecycle.SavedStateHandle
-import com.example.core.model.app.LocationResult
-import com.example.core.model.app.LocationStatus
+import com.example.core.model.location.LocationResult
 import com.example.core.usecase.GetLocation
 import com.example.core.usecase.IsConnectedFlow
 import com.example.core.usecase.IsLocationAvailableFlow
 import com.example.core.util.ext.flatMapFirst
 import com.example.core.util.ext.takeWhileInclusive
 import com.example.coreandroid.base.FlowProcessor
+import com.example.coreandroid.model.location.LocationStatus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -29,8 +29,7 @@ class MainFlowProcessor @Inject constructor(
         currentState: () -> MainState,
         states: StateFlow<MainState>,
         intent: suspend (MainIntent) -> Unit,
-        signal: suspend (Unit) -> Unit,
-        savedStateHandle: SavedStateHandle
+        signal: suspend (Unit) -> Unit
     ): Flow<MainStateUpdate> = merge(
         intents.updates(currentState),
         isConnectedFlow()
@@ -38,6 +37,17 @@ class MainFlowProcessor @Inject constructor(
             .map { MainStateUpdate.Connection(it) },
         locationAvailabilityUpdates(states)
     )
+
+    override fun stateWillUpdate(
+        currentState: MainState,
+        nextState: MainState,
+        update: MainStateUpdate,
+        savedStateHandle: SavedStateHandle
+    ) {
+        if (update is MainStateUpdate.Location) {
+            savedStateHandle[MainState.KEY_LOCATION_STATE] = nextState.locationState
+        }
+    }
 
     private fun Flow<MainIntent>.updates(
         currentState: () -> MainState

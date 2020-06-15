@@ -2,8 +2,8 @@ package com.example.coreandroid.util
 
 import com.example.core.util.HoldsList
 import com.example.coreandroid.controller.SnackbarState
-import com.example.coreandroid.model.Event
-import com.example.coreandroid.model.Selectable
+import com.example.coreandroid.model.event.Event
+import com.example.coreandroid.model.event.Selectable
 import com.google.android.material.snackbar.Snackbar
 
 interface SelectableEventsState<S : SelectableEventsState<S>> {
@@ -35,7 +35,10 @@ interface ClearSelectionUpdate<S : SelectableEventsState<S>> : StateUpdate<S> {
 interface ToggleEventSelectionUpdate<S : SelectableEventsState<S>> : StateUpdate<S> {
     val event: Event
     override fun invoke(state: S): S = state.copyWithTransformedEvents {
-        if (it.item.id == event.id) Selectable(event, !it.selected) else it
+        if (it.item.id == event.id) Selectable(
+            event,
+            !it.selected
+        ) else it
     }
 }
 

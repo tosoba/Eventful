@@ -1,14 +1,14 @@
 package com.example.eventsnearby
 
 import androidx.lifecycle.ViewModel
-import com.example.core.provider.ConnectedStateProvider
-import com.example.core.provider.LocationStateProvider
 import com.example.coreandroid.base.savedStateViewModelFrom
 import com.example.coreandroid.di.scope.ActivityScoped
 import com.example.coreandroid.di.viewmodel.AssistedSavedStateViewModelFactory
 import com.example.coreandroid.di.viewmodel.InjectingSavedStateViewModelFactory
 import com.example.coreandroid.di.viewmodel.ViewModelKey
 import com.example.coreandroid.navigation.IFragmentFactory
+import com.example.coreandroid.provider.ConnectedStateProvider
+import com.example.coreandroid.provider.LocationStateProvider
 import com.example.event.EventModule
 import com.example.favourites.FavouritesModule
 import com.example.nearby.NearbyModule

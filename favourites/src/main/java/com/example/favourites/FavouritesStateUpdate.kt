@@ -4,8 +4,8 @@ import com.example.core.model.event.IEvent
 import com.example.core.util.DataList
 import com.example.core.util.LoadedSuccessfully
 import com.example.coreandroid.controller.SnackbarState
-import com.example.coreandroid.model.Event
-import com.example.coreandroid.model.Selectable
+import com.example.coreandroid.model.event.Event
+import com.example.coreandroid.model.event.Selectable
 import com.example.coreandroid.util.ClearSelectionUpdate
 import com.example.coreandroid.util.EventSelectionConfirmedUpdate
 import com.example.coreandroid.util.StateUpdate

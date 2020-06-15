@@ -1,6 +1,6 @@
 package com.example.search
 
-import com.example.coreandroid.model.Event
+import com.example.coreandroid.model.event.Event
 
 sealed class SearchIntent {
     data class NewSearch(val text: String, val confirmed: Boolean) : SearchIntent()

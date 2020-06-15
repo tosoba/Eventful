@@ -5,8 +5,8 @@ import com.airbnb.epoxy.CarouselModel_
 import com.airbnb.epoxy.EpoxyModelGroup
 import com.airbnb.epoxy.ModelGroupHolder
 import com.example.coreandroid.*
-import com.example.coreandroid.model.Event
-import com.example.coreandroid.model.Selectable
+import com.example.coreandroid.model.event.Event
+import com.example.coreandroid.model.event.Selectable
 import com.example.coreandroid.util.NestedScrollingCarouselModel
 
 open class EventItem(

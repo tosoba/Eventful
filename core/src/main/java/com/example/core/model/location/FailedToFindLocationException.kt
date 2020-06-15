@@ -1,3 +1,3 @@
-package com.example.core.model.app
+package com.example.core.model.location
 
 object FailedToFindLocationException : Throwable()

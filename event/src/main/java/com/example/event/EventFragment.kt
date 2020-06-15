@@ -11,7 +11,7 @@ import com.example.coreandroid.base.HasArgs
 import com.example.coreandroid.controller.SnackbarController
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.controller.handleSnackbarState
-import com.example.coreandroid.model.Event
+import com.example.coreandroid.model.event.Event
 import com.example.coreandroid.util.delegate.FragmentArgument
 import com.example.coreandroid.util.delegate.bottomNavItemSelectedViewPagerListener
 import com.example.coreandroid.util.delegate.viewBinding
@@ -53,10 +53,10 @@ class EventFragment :
     }
 
     private val viewPagerSwipedListener: ViewPagerPageSelectedListener
-            by viewPagerPageSelectedBottomNavListener(navigationItems.inverse()) { binding.eventBottomNavView }
+    by viewPagerPageSelectedBottomNavListener(navigationItems.inverse()) { binding.eventBottomNavView }
 
     private val bottomNavItemSelectedListener: BottomNavigationView.OnNavigationItemSelectedListener
-            by bottomNavItemSelectedViewPagerListener(navigationItems) { binding.eventViewPager }
+    by bottomNavItemSelectedViewPagerListener(navigationItems) { binding.eventViewPager }
 
     private lateinit var snackbarStateChannel: SendChannel<SnackbarState>
 

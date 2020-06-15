@@ -1,4 +1,4 @@
-package com.example.coreandroid.model
+package com.example.coreandroid.model.event
 
 import android.os.Parcelable
 import com.example.core.model.event.IVenue
