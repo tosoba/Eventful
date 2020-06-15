@@ -1,70 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
 
         <variable
-                name="event"
-                type="com.example.coreandroid.model.Event" />
+            name="event"
+            type="com.example.coreandroid.model.Event" />
 
         <variable
-                name="margin"
-                type="Integer" />
+            name="margin"
+            type="Integer" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@{margin != null ? margin : 0}">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@{margin != null ? margin : 0}">
 
         <TextView
-                android:id="@+id/event_price_text_view"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:paddingBottom="5dp"
-                android:text="@{event.formattedPriceRange}"
-                android:textAllCaps="true"
-                android:textColor="@color/greentText"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toTopOf="@+id/event_name_text_view"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+            android:id="@+id/event_price_text_view"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:paddingBottom="5dp"
+            android:text="@{event.formattedPriceRange}"
+            android:textAllCaps="true"
+            android:textColor="@color/greentText"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@+id/event_name_text_view"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <!-- TODO: animate long texts by sliding them sideways -->
         <TextView
-                android:id="@+id/event_name_text_view"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:paddingBottom="5dp"
-                android:text="@{event.name}"
-                android:textColor="@color/darkGrayText"
-                android:textSize="18sp"
-                app:layout_constraintBottom_toTopOf="@+id/event_address_text_view"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/event_price_text_view" />
+            android:id="@+id/event_name_text_view"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:paddingBottom="5dp"
+            android:text="@{event.name}"
+            android:textColor="@color/darkGrayText"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toTopOf="@+id/event_address_text_view"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/event_price_text_view" />
 
         <TextView
-                android:id="@+id/event_address_text_view"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:paddingBottom="5dp"
-                android:text="@{event.formattedAddress}"
-                android:textColor="@color/blueText"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/event_name_text_view" />
+            android:id="@+id/event_address_text_view"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:paddingBottom="5dp"
+            android:text="@{event.formattedAddress}"
+            android:textColor="@color/blueText"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/event_name_text_view" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

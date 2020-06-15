@@ -4,13 +4,14 @@
     <data>
 
         <variable
-                name="selected"
-                type="Boolean" />
+            name="selected"
+            type="Boolean" />
     </data>
 
-    <View xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@{selected ? @color/lightGrayText : @android:color/white}" />
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@{selected ? @color/lightGrayText : @android:color/white}"
+        android:foreground="?attr/selectableItemBackground" />
 
 </layout>

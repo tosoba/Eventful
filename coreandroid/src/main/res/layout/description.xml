@@ -6,20 +6,20 @@
         <import type="android.view.View" />
 
         <variable
-                name="text"
-                type="String" />
+            name="text"
+            type="String" />
 
         <variable
-                name="margin"
-                type="Integer" />
+            name="margin"
+            type="Integer" />
     </data>
 
     <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@{margin != null ? margin : 0}"
-            android:text="@{text}"
-            android:textSize="14sp"
-            android:visibility="@{text != null ? View.VISIBLE : View.GONE}" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@{margin != null ? margin : 0}"
+        android:text="@{text}"
+        android:textSize="14sp"
+        android:visibility="@{text != null ? View.VISIBLE : View.GONE}" />
 
 </layout>

@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
 
         <variable
-                name="kind"
-                type="String" />
+            name="kind"
+            type="String" />
     </data>
 
 
     <com.google.android.material.chip.Chip
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@{kind}"
-            android:textColor="@android:color/white"
-            android:textSize="12sp"
-            app:chipBackgroundColor="@color/blueText" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@{kind}"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        app:chipBackgroundColor="@color/blueText" />
 </layout>

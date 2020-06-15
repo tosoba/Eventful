@@ -6,35 +6,35 @@
         <import type="android.view.View" />
 
         <variable
-                name="onReloadClicked"
-                type="android.view.View.OnClickListener" />
+            name="onReloadClicked"
+            type="android.view.View.OnClickListener" />
 
         <variable
-                name="message"
-                type="String" />
+            name="message"
+            type="String" />
     </data>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="vertical">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical">
 
         <ImageButton
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_margin="5dp"
-                android:visibility="@{onReloadClicked != null ? View.VISIBLE : View.GONE}"
-                android:clickable="@{onReloadClicked != null}"
-                android:onClick="@{onReloadClicked}"
-                android:src="@drawable/reload" />
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_margin="5dp"
+            android:clickable="@{onReloadClicked != null}"
+            android:onClick="@{onReloadClicked}"
+            android:src="@drawable/reload"
+            android:visibility="@{onReloadClicked != null ? View.VISIBLE : View.GONE}" />
 
         <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="@{message}"
-                android:visibility="@{message != null ? View.VISIBLE : View.GONE}" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@{message}"
+            android:visibility="@{message != null ? View.VISIBLE : View.GONE}" />
 
     </LinearLayout>
 </layout>

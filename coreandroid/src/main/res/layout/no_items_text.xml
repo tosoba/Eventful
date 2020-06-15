@@ -4,16 +4,16 @@
     <data>
 
         <variable
-                name="text"
-                type="String" />
+            name="text"
+            type="String" />
     </data>
 
     <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@{text}"
-            android:textAlignment="center"
-            android:textColor="@color/blueText"
-            android:textSize="20sp" />
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="@{text}"
+        android:textAlignment="center"
+        android:textColor="@color/blueText"
+        android:textSize="20sp" />
 
 </layout>
