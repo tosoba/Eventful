@@ -6,6 +6,7 @@ import com.example.core.usecase.GetSavedEventsFlow
 import com.example.core.util.DataList
 import com.example.test.rule.event
 import com.example.test.rule.mockLog
+import com.example.test.rule.mockedList
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -61,6 +62,34 @@ class FavouritesFlowProcessorTests {
     ): Flow<FavouritesStateUpdate> {
         return updates(testScope, intents, currentState, states, intent, signal)
     }
+
+    @Test
+    fun loadFavouritesTest() = testScope.runBlockingTest {
+        val events = mockedList(20) { event(it) }
+        val getSavedEventsFlow = mockk<GetSavedEventsFlow> {
+            every { this@mockk(any()) } returns flowOf(events)
+        }
+        val currentState = mockk<() -> FavouritesState> {
+            every { this@mockk() } returns FavouritesState()
+        }
+        val processor = flowProcessor(getSavedEventsFlow = getSavedEventsFlow)
+        val limit = currentState().limit + FavouritesFlowProcessor.limitIncrement
+
+        val updates = processor
+            .updates(
+                intents = flowOf(FavouritesIntent.LoadFavourites),
+                currentState = currentState
+            )
+            .toList()
+
+        verify(exactly = 1) { getSavedEventsFlow(limit) }
+        assert(updates.size == 1)
+        assert(updates.first() == FavouritesStateUpdate.Events(events))
+    }
+
+    // test for multiple getSavedEventsFlow emissions
+
+    // test for removeFromFavouritesUpdates
 
     @Test
     fun loadFavouritesLimitHitTest() = testScope.runBlockingTest {
