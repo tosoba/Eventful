@@ -1,7 +1,6 @@
 package com.example.favourites
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.SavedStateHandle
 import com.example.core.usecase.DeleteEvents
 import com.example.core.usecase.GetSavedEventsFlow
 import com.example.core.util.DataList
@@ -14,10 +13,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Before
@@ -59,15 +55,11 @@ class FavouritesFlowProcessorTests {
     private fun FavouritesFlowProcessor.updates(
         intents: Flow<FavouritesIntent> = mockk(relaxed = true),
         currentState: () -> FavouritesState = mockk(relaxed = true),
+        states: StateFlow<FavouritesState> = mockk(relaxed = true),
         intent: suspend (FavouritesIntent) -> Unit = mockk(relaxed = true),
-        signal: suspend (FavouritesSignal) -> Unit = mockk(relaxed = true),
-        savedStateHandle: SavedStateHandle = SavedStateHandle()
+        signal: suspend (FavouritesSignal) -> Unit = mockk(relaxed = true)
     ): Flow<FavouritesStateUpdate> {
-        return updates(testScope, intents, currentState, intent, signal, savedStateHandle)
-    }
-
-    fun loadFavouritesTest() {
-
+        return updates(testScope, intents, currentState, states, intent, signal)
     }
 
     @Test
@@ -109,5 +101,15 @@ class FavouritesFlowProcessorTests {
 
         assert(updates.size == 1)
         assert(updates.first() == FavouritesStateUpdate.ClearSelection)
+    }
+
+    @Test
+    fun hideSnackbarTest() = testScope.runBlockingTest {
+        val updates = flowProcessor()
+            .updates(intents = flowOf(FavouritesIntent.HideSnackbar))
+            .toList()
+
+        assert(updates.size == 1)
+        assert(updates.first() == FavouritesStateUpdate.HideSnackbar)
     }
 }
