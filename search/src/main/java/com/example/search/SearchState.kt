@@ -1,10 +1,12 @@
 package com.example.search
 
+import androidx.lifecycle.SavedStateHandle
 import com.example.core.model.search.SearchSuggestion
 import com.example.core.util.PagedDataList
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.model.event.Event
 import com.example.coreandroid.model.event.Selectable
+import com.example.coreandroid.model.location.LocationState
 import com.example.coreandroid.util.SelectableEventsSnackbarState
 
 data class SearchState(
@@ -13,6 +15,10 @@ data class SearchState(
     override val events: PagedDataList<Selectable<Event>> = PagedDataList(),
     val snackbarState: SnackbarState = SnackbarState.Hidden
 ) : SelectableEventsSnackbarState<SearchState> {
+
+    constructor(savedStateHandle: SavedStateHandle) : this(
+        searchText = savedStateHandle[KEY_SEARCH_TEXT] ?: ""
+    )
 
     override fun copyWithTransformedEvents(
         transform: (Selectable<Event>) -> Selectable<Event>
@@ -29,4 +35,8 @@ data class SearchState(
     override fun copyWithSnackbarState(snackbarState: SnackbarState): SearchState = copy(
         snackbarState = snackbarState
     )
+
+    companion object {
+        const val KEY_SEARCH_TEXT = "key_search_text"
+    }
 }

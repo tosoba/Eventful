@@ -1,5 +1,6 @@
 package com.example.search
 
+import androidx.lifecycle.SavedStateHandle
 import com.example.core.model.PagedResult
 import com.example.core.model.Resource
 import com.example.core.model.event.IEvent
@@ -24,6 +25,17 @@ class SearchFlowProcessor @Inject constructor(
     private val connectedStateProvider: ConnectedStateProvider,
     private val ioDispatcher: CoroutineDispatcher
 ) : FlowProcessor<SearchIntent, SearchStateUpdate, SearchState, SearchSignal> {
+
+    override fun stateWillUpdate(
+        currentState: SearchState,
+        nextState: SearchState,
+        update: SearchStateUpdate,
+        savedStateHandle: SavedStateHandle
+    ) {
+        if (update is SearchStateUpdate.Events.Loading && update.searchText != null) {
+            savedStateHandle[SearchState.KEY_SEARCH_TEXT] = update.searchText
+        }
+    }
 
     override fun updates(
         coroutineScope: CoroutineScope,

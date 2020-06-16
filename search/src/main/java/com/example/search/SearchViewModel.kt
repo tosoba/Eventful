@@ -16,7 +16,7 @@ class SearchViewModel @AssistedInject constructor(
     processor: SearchFlowProcessor,
     @Assisted savedStateHandle: SavedStateHandle
 ) : FlowViewModel<SearchIntent, SearchStateUpdate, SearchState, SearchSignal>(
-    initialState = savedStateHandle["initialState"] ?: SearchState(),
+    initialState = SearchState(savedStateHandle),
     processor = processor,
     savedStateHandle = savedStateHandle
 ) {

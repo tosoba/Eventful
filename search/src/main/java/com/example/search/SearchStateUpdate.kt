@@ -37,7 +37,7 @@ sealed class SearchStateUpdate :
     }
 
     sealed class Events : SearchStateUpdate() {
-        class Loading(private val searchText: String? = null) : Events() {
+        class Loading(val searchText: String? = null) : Events() {
             override fun invoke(state: SearchState): SearchState = state.copy(
                 events = state.events.copyWithLoadingStatus,
                 searchText = searchText ?: state.searchText
