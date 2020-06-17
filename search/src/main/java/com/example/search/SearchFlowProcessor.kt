@@ -45,7 +45,15 @@ class SearchFlowProcessor @Inject constructor(
         intent: suspend (SearchIntent) -> Unit,
         signal: suspend (SearchSignal) -> Unit
     ): Flow<SearchStateUpdate> = merge(
-        intents.updates(coroutineScope, currentState, intent, signal),
+        intents
+            .run {
+                val initialSearchText = currentState().searchText
+                if (initialSearchText.isNotEmpty()) onStart {
+                    intent(SearchIntent.NewSearch(initialSearchText, false))
+                }
+                else this
+            }
+            .updates(coroutineScope, currentState, intent, signal),
         connectedStateProvider.updates(currentState)
     )
 
