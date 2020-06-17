@@ -2,11 +2,19 @@ package com.example.search
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.example.core.usecase.*
+import com.example.core.util.DataList
+import com.example.core.util.PagedDataList
+import com.example.coreandroid.model.event.Selectable
 import com.example.coreandroid.provider.ConnectedStateProvider
+import com.example.coreandroid.util.addedToFavouritesMessage
+import com.example.coreandroid.util.removedFromFavouritesMessage
 import com.example.test.rule.event
 import com.example.test.rule.mockLog
+import com.example.test.rule.mockedList
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -65,8 +73,43 @@ class SearchFlowProcessorTests {
         states: StateFlow<SearchState> = mockk(relaxed = true),
         intent: suspend (SearchIntent) -> Unit = mockk(relaxed = true),
         signal: suspend (SearchSignal) -> Unit = mockk(relaxed = true)
-    ): Flow<SearchStateUpdate> {
-        return updates(testScope, intents, currentState, states, intent, signal)
+    ): Flow<SearchStateUpdate> = updates(testScope, intents, currentState, states, intent, signal)
+
+    @Test
+    fun addToFavouritesTest() = testScope.runBlockingTest {
+        val saveEvents = mockk<SaveEvents>(relaxed = true)
+        val selectableEvents = mockedList(20) { event(it) }
+            .mapIndexed { index, event -> Selectable(event, index % 2 == 0) }
+        val currentState = mockk<() -> SearchState> {
+            every { this@mockk() } returns SearchState(
+                events = PagedDataList(selectableEvents)
+            )
+        }
+
+        abstract class Signal {
+            abstract suspend operator fun invoke(signal: SearchSignal)
+        }
+
+        val signal = mockk<Signal>(relaxed = true)
+
+        val updates = flowProcessor(saveEvents = saveEvents)
+            .updates(
+                intents = flowOf(SearchIntent.AddToFavouritesClicked),
+                currentState = currentState,
+                signal = signal::invoke
+            )
+            .toList()
+
+        val selectedEvents = selectableEvents.filter { it.selected }.map { it.item }
+        verify(exactly = 2) { currentState() }
+        coVerify(exactly = 1) { saveEvents(selectedEvents) }
+        coVerify(exactly = 1) { signal(SearchSignal.FavouritesSaved) }
+        assert(updates.size == 1)
+        val update = updates.first()
+        assert(
+            update is SearchStateUpdate.Events.AddedToFavourites
+                    && update.snackbarText == addedToFavouritesMessage(eventsCount = selectedEvents.size)
+        )
     }
 
     @Test
