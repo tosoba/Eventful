@@ -4,12 +4,13 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.example.core.usecase.DeleteEvents
 import com.example.core.usecase.GetSavedEventsFlow
 import com.example.core.util.DataList
+import com.example.coreandroid.model.event.Event
+import com.example.coreandroid.model.event.Selectable
+import com.example.coreandroid.util.removedFromFavouritesMessage
 import com.example.test.rule.event
 import com.example.test.rule.mockLog
 import com.example.test.rule.mockedList
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
+import io.mockk.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -72,10 +73,9 @@ class FavouritesFlowProcessorTests {
         val currentState = mockk<() -> FavouritesState> {
             every { this@mockk() } returns FavouritesState()
         }
-        val processor = flowProcessor(getSavedEventsFlow = getSavedEventsFlow)
         val limit = currentState().limit + FavouritesFlowProcessor.limitIncrement
 
-        val updates = processor
+        val updates = flowProcessor(getSavedEventsFlow = getSavedEventsFlow)
             .updates(
                 intents = flowOf(FavouritesIntent.LoadFavourites),
                 currentState = currentState
@@ -87,19 +87,76 @@ class FavouritesFlowProcessorTests {
         assert(updates.first() == FavouritesStateUpdate.Events(events))
     }
 
-    // test for multiple getSavedEventsFlow emissions
+    @Test
+    fun loadFavouritesMultipleEmissionsTest() = testScope.runBlockingTest {
+        val events1stEmission = mockedList(20) { event(it) }
+        val events2ndEmission = mockedList(25) { event(it) }
+        val getSavedEventsFlow = mockk<GetSavedEventsFlow> {
+            every { this@mockk(any()) } returns flowOf(events1stEmission, events2ndEmission)
+        }
+        val currentState = mockk<() -> FavouritesState> {
+            every { this@mockk() } returns FavouritesState()
+        }
+        val limit = currentState().limit + FavouritesFlowProcessor.limitIncrement
 
-    // test for removeFromFavouritesUpdates
+        val updates = flowProcessor(getSavedEventsFlow = getSavedEventsFlow)
+            .updates(
+                intents = flowOf(FavouritesIntent.LoadFavourites),
+                currentState = currentState
+            )
+            .toList()
+
+        verify(exactly = 1) { getSavedEventsFlow(limit) }
+        assert(updates.size == 2)
+        assert(updates.first() == FavouritesStateUpdate.Events(events1stEmission))
+        assert(updates.last() == FavouritesStateUpdate.Events(events2ndEmission))
+    }
+
+    @Test
+    fun removeFromFavouritesTest() = testScope.runBlockingTest {
+        val deleteEvents = mockk<DeleteEvents>(relaxed = true)
+        val selectableEvents = mockedList(20) { event(it) }
+            .mapIndexed { index, event -> Selectable(event, index % 2 == 0) }
+        val currentState = mockk<() -> FavouritesState> {
+            every { this@mockk() } returns FavouritesState(
+                events = DataList(selectableEvents)
+            )
+        }
+
+        abstract class Signal {
+            abstract suspend operator fun invoke(signal: FavouritesSignal)
+        }
+
+        val signal = mockk<Signal>(relaxed = true)
+
+        val updates = flowProcessor(deleteEvents = deleteEvents)
+            .updates(
+                intents = flowOf(FavouritesIntent.RemoveFromFavouritesClicked),
+                currentState = currentState,
+                signal = signal::invoke
+            )
+            .toList()
+
+        val selectedEvents = selectableEvents.filter { it.selected }.map { it.item }
+        verify(exactly = 1) { currentState() }
+        coVerify(exactly = 1) { deleteEvents(selectedEvents) }
+        coVerify(exactly = 1) { signal(FavouritesSignal.FavouritesRemoved) }
+        assert(updates.size == 1)
+        val update = updates.first()
+        assert(
+            update is FavouritesStateUpdate.RemovedFromFavourites
+                    && update.snackbarText == removedFromFavouritesMessage(eventsCount = selectedEvents.size)
+        )
+    }
 
     @Test
     fun loadFavouritesLimitHitTest() = testScope.runBlockingTest {
         val getSavedEventsFlow = mockk<GetSavedEventsFlow>(relaxed = true)
-        val processor = flowProcessor(getSavedEventsFlow = getSavedEventsFlow)
         val currentState = mockk<() -> FavouritesState> {
             every { this@mockk() } returns FavouritesState(events = DataList(limitHit = true))
         }
 
-        processor
+        flowProcessor(getSavedEventsFlow = getSavedEventsFlow)
             .updates(
                 intents = flowOf(FavouritesIntent.LoadFavourites),
                 currentState = currentState
