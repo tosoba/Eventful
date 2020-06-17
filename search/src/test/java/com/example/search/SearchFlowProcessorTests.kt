@@ -6,12 +6,11 @@ import com.example.core.model.Resource
 import com.example.core.model.event.IEvent
 import com.example.core.model.search.SearchSuggestion
 import com.example.core.usecase.*
-import com.example.core.util.DataList
 import com.example.core.util.PagedDataList
+import com.example.coreandroid.model.event.Event
 import com.example.coreandroid.model.event.Selectable
 import com.example.coreandroid.provider.ConnectedStateProvider
 import com.example.coreandroid.util.addedToFavouritesMessage
-import com.example.coreandroid.util.removedFromFavouritesMessage
 import com.example.test.rule.event
 import com.example.test.rule.mockLog
 import com.example.test.rule.mockedList
@@ -27,6 +26,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.Description
 
 @ExperimentalCoroutinesApi
 @FlowPreview
@@ -118,6 +118,60 @@ class SearchFlowProcessorTests {
 
     //TODO: newSearch tests: distinct, searchEventsUpdates
     //loadMoreResultsUpdates tests: filter, searchEventsUpdates
+    //connectedStateProvider test
+
+    @Test
+    fun initialSearchTextTest() = testScope.runBlockingTest {
+        val searchText = "test"
+        val currentState = mockk<() -> SearchState> {
+            every { this@mockk() } returns SearchState(searchText = searchText)
+        }
+        val getPagedEventsFlow = mockk<GetPagedEventsFlow> {
+            every { this@mockk<Selectable<Event>>(any(), any(), any()) } returns emptyFlow()
+        }
+        val saveSearchSuggestion = mockk<SaveSearchSuggestion>(relaxed = true)
+        val getSearchSuggestions = mockk<GetSearchSuggestions> {
+            coEvery { this@mockk(any()) } returns emptyList()
+        }
+
+        flowProcessor(
+            saveSearchSuggestion = saveSearchSuggestion,
+            getPagedEventsFlow = getPagedEventsFlow,
+            getSearchSuggestions = getSearchSuggestions
+        ).updates(
+            intents = emptyFlow(),
+            currentState = currentState
+        ).launchIn(testScope)
+
+        coVerify(exactly = 1) { getSearchSuggestions(searchText) }
+        coVerify(exactly = 1) { getPagedEventsFlow<Selectable<Event>>(any(), any(), any()) }
+    }
+
+    @Test
+    fun noInitialSearchTextTest() = testScope.runBlockingTest {
+        val currentState = mockk<() -> SearchState> {
+            every { this@mockk() } returns SearchState()
+        }
+        val getPagedEventsFlow = mockk<GetPagedEventsFlow> {
+            every { this@mockk<Selectable<Event>>(any(), any(), any()) } returns emptyFlow()
+        }
+        val saveSearchSuggestion = mockk<SaveSearchSuggestion>(relaxed = true)
+        val getSearchSuggestions = mockk<GetSearchSuggestions> {
+            coEvery { this@mockk(any()) } returns emptyList()
+        }
+
+        flowProcessor(
+            saveSearchSuggestion = saveSearchSuggestion,
+            getPagedEventsFlow = getPagedEventsFlow,
+            getSearchSuggestions = getSearchSuggestions
+        ).updates(
+            intents = emptyFlow(),
+            currentState = currentState
+        ).launchIn(testScope)
+
+        coVerify(exactly = 0) { getSearchSuggestions(any()) }
+        coVerify(exactly = 0) { getPagedEventsFlow<Selectable<Event>>(any(), any(), any()) }
+    }
 
     @Test
     fun addToFavouritesTest() = testScope.runBlockingTest {

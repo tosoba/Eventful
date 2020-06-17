@@ -4,13 +4,15 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.example.core.usecase.DeleteEvents
 import com.example.core.usecase.GetSavedEventsFlow
 import com.example.core.util.DataList
-import com.example.coreandroid.model.event.Event
 import com.example.coreandroid.model.event.Selectable
 import com.example.coreandroid.util.removedFromFavouritesMessage
 import com.example.test.rule.event
 import com.example.test.rule.mockLog
 import com.example.test.rule.mockedList
-import io.mockk.*
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -110,6 +112,11 @@ class FavouritesFlowProcessorTests {
         assert(updates.size == 2)
         assert(updates.first() == FavouritesStateUpdate.Events(events1stEmission))
         assert(updates.last() == FavouritesStateUpdate.Events(events2ndEmission))
+    }
+
+    @Test
+    fun loadFavouritesOnStartTest() = testScope.runBlockingTest {
+
     }
 
     @Test

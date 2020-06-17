@@ -49,7 +49,7 @@ class SearchFlowProcessor @Inject constructor(
             .run {
                 val initialSearchText = currentState().searchText
                 if (initialSearchText.isNotEmpty()) onStart {
-                    intent(SearchIntent.NewSearch(initialSearchText, false))
+                    emit(SearchIntent.NewSearch(initialSearchText, false))
                 }
                 else this
             }
