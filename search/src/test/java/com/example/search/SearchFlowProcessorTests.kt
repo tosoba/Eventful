@@ -26,7 +26,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.Description
 
 @ExperimentalCoroutinesApi
 @FlowPreview
@@ -116,7 +115,32 @@ class SearchFlowProcessorTests {
         saveSearchSuggestion = saveSearchSuggestion
     )
 
-    //TODO: newSearch tests: distinct, searchEventsUpdates
+    @Test
+    fun distinctNewSearchTest() = testScope.runBlockingTest {
+        val searchText = "test"
+        val currentState = mockk<() -> SearchState> {
+            every { this@mockk() } returns SearchState()
+        }
+        val getPagedEventsFlow = mockk<GetPagedEventsFlow> {
+            every { this@mockk<Selectable<Event>>(any(), any(), any()) } returns emptyFlow()
+        }
+        val getSearchSuggestions = mockk<GetSearchSuggestions> {
+            coEvery { this@mockk(any()) } returns emptyList()
+        }
+
+        flowProcessor(
+            getPagedEventsFlow = getPagedEventsFlow,
+            getSearchSuggestions = getSearchSuggestions
+        ).updates(
+            intents = (1..2).map { SearchIntent.NewSearch(searchText, false) }.asFlow(),
+            currentState = currentState
+        ).launchIn(testScope)
+
+        coVerify(exactly = 1) { getSearchSuggestions(searchText) }
+        coVerify(exactly = 1) { getPagedEventsFlow<Selectable<Event>>(any(), any(), any()) }
+    }
+
+    //TODO: newSearch tests: searchEventsUpdates
     //loadMoreResultsUpdates tests: filter, searchEventsUpdates
     //connectedStateProvider test
 
@@ -129,13 +153,11 @@ class SearchFlowProcessorTests {
         val getPagedEventsFlow = mockk<GetPagedEventsFlow> {
             every { this@mockk<Selectable<Event>>(any(), any(), any()) } returns emptyFlow()
         }
-        val saveSearchSuggestion = mockk<SaveSearchSuggestion>(relaxed = true)
         val getSearchSuggestions = mockk<GetSearchSuggestions> {
             coEvery { this@mockk(any()) } returns emptyList()
         }
 
         flowProcessor(
-            saveSearchSuggestion = saveSearchSuggestion,
             getPagedEventsFlow = getPagedEventsFlow,
             getSearchSuggestions = getSearchSuggestions
         ).updates(
@@ -155,13 +177,11 @@ class SearchFlowProcessorTests {
         val getPagedEventsFlow = mockk<GetPagedEventsFlow> {
             every { this@mockk<Selectable<Event>>(any(), any(), any()) } returns emptyFlow()
         }
-        val saveSearchSuggestion = mockk<SaveSearchSuggestion>(relaxed = true)
         val getSearchSuggestions = mockk<GetSearchSuggestions> {
             coEvery { this@mockk(any()) } returns emptyList()
         }
 
         flowProcessor(
-            saveSearchSuggestion = saveSearchSuggestion,
             getPagedEventsFlow = getPagedEventsFlow,
             getSearchSuggestions = getSearchSuggestions
         ).updates(
