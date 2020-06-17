@@ -115,8 +115,43 @@ class FavouritesFlowProcessorTests {
     }
 
     @Test
-    fun loadFavouritesOnStartTest() = testScope.runBlockingTest {
+    fun loadingFavouritesOnStartTest() = testScope.runBlockingTest {
+        val getSavedEventsFlow = mockk<GetSavedEventsFlow> {
+            every { this@mockk(any()) } returns flowOf(mockedList(20) { event(it) })
+        }
+        val currentState = mockk<() -> FavouritesState> {
+            every { this@mockk() } returns FavouritesState()
+        }
+        val limit = currentState().limit + FavouritesFlowProcessor.limitIncrement
 
+        flowProcessor(
+            getSavedEventsFlow = getSavedEventsFlow,
+            loadFavouritesOnStart = true
+        ).updates(
+            intents = emptyFlow(),
+            currentState = currentState
+        ).toList()
+
+        verify(exactly = 1) { getSavedEventsFlow(limit) }
+    }
+
+    @Test
+    fun noLoadingFavouritesOnStartTest() = testScope.runBlockingTest {
+        val getSavedEventsFlow = mockk<GetSavedEventsFlow>(relaxed = true)
+        val currentState = mockk<() -> FavouritesState> {
+            every { this@mockk() } returns FavouritesState()
+        }
+        val limit = currentState().limit + FavouritesFlowProcessor.limitIncrement
+
+        flowProcessor(
+            getSavedEventsFlow = getSavedEventsFlow,
+            loadFavouritesOnStart = false
+        ).updates(
+            intents = emptyFlow(),
+            currentState = currentState
+        ).toList()
+
+        verify(exactly = 0) { getSavedEventsFlow(limit) }
     }
 
     @Test
