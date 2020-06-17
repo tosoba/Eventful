@@ -1,6 +1,10 @@
 package com.example.search
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.example.core.model.PagedResult
+import com.example.core.model.Resource
+import com.example.core.model.event.IEvent
+import com.example.core.model.search.SearchSuggestion
 import com.example.core.usecase.*
 import com.example.core.util.DataList
 import com.example.core.util.PagedDataList
@@ -11,18 +15,13 @@ import com.example.coreandroid.util.removedFromFavouritesMessage
 import com.example.test.rule.event
 import com.example.test.rule.mockLog
 import com.example.test.rule.mockedList
-import io.mockk.coVerify
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
+import com.example.test.rule.relaxedMockedList
+import io.mockk.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Before
@@ -74,6 +73,51 @@ class SearchFlowProcessorTests {
         intent: suspend (SearchIntent) -> Unit = mockk(relaxed = true),
         signal: suspend (SearchSignal) -> Unit = mockk(relaxed = true)
     ): Flow<SearchStateUpdate> = updates(testScope, intents, currentState, states, intent, signal)
+
+    @Test
+    fun newSearchShouldSaveTest() = testScope.runBlockingTest {
+        val saveSearchSuggestion = mockk<SaveSearchSuggestion>(relaxed = true)
+        val searchText = "test"
+
+        flowProcessorForShouldSaveTest(saveSearchSuggestion = saveSearchSuggestion)
+            .updates(
+                intents = flowOf(SearchIntent.NewSearch(searchText, true))
+            )
+            .launchIn(testScope)
+
+        coVerify(exactly = 1) { saveSearchSuggestion(searchText) }
+    }
+
+    @Test
+    fun newSearchShouldNotSaveTest() = testScope.runBlockingTest {
+        val saveSearchSuggestion = mockk<SaveSearchSuggestion>(relaxed = true)
+        val searchText = "test"
+
+        flowProcessorForShouldSaveTest(saveSearchSuggestion = saveSearchSuggestion)
+            .updates(
+                intents = flowOf(SearchIntent.NewSearch(searchText, false))
+            )
+            .launchIn(testScope)
+
+        coVerify(exactly = 0) { saveSearchSuggestion(searchText) }
+    }
+
+    private fun flowProcessorForShouldSaveTest(
+        saveSearchSuggestion: SaveSearchSuggestion
+    ) = flowProcessor(
+        searchEvents = mockk {
+            coEvery { this@mockk(any(), any()) } returns Resource.successWith(
+                PagedResult(relaxedMockedList<IEvent>(20), 1, 1)
+            )
+        },
+        getSearchSuggestions = mockk {
+            coEvery { this@mockk(any()) } returns emptyList<SearchSuggestion>()
+        },
+        saveSearchSuggestion = saveSearchSuggestion
+    )
+
+    //TODO: newSearch tests: distinct, searchEventsUpdates
+    //loadMoreResultsUpdates tests: filter, searchEventsUpdates
 
     @Test
     fun addToFavouritesTest() = testScope.runBlockingTest {
