@@ -15,9 +15,8 @@ import com.example.coreandroid.util.StateUpdate
 import com.example.coreandroid.util.ToggleEventSelectionUpdate
 import com.haroldadmin.cnradapter.NetworkResponse
 
-sealed class SearchStateUpdate :
-    StateUpdate<SearchState> {
-    class ToggleEventSelection(
+sealed class SearchStateUpdate : StateUpdate<SearchState> {
+    data class ToggleEventSelection(
         override val event: Event
     ) : SearchStateUpdate(),
         ToggleEventSelectionUpdate<SearchState>
@@ -31,20 +30,20 @@ sealed class SearchStateUpdate :
             .copyWithSnackbarState(snackbarState = SnackbarState.Hidden)
     }
 
-    class Suggestions(private val suggestions: List<SearchSuggestion>) : SearchStateUpdate() {
+    data class Suggestions(private val suggestions: List<SearchSuggestion>) : SearchStateUpdate() {
         override fun invoke(state: SearchState): SearchState = state
             .copy(searchSuggestions = suggestions)
     }
 
     sealed class Events : SearchStateUpdate() {
-        class Loading(val searchText: String? = null) : Events() {
+        data class Loading(val searchText: String? = null) : Events() {
             override fun invoke(state: SearchState): SearchState = state.copy(
                 events = state.events.copyWithLoadingStatus,
                 searchText = searchText ?: state.searchText
             )
         }
 
-        class Loaded(
+        data class Loaded(
             private val resource: Resource<PagedResult<IEvent>>,
             private val newSearch: Boolean
         ) : Events() {
@@ -89,7 +88,7 @@ sealed class SearchStateUpdate :
             }
         }
 
-        class AddedToFavourites(
+        data class AddedToFavourites(
             override val snackbarText: String,
             override val onSnackbarDismissed: () -> Unit
         ) : SearchStateUpdate(),
