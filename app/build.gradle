@@ -111,7 +111,7 @@ dependencies {
     api "com.google.guava:guava:$guavaVersion"
     implementation "com.markodevcic.peko:peko:$pekoVersion"
 
-    testImplementation "junit:junit:$junitVersion"
+    testImplementation "junit:junit:$junit4Version"
     androidTestImplementation "androidx.test:runner:$testRunnerVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
 }

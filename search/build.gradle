@@ -3,6 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'org.jmailen.kotlinter'
+apply plugin: "de.mannodermaus.android-junit5"
 
 android {
     compileSdkVersion 29
@@ -74,7 +75,10 @@ dependencies {
     implementation "com.github.haroldadmin:NetworkResponseAdapter:$networkResponseAdapterVersion"
 
     testImplementation project(':test')
-    testImplementation "junit:junit:$junitVersion"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junit5Version"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit5Version"
+    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:$junit5Version"
+    testImplementation "junit:junit:$junit4Version"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinxCoroutinesTestVersion"
     testImplementation "io.mockk:mockk:$mockkVersion"
     testImplementation "androidx.arch.core:core-testing:$archCoreTestingVersion"

@@ -1,6 +1,5 @@
 package com.example.search
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.example.core.model.PagedResult
 import com.example.core.model.Resource
 import com.example.core.model.event.IEvent
@@ -22,10 +21,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.test.*
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
+import org.junit.jupiter.api.*
 
 @ExperimentalCoroutinesApi
 @FlowPreview
@@ -33,16 +29,13 @@ class SearchFlowProcessorTests {
     private val testDispatcher = TestCoroutineDispatcher()
     private val testScope = TestCoroutineScope(testDispatcher)
 
-    @get:Rule
-    val instantTaskExecutorRule: InstantTaskExecutorRule = InstantTaskExecutorRule()
-
-    @Before
+    @BeforeEach
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         mockLog()
     }
 
-    @After
+    @AfterEach
     fun cleanUp() {
         Dispatchers.resetMain()
     }
@@ -252,6 +245,7 @@ class SearchFlowProcessorTests {
     }
 
     @Test
+    @DisplayName("When Intent.HideSnackbar - should emit Update.HideSnackbar")
     fun hideSnackbarTest() = testScope.runBlockingTest {
         val updates = flowProcessor()
             .updates(intents = flowOf(SearchIntent.HideSnackbar))

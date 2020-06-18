@@ -56,7 +56,7 @@ dependencies {
     implementation "com.github.haroldadmin:NetworkResponseAdapter:$networkResponseAdapterVersion"
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
 
-    testImplementation "junit:junit:$junitVersion"
+    testImplementation "junit:junit:$junit4Version"
     androidTestImplementation "androidx.test:runner:$testRunnerVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
 }

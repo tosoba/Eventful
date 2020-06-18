@@ -97,7 +97,7 @@ dependencies {
     implementation "com.google.code.gson:gson:$gsonVersion"
     implementation "org.jsoup:jsoup:$jsoupVersion"
 
-    testImplementation "junit:junit:$junitVersion"
+    testImplementation "junit:junit:$junit4Version"
     testImplementation "io.mockk:mockk:$mockkVersion"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinxCoroutinesTestVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"

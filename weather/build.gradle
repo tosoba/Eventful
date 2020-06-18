@@ -71,7 +71,7 @@ dependencies {
 
     implementation "com.google.android.gms:play-services-maps:$playServicesMapsVersion"
 
-    testImplementation "junit:junit:$junitVersion"
+    testImplementation "junit:junit:$junit4Version"
     androidTestImplementation "androidx.test:runner:$testRunnerVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
