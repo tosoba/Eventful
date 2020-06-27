@@ -4,72 +4,28 @@ import com.example.core.model.PagedResult
 import com.example.core.model.Resource
 import com.example.core.model.event.IEvent
 import com.example.core.model.search.SearchSuggestion
-import com.example.core.usecase.*
-import com.example.core.util.Failure
-import com.example.core.util.LoadedSuccessfully
+import com.example.core.usecase.GetPagedEventsFlow
+import com.example.core.usecase.GetSearchSuggestions
+import com.example.core.usecase.SaveEvents
+import com.example.core.usecase.SaveSearchSuggestion
 import com.example.core.util.PagedDataList
 import com.example.coreandroid.model.event.Event
 import com.example.coreandroid.model.event.Selectable
-import com.example.coreandroid.provider.ConnectedStateProvider
 import com.example.coreandroid.util.addedToFavouritesMessage
 import com.example.test.rule.event
-import com.example.test.rule.mockLog
 import com.example.test.rule.mockedList
 import com.example.test.rule.relaxedMockedList
 import io.mockk.*
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.test.*
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class SearchFlowProcessorTests {
-    private val testDispatcher = TestCoroutineDispatcher()
-    private val testScope = TestCoroutineScope(testDispatcher)
-
-    @BeforeEach
-    fun setup() {
-        Dispatchers.setMain(testDispatcher)
-        mockLog()
-    }
-
-    @AfterEach
-    fun cleanUp() {
-        Dispatchers.resetMain()
-    }
-
-    private fun flowProcessor(
-        searchEvents: SearchEvents = mockk(relaxed = true),
-        getPagedEventsFlow: GetPagedEventsFlow = GetPagedEventsFlow(testDispatcher),
-        saveEvents: SaveEvents = mockk(relaxed = true),
-        getSearchSuggestions: GetSearchSuggestions = mockk(relaxed = true),
-        saveSearchSuggestion: SaveSearchSuggestion = mockk(relaxed = true),
-        connectedStateProvider: ConnectedStateProvider = mockk(relaxed = true),
-        ioDispatcher: CoroutineDispatcher = testDispatcher
-    ): SearchFlowProcessor = SearchFlowProcessor(
-        searchEvents,
-        getPagedEventsFlow,
-        saveEvents,
-        getSearchSuggestions,
-        saveSearchSuggestion,
-        connectedStateProvider,
-        ioDispatcher
-    )
-
-    private fun SearchFlowProcessor.updates(
-        intents: Flow<SearchIntent> = mockk(relaxed = true),
-        currentState: () -> SearchState = mockk { every { this@mockk() } returns SearchState() },
-        states: StateFlow<SearchState> = mockk(relaxed = true),
-        intent: suspend (SearchIntent) -> Unit = mockk(relaxed = true),
-        signal: suspend (SearchSignal) -> Unit = mockk(relaxed = true)
-    ): Flow<SearchStateUpdate> = updates(testScope, intents, currentState, states, intent, signal)
+internal class SearchFlowProcessorTests : BaseSearchFlowProcessorTests() {
 
     @Test
     fun newSearchShouldSaveTest() = testScope.runBlockingTest {
@@ -135,100 +91,6 @@ class SearchFlowProcessorTests {
         ).launchIn(testScope)
 
         coVerify(exactly = 1) { getSearchSuggestions(searchText) }
-        coVerify(exactly = 1) { getPagedEventsFlow<Selectable<Event>>(any(), any(), any()) }
-    }
-
-    @Test
-    @DisplayName("When not connected - should not call getPagedEventsFlow")
-    fun connectedStateProviderNotConnectedTest() {
-        val currentState = mockk<() -> SearchState> {
-            every { this@mockk() } returns SearchState(
-                events = PagedDataList(status = Failure(null))
-            )
-        }
-        val connectedStateProvider = mockk<ConnectedStateProvider> {
-            every { connectedStates } returns flowOf(false)
-        }
-        val getPagedEventsFlow = mockk<GetPagedEventsFlow>(relaxed = true)
-
-        flowProcessor(
-            getPagedEventsFlow = getPagedEventsFlow,
-            connectedStateProvider = connectedStateProvider
-        ).updates(
-            currentState = currentState
-        ).launchIn(testScope)
-
-        coVerify(exactly = 0) { getPagedEventsFlow<Selectable<Event>>(any(), any(), any()) }
-    }
-
-    @Test
-    @DisplayName("When events status is not Failed - should not call getPagedEventsFlow")
-    fun connectedStateProviderNotFailedTest() {
-        val currentState = mockk<() -> SearchState> {
-            every { this@mockk() } returns SearchState(
-                events = PagedDataList(status = LoadedSuccessfully)
-            )
-        }
-        val connectedStateProvider = mockk<ConnectedStateProvider> {
-            every { connectedStates } returns flowOf(true)
-        }
-        val getPagedEventsFlow = mockk<GetPagedEventsFlow>(relaxed = true)
-
-        flowProcessor(
-            getPagedEventsFlow = getPagedEventsFlow,
-            connectedStateProvider = connectedStateProvider
-        ).updates(
-            currentState = currentState
-        ).launchIn(testScope)
-
-        coVerify(exactly = 0) { getPagedEventsFlow<Selectable<Event>>(any(), any(), any()) }
-    }
-
-    @Test
-    @DisplayName("When events list is not empty - should not call getPagedEventsFlow")
-    fun connectedStateProviderNotEmptyTest() {
-        val currentState = mockk<() -> SearchState> {
-            every { this@mockk() } returns SearchState(
-                events = PagedDataList(status = LoadedSuccessfully, data = relaxedMockedList(1))
-            )
-        }
-        val connectedStateProvider = mockk<ConnectedStateProvider> {
-            every { connectedStates } returns flowOf(true)
-        }
-        val getPagedEventsFlow = mockk<GetPagedEventsFlow>(relaxed = true)
-
-        flowProcessor(
-            getPagedEventsFlow = getPagedEventsFlow,
-            connectedStateProvider = connectedStateProvider
-        ).updates(
-            currentState = currentState
-        ).launchIn(testScope)
-
-        coVerify(exactly = 0) { getPagedEventsFlow<Selectable<Event>>(any(), any(), any()) }
-    }
-
-    @Test
-    @DisplayName("When connected and all loading conditions met - should call getPagedEventsFlow")
-    fun connectedStateProviderAllConditionsMetTest() {
-        val currentState = mockk<() -> SearchState> {
-            every { this@mockk() } returns SearchState(
-                events = PagedDataList(status = Failure(null))
-            )
-        }
-        val connectedStateProvider = mockk<ConnectedStateProvider> {
-            every { connectedStates } returns flowOf(true)
-        }
-        val getPagedEventsFlow = mockk<GetPagedEventsFlow> {
-            every { this@mockk<Selectable<Event>>(any(), any(), any()) } returns emptyFlow()
-        }
-
-        flowProcessor(
-            getPagedEventsFlow = getPagedEventsFlow,
-            connectedStateProvider = connectedStateProvider
-        ).updates(
-            currentState = currentState
-        ).launchIn(testScope)
-
         coVerify(exactly = 1) { getPagedEventsFlow<Selectable<Event>>(any(), any(), any()) }
     }
 
