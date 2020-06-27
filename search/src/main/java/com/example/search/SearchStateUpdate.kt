@@ -30,7 +30,7 @@ sealed class SearchStateUpdate : StateUpdate<SearchState> {
             .copyWithSnackbarState(snackbarState = SnackbarState.Hidden)
     }
 
-    data class Suggestions(private val suggestions: List<SearchSuggestion>) : SearchStateUpdate() {
+    data class Suggestions(val suggestions: List<SearchSuggestion>) : SearchStateUpdate() {
         override fun invoke(state: SearchState): SearchState = state
             .copy(searchSuggestions = suggestions)
     }
@@ -44,8 +44,8 @@ sealed class SearchStateUpdate : StateUpdate<SearchState> {
         }
 
         data class Loaded(
-            private val resource: Resource<PagedResult<IEvent>>,
-            private val newSearch: Boolean
+            val resource: Resource<PagedResult<IEvent>>,
+            val newSearch: Boolean
         ) : Events() {
             override fun invoke(state: SearchState): SearchState = state.run {
                 when (resource) {

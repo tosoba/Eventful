@@ -9,6 +9,8 @@ import com.example.core.usecase.GetSearchSuggestions
 import com.example.core.usecase.SaveSearchSuggestion
 import com.example.coreandroid.model.event.Event
 import com.example.coreandroid.model.event.Selectable
+import com.example.test.rule.event
+import com.example.test.rule.mockedList
 import com.example.test.rule.relaxedMockedList
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -16,10 +18,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -27,7 +26,6 @@ import org.junit.jupiter.api.Test
 @FlowPreview
 @ExperimentalCoroutinesApi
 internal class NewSearchTests : BaseSearchFlowProcessorTests() {
-    //TODO: newSearch tests: searchEventsUpdates
 
     @Test
     @DisplayName("When new search is confirmed - should saveSearchSuggestion")
@@ -97,5 +95,53 @@ internal class NewSearchTests : BaseSearchFlowProcessorTests() {
 
         coVerify(exactly = 1) { getSearchSuggestions(searchText) }
         coVerify(exactly = 1) { getPagedEventsFlow<Selectable<Event>>(any(), any(), any()) }
+    }
+
+    @Test
+    @DisplayName("On new search - should emit loading, suggestions and events loaded updates")
+    fun newSearchUpdatesTest() = testScope.runBlockingTest {
+        val searchText = "test"
+        val currentState = mockk<() -> SearchState> {
+            every { this@mockk() } returns SearchState()
+        }
+        val expectedResource = Resource.successWith(
+            PagedResult<IEvent>(mockedList(10) { event(it) }, 1, 1)
+        )
+        val getPagedEventsFlow = mockk<GetPagedEventsFlow> {
+            every { this@mockk<Selectable<Event>>(any(), any(), any()) } returns flowOf(
+                expectedResource
+            )
+        }
+        val expectedSuggestions = mockedList(10) {
+            SearchSuggestion(it, "suggestion$it", 100L)
+        }
+        val getSearchSuggestions = mockk<GetSearchSuggestions> {
+            coEvery { this@mockk(any()) } returns expectedSuggestions
+        }
+
+        val updates = flowProcessor(
+            getPagedEventsFlow = getPagedEventsFlow,
+            getSearchSuggestions = getSearchSuggestions
+        ).updates(
+            intents = flowOf(SearchIntent.NewSearch(searchText, true)),
+            currentState = currentState
+        ).toList()
+
+        val loadingUpdate = updates.first()
+        assert(
+            loadingUpdate is SearchStateUpdate.Events.Loading
+                    && loadingUpdate.searchText == searchText
+        )
+        val suggestionsUpdate = updates[1]
+        assert(
+            suggestionsUpdate is SearchStateUpdate.Suggestions
+                    && suggestionsUpdate.suggestions == expectedSuggestions
+        )
+        val eventsUpdate = updates.last()
+        assert(
+            eventsUpdate is SearchStateUpdate.Events.Loaded
+                    && eventsUpdate.resource == expectedResource
+                    && eventsUpdate.newSearch
+        )
     }
 }
