@@ -101,14 +101,15 @@ internal class NewSearchTests : BaseSearchFlowProcessorTests() {
     @DisplayName("On new search - should emit loading, suggestions and events loaded updates")
     fun newSearchUpdatesTest() = testScope.runBlockingTest {
         val searchText = "test"
+        val initialState = SearchState()
         val currentState = mockk<() -> SearchState> {
-            every { this@mockk() } returns SearchState()
+            every { this@mockk() } returns initialState
         }
         val expectedResource = Resource.successWith(
             PagedResult<IEvent>(mockedList(10) { event(it) }, 1, 1)
         )
         val getPagedEventsFlow = mockk<GetPagedEventsFlow> {
-            every { this@mockk<Selectable<Event>>(any(), any(), any()) } returns flowOf(
+            every { this@mockk(initialState.events, any(), any()) } returns flowOf(
                 expectedResource
             )
         }

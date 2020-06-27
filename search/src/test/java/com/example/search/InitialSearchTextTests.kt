@@ -24,8 +24,9 @@ internal class InitialSearchTextTests : BaseSearchFlowProcessorTests() {
     @DisplayName("When initial text is not blank - should call getSearchSuggestions and getPagedEventsFlow")
     fun initialSearchTextTest() = testScope.runBlockingTest {
         val searchText = "test"
+        val initialState = SearchState(searchText = searchText)
         val currentState = mockk<() -> SearchState> {
-            every { this@mockk() } returns SearchState(searchText = searchText)
+            every { this@mockk() } returns initialState
         }
         val getPagedEventsFlow = mockk<GetPagedEventsFlow> {
             every { this@mockk<Selectable<Event>>(any(), any(), any()) } returns emptyFlow()
@@ -43,7 +44,7 @@ internal class InitialSearchTextTests : BaseSearchFlowProcessorTests() {
         ).launchIn(testScope)
 
         coVerify(exactly = 1) { getSearchSuggestions(searchText) }
-        coVerify(exactly = 1) { getPagedEventsFlow<Selectable<Event>>(any(), any(), any()) }
+        coVerify(exactly = 1) { getPagedEventsFlow(initialState.events, any(), any()) }
     }
 
     @Test
