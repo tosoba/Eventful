@@ -12,9 +12,9 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class GetPagedEventsFlow @Inject constructor(private val dispatcher: CoroutineDispatcher) {
-    operator fun <Event> invoke(
-        currentEvents: PagedDataList<Event>,
-        toEvent: (Event) -> IEvent,
+    operator fun <MappableToEvent> invoke(
+        currentEvents: PagedDataList<MappableToEvent>,
+        toEvent: (MappableToEvent) -> IEvent,
         getEvents: suspend (Int) -> Resource<PagedResult<IEvent>>
     ): Flow<Resource<PagedResult<IEvent>>> = flow {
         val currentEventNames = currentEvents.data.map(toEvent)
