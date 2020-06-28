@@ -10,8 +10,8 @@ import com.example.coreandroid.controller.MenuController
 import com.example.coreandroid.controller.SnackbarController
 import com.example.coreandroid.view.ActionBarDrawerToggleEnd
 
-val Fragment.appCompatActivity: AppCompatActivity
-    get() = activity as AppCompatActivity
+private val Fragment.appCompatActivity: AppCompatActivity?
+    get() = activity as? AppCompatActivity
 
 val Fragment.navigationFragment: BaseNavigationFragment?
     get() = findAncestorFragmentOfType()
@@ -32,33 +32,38 @@ private inline fun <reified T> Fragment.findAncestorFragmentOfType(): T? {
 }
 
 fun Fragment.setupToolbar(toolbar: Toolbar) {
-    appCompatActivity.setSupportActionBar(toolbar)
-    appCompatActivity.supportActionBar?.setDisplayShowTitleEnabled(false)
+    appCompatActivity?.setSupportActionBar(toolbar)
+    appCompatActivity?.supportActionBar?.setDisplayShowTitleEnabled(false)
 }
 
 fun Fragment.setupToolbarWithDrawerToggle(toolbar: Toolbar) {
     val activityRef = activity
-    if (activityRef != null && activityRef is DrawerLayoutController && activityRef.drawerLayout != null) {
-        val drawerLayout = (activityRef as DrawerLayoutController).drawerLayout!!
-        ActionBarDrawerToggleEnd(
-            activityRef,
-            drawerLayout,
-            toolbar,
-            R.string.navigation_drawer_open,
-            R.string.navigation_drawer_close
-        ).run {
-            drawerLayout.addDrawerListener(this)
-            syncState()
+    if (activityRef != null && activityRef is DrawerLayoutController) {
+        activityRef.drawerLayout?.let {
+            ActionBarDrawerToggleEnd(
+                activityRef,
+                it,
+                toolbar,
+                R.string.navigation_drawer_open,
+                R.string.navigation_drawer_close
+            ).run {
+                it.addDrawerListener(this)
+                syncState()
+            }
         }
     }
 }
 
 fun Fragment.showBackNavArrow() {
-    appCompatActivity.supportActionBar?.setDisplayHomeAsUpEnabled(true)
-    appCompatActivity.supportActionBar?.setDisplayShowHomeEnabled(true)
+    appCompatActivity?.supportActionBar?.apply {
+        setDisplayHomeAsUpEnabled(true)
+        setDisplayShowHomeEnabled(true)
+    }
 }
 
 fun Fragment.hideBackNavArrow() {
-    appCompatActivity.supportActionBar?.setDisplayHomeAsUpEnabled(false)
-    appCompatActivity.supportActionBar?.setDisplayShowHomeEnabled(false)
+    appCompatActivity?.supportActionBar?.apply {
+        setDisplayHomeAsUpEnabled(false)
+        setDisplayShowHomeEnabled(false)
+    }
 }
