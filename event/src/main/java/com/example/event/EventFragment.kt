@@ -41,7 +41,7 @@ class EventFragment :
     HasArgs {
 
     private var event: Event by FragmentArgument()
-    override val args: Bundle get() = bundleOf("initialState" to event)
+    override val args: Bundle get() = bundleOf(EVENT_ARG_KEY to event)
 
     private val binding: FragmentEventBinding by viewBinding(FragmentEventBinding::bind)
 
@@ -53,10 +53,10 @@ class EventFragment :
     }
 
     private val viewPagerSwipedListener: ViewPagerPageSelectedListener
-    by viewPagerPageSelectedBottomNavListener(navigationItems.inverse()) { binding.eventBottomNavView }
+            by viewPagerPageSelectedBottomNavListener(navigationItems.inverse()) { binding.eventBottomNavView }
 
     private val bottomNavItemSelectedListener: BottomNavigationView.OnNavigationItemSelectedListener
-    by bottomNavItemSelectedViewPagerListener(navigationItems) { binding.eventViewPager }
+            by bottomNavItemSelectedViewPagerListener(navigationItems) { binding.eventViewPager }
 
     private lateinit var snackbarStateChannel: SendChannel<SnackbarState>
 
@@ -90,8 +90,8 @@ class EventFragment :
                         binding.eventFab.updateDrawable(it.isFavourite)
                     is EventViewUpdate.FavouriteStatusSnackbar -> transitionToSnackbarState(
                         SnackbarState.Shown(
-                            text = if (it.isFavourite) "Event was added to favourites"
-                            else "Event was removed from favourites",
+                            text = if (it.isFavourite) getString(R.string.event_added)
+                            else getString(R.string.event_removed),
                             length = Snackbar.LENGTH_SHORT
                         )
                     )
@@ -125,5 +125,7 @@ class EventFragment :
             put(R.id.bottom_nav_event_details, 0)
             put(R.id.bottom_nav_weather, 1)
         }
+
+        const val EVENT_ARG_KEY = "event"
     }
 }

@@ -29,10 +29,11 @@ class EventFlowProcessor @Inject constructor(
         signal: suspend (EventSignal) -> Unit
     ): Flow<EventStateUpdate> = merge(
         intents.filterIsInstance<EventIntent.ToggleFavourite>()
+            .filter { currentState().isFavourite.data != null }
             .onEach {
                 coroutineScope.launch {
                     currentState().run {
-                        if (isFavourite.data) deleteEvent(event)
+                        if (isFavourite.data!!) deleteEvent(event)
                         else saveEvent(event)
                     }
                 }

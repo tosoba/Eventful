@@ -16,8 +16,10 @@ internal val EventViewModel.viewUpdates: Flow<EventViewUpdate>
     get() = merge(
         states.map { it.isFavourite }
             .filter { (_, status) -> status is LoadedSuccessfully }
+            .map { it.data }
+            .filterNotNull()
             .distinctUntilChanged()
-            .map { (isFavourite) -> EventViewUpdate.FloatingActionButtonDrawable(isFavourite) },
+            .map { EventViewUpdate.FloatingActionButtonDrawable(it) },
         signals.filterIsInstance<EventSignal.FavouriteStateToggled>()
             .map { (isFavourite) -> EventViewUpdate.FavouriteStatusSnackbar(isFavourite) }
     )
