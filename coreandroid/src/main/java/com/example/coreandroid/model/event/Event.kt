@@ -36,16 +36,8 @@ data class Event(
         other.startTime,
         other.kinds,
         other.venues?.map { Venue(it) },
-        other.attractions?.map {
-            Attraction(
-                it
-            )
-        },
-        other.priceRanges?.map {
-            PriceRange(
-                it
-            )
-        }
+        other.attractions?.map { Attraction(it) },
+        other.priceRanges?.map { PriceRange(it) }
     )
 
     val formattedAddress: String

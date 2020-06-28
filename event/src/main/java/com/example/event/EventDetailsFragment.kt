@@ -26,12 +26,12 @@ class EventDetailsFragment : Fragment() {
 
     private val epoxyController: AsyncEpoxyController by lazy(LazyThreadSafetyMode.NONE) {
         simpleController {
-            event.kindsCarousel.addTo(this)
             eventInfo {
                 id("${event.id}i")
                 event(event)
                 margin(requireContext().toPx(15f).toInt())
             }
+            event.kindsCarousel.addTo(this)
             description {
                 id("${event.id}d")
                 text(event.info ?: "No details available")

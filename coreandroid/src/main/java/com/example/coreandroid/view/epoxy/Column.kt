@@ -1,4 +1,4 @@
-package com.example.coreandroid.util
+package com.example.coreandroid.view.epoxy
 
 import android.view.View
 import com.airbnb.epoxy.EpoxyModel

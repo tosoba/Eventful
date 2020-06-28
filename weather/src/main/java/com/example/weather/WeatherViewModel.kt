@@ -14,7 +14,7 @@ class WeatherViewModel @AssistedInject constructor(
     processor: WeatherFlowProcessor,
     @Assisted savedStateHandle: SavedStateHandle
 ) : FlowViewModel<WeatherIntent, WeatherStateUpdate, WeatherState, Unit>(
-    initialState = savedStateHandle["initialState"] ?: WeatherState(),
+    initialState = WeatherState(latLng = savedStateHandle[WeatherFragment.LAT_LNG_ARG_KEY]),
     processor = processor,
     savedStateHandle = savedStateHandle
 ) {

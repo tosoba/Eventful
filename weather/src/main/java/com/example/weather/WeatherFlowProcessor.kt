@@ -1,13 +1,10 @@
 package com.example.weather
 
 import com.example.core.usecase.GetForecast
-import com.example.core.util.ext.flatMapFirst
 import com.example.coreandroid.base.FlowProcessor
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
@@ -24,17 +21,31 @@ class WeatherFlowProcessor @Inject constructor(
         states: StateFlow<WeatherState>,
         intent: suspend (WeatherIntent) -> Unit,
         signal: suspend (Unit) -> Unit
-    ): Flow<WeatherStateUpdate> = intents.filterIsInstance<WeatherIntent.LoadWeather>()
-        .flatMapFirst {
-            flow<WeatherStateUpdate> {
-                emit(WeatherStateUpdate.Weather.Loading)
-                val resource = withContext(ioDispatcher) {
-                    getForecast(
-                        lat = it.latLng.latitude,
-                        lon = it.latLng.longitude
-                    )
-                }
-                emit(WeatherStateUpdate.Weather.Loaded(resource))
-            }
+    ): Flow<WeatherStateUpdate> = merge(
+        states.map { it.latLng }
+            .filterNotNull()
+            .take(1)
+            .flatMapLatest { weatherLoadingUpdates(it, coroutineScope, intent) },
+        intents.filterIsInstance<WeatherIntent.RetryLoadWeather>()
+            .map { currentState().latLng }
+            .filterNotNull()
+            .flatMapLatest { weatherLoadingUpdates(it, coroutineScope, intent) }
+    )
+
+    private suspend fun weatherLoadingUpdates(
+        latLng: LatLng,
+        coroutineScope: CoroutineScope,
+        intent: suspend (WeatherIntent) -> Unit
+    ): Flow<WeatherStateUpdate> = flow<WeatherStateUpdate> {
+        emit(WeatherStateUpdate.Weather.Loading)
+        val resource = withContext(ioDispatcher) {
+            getForecast(lat = latLng.latitude, lon = latLng.longitude)
         }
+        emit(
+            WeatherStateUpdate.Weather.Loaded(
+                resource,
+                retry = { coroutineScope.launch { intent(WeatherIntent.RetryLoadWeather) } }
+            )
+        )
+    }
 }

@@ -51,20 +51,12 @@ sealed class SearchStateUpdate : StateUpdate<SearchState> {
                 when (resource) {
                     is Resource.Success -> copy(
                         events = if (newSearch) PagedDataList(
-                            data = resource.data.items.map {
-                                Selectable(
-                                    Event(it)
-                                )
-                            },
+                            data = resource.data.items.map { Selectable(Event(it)) },
                             status = LoadedSuccessfully,
                             offset = resource.data.currentPage + 1,
                             limit = resource.data.totalPages
                         ) else events.copyWithNewItems(
-                            newItems = resource.data.items.map {
-                                Selectable(
-                                    Event(it)
-                                )
-                            },
+                            newItems = resource.data.items.map { Selectable(Event(it)) },
                             offset = resource.data.currentPage + 1,
                             limit = resource.data.totalPages
                         )
@@ -74,13 +66,9 @@ sealed class SearchStateUpdate : StateUpdate<SearchState> {
                         events = events.copyWithFailureStatus(resource.error),
                         snackbarState = if (resource.error is NetworkResponse.ServerError<*>) {
                             if ((resource.error as NetworkResponse.ServerError<*>).code in 503..504) {
-                                SnackbarState.Shown(
-                                    "No connection"
-                                )
+                                SnackbarState.Shown("No connection")
                             } else {
-                                SnackbarState.Shown(
-                                    "Unknown network error."
-                                )
+                                SnackbarState.Shown("Unknown network error.")
                             }
                         } else snackbarState
                     )

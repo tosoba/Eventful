@@ -15,24 +15,18 @@ import com.example.coreandroid.util.StateUpdate
 import com.example.coreandroid.util.ToggleEventSelectionUpdate
 import com.haroldadmin.cnradapter.NetworkResponse
 
-sealed class NearbyStateUpdate :
-    StateUpdate<NearbyState> {
+sealed class NearbyStateUpdate : StateUpdate<NearbyState> {
     class ToggleEventSelection(
         override val event: Event
     ) : NearbyStateUpdate(),
         ToggleEventSelectionUpdate<NearbyState>
 
-    object ClearSelection :
-        NearbyStateUpdate(),
-        ClearSelectionUpdate<NearbyState>
+    object ClearSelection : NearbyStateUpdate(), ClearSelectionUpdate<NearbyState>
 
     object NoConnectionSnackbar : NearbyStateUpdate() {
-        override fun invoke(state: NearbyState): NearbyState =
-            NearbyState(
-                snackbarState = SnackbarState.Shown(
-                    "No connection."
-                )
-            )
+        override fun invoke(state: NearbyState): NearbyState = NearbyState(
+            snackbarState = SnackbarState.Shown("No connection.")
+        )
     }
 
     class LocationSnackbar(
@@ -41,19 +35,13 @@ sealed class NearbyStateUpdate :
     ) : NearbyStateUpdate() {
         override fun invoke(state: NearbyState): NearbyState = when (status) {
             is LocationStatus.PermissionDenied -> state.copy(
-                snackbarState = SnackbarState.Shown(
-                    "No location permission."
-                )
+                snackbarState = SnackbarState.Shown("No location permission.")
             )
             is LocationStatus.Disabled -> state.copy(
-                snackbarState = SnackbarState.Shown(
-                    "Location disabled."
-                )
+                snackbarState = SnackbarState.Shown("Location disabled.")
             )
             is LocationStatus.Loading -> state.copy(
-                snackbarState = SnackbarState.Shown(
-                    "Loading location..."
-                )
+                snackbarState = SnackbarState.Shown("Loading location...")
             )
             is LocationStatus.Error -> state.copy(
                 snackbarState = SnackbarState.Shown(
@@ -85,11 +73,7 @@ sealed class NearbyStateUpdate :
                 when (resource) {
                     is Resource.Success -> copy(
                         events = events.copyWithNewItems(
-                            resource.data.items.map {
-                                Selectable(
-                                    Event(it)
-                                )
-                            },
+                            resource.data.items.map { Selectable(Event(it)) },
                             resource.data.currentPage + 1,
                             resource.data.totalPages
                         ),
@@ -100,13 +84,9 @@ sealed class NearbyStateUpdate :
                         events = events.copyWithFailureStatus(resource.error),
                         snackbarState = if (resource.error is NetworkResponse.ServerError<*>) {
                             if ((resource.error as NetworkResponse.ServerError<*>).code in 503..504) {
-                                SnackbarState.Shown(
-                                    "No connection."
-                                )
+                                SnackbarState.Shown("No connection.")
                             } else {
-                                SnackbarState.Shown(
-                                    "Unknown network error."
-                                )
+                                SnackbarState.Shown("Unknown network error.")
                             }
                         } else snackbarState
                     )
