@@ -13,6 +13,7 @@ import com.markodevcic.peko.ActivityRotatingException
 import com.markodevcic.peko.Peko
 import com.markodevcic.peko.rationale.AlertDialogPermissionRationale
 import com.markodevcic.peko.requestPermissionsAsync
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
@@ -28,7 +29,7 @@ class MainActivity :
 
     private val binding: ActivityMainBinding by viewBinding(ActivityMainBinding::inflate)
 
-    override val drawerLayout: DrawerLayout? get() = binding.mainDrawerLayout
+    override val drawerLayout: DrawerLayout? get() = main_drawer_layout
     private val drawerItemSelectedListener: NavigationView.OnNavigationItemSelectedListener =
         NavigationView.OnNavigationItemSelectedListener { item ->
             when (item.itemId) {
