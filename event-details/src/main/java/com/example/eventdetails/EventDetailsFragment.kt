@@ -1,4 +1,4 @@
-package com.example.event
+package com.example.eventdetails
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -17,7 +17,7 @@ import com.example.coreandroid.util.ext.showBackNavArrow
 import com.example.coreandroid.util.ext.toPx
 import com.example.coreandroid.util.simpleController
 import com.example.coreandroid.view.epoxy.kindsCarousel
-import com.example.event.databinding.FragmentEventDetailsBinding
+import com.example.eventdetails.databinding.FragmentEventDetailsBinding
 import kotlinx.android.synthetic.main.fragment_event_details.*
 
 class EventDetailsFragment : Fragment() {

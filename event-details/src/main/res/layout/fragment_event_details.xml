@@ -16,7 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="false"
-        tools:context=".EventDetailsFragment">
+        tools:context="com.example.eventdetails.EventDetailsFragment">
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/event_details_app_bar_layout"

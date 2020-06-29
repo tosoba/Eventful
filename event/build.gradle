@@ -44,6 +44,7 @@ dependencies {
 
     implementation project(':core')
     implementation project(':coreandroid')
+    implementation project(':event-details')
     implementation project(':weather')
 
     implementation "androidx.appcompat:appcompat:$appCompatVersion"
