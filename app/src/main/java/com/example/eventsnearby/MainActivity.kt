@@ -34,7 +34,7 @@ class MainActivity :
         NavigationView.OnNavigationItemSelectedListener { item ->
             when (item.itemId) {
             }
-            binding.mainDrawerLayout.closeDrawer(GravityCompat.START)
+            binding.mainDrawerLayout.closeDrawer(GravityCompat.END)
             true
         }
 
@@ -46,6 +46,7 @@ class MainActivity :
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         binding.mainDrawerNavView.setNavigationItemSelectedListener(drawerItemSelectedListener)
+
         requestPermission()
     }
 
