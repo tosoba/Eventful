@@ -97,7 +97,7 @@ internal class ConnectedStateProviderUpdatesTests : BaseNearbyFlowProcessorTests
 
     @Test
     @DisplayName("When connected and all loading conditions met - should call getPagedEventsFlow")
-    fun allConditionsMetTest() {
+    fun allConditionsMetTest() = testScope.runBlockingTest {
         val currentState = mockk<() -> NearbyState> {
             every { this@mockk() } returns NearbyState(
                 events = PagedDataList(status = Failure(null))
