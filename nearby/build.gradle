@@ -3,6 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'org.jmailen.kotlinter'
+apply plugin: "de.mannodermaus.android-junit5"
 
 android {
     compileSdkVersion 29
@@ -76,7 +77,14 @@ dependencies {
     implementation "com.google.android.gms:play-services-maps:$playServicesMapsVersion"
     implementation "com.patloew.rxlocation:rxlocation:$rxLocationVersion"
 
+    testImplementation project(':test')
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junit5Version"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit5Version"
+    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:$junit5Version"
     testImplementation "junit:junit:$junit4Version"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinxCoroutinesTestVersion"
+    testImplementation "io.mockk:mockk:$mockkVersion"
+    testImplementation "androidx.arch.core:core-testing:$archCoreTestingVersion"
     androidTestImplementation "androidx.test:runner:$testRunnerVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
 }

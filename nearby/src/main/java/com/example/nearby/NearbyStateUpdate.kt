@@ -15,9 +15,7 @@ import com.example.coreandroid.base.StateUpdate
 import com.example.coreandroid.base.ToggleEventSelectionUpdate
 import com.haroldadmin.cnradapter.NetworkResponse
 
-sealed class NearbyStateUpdate :
-    StateUpdate<NearbyState> {
-    class ToggleEventSelection(
+    data class ToggleEventSelection(
         override val event: Event
     ) : NearbyStateUpdate(),
         ToggleEventSelectionUpdate<NearbyState>
@@ -30,9 +28,9 @@ sealed class NearbyStateUpdate :
         )
     }
 
-    class LocationSnackbar(
-        private val status: LocationStatus,
-        private val reloadLocation: () -> Unit
+    data class LocationSnackbar(
+        val status: LocationStatus,
+        val reloadLocation: () -> Unit
     ) : NearbyStateUpdate() {
         override fun invoke(state: NearbyState): NearbyState = when (status) {
             is LocationStatus.PermissionDenied -> state.copy(
@@ -69,7 +67,7 @@ sealed class NearbyStateUpdate :
             )
         }
 
-        class Loaded(private val resource: Resource<PagedResult<IEvent>>) : NearbyStateUpdate() {
+        data class Loaded(val resource: Resource<PagedResult<IEvent>>) : NearbyStateUpdate() {
             override fun invoke(state: NearbyState): NearbyState = state.run {
                 when (resource) {
                     is Resource.Success -> copy(
@@ -95,7 +93,7 @@ sealed class NearbyStateUpdate :
             }
         }
 
-        class AddedToFavourites(
+        data class AddedToFavourites(
             override val snackbarText: String,
             override val onSnackbarDismissed: () -> Unit
         ) : NearbyStateUpdate(),
