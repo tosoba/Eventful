@@ -20,6 +20,7 @@ import com.example.coreandroid.view.ViewPagerPageSelectedListener
 import com.example.coreandroid.view.ext.hideAndShow
 import com.example.coreandroid.view.titledFragmentsPagerAdapter
 import com.example.event.databinding.FragmentEventBinding
+import com.example.eventdetails.EventDetailsFragment
 import com.example.weather.WeatherFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -47,7 +48,7 @@ class EventFragment :
 
     private val eventViewPagerAdapter: PagerAdapter by titledFragmentsPagerAdapter {
         arrayOf(
-            getString(R.string.details) to com.example.eventdetails.EventDetailsFragment.new(event),
+            getString(R.string.details) to EventDetailsFragment.new(event),
             getString(R.string.weather) to WeatherFragment.new(event.venues?.firstOrNull()?.latLng)
         )
     }
