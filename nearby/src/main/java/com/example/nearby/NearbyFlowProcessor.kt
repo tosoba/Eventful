@@ -76,17 +76,17 @@ class NearbyFlowProcessor @Inject constructor(
         locationStateProvider.locationStates.notNullLatLng.take(1)
     }.map { NearbyStateUpdate.NoConnectionSnackbar }
 
-    private fun LocationStateProvider.updates(
-        currentState: () -> NearbyState
-    ): Flow<NearbyStateUpdate> = locationStates.notNullLatLng
-        .filter { currentState().events.data.isEmpty() } // TODO: this won't work with refreshing with SwipeRefreshLayout
-        .flatMapLatest { latLng -> loadingEventsUpdates(latLng, currentState) }
-
     private val LocationStateProvider.snackbarUpdates: Flow<NearbyStateUpdate>
         get() = locationStates.filter { it.latLng == null && it.status !is LocationStatus.Initial }
             .map { (_, status) ->
                 NearbyStateUpdate.LocationSnackbar(status, locationStateProvider::reloadLocation)
             }
+
+    private fun LocationStateProvider.updates(
+        currentState: () -> NearbyState
+    ): Flow<NearbyStateUpdate> = locationStates.notNullLatLng
+        .filter { currentState().run { events.data.isEmpty() && !events.loadingFailed } } // TODO: this won't work with refreshing with SwipeRefreshLayout
+        .flatMapLatest { latLng -> loadingEventsUpdates(latLng, currentState) }
 
     private fun Flow<NearbyIntent.LoadMoreResults>.loadMoreResultsUpdates(
         currentState: () -> NearbyState
