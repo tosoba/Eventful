@@ -9,7 +9,7 @@ import com.example.core.util.Loading
 import com.example.core.util.ext.flatMapFirst
 import com.example.coreandroid.base.FlowProcessor
 import com.example.coreandroid.provider.ConnectedStateProvider
-import com.example.coreandroid.util.addedToFavouritesMessage
+import com.example.coreandroid.base.addedToFavouritesMessage
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
@@ -155,7 +155,9 @@ class SearchFlowProcessor @Inject constructor(
         withContext(ioDispatcher) { saveEvents(selectedEvents) }
         signal(SearchSignal.FavouritesSaved)
         SearchStateUpdate.Events.AddedToFavourites(
-            snackbarText = addedToFavouritesMessage(eventsCount = selectedEvents.size),
+            snackbarText = addedToFavouritesMessage(
+                eventsCount = selectedEvents.size
+            ),
             onSnackbarDismissed = { coroutineScope.launch { intent(SearchIntent.HideSnackbar) } }
         )
     }

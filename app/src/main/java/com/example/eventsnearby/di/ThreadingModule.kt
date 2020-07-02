@@ -2,7 +2,7 @@ package com.example.eventsnearby.di
 
 import android.os.Handler
 import android.os.HandlerThread
-import com.example.coreandroid.util.EpoxyThreads
+import com.example.coreandroid.view.epoxy.EpoxyThreads
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineDispatcher

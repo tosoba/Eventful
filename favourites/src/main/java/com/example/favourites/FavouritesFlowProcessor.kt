@@ -4,7 +4,7 @@ import com.example.core.model.event.trimmedLowerCasedName
 import com.example.core.usecase.DeleteEvents
 import com.example.core.usecase.GetSavedEventsFlow
 import com.example.coreandroid.base.FlowProcessor
-import com.example.coreandroid.util.removedFromFavouritesMessage
+import com.example.coreandroid.base.removedFromFavouritesMessage
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import java.util.*
@@ -85,7 +85,9 @@ class FavouritesFlowProcessor(
         withContext(ioDispatcher) { deleteEvents(selectedEvents) }
         signal(FavouritesSignal.FavouritesRemoved)
         FavouritesStateUpdate.RemovedFromFavourites(
-            snackbarText = removedFromFavouritesMessage(eventsCount = selectedEvents.size),
+            snackbarText = removedFromFavouritesMessage(
+                eventsCount = selectedEvents.size
+            ),
             onSnackbarDismissed = {
                 coroutineScope.launch { intent(FavouritesIntent.HideSnackbar) }
             }

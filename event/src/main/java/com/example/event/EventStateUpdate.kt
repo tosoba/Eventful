@@ -2,7 +2,7 @@ package com.example.event
 
 import com.example.core.util.Data
 import com.example.core.util.LoadedSuccessfully
-import com.example.coreandroid.util.StateUpdate
+import com.example.coreandroid.base.StateUpdate
 
 sealed class EventStateUpdate :
     StateUpdate<EventState> {

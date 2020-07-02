@@ -3,7 +3,7 @@ package com.example.search
 import com.example.core.usecase.SaveEvents
 import com.example.core.util.PagedDataList
 import com.example.coreandroid.model.event.Selectable
-import com.example.coreandroid.util.addedToFavouritesMessage
+import com.example.coreandroid.base.addedToFavouritesMessage
 import com.example.test.rule.event
 import com.example.test.rule.mockedList
 import io.mockk.coVerify
@@ -54,7 +54,9 @@ internal class OtherSearchFlowProcessorTests : BaseSearchFlowProcessorTests() {
         val update = updates.first()
         assert(
             update is SearchStateUpdate.Events.AddedToFavourites
-                    && update.snackbarText == addedToFavouritesMessage(eventsCount = selectedEvents.size)
+                    && update.snackbarText == addedToFavouritesMessage(
+                eventsCount = selectedEvents.size
+            )
         )
     }
 

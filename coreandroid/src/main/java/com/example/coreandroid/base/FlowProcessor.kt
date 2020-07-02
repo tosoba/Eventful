@@ -1,7 +1,6 @@
 package com.example.coreandroid.base
 
 import androidx.lifecycle.SavedStateHandle
-import com.example.coreandroid.util.StateUpdate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow

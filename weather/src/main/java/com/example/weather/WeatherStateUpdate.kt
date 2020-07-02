@@ -5,7 +5,7 @@ import com.example.core.model.Resource
 import com.example.core.model.weather.Forecast
 import com.example.coreandroid.controller.SnackbarAction
 import com.example.coreandroid.controller.SnackbarState
-import com.example.coreandroid.util.StateUpdate
+import com.example.coreandroid.base.StateUpdate
 
 sealed class WeatherStateUpdate : StateUpdate<WeatherState> {
     sealed class Weather : WeatherStateUpdate() {

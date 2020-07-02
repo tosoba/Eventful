@@ -7,7 +7,6 @@ import com.airbnb.epoxy.ModelGroupHolder
 import com.example.coreandroid.*
 import com.example.coreandroid.model.event.Event
 import com.example.coreandroid.model.event.Selectable
-import com.example.coreandroid.util.NestedScrollingCarouselModel
 
 open class EventItem(
     private val clicked: View.OnClickListener,

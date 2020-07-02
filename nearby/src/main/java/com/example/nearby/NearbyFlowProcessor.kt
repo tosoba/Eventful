@@ -10,7 +10,7 @@ import com.example.coreandroid.model.location.LocationState
 import com.example.coreandroid.model.location.LocationStatus
 import com.example.coreandroid.provider.ConnectedStateProvider
 import com.example.coreandroid.provider.LocationStateProvider
-import com.example.coreandroid.util.addedToFavouritesMessage
+import com.example.coreandroid.base.addedToFavouritesMessage
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*

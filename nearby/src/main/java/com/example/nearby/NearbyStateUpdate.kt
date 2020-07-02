@@ -9,13 +9,14 @@ import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.model.event.Event
 import com.example.coreandroid.model.event.Selectable
 import com.example.coreandroid.model.location.LocationStatus
-import com.example.coreandroid.util.ClearSelectionUpdate
-import com.example.coreandroid.util.EventSelectionConfirmedUpdate
-import com.example.coreandroid.util.StateUpdate
-import com.example.coreandroid.util.ToggleEventSelectionUpdate
+import com.example.coreandroid.base.ClearSelectionUpdate
+import com.example.coreandroid.base.EventSelectionConfirmedUpdate
+import com.example.coreandroid.base.StateUpdate
+import com.example.coreandroid.base.ToggleEventSelectionUpdate
 import com.haroldadmin.cnradapter.NetworkResponse
 
-sealed class NearbyStateUpdate : StateUpdate<NearbyState> {
+sealed class NearbyStateUpdate :
+    StateUpdate<NearbyState> {
     class ToggleEventSelection(
         override val event: Event
     ) : NearbyStateUpdate(),

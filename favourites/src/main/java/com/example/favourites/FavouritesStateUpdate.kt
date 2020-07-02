@@ -6,12 +6,13 @@ import com.example.core.util.LoadedSuccessfully
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.model.event.Event
 import com.example.coreandroid.model.event.Selectable
-import com.example.coreandroid.util.ClearSelectionUpdate
-import com.example.coreandroid.util.EventSelectionConfirmedUpdate
-import com.example.coreandroid.util.StateUpdate
-import com.example.coreandroid.util.ToggleEventSelectionUpdate
+import com.example.coreandroid.base.ClearSelectionUpdate
+import com.example.coreandroid.base.EventSelectionConfirmedUpdate
+import com.example.coreandroid.base.StateUpdate
+import com.example.coreandroid.base.ToggleEventSelectionUpdate
 
-sealed class FavouritesStateUpdate : StateUpdate<FavouritesState> {
+sealed class FavouritesStateUpdate :
+    StateUpdate<FavouritesState> {
     data class SearchTextUpdate(val searchText: String) : FavouritesStateUpdate() {
         override fun invoke(state: FavouritesState): FavouritesState = FavouritesState(
             searchText = searchText

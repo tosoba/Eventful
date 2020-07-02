@@ -15,7 +15,7 @@ import com.example.coreandroid.util.ext.setupToolbar
 import com.example.coreandroid.util.ext.setupToolbarWithDrawerToggle
 import com.example.coreandroid.util.ext.showBackNavArrow
 import com.example.coreandroid.util.ext.toPx
-import com.example.coreandroid.util.simpleController
+import com.example.coreandroid.view.epoxy.simpleController
 import com.example.coreandroid.view.epoxy.kindsCarousel
 import com.example.eventdetails.databinding.FragmentEventDetailsBinding
 import kotlinx.android.synthetic.main.fragment_event_details.*

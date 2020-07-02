@@ -6,7 +6,7 @@ import com.example.core.util.PagedDataList
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.model.event.Event
 import com.example.coreandroid.model.event.Selectable
-import com.example.coreandroid.util.SelectableEventsSnackbarState
+import com.example.coreandroid.base.SelectableEventsSnackbarState
 
 data class SearchState(
     val searchText: String = "",

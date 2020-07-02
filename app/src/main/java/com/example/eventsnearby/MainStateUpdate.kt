@@ -2,7 +2,7 @@ package com.example.eventsnearby
 
 import com.example.core.model.location.LocationResult
 import com.example.coreandroid.model.location.LocationStatus
-import com.example.coreandroid.util.StateUpdate
+import com.example.coreandroid.base.StateUpdate
 import com.google.android.gms.maps.model.LatLng
 
 sealed class MainStateUpdate : StateUpdate<MainState> {

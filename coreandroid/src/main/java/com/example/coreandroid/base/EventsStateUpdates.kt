@@ -1,4 +1,4 @@
-package com.example.coreandroid.util
+package com.example.coreandroid.base
 
 import com.example.core.util.HoldsList
 import com.example.coreandroid.controller.SnackbarState
@@ -24,10 +24,6 @@ interface HoldsSnackbarState<S> {
     fun copyWithSnackbarState(snackbarState: SnackbarState): S
 }
 
-interface StateUpdate<State : Any> {
-    operator fun invoke(state: State): State
-}
-
 interface ClearSelectionUpdate<S : SelectableEventsState<S>> : StateUpdate<S> {
     override fun invoke(state: S): S = state.copyWithTransformedEvents { it.copy(selected = false) }
 }
@@ -35,10 +31,7 @@ interface ClearSelectionUpdate<S : SelectableEventsState<S>> : StateUpdate<S> {
 interface ToggleEventSelectionUpdate<S : SelectableEventsState<S>> : StateUpdate<S> {
     val event: Event
     override fun invoke(state: S): S = state.copyWithTransformedEvents {
-        if (it.item.id == event.id) Selectable(
-            event,
-            !it.selected
-        ) else it
+        if (it.item.id == event.id) Selectable(event, !it.selected) else it
     }
 }
 
