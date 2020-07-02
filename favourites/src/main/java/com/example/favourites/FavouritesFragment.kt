@@ -11,7 +11,6 @@ import com.example.favourites.databinding.FragmentFavouritesBinding
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
-import reactivecircus.flowbinding.appcompat.QueryTextEvent
 import reactivecircus.flowbinding.appcompat.queryTextEvents
 
 @ExperimentalCoroutinesApi

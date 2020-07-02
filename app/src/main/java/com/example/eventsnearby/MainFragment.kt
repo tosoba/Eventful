@@ -32,10 +32,10 @@ class MainFragment : DaggerFragment(R.layout.fragment_main), MenuController, Sna
     private val binding: FragmentMainBinding by viewBinding(FragmentMainBinding::bind)
 
     private val bottomNavItemSelectedListener: BottomNavigationView.OnNavigationItemSelectedListener
-    by bottomNavItemSelectedViewPagerListener(navigationItems) { binding.mainViewPager }
+            by bottomNavItemSelectedViewPagerListener(navigationItems) { binding.mainViewPager }
 
     private val viewPagerSwipedListener: ViewPagerPageSelectedListener
-    by viewPagerPageSelectedBottomNavListener(navigationItems.inverse()) { binding.mainBottomNavView }
+            by viewPagerPageSelectedBottomNavListener(navigationItems.inverse()) { binding.mainBottomNavView }
 
     private val mainViewPagerAdapter: PagerAdapter by titledFragmentsPagerAdapter {
         arrayOf(

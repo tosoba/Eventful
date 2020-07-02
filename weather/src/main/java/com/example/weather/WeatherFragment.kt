@@ -46,10 +46,10 @@ class WeatherFragment :
             .onEach { viewUpdate ->
                 when (viewUpdate) {
                     is WeatherViewUpdate.UnknownLatLng -> {
-                        //TODO: show unknown location imageView or whatever
+                        // TODO: show unknown location imageView or whatever
                     }
                     is WeatherViewUpdate.ForecastLoaded -> {
-                        //TODO: update forecast UI
+                        // TODO: update forecast UI
                     }
                     is WeatherViewUpdate.Snackbar -> snackbarController?.transitionToSnackbarState(
                         viewUpdate.state
