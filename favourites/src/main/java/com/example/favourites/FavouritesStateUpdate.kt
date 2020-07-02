@@ -11,8 +11,13 @@ import com.example.coreandroid.util.EventSelectionConfirmedUpdate
 import com.example.coreandroid.util.StateUpdate
 import com.example.coreandroid.util.ToggleEventSelectionUpdate
 
-sealed class FavouritesStateUpdate :
-    StateUpdate<FavouritesState> {
+sealed class FavouritesStateUpdate : StateUpdate<FavouritesState> {
+    data class SearchTextUpdate(val searchText: String) : FavouritesStateUpdate() {
+        override fun invoke(state: FavouritesState): FavouritesState = FavouritesState(
+            searchText = searchText
+        )
+    }
+
     data class ToggleEventSelection(
         override val event: Event
     ) : FavouritesStateUpdate(),

@@ -16,7 +16,7 @@ class NearbyFragment :
         layoutRes = R.layout.fragment_nearby,
         viewBindingFactory = FragmentNearbyBinding::bind,
         epoxyRecyclerView = FragmentNearbyBinding::nearbyEventsRecyclerView,
-        menuRes = R.menu.nearby_events_selection_menu,
+        eventsSelectionMenuRes = R.menu.nearby_events_selection_menu,
         emptyListTextRes = R.string.no_events_found,
         selectionConfirmedActionId = R.id.nearby_action_add_favourite,
         loadMoreResultsIntent = NearbyIntent.LoadMoreResults,

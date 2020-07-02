@@ -6,10 +6,7 @@ import com.example.coreandroid.model.event.Event
 import com.example.coreandroid.model.event.Selectable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 
 sealed class FavouritesViewUpdate {
     data class Events(val events: DataList<Selectable<Event>>) : FavouritesViewUpdate()
@@ -21,7 +18,7 @@ sealed class FavouritesViewUpdate {
 @ExperimentalCoroutinesApi
 @FlowPreview
 val FavouritesViewModel.viewUpdates: Flow<FavouritesViewUpdate>
-    get() = kotlinx.coroutines.flow.merge(
+    get() = merge(
         states.map { it.events }
             .distinctUntilChanged()
             .map { FavouritesViewUpdate.Events(it) },

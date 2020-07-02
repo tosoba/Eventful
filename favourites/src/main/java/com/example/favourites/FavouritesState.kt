@@ -7,6 +7,7 @@ import com.example.coreandroid.model.event.Selectable
 import com.example.coreandroid.util.SelectableEventsSnackbarState
 
 data class FavouritesState(
+    val searchText: String = "",
     override val events: DataList<Selectable<Event>> = DataList(),
     val limit: Int = 0,
     val snackbarState: SnackbarState = SnackbarState.Hidden

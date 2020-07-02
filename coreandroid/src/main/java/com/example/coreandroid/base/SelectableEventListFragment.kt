@@ -35,7 +35,7 @@ abstract class SelectableEventListFragment<Binding : ViewBinding, Intent : Any, 
     @LayoutRes private val layoutRes: Int,
     viewBindingFactory: (View) -> Binding,
     private val epoxyRecyclerView: Binding.() -> EpoxyRecyclerView,
-    @MenuRes private val menuRes: Int,
+    @MenuRes private val eventsSelectionMenuRes: Int,
     @StringRes private val emptyListTextRes: Int?,
     private val selectionConfirmedActionId: Int,
     private val loadMoreResultsIntent: Intent,
@@ -75,7 +75,7 @@ abstract class SelectableEventListFragment<Binding : ViewBinding, Intent : Any, 
 
     protected val actionModeController by lazy(LazyThreadSafetyMode.NONE) {
         eventsSelectionActionModeController(
-            menuId = menuRes,
+            menuId = eventsSelectionMenuRes,
             itemClickedCallbacks = mapOf(
                 selectionConfirmedActionId to {
                     lifecycleScope.launch { viewModel.intent(selectionConfirmedIntent) }

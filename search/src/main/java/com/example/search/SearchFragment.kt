@@ -27,7 +27,7 @@ class SearchFragment :
         layoutRes = R.layout.fragment_search,
         viewBindingFactory = FragmentSearchBinding::bind,
         epoxyRecyclerView = FragmentSearchBinding::searchEventsRecyclerView,
-        menuRes = R.menu.search_events_selection_menu,
+        eventsSelectionMenuRes = R.menu.search_events_selection_menu,
         emptyListTextRes = R.string.no_events_found,
         selectionConfirmedActionId = R.id.search_action_add_favourite,
         loadMoreResultsIntent = SearchIntent.LoadMoreResults,
