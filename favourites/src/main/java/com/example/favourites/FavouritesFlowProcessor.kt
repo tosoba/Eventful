@@ -22,7 +22,7 @@ class FavouritesFlowProcessor(
         coroutineScope: CoroutineScope,
         intents: Flow<FavouritesIntent>,
         currentState: () -> FavouritesState,
-        states: StateFlow<FavouritesState>,
+        states: Flow<FavouritesState>,
         intent: suspend (FavouritesIntent) -> Unit,
         signal: suspend (FavouritesSignal) -> Unit
     ): Flow<FavouritesStateUpdate> = intents
@@ -35,7 +35,7 @@ class FavouritesFlowProcessor(
     private fun Flow<FavouritesIntent>.updates(
         coroutineScope: CoroutineScope,
         currentState: () -> FavouritesState,
-        states: StateFlow<FavouritesState>,
+        states: Flow<FavouritesState>,
         intent: suspend (FavouritesIntent) -> Unit,
         signal: suspend (FavouritesSignal) -> Unit
     ): Flow<FavouritesStateUpdate> = merge(
@@ -55,7 +55,7 @@ class FavouritesFlowProcessor(
 
     private fun Flow<FavouritesIntent.LoadFavourites>.loadFavouritesUpdates(
         currentState: () -> FavouritesState,
-        states: StateFlow<FavouritesState>
+        states: Flow<FavouritesState>
     ): Flow<FavouritesStateUpdate> = filterNot { currentState().events.limitHit }
         .flatMapLatest { states.map { it.searchText }.onStart { emit(currentState().searchText) } }
         .flatMapLatest { searchText ->

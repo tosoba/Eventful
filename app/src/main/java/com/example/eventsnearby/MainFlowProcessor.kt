@@ -27,7 +27,7 @@ class MainFlowProcessor @Inject constructor(
         coroutineScope: CoroutineScope,
         intents: Flow<MainIntent>,
         currentState: () -> MainState,
-        states: StateFlow<MainState>,
+        states: Flow<MainState>,
         intent: suspend (MainIntent) -> Unit,
         signal: suspend (Unit) -> Unit
     ): Flow<MainStateUpdate> = merge(

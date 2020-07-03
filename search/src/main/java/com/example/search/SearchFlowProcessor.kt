@@ -41,7 +41,7 @@ class SearchFlowProcessor @Inject constructor(
         coroutineScope: CoroutineScope,
         intents: Flow<SearchIntent>,
         currentState: () -> SearchState,
-        states: StateFlow<SearchState>,
+        states: Flow<SearchState>,
         intent: suspend (SearchIntent) -> Unit,
         signal: suspend (SearchSignal) -> Unit
     ): Flow<SearchStateUpdate> = merge(

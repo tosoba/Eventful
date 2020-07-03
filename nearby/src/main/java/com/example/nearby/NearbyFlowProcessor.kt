@@ -31,7 +31,7 @@ class NearbyFlowProcessor @Inject constructor(
         coroutineScope: CoroutineScope,
         intents: Flow<NearbyIntent>,
         currentState: () -> NearbyState,
-        states: StateFlow<NearbyState>,
+        states: Flow<NearbyState>,
         intent: suspend (NearbyIntent) -> Unit,
         signal: suspend (NearbySignal) -> Unit
     ): Flow<NearbyStateUpdate> = merge(

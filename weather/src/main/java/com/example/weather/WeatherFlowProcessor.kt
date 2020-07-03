@@ -18,7 +18,7 @@ class WeatherFlowProcessor @Inject constructor(
         coroutineScope: CoroutineScope,
         intents: Flow<WeatherIntent>,
         currentState: () -> WeatherState,
-        states: StateFlow<WeatherState>,
+        states: Flow<WeatherState>,
         intent: suspend (WeatherIntent) -> Unit,
         signal: suspend (Unit) -> Unit
     ): Flow<WeatherStateUpdate> = merge(

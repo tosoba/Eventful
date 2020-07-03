@@ -24,7 +24,7 @@ class EventFlowProcessor @Inject constructor(
         coroutineScope: CoroutineScope,
         intents: Flow<EventIntent>,
         currentState: () -> EventState,
-        states: StateFlow<EventState>,
+        states: Flow<EventState>,
         intent: suspend (EventIntent) -> Unit,
         signal: suspend (EventSignal) -> Unit
     ): Flow<EventStateUpdate> = merge(

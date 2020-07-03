@@ -12,7 +12,7 @@ interface FlowProcessor<Intent : Any, Update : StateUpdate<State>, State : Any, 
         coroutineScope: CoroutineScope,
         intents: Flow<Intent>,
         currentState: () -> State,
-        states: StateFlow<State>,
+        states: Flow<State>,
         intent: suspend (Intent) -> Unit,
         signal: suspend (Signal) -> Unit
     ): Flow<Update>

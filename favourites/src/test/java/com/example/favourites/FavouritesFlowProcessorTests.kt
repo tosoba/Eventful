@@ -59,7 +59,7 @@ class FavouritesFlowProcessorTests {
     private fun FavouritesFlowProcessor.updates(
         intents: Flow<FavouritesIntent> = mockk(relaxed = true),
         currentState: () -> FavouritesState = mockk(relaxed = true),
-        states: StateFlow<FavouritesState> = mockk(relaxed = true),
+        states: Flow<FavouritesState> = mockk(relaxed = true),
         intent: suspend (FavouritesIntent) -> Unit = mockk(relaxed = true),
         signal: suspend (FavouritesSignal) -> Unit = mockk(relaxed = true)
     ): Flow<FavouritesStateUpdate> {
@@ -170,6 +170,35 @@ class FavouritesFlowProcessorTests {
 
         assert(updates.size == 1)
         assert(updates.first() == FavouritesStateUpdate.SearchTextUpdate(searchText))
+    }
+
+    @Test
+    fun newSearchLoadFavouritesTest() = testScope.runBlockingTest {
+        val events1stEmission = mockedList(20) { event(it) }
+        val getSavedEventsFlow = mockk<GetSavedEventsFlow> {
+            every { this@mockk(any()) } returns flowOf(events1stEmission)
+        }
+        val currentState = mockk<() -> FavouritesState> {
+            every { this@mockk() } returns FavouritesState()
+        }
+        val limit = currentState().limit + FavouritesFlowProcessor.limitIncrement
+        val searchText = "7"
+
+
+        val updates = flowProcessor(getSavedEventsFlow = getSavedEventsFlow)
+            .updates(
+                intents = flowOf(
+                    FavouritesIntent.LoadFavourites,
+                    FavouritesIntent.NewSearch(searchText)
+                ),
+                currentState = currentState,
+                states = flow<FavouritesState> {
+
+                }
+            )
+            .toList()
+
+        verify(exactly = 1) { getSavedEventsFlow(limit) }
     }
 
     @Test
