@@ -155,6 +155,24 @@ class FavouritesFlowProcessorTests {
     }
 
     @Test
+    fun newSearchTest() = testScope.runBlockingTest {
+        val currentState = mockk<() -> FavouritesState> {
+            every { this@mockk() } returns FavouritesState()
+        }
+        val searchText = "test"
+
+        val updates = flowProcessor()
+            .updates(
+                intents = flowOf(FavouritesIntent.NewSearch(searchText)),
+                currentState = currentState
+            )
+            .toList()
+
+        assert(updates.size == 1)
+        assert(updates.first() == FavouritesStateUpdate.SearchTextUpdate(searchText))
+    }
+
+    @Test
     fun removeFromFavouritesTest() = testScope.runBlockingTest {
         val deleteEvents = mockk<DeleteEvents>(relaxed = true)
         val selectableEvents = mockedList(20) { event(it) }
