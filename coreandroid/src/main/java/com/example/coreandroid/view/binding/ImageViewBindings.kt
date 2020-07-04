@@ -7,7 +7,7 @@ import com.bumptech.glide.request.RequestOptions
 import com.example.coreandroid.R
 import com.example.coreandroid.model.event.Event
 
-private val eventRequestOptions by lazy {
+val eventRequestOptions by lazy {
     RequestOptions()
         .placeholder(R.drawable.event_placeholder)
         .centerCrop()

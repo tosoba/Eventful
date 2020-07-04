@@ -35,7 +35,6 @@
 
                 <ImageView
                     android:id="@+id/expandedImage"
-                    event="@{event}"
                     android:layout_width="match_parent"
                     android:layout_height="200dp"
                     android:scaleType="centerCrop"
@@ -46,6 +45,7 @@
                     android:id="@+id/event_details_toolbar"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
+                    app:title="@{event.name}"
                     app:layout_collapseMode="pin"
                     app:popupTheme="@style/AppTheme.PopupOverlay" />
 
