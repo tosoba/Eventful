@@ -31,11 +31,6 @@ internal class OtherNearbyFlowProcessorTests : BaseNearbyFlowProcessorTests() {
                 events = PagedDataList(selectableEvents)
             )
         }
-
-        abstract class Signal {
-            abstract suspend operator fun invoke(signal: NearbySignal)
-        }
-        1
         val signal = mockk<Signal>(relaxed = true)
 
         val updates = flowProcessor(saveEvents = saveEvents)

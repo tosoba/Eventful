@@ -56,7 +56,11 @@ class FavouritesFlowProcessor(
         currentState: () -> FavouritesState,
         states: Flow<FavouritesState>
     ): Flow<FavouritesStateUpdate> = filterNot { currentState().events.limitHit }
-        .flatMapLatest { states.map { it.searchText }.onStart { emit(currentState().searchText) }.distinctUntilChanged() }
+        .flatMapLatest {
+            states.map { it.searchText }
+                .onStart { emit(currentState().searchText) }
+                .distinctUntilChanged()
+        }
         .flatMapLatest { searchText ->
             getSavedEventsFlow(currentState().limit + limitIncrement)
                 .flowOn(ioDispatcher)

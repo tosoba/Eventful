@@ -62,4 +62,7 @@ internal abstract class BaseNearbyFlowProcessorTests {
         signal: suspend (NearbySignal) -> Unit = mockk(relaxed = true)
     ): Flow<NearbyStateUpdate> = updates(testScope, intents, currentState, states, intent, signal)
 
+    protected abstract class Signal {
+        abstract suspend operator fun invoke(signal: NearbySignal)
+    }
 }

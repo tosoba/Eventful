@@ -35,14 +35,7 @@ class NearbyFlowProcessor @Inject constructor(
         intent: suspend (NearbyIntent) -> Unit,
         signal: suspend (NearbySignal) -> Unit
     ): Flow<NearbyStateUpdate> = merge(
-        intents
-            .onEach {
-                if (it is NearbyIntent.ReloadLocation) {
-                    if (currentState().events.data.isNotEmpty()) locationStateProvider.reloadLocation()
-                    else signal(NearbySignal.EventsLoadingFinished)
-                }
-            }
-            .updates(coroutineScope, currentState, intent, signal),
+        intents.updates(coroutineScope, currentState, intent, signal),
         connectedStateProvider.updates(currentState, signal),
         connectedStateProvider.snackbarUpdates(currentState),
         locationStateProvider.updates(currentState, signal),
@@ -64,7 +57,14 @@ class NearbyFlowProcessor @Inject constructor(
         filterIsInstance<NearbyIntent.LoadMoreResults>()
             .loadMoreResultsUpdates(currentState, signal),
         filterIsInstance<NearbyIntent.AddToFavouritesClicked>()
-            .addToFavouritesUpdates(coroutineScope, currentState, intent, signal)
+            .addToFavouritesUpdates(coroutineScope, currentState, intent, signal),
+        filterIsInstance<NearbyIntent.ReloadLocation>()
+            .onEach {
+                if (currentState().events.data.isNotEmpty()) locationStateProvider.reloadLocation()
+                else signal(NearbySignal.EventsLoadingFinished)
+            }
+            .map { null }
+            .filterNotNull()
     )
 
     private fun ConnectedStateProvider.updates(
