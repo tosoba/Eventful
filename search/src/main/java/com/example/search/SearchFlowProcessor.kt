@@ -8,8 +8,8 @@ import com.example.core.usecase.*
 import com.example.core.util.Loading
 import com.example.core.util.ext.flatMapFirst
 import com.example.coreandroid.base.FlowProcessor
-import com.example.coreandroid.provider.ConnectedStateProvider
 import com.example.coreandroid.base.addedToFavouritesMessage
+import com.example.coreandroid.provider.ConnectedStateProvider
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
@@ -80,7 +80,7 @@ class SearchFlowProcessor @Inject constructor(
     private fun ConnectedStateProvider.updates(
         currentState: () -> SearchState
     ): Flow<SearchStateUpdate> = connectedStates.filter { connected ->
-        currentState().run { connected && events.loadingFailed && events.data.isEmpty() }
+        connected && currentState().events.run { loadingFailed && data.isEmpty() }
     }.flatMapFirst {
         searchEventsUpdates(
             newSearch = true,
@@ -96,7 +96,7 @@ class SearchFlowProcessor @Inject constructor(
     }.distinctUntilChangedBy {
         it.text
     }.flatMapLatest { (text) ->
-        flow<SearchStateUpdate> {
+        flow {
             emit(SearchStateUpdate.Events.Loading(searchText = text))
             val suggestions = withContext(ioDispatcher) { getSearchSuggestions(text) }
             emit(SearchStateUpdate.Suggestions(suggestions))
@@ -114,8 +114,7 @@ class SearchFlowProcessor @Inject constructor(
     private fun Flow<SearchIntent.LoadMoreResults>.loadMoreResultsUpdates(
         currentState: () -> SearchState
     ): Flow<SearchStateUpdate> = filterNot {
-        val events = currentState().events
-        events.status is Loading || !events.canLoadMore || events.data.isEmpty()
+        currentState().events.run { status is Loading || !canLoadMore || data.isEmpty() }
     }.flatMapFirst {
         searchEventsUpdates(
             newSearch = false,

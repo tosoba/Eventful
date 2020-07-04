@@ -71,7 +71,7 @@ class NearbyFlowProcessor @Inject constructor(
         currentState: () -> NearbyState,
         signal: suspend (NearbySignal) -> Unit
     ): Flow<NearbyStateUpdate> = connectedStates.filter { connected ->
-        currentState().run { connected && events.loadingFailed && events.data.isEmpty() }
+        connected && currentState().events.run { loadingFailed && data.isEmpty() }
     }.flatMapFirst {
         locationStateProvider.locationStates.notNullLatLng.take(1)
     }.flatMapLatest { latLng -> loadingEventsUpdates(latLng, false, currentState, signal) }
@@ -79,7 +79,7 @@ class NearbyFlowProcessor @Inject constructor(
     private fun ConnectedStateProvider.snackbarUpdates(
         currentState: () -> NearbyState
     ): Flow<NearbyStateUpdate> = connectedStates.filter { connected ->
-        currentState().run { !connected && events.loadingFailed }
+        !connected && currentState().events.loadingFailed
     }.flatMapFirst {
         locationStateProvider.locationStates.notNullLatLng.take(1)
     }.map { NearbyStateUpdate.NoConnectionSnackbar }
