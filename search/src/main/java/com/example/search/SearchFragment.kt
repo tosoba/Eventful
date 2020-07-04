@@ -5,7 +5,10 @@ import android.view.*
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.lifecycleScope
+import com.example.core.util.HoldsList
 import com.example.coreandroid.base.SelectableEventListFragment
+import com.example.coreandroid.model.event.Event
+import com.example.coreandroid.model.event.Selectable
 import com.example.coreandroid.util.ext.menuController
 import com.example.coreandroid.util.ext.snackbarController
 import com.example.search.databinding.FragmentSearchBinding
@@ -23,18 +26,18 @@ import reactivecircus.flowbinding.appcompat.queryTextEvents
 @ExperimentalCoroutinesApi
 @FlowPreview
 class SearchFragment :
-    SelectableEventListFragment<FragmentSearchBinding, SearchIntent, SearchState, SearchViewModel, SearchViewUpdate>(
+    SelectableEventListFragment<FragmentSearchBinding, HoldsList<Selectable<Event>>, SearchIntent, SearchState, SearchViewModel, SearchViewUpdate>(
         layoutRes = R.layout.fragment_search,
         viewBindingFactory = FragmentSearchBinding::bind,
         epoxyRecyclerView = FragmentSearchBinding::searchEventsRecyclerView,
+        mapToHoldsList = { this },
+        emptyTextResource = { R.string.no_events_found },
         eventsSelectionMenuRes = R.menu.search_events_selection_menu,
-        emptyListTextRes = R.string.no_events_found,
         selectionConfirmedActionId = R.id.search_action_add_favourite,
         loadMoreResultsIntent = SearchIntent.LoadMoreResults,
         selectionConfirmedIntent = SearchIntent.AddToFavouritesClicked,
         clearSelectionIntent = SearchIntent.ClearSelectionClicked,
         eventSelectedIntent = { SearchIntent.EventLongClicked(it) },
-        numberOfSelectedEvents = { events.data.count { it.selected } },
         viewUpdates = SearchViewModel::viewUpdates
     ) {
 

@@ -1,15 +1,12 @@
 package com.example.favourites
 
-import com.example.core.util.DataList
 import com.example.coreandroid.controller.SnackbarState
-import com.example.coreandroid.model.event.Event
-import com.example.coreandroid.model.event.Selectable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 
 sealed class FavouritesViewUpdate {
-    data class Events(val events: DataList<Selectable<Event>>) : FavouritesViewUpdate()
+    data class Events(val eventsData: FavouriteEventsData) : FavouritesViewUpdate()
     data class Snackbar(val state: SnackbarState) : FavouritesViewUpdate()
     data class UpdateActionMode(val numberOfSelectedEvents: Int) : FavouritesViewUpdate()
     object FinishActionMode : FavouritesViewUpdate()
@@ -19,7 +16,7 @@ sealed class FavouritesViewUpdate {
 @FlowPreview
 val FavouritesViewModel.viewUpdates: Flow<FavouritesViewUpdate>
     get() = merge(
-        states.map { it.events }
+        states.map { FavouriteEventsData(it.searchText, it.events) }
             .distinctUntilChanged()
             .map { FavouritesViewUpdate.Events(it) },
         states.map { it.snackbarState }

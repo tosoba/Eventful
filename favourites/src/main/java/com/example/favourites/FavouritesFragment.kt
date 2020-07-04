@@ -16,24 +16,27 @@ import reactivecircus.flowbinding.appcompat.queryTextEvents
 @ExperimentalCoroutinesApi
 @FlowPreview
 class FavouritesFragment :
-    SelectableEventListFragment<FragmentFavouritesBinding, FavouritesIntent, FavouritesState, FavouritesViewModel, FavouritesViewUpdate>(
+    SelectableEventListFragment<FragmentFavouritesBinding, FavouriteEventsData, FavouritesIntent, FavouritesState, FavouritesViewModel, FavouritesViewUpdate>(
         layoutRes = R.layout.fragment_favourites,
         viewBindingFactory = FragmentFavouritesBinding::bind,
         epoxyRecyclerView = FragmentFavouritesBinding::favouriteEventsRecyclerView,
+        mapToHoldsList = { events },
+        emptyTextResource = { state ->
+            if (state.searchText.isNotBlank()) R.string.no_favourite_events_match_search_text
+            else R.string.no_favourite_events_added_yet
+        },
         eventsSelectionMenuRes = R.menu.favourites_events_selection_menu,
-        emptyListTextRes = R.string.no_favourite_events_added_yet,
         selectionConfirmedActionId = R.id.favourites_action_remove_favourite,
         loadMoreResultsIntent = FavouritesIntent.LoadFavourites,
         selectionConfirmedIntent = FavouritesIntent.RemoveFromFavouritesClicked,
         clearSelectionIntent = FavouritesIntent.ClearSelectionClicked,
         eventSelectedIntent = { FavouritesIntent.EventLongClicked(it) },
-        numberOfSelectedEvents = { events.data.count { it.selected } },
         viewUpdates = FavouritesViewModel::viewUpdates
     ) {
 
     override suspend fun onViewUpdate(viewUpdate: FavouritesViewUpdate) {
         when (viewUpdate) {
-            is FavouritesViewUpdate.Events -> epoxyController.setData(viewUpdate.events)
+            is FavouritesViewUpdate.Events -> epoxyController.setData(viewUpdate.eventsData)
             is FavouritesViewUpdate.Snackbar -> snackbarController?.transitionToSnackbarState(
                 viewUpdate.state
             )
@@ -54,7 +57,6 @@ class FavouritesFragment :
         maxWidth = Integer.MAX_VALUE
         queryTextEvents()
             .debounce(500)
-            .filter { it.queryText.isNotBlank() }
             .distinctUntilChanged()
             .onEach {
                 viewModel.intent(FavouritesIntent.NewSearch(it.queryText.toString().trim()))

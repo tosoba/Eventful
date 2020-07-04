@@ -2,7 +2,10 @@ package com.example.nearby
 
 import android.view.Menu
 import android.view.MenuInflater
+import com.example.core.util.HoldsList
 import com.example.coreandroid.base.SelectableEventListFragment
+import com.example.coreandroid.model.event.Event
+import com.example.coreandroid.model.event.Selectable
 import com.example.coreandroid.util.ext.menuController
 import com.example.coreandroid.util.ext.snackbarController
 import com.example.nearby.databinding.FragmentNearbyBinding
@@ -12,18 +15,18 @@ import kotlinx.coroutines.FlowPreview
 @FlowPreview
 @ExperimentalCoroutinesApi
 class NearbyFragment :
-    SelectableEventListFragment<FragmentNearbyBinding, NearbyIntent, NearbyState, NearbyViewModel, NearbyViewUpdate>(
+    SelectableEventListFragment<FragmentNearbyBinding, HoldsList<Selectable<Event>>, NearbyIntent, NearbyState, NearbyViewModel, NearbyViewUpdate>(
         layoutRes = R.layout.fragment_nearby,
         viewBindingFactory = FragmentNearbyBinding::bind,
         epoxyRecyclerView = FragmentNearbyBinding::nearbyEventsRecyclerView,
+        mapToHoldsList = { this },
+        emptyTextResource = { R.string.no_events_found },
         eventsSelectionMenuRes = R.menu.nearby_events_selection_menu,
-        emptyListTextRes = R.string.no_events_found,
         selectionConfirmedActionId = R.id.nearby_action_add_favourite,
         loadMoreResultsIntent = NearbyIntent.LoadMoreResults,
         selectionConfirmedIntent = NearbyIntent.AddToFavouritesClicked,
         clearSelectionIntent = NearbyIntent.ClearSelectionClicked,
         eventSelectedIntent = { NearbyIntent.EventLongClicked(it) },
-        numberOfSelectedEvents = { events.data.count { it.selected } },
         viewUpdates = NearbyViewModel::viewUpdates
     ) {
 

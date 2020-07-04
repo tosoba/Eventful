@@ -3,7 +3,10 @@ package com.example.coreandroid.view.epoxy
 import android.os.Handler
 import android.view.View
 import androidx.fragment.app.Fragment
-import com.airbnb.epoxy.*
+import com.airbnb.epoxy.AsyncEpoxyController
+import com.airbnb.epoxy.EpoxyController
+import com.airbnb.epoxy.EpoxyModel
+import com.airbnb.epoxy.TypedEpoxyController
 import com.example.core.util.*
 import com.example.coreandroid.LoadingMoreIndicatorBindingModel_
 import com.example.coreandroid.loadingIndicator
@@ -38,23 +41,28 @@ fun <S> Fragment.asyncController(
     }
 }
 
-fun <I> Fragment.infiniteItemListController(
+fun <D, I> Fragment.infiniteItemListController(
     epoxyThreads: EpoxyThreads,
+    mapToHoldsList: D.() -> HoldsList<I>,
     reloadClicked: (() -> Unit)? = null,
-    emptyText: String? = null,
+    emptyTextResource: ((D) -> Int)? = null,
     loadMore: () -> Unit,
     buildItem: (I) -> EpoxyModel<*>
-): TypedEpoxyController<HoldsList<I>> = object : TypedEpoxyController<HoldsList<I>>(
+): TypedEpoxyController<D> = object : TypedEpoxyController<D>(
     epoxyThreads.builder, epoxyThreads.differ
 ) {
-    override fun buildModels(data: HoldsList<I>) {
+    override fun buildModels(data: D) {
         if (view == null || isRemoving) return
 
-        if (data.data.isEmpty()) when (val status = data.status) {
+        val holder = data.mapToHoldsList()
+        if (holder.data.isEmpty()) when (val status = holder.status) {
             is Loading -> loadingIndicator { id("loading-indicator-items") }
-            is LoadedSuccessfully -> if (emptyText != null && emptyText.isNotBlank()) noItemsText {
-                id("empty-text")
-                text(emptyText)
+            is LoadedSuccessfully -> if (emptyTextResource != null) {
+                val emptyText = context?.getText(emptyTextResource(data))?.toString()
+                if (emptyText != null) noItemsText {
+                    id("empty-text")
+                    text(emptyText)
+                }
             }
             is Failure -> reloadControl {
                 id("reload-control")
@@ -62,13 +70,13 @@ fun <I> Fragment.infiniteItemListController(
                 (status.error as? HasFailureMessage)?.let { message(it.message) }
             }
         } else {
-            data.data.forEach {
+            holder.data.forEach {
                 buildItem(it).spanSizeOverride { _, _, _ -> 1 }.addTo(this)
             }
             LoadingMoreIndicatorBindingModel_()
                 .id("loading-indicator-more-items")
                 .onBind { _, _, _ -> loadMore() }
-                .addIf(data.canLoadMore, this)
+                .addIf(holder.canLoadMore, this)
         }
     }
 }

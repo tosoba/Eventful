@@ -5,10 +5,11 @@ import android.view.View
 import androidx.annotation.CallSuper
 import androidx.annotation.LayoutRes
 import androidx.annotation.MenuRes
-import androidx.annotation.StringRes
 import androidx.lifecycle.lifecycleScope
 import androidx.viewbinding.ViewBinding
 import com.airbnb.epoxy.EpoxyRecyclerView
+import com.airbnb.epoxy.TypedEpoxyController
+import com.example.core.util.HoldsList
 import com.example.coreandroid.controller.eventsSelectionActionModeController
 import com.example.coreandroid.model.event.Event
 import com.example.coreandroid.model.event.Selectable
@@ -32,18 +33,19 @@ import javax.inject.Inject
 
 @FlowPreview
 @ExperimentalCoroutinesApi
-abstract class SelectableEventListFragment<VB : ViewBinding, I : Any, S : Any, VM : FlowViewModel<I, *, S, *>, VU>(
+abstract class SelectableEventListFragment<
+        VB : ViewBinding, D : Any, I : Any, S : SelectableEventsState<S>, VM : FlowViewModel<I, *, S, *>, VU>(
     @LayoutRes private val layoutRes: Int,
     viewBindingFactory: (View) -> VB,
     private val epoxyRecyclerView: VB.() -> EpoxyRecyclerView,
+    private val mapToHoldsList: D.() -> HoldsList<Selectable<Event>>,
+    private val emptyTextResource: ((D) -> Int)? = null,
     @MenuRes private val eventsSelectionMenuRes: Int,
-    @StringRes private val emptyListTextRes: Int?,
     private val selectionConfirmedActionId: Int,
     private val loadMoreResultsIntent: I,
     private val selectionConfirmedIntent: I,
     private val clearSelectionIntent: I,
     private val eventSelectedIntent: (Event) -> I,
-    private val numberOfSelectedEvents: (S).() -> Int,
     private val viewUpdates: (VM).() -> Flow<VU>
 ) : DaggerViewModelFragment<VM>(layoutRes) {
 
@@ -58,10 +60,11 @@ abstract class SelectableEventListFragment<VB : ViewBinding, I : Any, S : Any, V
 
     protected val binding: VB by viewBinding(viewBindingFactory)
 
-    protected val epoxyController by lazy(LazyThreadSafetyMode.NONE) {
-        infiniteItemListController<Selectable<Event>>(
-            epoxyThreads,
-            emptyText = emptyListTextRes?.let { context?.getString(it) },
+    protected val epoxyController: TypedEpoxyController<D> by lazy(LazyThreadSafetyMode.NONE) {
+        infiniteItemListController(
+            epoxyThreads = epoxyThreads,
+            mapToHoldsList = mapToHoldsList,
+            emptyTextResource = emptyTextResource,
             loadMore = { lifecycleScope.launch { viewModel.intent(loadMoreResultsIntent) } }
         ) { selectable ->
             selectable.listItem(
@@ -120,7 +123,7 @@ abstract class SelectableEventListFragment<VB : ViewBinding, I : Any, S : Any, V
         viewUpdatesJob = viewModel.viewUpdates().onEach(::onViewUpdate).launchIn(lifecycleScope)
         popBackStackSignalProviderJob = popBackStackSignalProvider.popBackStackSignals
             .onEach {
-                actionModeController.update(viewModel.state.numberOfSelectedEvents())
+                actionModeController.update(viewModel.state.events.data.count { it.selected })
             }
             .launchIn(lifecycleScope)
     }
