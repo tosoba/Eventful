@@ -3,8 +3,8 @@ package com.example.core.usecase
 import com.example.core.model.PagedResult
 import com.example.core.model.Resource
 import com.example.core.model.event.IEvent
-import com.example.core.model.event.trimmedLowerCasedName
 import com.example.core.util.PagedDataList
+import com.example.core.util.ext.lowerCasedTrimmed
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -18,7 +18,7 @@ class GetPagedEventsFlow @Inject constructor(private val dispatcher: CoroutineDi
         getEvents: suspend (Int) -> Resource<PagedResult<IEvent>>
     ): Flow<Resource<PagedResult<IEvent>>> = flow {
         val currentEventNames = currentEvents.data.map(toEvent)
-            .map { it.trimmedLowerCasedName }
+            .map { it.name.lowerCasedTrimmed }
             .toSet()
         var page = currentEvents.offset
         var resource: Resource<PagedResult<IEvent>>
@@ -27,8 +27,8 @@ class GetPagedEventsFlow @Inject constructor(private val dispatcher: CoroutineDi
                 .map { result ->
                     PagedResult(
                         items = result.items
-                            .filterNot { currentEventNames.contains(it.trimmedLowerCasedName) }
-                            .distinctBy { it.trimmedLowerCasedName },
+                            .filterNot { currentEventNames.contains(it.name.lowerCasedTrimmed) }
+                            .distinctBy { it.name.lowerCasedTrimmed },
                         currentPage = result.currentPage,
                         totalPages = result.totalPages
                     )

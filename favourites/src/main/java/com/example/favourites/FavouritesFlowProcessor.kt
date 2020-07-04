@@ -1,13 +1,12 @@
 package com.example.favourites
 
-import com.example.core.model.event.trimmedLowerCasedName
 import com.example.core.usecase.DeleteEvents
 import com.example.core.usecase.GetSavedEventsFlow
+import com.example.core.util.ext.lowerCasedTrimmed
 import com.example.coreandroid.base.FlowProcessor
 import com.example.coreandroid.base.removedFromFavouritesMessage
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import java.util.*
 
 @FlowPreview
 @ExperimentalCoroutinesApi
@@ -66,9 +65,7 @@ class FavouritesFlowProcessor(
                         events = events.run {
                             if (searchText.isBlank()) this
                             else filter {
-                                it.trimmedLowerCasedName.contains(
-                                    searchText.toLowerCase(Locale.getDefault()).trim()
-                                )
+                                it.name.lowerCasedTrimmed.contains(searchText.lowerCasedTrimmed)
                             }
                         }
                     )

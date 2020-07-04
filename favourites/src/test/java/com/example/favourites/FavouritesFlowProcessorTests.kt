@@ -4,8 +4,9 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.example.core.usecase.DeleteEvents
 import com.example.core.usecase.GetSavedEventsFlow
 import com.example.core.util.DataList
-import com.example.coreandroid.model.event.Selectable
+import com.example.core.util.ext.lowerCasedTrimmed
 import com.example.coreandroid.base.removedFromFavouritesMessage
+import com.example.coreandroid.model.event.Selectable
 import com.example.test.rule.event
 import com.example.test.rule.mockLog
 import com.example.test.rule.mockedList
@@ -23,6 +24,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.jupiter.api.DisplayName
 
 @ExperimentalCoroutinesApi
 @FlowPreview
@@ -173,17 +175,19 @@ class FavouritesFlowProcessorTests {
     }
 
     @Test
+    @DisplayName("After NewSearch update is applied to state - should emit Update.Events with filtered events")
     fun newSearchLoadFavouritesTest() = testScope.runBlockingTest {
-        val events1stEmission = mockedList(20) { event(it) }
+        val events = mockedList(20) { event(it) }
         val getSavedEventsFlow = mockk<GetSavedEventsFlow> {
-            every { this@mockk(any()) } returns flowOf(events1stEmission)
+            every { this@mockk(any()) } returns flowOf(events)
         }
+        val initialState = FavouritesState()
         val currentState = mockk<() -> FavouritesState> {
-            every { this@mockk() } returns FavouritesState()
+            every { this@mockk() } returns initialState
         }
         val limit = currentState().limit + FavouritesFlowProcessor.limitIncrement
         val searchText = "7"
-
+        val searchTextUpdate = FavouritesStateUpdate.SearchTextUpdate(searchText)
 
         val updates = flowProcessor(getSavedEventsFlow = getSavedEventsFlow)
             .updates(
@@ -192,13 +196,25 @@ class FavouritesFlowProcessorTests {
                     FavouritesIntent.NewSearch(searchText)
                 ),
                 currentState = currentState,
-                states = flow<FavouritesState> {
-
-                }
+                states = flowOf(searchTextUpdate(initialState))
             )
             .toList()
 
-        verify(exactly = 1) { getSavedEventsFlow(limit) }
+        verify(exactly = 2) { getSavedEventsFlow(limit) }
+        assert(updates.size == 3)
+        assert(updates.first() == searchTextUpdate)
+        val unfilteredEventsUpdate = updates[1]
+        assert(
+            unfilteredEventsUpdate is FavouritesStateUpdate.Events
+                    && unfilteredEventsUpdate.events == events
+        )
+        val filteredEventsUpdate = updates.last()
+        assert(
+            filteredEventsUpdate is FavouritesStateUpdate.Events
+                    && filteredEventsUpdate.events == events.filter {
+                it.name.lowerCasedTrimmed.contains(searchText.lowerCasedTrimmed)
+            }
+        )
     }
 
     @Test

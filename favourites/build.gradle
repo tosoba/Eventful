@@ -73,10 +73,13 @@ dependencies {
     implementation "androidx.core:core-ktx:$coreKtxVersion"
 
     testImplementation project(':test')
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junit5Version"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit5Version"
+    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:$junit5Version"
     testImplementation "junit:junit:$junit4Version"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinxCoroutinesTestVersion"
     testImplementation "io.mockk:mockk:$mockkVersion"
     testImplementation "androidx.arch.core:core-testing:$archCoreTestingVersion"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
     androidTestImplementation "androidx.test:runner:$testRunnerVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
 }
