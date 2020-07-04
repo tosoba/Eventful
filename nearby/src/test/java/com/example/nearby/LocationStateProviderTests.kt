@@ -51,7 +51,7 @@ internal class LocationStateProviderTests : BaseNearbyFlowProcessorTests() {
             currentState = currentState
         ).launchIn(this)
 
-        verify(exactly = 0) { getPagedEventsFlow<Selectable<Event>>(any(), any(), any()) }
+        verify(exactly = 0) { getPagedEventsFlow(initialState.events, any(), any()) }
     }
 
     @Test
@@ -75,7 +75,7 @@ internal class LocationStateProviderTests : BaseNearbyFlowProcessorTests() {
             currentState = currentState
         ).launchIn(this)
 
-        verify(exactly = 0) { getPagedEventsFlow<Selectable<Event>>(any(), any(), any()) }
+        verify(exactly = 0) { getPagedEventsFlow(initialState.events, any(), any()) }
     }
 
     @Test

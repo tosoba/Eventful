@@ -2,8 +2,8 @@ package com.example.nearby
 
 import com.example.core.usecase.SaveEvents
 import com.example.core.util.PagedDataList
+import com.example.coreandroid.base.addedToFavouritesMessage
 import com.example.coreandroid.model.event.Selectable
-import com.example.coreandroid.util.addedToFavouritesMessage
 import com.example.test.rule.event
 import com.example.test.rule.mockedList
 import io.mockk.coVerify
@@ -35,7 +35,7 @@ internal class OtherNearbyFlowProcessorTests : BaseNearbyFlowProcessorTests() {
         abstract class Signal {
             abstract suspend operator fun invoke(signal: NearbySignal)
         }
-1
+        1
         val signal = mockk<Signal>(relaxed = true)
 
         val updates = flowProcessor(saveEvents = saveEvents)
