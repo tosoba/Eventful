@@ -70,7 +70,7 @@ class MainFlowProcessor @Inject constructor(
     }
 
     private fun locationAvailabilityUpdates(
-        states: StateFlow<MainState>
+        states: Flow<MainState>
     ): Flow<MainStateUpdate> = states.map { it.locationState }
         .filter { (latLng, status) -> status is LocationStatus.Disabled && latLng == null }
         .flatMapLatest { isLocationAvailableFlow().takeWhileInclusive { !it } }
