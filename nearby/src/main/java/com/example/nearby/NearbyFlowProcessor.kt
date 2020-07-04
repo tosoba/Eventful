@@ -6,11 +6,11 @@ import com.example.core.usecase.SaveEvents
 import com.example.core.util.Loading
 import com.example.core.util.ext.flatMapFirst
 import com.example.coreandroid.base.FlowProcessor
+import com.example.coreandroid.base.addedToFavouritesMessage
 import com.example.coreandroid.model.location.LocationState
 import com.example.coreandroid.model.location.LocationStatus
 import com.example.coreandroid.provider.ConnectedStateProvider
 import com.example.coreandroid.provider.LocationStateProvider
-import com.example.coreandroid.base.addedToFavouritesMessage
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -84,8 +84,11 @@ class NearbyFlowProcessor @Inject constructor(
 
     private fun LocationStateProvider.updates(
         currentState: () -> NearbyState
-    ): Flow<NearbyStateUpdate> = locationStates.notNullLatLng
-        .filter { currentState().run { events.data.isEmpty() && !events.loadingFailed } } // TODO: this won't work with refreshing with SwipeRefreshLayout
+    ): Flow<NearbyStateUpdate> = locationStates.filter { (_, status) -> status is LocationStatus.Found }
+        .map { it.latLng }
+        .filterNotNull()
+        .distinctUntilChanged()
+        .filterNot { currentState().events.loadingFailed }
         .flatMapLatest { latLng -> loadingEventsUpdates(latLng, currentState) }
 
     private fun Flow<NearbyIntent.LoadMoreResults>.loadMoreResultsUpdates(
