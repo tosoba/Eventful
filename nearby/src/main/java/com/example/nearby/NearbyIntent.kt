@@ -8,4 +8,5 @@ sealed class NearbyIntent {
     object ClearSelectionClicked : NearbyIntent()
     object AddToFavouritesClicked : NearbyIntent()
     object HideSnackbar : NearbyIntent()
+    object ReloadLocation : NearbyIntent()
 }

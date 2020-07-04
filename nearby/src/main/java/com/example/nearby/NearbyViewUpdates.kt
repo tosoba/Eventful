@@ -13,6 +13,7 @@ sealed class NearbyViewUpdate {
     data class Snackbar(val state: SnackbarState) : NearbyViewUpdate()
     data class UpdateActionMode(val numberOfSelectedEvents: Int) : NearbyViewUpdate()
     object FinishActionMode : NearbyViewUpdate()
+    object StopRefreshingIfInProgress : NearbyViewUpdate()
 }
 
 @ExperimentalCoroutinesApi
@@ -29,5 +30,7 @@ val NearbyViewModel.viewUpdates: Flow<NearbyViewUpdate>
             .distinctUntilChanged()
             .map { NearbyViewUpdate.UpdateActionMode(it) },
         signals.filterIsInstance<NearbySignal.FavouritesSaved>()
-            .map { NearbyViewUpdate.FinishActionMode }
+            .map { NearbyViewUpdate.FinishActionMode },
+        signals.filterIsInstance<NearbySignal.EventsLoadingFinished>()
+            .map { NearbyViewUpdate.StopRefreshingIfInProgress }
     )

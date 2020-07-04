@@ -1,7 +1,10 @@
 package com.example.nearby
 
+import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
+import android.view.View
+import androidx.lifecycle.lifecycleScope
 import com.example.core.util.HoldsList
 import com.example.coreandroid.base.SelectableEventListFragment
 import com.example.coreandroid.model.event.Event
@@ -11,6 +14,7 @@ import com.example.coreandroid.util.ext.snackbarController
 import com.example.nearby.databinding.FragmentNearbyBinding
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.launch
 
 @FlowPreview
 @ExperimentalCoroutinesApi
@@ -30,6 +34,13 @@ class NearbyFragment :
         viewUpdates = NearbyViewModel::viewUpdates
     ) {
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding.nearbySwipeRefreshLayout.setOnRefreshListener {
+            lifecycleScope.launch { viewModel.intent(NearbyIntent.ReloadLocation) }
+        }
+    }
+
     override suspend fun onViewUpdate(viewUpdate: NearbyViewUpdate) {
         when (viewUpdate) {
             is NearbyViewUpdate.Events -> epoxyController.setData(viewUpdate.events)
@@ -40,6 +51,9 @@ class NearbyFragment :
                 viewUpdate.numberOfSelectedEvents
             )
             is NearbyViewUpdate.FinishActionMode -> actionModeController.finish(false)
+            is NearbyViewUpdate.StopRefreshingIfInProgress -> {
+                binding.nearbySwipeRefreshLayout.isRefreshing = false
+            }
         }
     }
 
