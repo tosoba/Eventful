@@ -13,11 +13,12 @@ import com.example.coreandroid.controller.eventsSelectionActionModeController
 import com.example.coreandroid.model.event.Event
 import com.example.coreandroid.model.event.Selectable
 import com.example.coreandroid.navigation.IFragmentFactory
-import com.example.coreandroid.view.epoxy.EpoxyThreads
+import com.example.coreandroid.provider.PopBackStackSignalProvider
 import com.example.coreandroid.util.delegate.viewBinding
 import com.example.coreandroid.util.ext.navigationFragment
 import com.example.coreandroid.util.ext.saveScrollPosition
 import com.example.coreandroid.util.ext.setControllerWithSavedState
+import com.example.coreandroid.view.epoxy.EpoxyThreads
 import com.example.coreandroid.view.epoxy.infiniteItemListController
 import com.example.coreandroid.view.epoxy.listItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -31,18 +32,19 @@ import javax.inject.Inject
 
 @FlowPreview
 @ExperimentalCoroutinesApi
-abstract class SelectableEventListFragment<Binding : ViewBinding, Intent : Any, VM : FlowViewModel<Intent, *, *, *>, ViewUpdate>(
+abstract class SelectableEventListFragment<VB : ViewBinding, I : Any, S : Any, VM : FlowViewModel<I, *, S, *>, VU>(
     @LayoutRes private val layoutRes: Int,
-    viewBindingFactory: (View) -> Binding,
-    private val epoxyRecyclerView: Binding.() -> EpoxyRecyclerView,
+    viewBindingFactory: (View) -> VB,
+    private val epoxyRecyclerView: VB.() -> EpoxyRecyclerView,
     @MenuRes private val eventsSelectionMenuRes: Int,
     @StringRes private val emptyListTextRes: Int?,
     private val selectionConfirmedActionId: Int,
-    private val loadMoreResultsIntent: Intent,
-    private val selectionConfirmedIntent: Intent,
-    private val clearSelectionIntent: Intent,
-    private val eventSelectedIntent: (Event) -> Intent,
-    private val viewUpdates: (VM).() -> Flow<ViewUpdate>
+    private val loadMoreResultsIntent: I,
+    private val selectionConfirmedIntent: I,
+    private val clearSelectionIntent: I,
+    private val eventSelectedIntent: (Event) -> I,
+    private val numberOfSelectedEvents: (S).() -> Int,
+    private val viewUpdates: (VM).() -> Flow<VU>
 ) : DaggerViewModelFragment<VM>(layoutRes) {
 
     @Inject
@@ -51,7 +53,10 @@ abstract class SelectableEventListFragment<Binding : ViewBinding, Intent : Any, 
     @Inject
     internal lateinit var epoxyThreads: EpoxyThreads
 
-    protected val binding: Binding by viewBinding(viewBindingFactory)
+    @Inject
+    internal lateinit var popBackStackSignalProvider: PopBackStackSignalProvider
+
+    protected val binding: VB by viewBinding(viewBindingFactory)
 
     protected val epoxyController by lazy(LazyThreadSafetyMode.NONE) {
         infiniteItemListController<Selectable<Event>>(
@@ -61,6 +66,7 @@ abstract class SelectableEventListFragment<Binding : ViewBinding, Intent : Any, 
         ) { selectable ->
             selectable.listItem(
                 clicked = View.OnClickListener {
+                    actionModeController.finish(false)
                     navigationFragment?.showFragment(fragmentFactory.eventFragment(selectable.item))
                 },
                 longClicked = View.OnLongClickListener {
@@ -83,8 +89,7 @@ abstract class SelectableEventListFragment<Binding : ViewBinding, Intent : Any, 
                 }
             ),
             onDestroyActionMode = {
-                lifecycleScope.launch { viewModel.intent(clearSelectionIntent) }
-                Unit
+                lifecycleScope.launch { viewModel.intent(clearSelectionIntent) }.let { Unit }
             }
         )
     }
@@ -106,19 +111,26 @@ abstract class SelectableEventListFragment<Binding : ViewBinding, Intent : Any, 
     }
 
     private var viewUpdatesJob: Job? = null
+    private var popBackStackSignalProviderJob: Job? = null
 
     @CallSuper
     override fun onResume() {
         super.onResume()
         activity?.invalidateOptionsMenu()
         viewUpdatesJob = viewModel.viewUpdates().onEach(::onViewUpdate).launchIn(lifecycleScope)
+        popBackStackSignalProviderJob = popBackStackSignalProvider.popBackStackSignals
+            .onEach {
+                actionModeController.update(viewModel.state.numberOfSelectedEvents())
+            }
+            .launchIn(lifecycleScope)
     }
 
     @CallSuper
     override fun onPause() {
         viewUpdatesJob?.cancel()
+        popBackStackSignalProviderJob?.cancel()
         super.onPause()
     }
 
-    protected abstract suspend fun onViewUpdate(viewUpdate: ViewUpdate)
+    protected abstract suspend fun onViewUpdate(viewUpdate: VU)
 }

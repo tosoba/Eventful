@@ -16,7 +16,7 @@ import reactivecircus.flowbinding.appcompat.queryTextEvents
 @ExperimentalCoroutinesApi
 @FlowPreview
 class FavouritesFragment :
-    SelectableEventListFragment<FragmentFavouritesBinding, FavouritesIntent, FavouritesViewModel, FavouritesViewUpdate>(
+    SelectableEventListFragment<FragmentFavouritesBinding, FavouritesIntent, FavouritesState, FavouritesViewModel, FavouritesViewUpdate>(
         layoutRes = R.layout.fragment_favourites,
         viewBindingFactory = FragmentFavouritesBinding::bind,
         epoxyRecyclerView = FragmentFavouritesBinding::favouriteEventsRecyclerView,
@@ -27,6 +27,7 @@ class FavouritesFragment :
         selectionConfirmedIntent = FavouritesIntent.RemoveFromFavouritesClicked,
         clearSelectionIntent = FavouritesIntent.ClearSelectionClicked,
         eventSelectedIntent = { FavouritesIntent.EventLongClicked(it) },
+        numberOfSelectedEvents = { events.data.count { it.selected } },
         viewUpdates = FavouritesViewModel::viewUpdates
     ) {
 

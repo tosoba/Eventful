@@ -23,7 +23,7 @@ import reactivecircus.flowbinding.appcompat.queryTextEvents
 @ExperimentalCoroutinesApi
 @FlowPreview
 class SearchFragment :
-    SelectableEventListFragment<FragmentSearchBinding, SearchIntent, SearchViewModel, SearchViewUpdate>(
+    SelectableEventListFragment<FragmentSearchBinding, SearchIntent, SearchState, SearchViewModel, SearchViewUpdate>(
         layoutRes = R.layout.fragment_search,
         viewBindingFactory = FragmentSearchBinding::bind,
         epoxyRecyclerView = FragmentSearchBinding::searchEventsRecyclerView,
@@ -34,6 +34,7 @@ class SearchFragment :
         selectionConfirmedIntent = SearchIntent.AddToFavouritesClicked,
         clearSelectionIntent = SearchIntent.ClearSelectionClicked,
         eventSelectedIntent = { SearchIntent.EventLongClicked(it) },
+        numberOfSelectedEvents = { events.data.count { it.selected } },
         viewUpdates = SearchViewModel::viewUpdates
     ) {
 

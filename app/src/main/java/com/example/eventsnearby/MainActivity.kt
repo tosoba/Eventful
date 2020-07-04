@@ -59,8 +59,10 @@ class MainActivity :
     override fun onSupportNavigateUp(): Boolean = onBackPressed().let { true }
 
     override fun onBackPressed() {
-        if (mainNavigationFragment?.onBackPressed() == true) return
-        else super.onBackPressed()
+        if (mainNavigationFragment?.onBackPressed() == true) {
+            launch { viewModel.signal(MainSignal.PopMainBackStackSignal) }
+            return
+        } else super.onBackPressed()
     }
 
     private fun requestPermission(): Job = launch {

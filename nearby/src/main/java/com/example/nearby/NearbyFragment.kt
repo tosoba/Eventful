@@ -12,7 +12,7 @@ import kotlinx.coroutines.FlowPreview
 @FlowPreview
 @ExperimentalCoroutinesApi
 class NearbyFragment :
-    SelectableEventListFragment<FragmentNearbyBinding, NearbyIntent, NearbyViewModel, NearbyViewUpdate>(
+    SelectableEventListFragment<FragmentNearbyBinding, NearbyIntent, NearbyState, NearbyViewModel, NearbyViewUpdate>(
         layoutRes = R.layout.fragment_nearby,
         viewBindingFactory = FragmentNearbyBinding::bind,
         epoxyRecyclerView = FragmentNearbyBinding::nearbyEventsRecyclerView,
@@ -23,6 +23,7 @@ class NearbyFragment :
         selectionConfirmedIntent = NearbyIntent.AddToFavouritesClicked,
         clearSelectionIntent = NearbyIntent.ClearSelectionClicked,
         eventSelectedIntent = { NearbyIntent.EventLongClicked(it) },
+        numberOfSelectedEvents = { events.data.count { it.selected } },
         viewUpdates = NearbyViewModel::viewUpdates
     ) {
 

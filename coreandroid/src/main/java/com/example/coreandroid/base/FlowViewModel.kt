@@ -20,6 +20,7 @@ abstract class FlowViewModel<Intent : Any, Update : StateUpdate<State>, State : 
 
     private val _signals: BroadcastChannel<Signal> = BroadcastChannel(Channel.BUFFERED)
     val signals: Flow<Signal> get() = _signals.asFlow()
+    suspend fun signal(signal: Signal) = _signals.send(signal)
 
     private val _intents: BroadcastChannel<Intent> = BroadcastChannel(Channel.CONFLATED)
     suspend fun intent(intent: Intent) = _intents.send(intent)

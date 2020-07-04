@@ -9,6 +9,7 @@ import com.example.coreandroid.di.viewmodel.ViewModelKey
 import com.example.coreandroid.navigation.IFragmentFactory
 import com.example.coreandroid.provider.ConnectedStateProvider
 import com.example.coreandroid.provider.LocationStateProvider
+import com.example.coreandroid.provider.PopBackStackSignalProvider
 import com.example.event.EventModule
 import com.example.favourites.FavouritesModule
 import com.example.nearby.NearbyModule
@@ -61,6 +62,9 @@ abstract class MainActivityModule {
 
     @Binds
     abstract fun locationStateProvider(mainViewModel: MainViewModel): LocationStateProvider
+
+    @Binds
+    abstract fun popBackStackSignalProvider(mainViewModel: MainViewModel): PopBackStackSignalProvider
 
     companion object {
         @Provides
