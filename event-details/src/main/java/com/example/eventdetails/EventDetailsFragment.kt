@@ -21,7 +21,7 @@ import com.example.coreandroid.util.delegate.FragmentArgument
 import com.example.coreandroid.util.ext.*
 import com.example.coreandroid.view.binding.eventRequestOptions
 import com.example.coreandroid.view.epoxy.kindsCarousel
-import com.example.coreandroid.view.epoxy.simpleController
+import com.example.coreandroid.view.epoxy.asyncController
 import com.example.eventdetails.databinding.FragmentEventDetailsBinding
 import kotlinx.android.synthetic.main.fragment_event_details.*
 import kotlinx.coroutines.Dispatchers
@@ -34,7 +34,7 @@ class EventDetailsFragment : Fragment() {
     private var statusBarColor: Int? = null
 
     private val epoxyController: AsyncEpoxyController by lazy(LazyThreadSafetyMode.NONE) {
-        simpleController {
+        asyncController {
             eventInfo {
                 id("${event.id}i")
                 event(event)

@@ -20,7 +20,7 @@ class EpoxyThreads(val builder: Handler, val differ: Handler) {
     }
 }
 
-fun Fragment.simpleController(
+fun Fragment.asyncController(
     build: EpoxyController.() -> Unit
 ): AsyncEpoxyController = object : AsyncEpoxyController() {
     override fun buildModels() {
@@ -29,13 +29,13 @@ fun Fragment.simpleController(
     }
 }
 
-fun <S> Fragment.asyncController(
+fun <D> Fragment.typedController(
     epoxyThreads: EpoxyThreads,
-    build: EpoxyController.(state: S) -> Unit
-): TypedEpoxyController<S> = object : TypedEpoxyController<S>(
+    build: EpoxyController.(D) -> Unit
+): TypedEpoxyController<D> = object : TypedEpoxyController<D>(
     epoxyThreads.builder, epoxyThreads.differ
 ) {
-    override fun buildModels(data: S) {
+    override fun buildModels(data: D) {
         if (view == null || isRemoving) return
         build(data)
     }
@@ -48,35 +48,29 @@ fun <D, I> Fragment.infiniteItemListController(
     emptyTextResource: ((D) -> Int)? = null,
     loadMore: () -> Unit,
     buildItem: (I) -> EpoxyModel<*>
-): TypedEpoxyController<D> = object : TypedEpoxyController<D>(
-    epoxyThreads.builder, epoxyThreads.differ
-) {
-    override fun buildModels(data: D) {
-        if (view == null || isRemoving) return
-
-        val holder = data.mapToHoldsList()
-        if (holder.data.isEmpty()) when (val status = holder.status) {
-            is Loading -> loadingIndicator { id("loading-indicator-items") }
-            is LoadedSuccessfully -> if (emptyTextResource != null) {
-                val emptyText = context?.getText(emptyTextResource(data))?.toString()
-                if (emptyText != null) noItemsText {
-                    id("empty-text")
-                    text(emptyText)
-                }
+): TypedEpoxyController<D> = typedController(epoxyThreads) { data ->
+    val holder = data.mapToHoldsList()
+    if (holder.data.isEmpty()) when (val status = holder.status) {
+        is Loading -> loadingIndicator { id("loading-indicator-items") }
+        is LoadedSuccessfully -> if (emptyTextResource != null) {
+            val emptyText = context?.getText(emptyTextResource(data))?.toString()
+            if (emptyText != null) noItemsText {
+                id("empty-text")
+                text(emptyText)
             }
-            is Failure -> reloadControl {
-                id("reload-control")
-                reloadClicked?.let { onReloadClicked(View.OnClickListener { it() }) }
-                (status.error as? HasFailureMessage)?.let { message(it.message) }
-            }
-        } else {
-            holder.data.forEach {
-                buildItem(it).spanSizeOverride { _, _, _ -> 1 }.addTo(this)
-            }
-            LoadingMoreIndicatorBindingModel_()
-                .id("loading-indicator-more-items")
-                .onBind { _, _, _ -> loadMore() }
-                .addIf(holder.canLoadMore, this)
         }
+        is Failure -> reloadControl {
+            id("reload-control")
+            reloadClicked?.let { onReloadClicked(View.OnClickListener { it() }) }
+            (status.error as? HasFailureMessage)?.let { message(it.message) }
+        }
+    } else {
+        holder.data.forEach {
+            buildItem(it).spanSizeOverride { _, _, _ -> 1 }.addTo(this)
+        }
+        LoadingMoreIndicatorBindingModel_()
+            .id("loading-indicator-more-items")
+            .onBind { _, _, _ -> loadMore() }
+            .addIf(holder.canLoadMore, this)
     }
 }
