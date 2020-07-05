@@ -4,13 +4,17 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
+import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.PagerAdapter
 import com.example.coreandroid.controller.*
+import com.example.coreandroid.provider.PopBackStackSignalProvider
 import com.example.coreandroid.util.delegate.bottomNavItemSelectedViewPagerListener
 import com.example.coreandroid.util.delegate.viewBinding
 import com.example.coreandroid.util.delegate.viewPagerPageSelectedBottomNavListener
 import com.example.coreandroid.util.ext.setupToolbar
 import com.example.coreandroid.util.ext.setupToolbarWithDrawerToggle
+import com.example.coreandroid.util.ext.statusBarColor
+import com.example.coreandroid.util.ext.themeColor
 import com.example.coreandroid.view.ViewPagerPageSelectedListener
 import com.example.coreandroid.view.titledFragmentsPagerAdapter
 import com.example.eventsnearby.databinding.FragmentMainBinding
@@ -24,6 +28,9 @@ import dagger.android.support.DaggerFragment
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
 @FlowPreview
@@ -47,12 +54,16 @@ class MainFragment : DaggerFragment(R.layout.fragment_main), MenuController, Sna
 
     private lateinit var snackbarStateChannel: SendChannel<SnackbarState>
 
-    override fun initializeMenu(menuRes: Int, inflater: MenuInflater, initialize: (Menu) -> Unit) {
-        binding.mainActionMenuView.initializeMenu(menuRes, inflater, initialize)
-    }
+    @Inject
+    internal lateinit var popBackStackSignalProvider: PopBackStackSignalProvider
 
-    override fun clearMenu() {
-        binding.mainActionMenuView.menu?.clear()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        popBackStackSignalProvider.popBackStackSignals
+            .onEach {
+                activity?.statusBarColor = context?.themeColor(R.attr.colorPrimaryDark)
+            }
+            .launchIn(lifecycleScope)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -75,6 +86,14 @@ class MainFragment : DaggerFragment(R.layout.fragment_main), MenuController, Sna
     override fun onDestroyView() {
         super.onDestroyView()
         snackbarStateChannel.close()
+    }
+
+    override fun initializeMenu(menuRes: Int, inflater: MenuInflater, initialize: (Menu) -> Unit) {
+        binding.mainActionMenuView.initializeMenu(menuRes, inflater, initialize)
+    }
+
+    override fun clearMenu() {
+        binding.mainActionMenuView.menu?.clear()
     }
 
     override fun transitionToSnackbarState(newState: SnackbarState) {

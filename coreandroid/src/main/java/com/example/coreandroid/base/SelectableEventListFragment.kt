@@ -10,15 +10,14 @@ import androidx.viewbinding.ViewBinding
 import com.airbnb.epoxy.EpoxyRecyclerView
 import com.airbnb.epoxy.TypedEpoxyController
 import com.example.core.util.HoldsList
+import com.example.coreandroid.R
 import com.example.coreandroid.controller.eventsSelectionActionModeController
 import com.example.coreandroid.model.event.Event
 import com.example.coreandroid.model.event.Selectable
 import com.example.coreandroid.navigation.IFragmentFactory
 import com.example.coreandroid.provider.PopBackStackSignalProvider
 import com.example.coreandroid.util.delegate.viewBinding
-import com.example.coreandroid.util.ext.navigationFragment
-import com.example.coreandroid.util.ext.saveScrollPosition
-import com.example.coreandroid.util.ext.setControllerWithSavedState
+import com.example.coreandroid.util.ext.*
 import com.example.coreandroid.view.epoxy.EpoxyThreads
 import com.example.coreandroid.view.epoxy.infiniteItemListController
 import com.example.coreandroid.view.epoxy.listItem

@@ -8,10 +8,7 @@ import com.example.coreandroid.base.DaggerViewModelFragment
 import com.example.coreandroid.base.HasArgs
 import com.example.coreandroid.util.delegate.NullableFragmentArgument
 import com.example.coreandroid.util.delegate.viewBinding
-import com.example.coreandroid.util.ext.setupToolbar
-import com.example.coreandroid.util.ext.setupToolbarWithDrawerToggle
-import com.example.coreandroid.util.ext.showBackNavArrow
-import com.example.coreandroid.util.ext.snackbarController
+import com.example.coreandroid.util.ext.*
 import com.example.weather.databinding.FragmentWeatherBinding
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -41,6 +38,7 @@ class WeatherFragment :
         super.onResume()
         setupToolbar(binding.weatherToolbar)
         showBackNavArrow()
+        activity?.statusBarColor = context?.themeColor(R.attr.colorPrimaryDark)
 
         viewUpdatesJob = viewModel.viewUpdates
             .onEach { viewUpdate ->

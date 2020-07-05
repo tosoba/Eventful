@@ -82,8 +82,8 @@ class EventDetailsFragment : Fragment() {
                             statusBarColor = withContext(Dispatchers.Default) {
                                 drawable.bitmap.dominantColor
                             }.also {
+                                statusBarColor = it
                                 activity?.statusBarColor = it
-                                //TODO: save it in onSaveInstanceState -> set in onResume -> reset back to primary in WeatherFragment and on popped from back stack
                             }
                         }
                     }
@@ -98,17 +98,31 @@ class EventDetailsFragment : Fragment() {
         epoxyController.requestModelBuild()
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (savedInstanceState?.containsKey(KEY_STATUS_BAR_COLOR) == true)
+            statusBarColor = savedInstanceState.getInt(KEY_STATUS_BAR_COLOR)
+    }
+
     override fun onResume() {
         super.onResume()
         event_details_toolbar?.let {
             setupToolbar(it)
             showBackNavArrow()
         }
+        statusBarColor?.let { activity?.statusBarColor = it }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        statusBarColor?.let { outState.putInt(KEY_STATUS_BAR_COLOR, it) }
     }
 
     companion object {
         fun new(event: Event): EventDetailsFragment = EventDetailsFragment().apply {
             this.event = event
         }
+
+        private const val KEY_STATUS_BAR_COLOR = "KEY_STATUS_BAR_COLOR"
     }
 }
