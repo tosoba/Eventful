@@ -47,9 +47,10 @@ class EventFragment :
     private val binding: FragmentEventBinding by viewBinding(FragmentEventBinding::bind)
 
     private val eventViewPagerAdapter: PagerAdapter by titledFragmentsPagerAdapter {
+        val venue = event.venues?.firstOrNull()
         arrayOf(
             getString(R.string.details) to EventDetailsFragment.new(event),
-            getString(R.string.weather) to WeatherFragment.new(event.venues?.firstOrNull()?.latLng)
+            getString(R.string.weather) to WeatherFragment.new(venue?.latLng, venue?.name)
         )
     }
 

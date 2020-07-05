@@ -2,6 +2,7 @@ package com.example.weather
 
 import com.example.core.model.weather.Forecast
 import com.example.core.util.LoadedSuccessfully
+import com.example.core.util.Loading
 import com.example.coreandroid.controller.SnackbarState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -9,6 +10,7 @@ import kotlinx.coroutines.flow.*
 
 sealed class WeatherViewUpdate {
     object UnknownLatLng : WeatherViewUpdate()
+    object LoadingForecast : WeatherViewUpdate()
     data class ForecastLoaded(val forecast: Forecast) : WeatherViewUpdate()
     data class Snackbar(val state: SnackbarState) : WeatherViewUpdate()
 }
@@ -20,6 +22,9 @@ val WeatherViewModel.viewUpdates: Flow<WeatherViewUpdate>
         states.map { it.snackbarState }
             .distinctUntilChanged()
             .map { WeatherViewUpdate.Snackbar(it) },
+        states.map { it.forecast }
+            .filter { (_, status) -> status is Loading }
+            .map { WeatherViewUpdate.LoadingForecast },
         states.map { it.forecast }
             .filter { (_, status) -> status is LoadedSuccessfully }
             .map { it.data }
