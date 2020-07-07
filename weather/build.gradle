@@ -43,7 +43,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation project(':core')
-    implementation project(':coreandroid')
+    implementation project(':core-android')
 
     implementation "androidx.appcompat:appcompat:$appCompatVersion"
     implementation "androidx.constraintlayout:constraintlayout:$constraintLayoutVersion"

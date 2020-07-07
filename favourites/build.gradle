@@ -47,7 +47,7 @@ dependencies {
     implementation "com.google.android.material:material:$materialVersion"
 
     implementation project(':core')
-    implementation project(':coreandroid')
+    implementation project(':core-android')
 
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycleExtensionsVersion"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleRuntimeKtxVersion"

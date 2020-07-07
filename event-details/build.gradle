@@ -39,7 +39,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     implementation project(':core')
-    implementation project(':coreandroid')
+    implementation project(':core-android')
 
     implementation "androidx.appcompat:appcompat:$appCompatVersion"
     implementation "androidx.legacy:legacy-support-v4:$legacySupportV4Version"

@@ -29,10 +29,10 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
 
     implementation project(':core')
-    implementation project(':coreandroid')
-    implementation project(':darkskyapi')
+    implementation project(':core-android')
+    implementation project(':darksky-api')
     implementation project(':db')
-    implementation project(':ticketmasterapi')
+    implementation project(':ticketmaster-api')
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"

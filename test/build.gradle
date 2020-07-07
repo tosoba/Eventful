@@ -28,7 +28,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
 
-    implementation project(':coreandroid')
+    implementation project(':core-android')
     implementation project(':core')
 
     api "junit:junit:$junit4Version"
