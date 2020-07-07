@@ -112,8 +112,7 @@ class NearbyFlowProcessor @Inject constructor(
         currentState: () -> NearbyState,
         signal: suspend (NearbySignal) -> Unit
     ): Flow<NearbyStateUpdate> = filterNot {
-        val events = currentState().events
-        events.status is Loading || !events.canLoadMore || events.data.isEmpty()
+        currentState().events.run { status is Loading || !canLoadMore || data.isEmpty() }
     }.flatMapFirst {
         locationStateProvider.locationStates.notNullLatLng.take(1)
     }.flatMapFirst { latLng -> loadingEventsUpdates(latLng, false, currentState, signal) }

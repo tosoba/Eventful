@@ -39,14 +39,14 @@ internal abstract class BaseNearbyFlowProcessorTests {
     }
 
     protected fun flowProcessor(
-        searchEvents: GetNearbyEvents = mockk(relaxed = true),
+        getNearbyEvents: GetNearbyEvents = mockk(relaxed = true),
         saveEvents: SaveEvents = mockk(relaxed = true),
         getPagedEventsFlow: GetPagedEventsFlow = GetPagedEventsFlow(testDispatcher),
         connectedStateProvider: ConnectedStateProvider = mockk(relaxed = true),
         locationStateProvider: LocationStateProvider = mockk(relaxed = true),
         ioDispatcher: CoroutineDispatcher = testDispatcher
     ): NearbyFlowProcessor = NearbyFlowProcessor(
-        searchEvents,
+        getNearbyEvents,
         saveEvents,
         getPagedEventsFlow,
         connectedStateProvider,
