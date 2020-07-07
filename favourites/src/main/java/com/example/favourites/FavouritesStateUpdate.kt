@@ -12,7 +12,7 @@ import com.example.coreandroid.model.event.Event
 import com.example.coreandroid.model.event.Selectable
 
 sealed class FavouritesStateUpdate : StateUpdate<FavouritesState> {
-    data class SearchTextUpdate(val searchText: String) : FavouritesStateUpdate() {
+    data class SearchText(val searchText: String) : FavouritesStateUpdate() {
         override fun invoke(state: FavouritesState): FavouritesState = FavouritesState(
             searchText = searchText
         )

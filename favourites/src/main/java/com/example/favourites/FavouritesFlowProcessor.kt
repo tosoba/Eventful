@@ -39,7 +39,7 @@ class FavouritesFlowProcessor(
         signal: suspend (FavouritesSignal) -> Unit
     ): Flow<FavouritesStateUpdate> = merge(
         filterIsInstance<FavouritesIntent.NewSearch>()
-            .map { (searchText) -> FavouritesStateUpdate.SearchTextUpdate(searchText) },
+            .map { (searchText) -> FavouritesStateUpdate.SearchText(searchText) },
         filterIsInstance<FavouritesIntent.LoadFavourites>()
             .loadFavouritesUpdates(currentState, states),
         filterIsInstance<FavouritesIntent.EventLongClicked>()
