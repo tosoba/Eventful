@@ -51,10 +51,20 @@ class WeatherFragment :
                             .temperature(currently.temperature)
                             .locationName(locationName),
                         WeatherSymbolInfoBindingModel_()
-                            .id("weather-symbol-info")
+                            .id("weather-forecast-info")
                             .symbolResource(WeatherStatus.fromIcon(currently.icon).resource)
                             .title("Forecast")
                             .info(currently.summary),
+                        WeatherSymbolInfoBindingModel_()
+                            .id("weather-wind-info")
+                            .symbolResource(R.drawable.wind_info)
+                            .title("Wind")
+                            .info("${currently.windSpeed} km/h"),
+                        WeatherSymbolInfoBindingModel_()
+                            .id("weather-humidity-info")
+                            .symbolResource(R.drawable.humidity)
+                            .title("Humidity")
+                            .info("${currently.humidity * 100}%"),
                         WeatherDescriptionBindingModel_()
                             .id("weather-description")
                             .description(currently.summary)

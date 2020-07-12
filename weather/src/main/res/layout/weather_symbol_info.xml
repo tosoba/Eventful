@@ -45,7 +45,8 @@
             android:maxLines="1"
             android:text="@{info}"
             android:textAlignment="center"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            android:textStyle="bold" />
 
     </LinearLayout>
 </layout>
