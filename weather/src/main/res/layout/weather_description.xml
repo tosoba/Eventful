@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="description"
+            type="java.lang.String" />
+    </data>
+
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:ellipsize="end"
+        android:maxLines="3"
+        android:text="@{description}"
+        android:textAlignment="center"
+        android:textColor="@color/blueText"
+        android:textSize="18sp"
+        android:visibility="@{description != null ? View.VISIBLE : View.GONE}" />
+</layout>

@@ -43,11 +43,15 @@ class WeatherFragment :
                 is WeatherControllerData.LoadingForecast -> loadingIndicator {
                     id("loading-indicator-weather")
                 }
-                is WeatherControllerData.ForecastLoaded -> weatherCurrently {
-                    id("weather-currently")
-                    currently(data.forecast.currently)
-                    locationName(locationName)
-                }
+                is WeatherControllerData.ForecastLoaded -> WeatherEpoxyModelGroup(
+                    TemperatureInLocationBindingModel_()
+                        .id("temperature-in-location")
+                        .currently(data.forecast.currently)
+                        .locationName(locationName),
+                    WeatherDescriptionBindingModel_()
+                        .id("weather-description")
+                        .description(data.forecast.currently.summary)
+                ).addTo(this)
                 is WeatherControllerData.UnknownLatLng -> unknownLocation {
                     id("unknown-location-weather")
                     text(getString(R.string.event_location_unknown))
