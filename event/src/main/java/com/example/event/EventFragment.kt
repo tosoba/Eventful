@@ -31,9 +31,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import reactivecircus.flowbinding.android.view.clicks
 import reactivecircus.flowbinding.viewpager.pageSelections
 
@@ -75,6 +75,7 @@ class EventFragment :
                 offscreenPageLimit = 2
                 pageSelections()
                     .skipInitialValue()
+                    .distinctUntilChanged()
                     .debounce(500)
                     .onEach { position -> if (position == 0) eventFab.show() else eventFab.hide() }
                     .launchIn(lifecycleScope)

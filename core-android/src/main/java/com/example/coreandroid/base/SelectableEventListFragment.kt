@@ -1,6 +1,7 @@
 package com.example.coreandroid.base
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.annotation.CallSuper
 import androidx.annotation.LayoutRes
@@ -10,14 +11,15 @@ import androidx.viewbinding.ViewBinding
 import com.airbnb.epoxy.EpoxyRecyclerView
 import com.airbnb.epoxy.TypedEpoxyController
 import com.example.core.util.HoldsList
-import com.example.coreandroid.R
 import com.example.coreandroid.controller.eventsSelectionActionModeController
 import com.example.coreandroid.model.event.Event
 import com.example.coreandroid.model.event.Selectable
 import com.example.coreandroid.navigation.IFragmentFactory
 import com.example.coreandroid.provider.PopBackStackSignalProvider
 import com.example.coreandroid.util.delegate.viewBinding
-import com.example.coreandroid.util.ext.*
+import com.example.coreandroid.util.ext.navigationFragment
+import com.example.coreandroid.util.ext.saveScrollPosition
+import com.example.coreandroid.util.ext.setControllerWithSavedState
 import com.example.coreandroid.view.epoxy.EpoxyThreads
 import com.example.coreandroid.view.epoxy.infiniteItemListController
 import com.example.coreandroid.view.epoxy.listItem
@@ -119,7 +121,17 @@ abstract class SelectableEventListFragment<
     override fun onResume() {
         super.onResume()
         activity?.invalidateOptionsMenu()
-        viewUpdatesJob = viewModel.viewUpdates().onEach(::onViewUpdate).launchIn(lifecycleScope)
+
+        viewUpdatesJob = viewModel.viewUpdates()
+            .onEach {
+                Log.e(
+                    "VIEW_UPDATE",
+                    "${javaClass.simpleName.replace("Fragment", "")}:${it}"
+                )
+            }
+            .onEach(::onViewUpdate)
+            .launchIn(lifecycleScope)
+
         popBackStackSignalProviderJob = popBackStackSignalProvider.popBackStackSignals
             .onEach {
                 actionModeController.update(viewModel.state.events.data.count { it.selected })

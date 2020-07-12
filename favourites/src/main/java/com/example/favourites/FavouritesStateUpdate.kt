@@ -13,7 +13,7 @@ import com.example.coreandroid.model.event.Selectable
 
 sealed class FavouritesStateUpdate : StateUpdate<FavouritesState> {
     data class SearchText(val searchText: String) : FavouritesStateUpdate() {
-        override fun invoke(state: FavouritesState): FavouritesState = FavouritesState(
+        override fun invoke(state: FavouritesState): FavouritesState = state.copy(
             searchText = searchText
         )
     }

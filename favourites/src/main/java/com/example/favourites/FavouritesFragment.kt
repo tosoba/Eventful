@@ -57,10 +57,9 @@ class FavouritesFragment :
         maxWidth = Integer.MAX_VALUE
         queryTextEvents()
             .debounce(500)
+            .map { it.queryText.toString().trim() }
             .distinctUntilChanged()
-            .onEach {
-                viewModel.intent(FavouritesIntent.NewSearch(it.queryText.toString().trim()))
-            }
+            .onEach { viewModel.intent(FavouritesIntent.NewSearch(it)) }
             .launchIn(lifecycleScope)
     }
 }

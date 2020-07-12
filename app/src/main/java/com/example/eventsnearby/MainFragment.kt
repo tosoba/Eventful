@@ -57,15 +57,6 @@ class MainFragment : DaggerFragment(R.layout.fragment_main), MenuController, Sna
     @Inject
     internal lateinit var popBackStackSignalProvider: PopBackStackSignalProvider
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        popBackStackSignalProvider.popBackStackSignals
-            .onEach {
-                activity?.statusBarColor = context?.themeColor(R.attr.colorPrimaryDark)
-            }
-            .launchIn(lifecycleScope)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         with(binding) {
             setupToolbar(mainToolbar)
@@ -80,6 +71,13 @@ class MainFragment : DaggerFragment(R.layout.fragment_main), MenuController, Sna
             mainFab.setOnClickListener {}
 
             snackbarStateChannel = handleSnackbarState(mainFab)
+
+            popBackStackSignalProvider.popBackStackSignals
+                .onEach {
+                    setupToolbar(mainToolbar)
+                    activity?.statusBarColor = context?.themeColor(R.attr.colorPrimaryDark)
+                }
+                .launchIn(lifecycleScope)
         }
     }
 

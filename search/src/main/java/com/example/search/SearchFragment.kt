@@ -1,7 +1,8 @@
 package com.example.search
 
 import android.app.SearchManager
-import android.view.*
+import android.view.Menu
+import android.view.MenuInflater
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.lifecycleScope
@@ -12,8 +13,6 @@ import com.example.coreandroid.model.event.Selectable
 import com.example.coreandroid.util.ext.menuController
 import com.example.coreandroid.util.ext.snackbarController
 import com.example.search.databinding.FragmentSearchBinding
-import kotlinx.android.synthetic.main.fragment_search.*
-import kotlinx.android.synthetic.main.fragment_search.view.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
@@ -71,11 +70,11 @@ class SearchFragment :
         queryTextEvents()
             .debounce(500)
             .filter { it.queryText.isNotBlank() && it.queryText.length > 2 }
-            .onEach {
+            .onEach { event ->
                 viewModel.intent(
                     SearchIntent.NewSearch(
-                        text = it.queryText.toString().trim(),
-                        confirmed = it is QueryTextEvent.QuerySubmitted
+                        text = event.queryText.toString().trim(),
+                        confirmed = event is QueryTextEvent.QuerySubmitted
                     )
                 )
             }
