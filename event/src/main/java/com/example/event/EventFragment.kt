@@ -30,9 +30,12 @@ import com.google.common.collect.HashBiMap
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import reactivecircus.flowbinding.android.view.clicks
+import reactivecircus.flowbinding.viewpager.pageSelections
 
 @ExperimentalCoroutinesApi
 @FlowPreview
@@ -66,13 +69,21 @@ class EventFragment :
         with(binding) {
             eventBottomNavView.setOnNavigationItemSelectedListener(bottomNavItemSelectedListener)
 
-            eventViewPager.adapter = eventViewPagerAdapter
-            eventViewPager.addOnPageChangeListener(viewPagerSwipedListener)
-            eventViewPager.offscreenPageLimit = 2
-
-            eventFab.setOnClickListener {
-                lifecycleScope.launch { viewModel.intent(EventIntent.ToggleFavourite) }
+            with(eventViewPager) {
+                adapter = eventViewPagerAdapter
+                addOnPageChangeListener(viewPagerSwipedListener)
+                offscreenPageLimit = 2
+                pageSelections()
+                    .skipInitialValue()
+                    .debounce(500)
+                    .onEach { position -> if (position == 0) eventFab.show() else eventFab.hide() }
+                    .launchIn(lifecycleScope)
             }
+
+            eventFab.clicks()
+                .onEach { viewModel.intent(EventIntent.ToggleFavourite) }
+                .launchIn(lifecycleScope)
+
             snackbarStateChannel = handleSnackbarState(eventFab)
         }
     }
