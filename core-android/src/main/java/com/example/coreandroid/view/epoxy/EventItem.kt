@@ -1,6 +1,8 @@
 package com.example.coreandroid.view.epoxy
 
 import android.view.View
+import android.view.ViewGroup
+import com.airbnb.epoxy.Carousel
 import com.airbnb.epoxy.CarouselModel_
 import com.airbnb.epoxy.EpoxyModelGroup
 import com.airbnb.epoxy.ModelGroupHolder
@@ -62,6 +64,12 @@ fun Selectable<Event>.listItem(
         .event(item),
     item.kindsCarousel
 )
+
+open class NestedScrollingCarouselModel : CarouselModel_() {
+    override fun buildView(parent: ViewGroup): Carousel = super.buildView(parent).apply {
+        isNestedScrollingEnabled = false
+    }
+}
 
 val Event.kindsCarousel: CarouselModel_
     get() = NestedScrollingCarouselModel()

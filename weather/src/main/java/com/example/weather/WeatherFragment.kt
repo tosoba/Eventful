@@ -46,6 +46,7 @@ class WeatherFragment :
                 is WeatherControllerData.ForecastLoaded -> weatherCurrently {
                     id("weather-currently")
                     currently(data.forecast.currently)
+                    locationName(locationName)
                 }
                 is WeatherControllerData.UnknownLatLng -> unknownLocation {
                     id("unknown-location-weather")

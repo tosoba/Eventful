@@ -50,7 +50,7 @@ class EventFragment :
         val venue = event.venues?.firstOrNull()
         arrayOf(
             getString(R.string.details) to EventDetailsFragment.new(event),
-            getString(R.string.weather) to WeatherFragment.new(venue?.latLng, venue?.name)
+            getString(R.string.weather) to WeatherFragment.new(venue?.latLng, venue?.city)
         )
     }
 
