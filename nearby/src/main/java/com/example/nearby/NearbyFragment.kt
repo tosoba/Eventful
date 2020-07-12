@@ -43,7 +43,10 @@ class NearbyFragment :
 
     override suspend fun onViewUpdate(viewUpdate: NearbyViewUpdate) {
         when (viewUpdate) {
-            is NearbyViewUpdate.Events -> epoxyController.setData(viewUpdate.events)
+            is NearbyViewUpdate.Events -> {
+                epoxyController.setData(viewUpdate.events)
+                binding.nearbySwipeRefreshLayout.isEnabled = viewUpdate.events.data.isNotEmpty()
+            }
             is NearbyViewUpdate.Snackbar -> snackbarController?.transitionToSnackbarState(
                 viewUpdate.state
             )

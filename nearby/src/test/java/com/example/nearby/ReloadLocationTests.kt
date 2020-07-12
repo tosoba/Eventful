@@ -3,7 +3,6 @@ package com.example.nearby
 import com.example.core.util.PagedDataList
 import com.example.coreandroid.provider.LocationStateProvider
 import com.example.test.rule.relaxedMockedList
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -20,19 +19,18 @@ import org.junit.jupiter.api.Test
 internal class ReloadLocationTests : BaseNearbyFlowProcessorTests() {
 
     @Test
-    @DisplayName("When no events - should signal EventsLoadingFinished")
+    @DisplayName("When no events - should not call reloadLocation")
     fun reloadLocationWhenEventsEmptyTest() = testScope.runBlockingTest {
-        val signal = mockk<Signal>(relaxed = true)
+        val locationStateProvider = mockk<LocationStateProvider>(relaxed = true)
 
-        flowProcessor()
+        flowProcessor(locationStateProvider = locationStateProvider)
             .updates(
                 intents = flowOf(NearbyIntent.ReloadLocation),
-                currentState = mockk { every { this@mockk() } returns NearbyState() },
-                signal = signal::invoke
+                currentState = mockk { every { this@mockk() } returns NearbyState() }
             )
             .launchIn(this)
 
-        coVerify(exactly = 1) { signal.invoke(NearbySignal.EventsLoadingFinished) }
+        verify(exactly = 0) { locationStateProvider.reloadLocation() }
     }
 
     @Test

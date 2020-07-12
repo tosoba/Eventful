@@ -59,10 +59,8 @@ class NearbyFlowProcessor @Inject constructor(
         filterIsInstance<NearbyIntent.AddToFavouritesClicked>()
             .addToFavouritesUpdates(coroutineScope, currentState, intent, signal),
         filterIsInstance<NearbyIntent.ReloadLocation>()
-            .onEach {
-                if (currentState().events.data.isNotEmpty()) locationStateProvider.reloadLocation()
-                else signal(NearbySignal.EventsLoadingFinished)
-            }
+            .filter { currentState().events.data.isNotEmpty() }
+            .onEach { locationStateProvider.reloadLocation() }
             .map { null }
             .filterNotNull()
     )
