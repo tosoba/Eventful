@@ -50,7 +50,7 @@ class WeatherFragment :
                 }
                 is WeatherControllerData.UnknownLatLng -> unknownLocation {
                     id("unknown-location-weather")
-                    text("Event's location is unknown.")
+                    text(getString(R.string.event_location_unknown))
                 }
             }
         }
