@@ -2,7 +2,7 @@ package com.example.weather
 
 import androidx.annotation.DrawableRes
 
-enum class WeatherIcon(@DrawableRes val resource: Int, val iconName: String) {
+enum class WeatherStatus(@DrawableRes val resource: Int, val icon: String) {
     CLEAR_DAY(R.drawable.clear_day, "clear-day"),
     CLEAR_NIGHT(R.drawable.clear_night, "clear-night"),
     CLOUDY(R.drawable.cloudy, "cloudy"),
@@ -16,7 +16,7 @@ enum class WeatherIcon(@DrawableRes val resource: Int, val iconName: String) {
     UNKNOWN(R.drawable.unknown, "unknown");
 
     companion object {
-        fun fromName(name: String): WeatherIcon = values()
-            .find { it.iconName.equals(name, true) } ?: UNKNOWN
+        fun fromIcon(icon: String): WeatherStatus = values()
+            .find { it.icon.equals(icon, true) } ?: UNKNOWN
     }
 }

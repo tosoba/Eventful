@@ -43,18 +43,23 @@ class WeatherFragment :
                 is WeatherControllerData.LoadingForecast -> loadingIndicator {
                     id("loading-indicator-weather")
                 }
-                is WeatherControllerData.ForecastLoaded -> WeatherEpoxyModelGroup(
-                    TemperatureInLocationBindingModel_()
-                        .id("temperature-in-location")
-                        .currently(data.forecast.currently)
-                        .locationName(locationName),
-                    WeatherSymbolBindingModel_()
-                        .id("weather-symbol")
-                        .icon(WeatherIcon.fromName(data.forecast.currently.icon)),
-                    WeatherDescriptionBindingModel_()
-                        .id("weather-description")
-                        .description(data.forecast.currently.summary)
-                ).addTo(this)
+                is WeatherControllerData.ForecastLoaded -> {
+                    val currently = data.forecast.currently
+                    WeatherEpoxyModelGroup(
+                        TemperatureInLocationBindingModel_()
+                            .id("temperature-in-location")
+                            .temperature(currently.temperature)
+                            .locationName(locationName),
+                        WeatherSymbolInfoBindingModel_()
+                            .id("weather-symbol-info")
+                            .symbolResource(WeatherStatus.fromIcon(currently.icon).resource)
+                            .title("Forecast")
+                            .info(currently.summary),
+                        WeatherDescriptionBindingModel_()
+                            .id("weather-description")
+                            .description(currently.summary)
+                    ).addTo(this)
+                }
                 is WeatherControllerData.UnknownLatLng -> unknownLocation {
                     id("unknown-location-weather")
                     text(getString(R.string.event_location_unknown))
