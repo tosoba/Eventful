@@ -1,6 +1,7 @@
 package com.example.coreandroid.view.binding
 
 import android.widget.ImageView
+import androidx.annotation.DrawableRes
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -19,4 +20,9 @@ fun bindEvent(imageView: ImageView, event: Event) {
         .load(event.imageUrl)
         .apply(eventRequestOptions)
         .into(imageView)
+}
+
+@BindingAdapter("resource")
+fun bindResource(imageView: ImageView, @DrawableRes resource: Int) {
+    imageView.setImageResource(resource)
 }

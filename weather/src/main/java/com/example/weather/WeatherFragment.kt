@@ -48,6 +48,9 @@ class WeatherFragment :
                         .id("temperature-in-location")
                         .currently(data.forecast.currently)
                         .locationName(locationName),
+                    WeatherSymbolBindingModel_()
+                        .id("weather-symbol")
+                        .icon(WeatherIcon.fromName(data.forecast.currently.icon)),
                     WeatherDescriptionBindingModel_()
                         .id("weather-description")
                         .description(data.forecast.currently.summary)
