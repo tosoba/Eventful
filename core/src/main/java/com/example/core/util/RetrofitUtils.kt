@@ -6,7 +6,6 @@ import retrofit2.CallAdapter
 import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.util.concurrent.TimeUnit
 
 fun retrofitWith(
     url: String,
@@ -22,7 +21,7 @@ fun retrofitWith(
     .baseUrl(url)
     .build()
 
-fun onlineCacheInterceptor(maxAge: Long = 60 * 5) = Interceptor { chain ->
+fun onlineCacheInterceptor(maxAge: Long = 60 * 5): Interceptor = Interceptor { chain ->
     val response = chain.proceed(chain.request())
     response.newBuilder()
         .header("Cache-Control", "public, max-age=$maxAge")
@@ -33,7 +32,7 @@ fun onlineCacheInterceptor(maxAge: Long = 60 * 5) = Interceptor { chain ->
 fun offlineCacheInterceptor(
     maxStale: Long = 60 * 60 * 24 * 7,
     isConnected: () -> Boolean
-) = Interceptor { chain ->
+): Interceptor = Interceptor { chain ->
     val request = chain.request().run {
         if (!isConnected()) newBuilder()
             .header("Cache-Control", "public, only-if-cached, max-stale=$maxStale")
