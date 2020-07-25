@@ -7,4 +7,5 @@ object Tables {
     const val ATTRACTION = "attraction"
     const val EVENT_ATTRACTION_JOIN = "event_attraction_join"
     const val EVENT_VENUE_JOIN = "event_venue_join"
+    const val ALARM = "alarm"
 }

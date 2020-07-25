@@ -7,6 +7,7 @@ import com.example.db.converter.DateConverter
 import com.example.db.converter.LinkConverter
 import com.example.db.converter.PriceRangeConverter
 import com.example.db.converter.StringListConverter
+import com.example.db.dao.AlarmDao
 import com.example.db.dao.EventDao
 import com.example.db.dao.SearchSuggestionDao
 import com.example.db.entity.*
@@ -18,7 +19,8 @@ import com.example.db.entity.*
         EventAttractionJoinEntity::class,
         EventVenueJoinEntity::class,
         AttractionEntity::class,
-        VenueEntity::class
+        VenueEntity::class,
+        AlarmEntity::class
     ],
     version = 1,
     exportSchema = false
@@ -34,6 +36,7 @@ import com.example.db.entity.*
 abstract class EventfulDb : RoomDatabase() {
     abstract fun searchSuggestionDao(): SearchSuggestionDao
     abstract fun eventDao(): EventDao
+    abstract fun alarmDao(): AlarmDao
 
     companion object {
         const val NAME = "Eventful.db"
