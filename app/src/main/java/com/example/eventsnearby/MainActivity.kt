@@ -59,24 +59,23 @@ class MainActivity :
     override fun onSupportNavigateUp(): Boolean = onBackPressed().let { true }
 
     override fun onBackPressed() {
-        if (mainNavigationFragment?.onBackPressed() == true) {
-            launch { viewModel.signal(MainSignal.PopMainBackStackSignal) }
-            return
-        } else super.onBackPressed()
+        if (mainNavigationFragment?.onBackPressed() == true) launch {
+            viewModel.signal(MainSignal.PopMainBackStackSignal)
+        } else {
+            super.onBackPressed()
+        }
     }
 
     private fun requestPermission(): Job = launch {
         val (grantedPermissions) = if (Peko.isRequestInProgress()) {
             Peko.resumeRequest()
-        } else {
-            requestPermissionsAsync(
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                rationale = AlertDialogPermissionRationale(this@MainActivity) {
-                    setTitle(getString(R.string.location_permission_needed))
-                    setMessage(getString(R.string.no_location_permission_warning))
-                }
-            )
-        }
+        } else requestPermissionsAsync(
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            rationale = AlertDialogPermissionRationale(this@MainActivity) {
+                setTitle(getString(R.string.location_permission_needed))
+                setMessage(getString(R.string.no_location_permission_warning))
+            }
+        )
         viewModel.intent(
             if (Manifest.permission.ACCESS_COARSE_LOCATION in grantedPermissions) MainIntent.LoadLocation
             else MainIntent.PermissionDenied

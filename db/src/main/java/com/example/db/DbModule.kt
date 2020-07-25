@@ -9,13 +9,12 @@ import dagger.Provides
 import javax.inject.Singleton
 
 @Module
-class DbModule {
-
+object DbModule {
     @Provides
     @Singleton
-    fun eventfulDb(
-        context: Context
-    ): EventfulDb = Room.databaseBuilder(context, EventfulDb::class.java, EventfulDb.NAME).build()
+    fun eventfulDb(context: Context): EventfulDb = Room
+        .databaseBuilder(context, EventfulDb::class.java, EventfulDb.NAME)
+        .build()
 
     @Provides
     @Singleton

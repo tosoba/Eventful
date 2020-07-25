@@ -7,13 +7,12 @@ import com.example.weatherapi.model.DarkSkyApi
 import com.haroldadmin.cnradapter.NetworkResponse
 
 class WeatherRepository(private val api: DarkSkyApi) : IWeatherRepository {
-
     override suspend fun getForecast(
-        lat: Double,
-        lon: Double
-    ): Resource<Forecast> = when (val response = api.loadForecast(lat, lon).await()) {
+        lat: Double, lon: Double
+    ): Resource<Forecast> = when (val response = api.getForecastAsync(lat, lon).await()) {
         is NetworkResponse.Success -> Resource.Success(response.body)
         is NetworkResponse.ServerError -> Resource.Error(response.body)
         is NetworkResponse.NetworkError -> Resource.Error(response.error)
+        else -> throw IllegalArgumentException()
     }
 }

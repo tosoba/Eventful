@@ -11,11 +11,11 @@ import java.util.*
 
 interface DarkSkyApi {
     @GET("forecast/{key}/{latitude},{longitude}")
-    fun loadForecast(
+    fun getForecastAsync(
         @Path("latitude") latitude: Double,
         @Path("longitude") longitude: Double,
         @Path("key") key: String = WeatherAuth.KEY,
-        @Query("units") units: String = "si", // TODO: move this to settings
+        @Query("units") units: String = "si",
         @Query("lang") language: String = Locale.getDefault().language,
         @Query("exclude") exclude: String = "flags"
     ): Deferred<NetworkResponse<Forecast, DarkSkyError>>

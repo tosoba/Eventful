@@ -10,7 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import javax.inject.Singleton
 
 @Module
-class ThreadingModule {
+object ThreadingModule {
     @Provides
     fun ioDispatcher(): CoroutineDispatcher = Dispatchers.IO
 

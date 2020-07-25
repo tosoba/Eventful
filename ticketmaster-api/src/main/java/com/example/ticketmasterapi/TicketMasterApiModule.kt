@@ -8,8 +8,7 @@ import okhttp3.OkHttpClient
 import javax.inject.Singleton
 
 @Module
-class TicketMasterApiModule {
-
+object TicketMasterApiModule {
     @Provides
     @Singleton
     fun ticketMasterApi(client: OkHttpClient): TicketMasterApi = retrofitWith(

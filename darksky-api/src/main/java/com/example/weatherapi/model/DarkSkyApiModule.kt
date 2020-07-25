@@ -8,8 +8,7 @@ import okhttp3.OkHttpClient
 import javax.inject.Singleton
 
 @Module
-class DarkSkyApiModule {
-
+object DarkSkyApiModule {
     @Provides
     @Singleton
     fun darkSkyApi(client: OkHttpClient): DarkSkyApi = retrofitWith(

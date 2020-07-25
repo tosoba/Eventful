@@ -15,8 +15,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Singleton
 
 @Module
-class RepoModule {
-
+object RepoModule {
     @ExperimentalCoroutinesApi
     @Provides
     @Singleton

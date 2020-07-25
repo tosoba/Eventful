@@ -42,26 +42,22 @@ interface EventDao {
         val eventsToInsert = events.filter { !existingIds.contains(it.id) }
         if (eventsToInsert.isEmpty()) return
 
-        val venues: ArrayList<VenueEntity> = ArrayList()
-        val eventVenueJoinEntities: ArrayList<EventVenueJoinEntity> = ArrayList()
-        val attractions: ArrayList<AttractionEntity> = ArrayList()
-        val eventAttractionJoinEntities: ArrayList<EventAttractionJoinEntity> = ArrayList()
+        val venues = mutableListOf<VenueEntity>()
+        val eventVenueJoinEntities = mutableListOf<EventVenueJoinEntity>()
+        val attractions = mutableListOf<AttractionEntity>()
+        val eventAttractionJoinEntities = mutableListOf<EventAttractionJoinEntity>()
         eventsToInsert.forEach { event ->
             event.venues?.let { eventVenues ->
                 venues.addAll(eventVenues.map { VenueEntity(it) })
                 eventVenueJoinEntities.addAll(
-                    eventVenues.map {
-                        EventVenueJoinEntity(event.id, it.id)
-                    }
+                    eventVenues.map { EventVenueJoinEntity(event.id, it.id) }
                 )
             }
 
             event.attractions?.let { eventAttractions ->
                 attractions.addAll(eventAttractions.map { AttractionEntity(it) })
                 eventAttractionJoinEntities.addAll(
-                    eventAttractions.map {
-                        EventAttractionJoinEntity(event.id, it.id)
-                    }
+                    eventAttractions.map { EventAttractionJoinEntity(event.id, it.id) }
                 )
             }
         }
@@ -87,9 +83,7 @@ interface EventDao {
         event.attractions?.let { attractions ->
             insertAttractions(attractions.map { AttractionEntity(it) })
             joinEventsAttractions(
-                attractions.map {
-                    EventAttractionJoinEntity(event.id, it.id)
-                }
+                attractions.map { EventAttractionJoinEntity(event.id, it.id) }
             )
         }
         true
