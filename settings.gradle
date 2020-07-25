@@ -1,1 +1,16 @@
-include ':app', ':core-android', ':nearby', ':search', ':favourites', ':core', ':repo', ':event', ':event-details', ':weather', ':darksky-api', ':ticketmaster-api', ':db', ':test'
+include ':alarms',
+        ':app',
+        ':core',
+        ':core-android',
+        ':darksky-api',
+        ':db',
+        ':event',
+        ':event-alarms',
+        ':event-details',
+        ':favourites',
+        ':nearby',
+        ':repo',
+        ':search',
+        ':test',
+        ':ticketmaster-api',
+        ':weather'
