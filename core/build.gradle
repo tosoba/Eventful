@@ -15,6 +15,7 @@ dependencies {
 
     implementation "com.google.code.gson:gson:$gsonVersion"
 
+    implementation "com.github.haroldadmin:NetworkResponseAdapter:$networkResponseAdapterVersion"
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
     implementation "com.squareup.retrofit2:converter-gson:$retrofitConverterGsonVersion"
 }
