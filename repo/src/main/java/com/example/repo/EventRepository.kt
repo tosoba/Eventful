@@ -35,7 +35,7 @@ class EventRepository @Inject constructor(
         radiusUnit = RadiusUnit.KM,
         geoPoint = GeoPoint(lat, lon),
         page = offset
-    ).await().asResource
+    ).await().resource
 
     override suspend fun searchEvents(
         searchText: String,
@@ -43,7 +43,7 @@ class EventRepository @Inject constructor(
     ): Resource<PagedResult<IEvent>> = ticketMasterApi.searchEvents(
         keyword = searchText,
         page = offset
-    ).await().asResource
+    ).await().resource
 
     override suspend fun saveEvent(event: IEvent): Boolean = eventDao.insertEvent(event)
 
@@ -70,7 +70,7 @@ class EventRepository @Inject constructor(
     override fun isEventSavedFlow(id: String): Flow<Boolean> = eventDao.getEventFlow(id)
         .map { it != null }
 
-    private val NetworkResponse<EventSearchResponse, TicketMasterErrorResponse>.asResource: Resource<PagedResult<IEvent>>
+    private val NetworkResponse<EventSearchResponse, TicketMasterErrorResponse>.resource: Resource<PagedResult<IEvent>>
         get() = when (this) {
             is NetworkResponse.Success -> Resource.Success(
                 PagedResult(
