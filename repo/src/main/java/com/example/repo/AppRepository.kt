@@ -15,9 +15,12 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.rx2.asFlow
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @ExperimentalCoroutinesApi
-class AppRepository(
+@Singleton
+class AppRepository @Inject constructor(
     private val appContext: Context,
     private val rxLocation: RxLocation
 ) : IAppRepository {
@@ -43,7 +46,8 @@ class AppRepository(
 
     override val connected: Flow<Boolean>
         @SuppressLint("MissingPermission")
-        get() = ReactiveNetwork.observeInternetConnectivity()
+        get() = ReactiveNetwork.observeNetworkConnectivity(appContext)
+            .map { it.available() }
             .subscribeOn(Schedulers.computation())
             .distinctUntilChanged()
             .onErrorReturn { false }

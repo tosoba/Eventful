@@ -16,8 +16,11 @@ import com.example.ticketmasterapi.queryparam.RadiusUnit
 import com.haroldadmin.cnradapter.NetworkResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class EventRepository(
+@Singleton
+class EventRepository @Inject constructor(
     private val ticketMasterApi: TicketMasterApi,
     private val searchSuggestionDao: SearchSuggestionDao,
     private val eventDao: EventDao

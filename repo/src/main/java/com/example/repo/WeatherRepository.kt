@@ -5,8 +5,11 @@ import com.example.core.model.weather.Forecast
 import com.example.core.repo.IWeatherRepository
 import com.example.core.util.ext.toResource
 import com.example.weatherapi.model.DarkSkyApi
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class WeatherRepository(private val api: DarkSkyApi) : IWeatherRepository {
+@Singleton
+class WeatherRepository @Inject constructor(private val api: DarkSkyApi) : IWeatherRepository {
 
     override suspend fun getForecast(lat: Double, lon: Double): Resource<Forecast> = api
         .getForecastAsync(lat, lon)

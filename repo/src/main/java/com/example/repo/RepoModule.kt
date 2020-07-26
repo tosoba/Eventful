@@ -1,38 +1,25 @@
 package com.example.repo
 
-import android.content.Context
+import com.example.core.repo.IAlarmRepository
 import com.example.core.repo.IAppRepository
 import com.example.core.repo.IEventRepository
 import com.example.core.repo.IWeatherRepository
-import com.example.db.dao.EventDao
-import com.example.db.dao.SearchSuggestionDao
-import com.example.ticketmasterapi.TicketMasterApi
-import com.example.weatherapi.model.DarkSkyApi
-import com.patloew.rxlocation.RxLocation
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import javax.inject.Singleton
 
+@ExperimentalCoroutinesApi
 @Module
-object RepoModule {
-    @ExperimentalCoroutinesApi
-    @Provides
-    @Singleton
-    fun appRepository(
-        appContext: Context,
-        rxLocation: RxLocation
-    ): IAppRepository = AppRepository(appContext, rxLocation)
+abstract class RepoModule {
+    @Binds
+    abstract fun alarmRepository(repo: AlarmRepository): IAlarmRepository
 
-    @Provides
-    @Singleton
-    fun eventsRepository(
-        ticketMasterApi: TicketMasterApi,
-        searchSuggestionDao: SearchSuggestionDao,
-        eventDao: EventDao
-    ): IEventRepository = EventRepository(ticketMasterApi, searchSuggestionDao, eventDao)
+    @Binds
+    abstract fun appRepository(repo: AppRepository): IAppRepository
 
-    @Provides
-    @Singleton
-    fun weatherRepository(api: DarkSkyApi): IWeatherRepository = WeatherRepository(api)
+    @Binds
+    abstract fun eventRepository(repo: EventRepository): IEventRepository
+
+    @Binds
+    abstract fun weatherRepository(repo: WeatherRepository): IWeatherRepository
 }
