@@ -44,7 +44,7 @@ internal class InitialSearchTextTests : BaseSearchFlowProcessorTests() {
         ).launchIn(testScope)
 
         coVerify(exactly = 1) { getSearchSuggestions(searchText) }
-        coVerify(exactly = 1) { getPagedEventsFlow(initialState.events, any(), any()) }
+        coVerify(exactly = 1) { getPagedEventsFlow(initialState.items, any(), any()) }
     }
 
     @Test

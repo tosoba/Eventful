@@ -96,12 +96,11 @@ class EventFragment :
 
     override fun onResume() {
         super.onResume()
-
         viewModel.viewUpdates
             .onEach {
                 when (it) {
-                    is EventViewUpdate.FloatingActionButtonDrawable ->
-                        binding.eventFab.updateDrawable(it.isFavourite)
+                    is EventViewUpdate.FloatingActionButtonDrawable -> binding.eventFab
+                        .updateDrawable(it.isFavourite)
                     is EventViewUpdate.FavouriteStatusSnackbar -> transitionToSnackbarState(
                         SnackbarState.Shown(
                             text = if (it.isFavourite) getString(R.string.event_added)
@@ -131,8 +130,8 @@ class EventFragment :
     }
 
     companion object {
-        fun new(event: Event): EventFragment = EventFragment().apply {
-            this.event = event
+        fun new(event: Event): EventFragment = EventFragment().also {
+            it.event = event
         }
 
         private val navigationItems: BiMap<Int, Int> = HashBiMap.create<Int, Int>().apply {

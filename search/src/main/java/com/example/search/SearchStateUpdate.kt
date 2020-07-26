@@ -6,24 +6,26 @@ import com.example.core.model.event.IEvent
 import com.example.core.model.search.SearchSuggestion
 import com.example.core.util.LoadedSuccessfully
 import com.example.core.util.PagedDataList
+import com.example.coreandroid.base.ClearSelectionUpdate
+import com.example.coreandroid.base.ItemSelectionConfirmedUpdate
+import com.example.coreandroid.base.StateUpdate
+import com.example.coreandroid.base.ToggleItemSelectionUpdate
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.model.event.Event
 import com.example.coreandroid.model.event.Selectable
-import com.example.coreandroid.base.ClearSelectionUpdate
-import com.example.coreandroid.base.EventSelectionConfirmedUpdate
-import com.example.coreandroid.base.StateUpdate
-import com.example.coreandroid.base.ToggleEventSelectionUpdate
 import com.haroldadmin.cnradapter.NetworkResponse
 
 sealed class SearchStateUpdate : StateUpdate<SearchState> {
     data class ToggleEventSelection(
-        override val event: Event
+        override val item: Event
     ) : SearchStateUpdate(),
-        ToggleEventSelectionUpdate<SearchState>
+        ToggleItemSelectionUpdate<SearchState, Event, String> {
+        override fun Event.id(): String = id
+    }
 
     object ClearSelection :
         SearchStateUpdate(),
-        ClearSelectionUpdate<SearchState>
+        ClearSelectionUpdate<SearchState, Event>
 
     object HideSnackbar : SearchStateUpdate() {
         override fun invoke(state: SearchState): SearchState = state
@@ -38,7 +40,7 @@ sealed class SearchStateUpdate : StateUpdate<SearchState> {
     sealed class Events : SearchStateUpdate() {
         data class Loading(val searchText: String? = null) : Events() {
             override fun invoke(state: SearchState): SearchState = state.copy(
-                events = state.events.copyWithLoadingStatus,
+                items = state.items.copyWithLoadingStatus,
                 searchText = searchText ?: state.searchText
             )
         }
@@ -50,12 +52,12 @@ sealed class SearchStateUpdate : StateUpdate<SearchState> {
             override fun invoke(state: SearchState): SearchState = state.run {
                 when (resource) {
                     is Resource.Success -> copy(
-                        events = if (newSearch) PagedDataList(
+                        items = if (newSearch) PagedDataList(
                             data = resource.data.items.map { Selectable(Event(it)) },
                             status = LoadedSuccessfully,
                             offset = resource.data.currentPage + 1,
                             limit = resource.data.totalPages
-                        ) else events.copyWithNewItems(
+                        ) else items.copyWithNewItems(
                             newItems = resource.data.items.map { Selectable(Event(it)) },
                             offset = resource.data.currentPage + 1,
                             limit = resource.data.totalPages
@@ -63,7 +65,7 @@ sealed class SearchStateUpdate : StateUpdate<SearchState> {
                     )
 
                     is Resource.Error<PagedResult<IEvent>> -> copy(
-                        events = events.copyWithFailureStatus(resource.error),
+                        items = items.copyWithFailureStatus(resource.error),
                         snackbarState = if (resource.error is NetworkResponse.ServerError<*>) {
                             if ((resource.error as NetworkResponse.ServerError<*>).code in 503..504) {
                                 SnackbarState.Shown("No connection")
@@ -80,6 +82,6 @@ sealed class SearchStateUpdate : StateUpdate<SearchState> {
             override val snackbarText: String,
             override val onSnackbarDismissed: () -> Unit
         ) : SearchStateUpdate(),
-            EventSelectionConfirmedUpdate<SearchState>
+            ItemSelectionConfirmedUpdate<SearchState, Event>
     }
 }

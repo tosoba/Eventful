@@ -43,7 +43,7 @@ internal class ReloadLocationTests : BaseNearbyFlowProcessorTests() {
                 intents = flowOf(NearbyIntent.ReloadLocation),
                 currentState = mockk {
                     every { this@mockk() } returns NearbyState(
-                        events = PagedDataList(data = relaxedMockedList(10))
+                        items = PagedDataList(data = relaxedMockedList(10))
                     )
                 }
             )

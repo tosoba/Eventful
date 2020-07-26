@@ -128,7 +128,7 @@ internal class LoadMoreResultsTests : BaseNearbyFlowProcessorTests() {
             PagedResult<IEvent>(mockedList(10) { event(it) }, 1, 1)
         )
         val getPagedEventsFlow = mockk<GetPagedEventsFlow> {
-            every { this@mockk(initialState.events, any(), any()) } returns flowOf(
+            every { this@mockk(initialState.items, any(), any()) } returns flowOf(
                 expectedResource
             )
         }
@@ -140,7 +140,7 @@ internal class LoadMoreResultsTests : BaseNearbyFlowProcessorTests() {
             signal = signal::invoke
         ).toList()
 
-        verify(exactly = 1) { getPagedEventsFlow(initialState.events, any(), any()) }
+        verify(exactly = 1) { getPagedEventsFlow(initialState.items, any(), any()) }
         coVerify(exactly = 1) { signal.invoke(NearbySignal.EventsLoadingFinished) }
         assert(updates.size == 2)
         val loadingUpdate = updates.first()

@@ -69,9 +69,6 @@ dependencies {
     compileOnly "com.squareup.inject:assisted-inject-annotations-dagger2:$assistedInjectVersion"
     kapt "com.squareup.inject:assisted-inject-processor-dagger2:$assistedInjectVersion"
 
-    compileOnly "com.squareup.inject:assisted-inject-annotations-dagger2:$assistedInjectVersion"
-    kapt "com.squareup.inject:assisted-inject-processor-dagger2:$assistedInjectVersion"
-
     implementation "com.airbnb.android:epoxy:$epoxyVersion"
     implementation "com.airbnb.android:epoxy-databinding:$epoxyVersion"
     kapt "com.airbnb.android:epoxy-processor:$epoxyVersion"
@@ -84,10 +81,6 @@ dependencies {
     implementation "androidx.core:core-ktx:$coreKtxVersion"
     api "com.google.guava:guava:$guavaVersion"
     implementation "com.google.android.gms:play-services-maps:$playServicesMapsVersion"
-
-    implementation 'com.github.satoshun.coroutinebinding:coroutinebinding-appcompat:1.0.0-rc2'
-    implementation 'com.github.satoshun.coroutinebinding:coroutinebinding-core:1.0.0-rc2'
-    implementation 'com.github.satoshun.coroutinebinding:coroutinebinding:1.0.0-rc2'
 
     testImplementation project(':test')
     testImplementation "junit:junit:$junit4Version"

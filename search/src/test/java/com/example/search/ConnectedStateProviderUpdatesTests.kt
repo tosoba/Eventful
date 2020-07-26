@@ -8,7 +8,6 @@ import com.example.coreandroid.model.event.Event
 import com.example.coreandroid.model.event.Selectable
 import com.example.coreandroid.provider.ConnectedStateProvider
 import com.example.test.rule.relaxedMockedList
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -29,7 +28,7 @@ internal class ConnectedStateProviderUpdatesTests : BaseSearchFlowProcessorTests
     fun notConnectedTest() {
         val currentState = mockk<() -> SearchState> {
             every { this@mockk() } returns SearchState(
-                events = PagedDataList(status = Failure(null))
+                items = PagedDataList(status = Failure(null))
             )
         }
         val connectedStateProvider = mockk<ConnectedStateProvider> {
@@ -52,7 +51,7 @@ internal class ConnectedStateProviderUpdatesTests : BaseSearchFlowProcessorTests
     fun loadingNotFailedTest() {
         val currentState = mockk<() -> SearchState> {
             every { this@mockk() } returns SearchState(
-                events = PagedDataList(status = LoadedSuccessfully)
+                items = PagedDataList(status = LoadedSuccessfully)
             )
         }
         val connectedStateProvider = mockk<ConnectedStateProvider> {
@@ -75,7 +74,7 @@ internal class ConnectedStateProviderUpdatesTests : BaseSearchFlowProcessorTests
     fun eventsNotEmptyTest() {
         val currentState = mockk<() -> SearchState> {
             every { this@mockk() } returns SearchState(
-                events = PagedDataList(status = LoadedSuccessfully, data = relaxedMockedList(1))
+                items = PagedDataList(status = LoadedSuccessfully, data = relaxedMockedList(1))
             )
         }
         val connectedStateProvider = mockk<ConnectedStateProvider> {
@@ -98,7 +97,7 @@ internal class ConnectedStateProviderUpdatesTests : BaseSearchFlowProcessorTests
     fun allConditionsMetTest() {
         val currentState = mockk<() -> SearchState> {
             every { this@mockk() } returns SearchState(
-                events = PagedDataList(status = Failure(null))
+                items = PagedDataList(status = Failure(null))
             )
         }
         val connectedStateProvider = mockk<ConnectedStateProvider> {

@@ -20,13 +20,13 @@ sealed class NearbyViewUpdate {
 @FlowPreview
 val NearbyViewModel.viewUpdates: Flow<NearbyViewUpdate>
     get() = merge(
-        states.map { it.events }
+        states.map { it.items }
             .distinctUntilChanged()
             .map { NearbyViewUpdate.Events(it) },
         states.map { it.snackbarState }
             .distinctUntilChanged()
             .map { NearbyViewUpdate.Snackbar(it) },
-        states.map { state -> state.events.data.count { it.selected } }
+        states.map { state -> state.items.data.count { it.selected } }
             .distinctUntilChanged()
             .map { NearbyViewUpdate.UpdateActionMode(it) },
         signals.filterIsInstance<NearbySignal.FavouritesSaved>()

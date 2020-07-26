@@ -54,7 +54,7 @@ internal class ConnectedStateProviderUpdatesTests : BaseNearbyFlowProcessorTests
     fun loadingNotFailedTest() {
         val currentState = mockk<() -> NearbyState> {
             every { this@mockk() } returns NearbyState(
-                events = PagedDataList(status = LoadedSuccessfully)
+                items = PagedDataList(status = LoadedSuccessfully)
             )
         }
         val connectedStateProvider = mockk<ConnectedStateProvider> {
@@ -77,7 +77,7 @@ internal class ConnectedStateProviderUpdatesTests : BaseNearbyFlowProcessorTests
     fun eventsNotEmptyTest() {
         val currentState = mockk<() -> NearbyState> {
             every { this@mockk() } returns NearbyState(
-                events = PagedDataList(status = LoadedSuccessfully, data = relaxedMockedList(1))
+                items = PagedDataList(status = LoadedSuccessfully, data = relaxedMockedList(1))
             )
         }
         val connectedStateProvider = mockk<ConnectedStateProvider> {
@@ -100,7 +100,7 @@ internal class ConnectedStateProviderUpdatesTests : BaseNearbyFlowProcessorTests
     fun allConditionsMetTest() = testScope.runBlockingTest {
         val currentState = mockk<() -> NearbyState> {
             every { this@mockk() } returns NearbyState(
-                events = PagedDataList(status = Failure(null))
+                items = PagedDataList(status = Failure(null))
             )
         }
         val connectedStateProvider = mockk<ConnectedStateProvider> {

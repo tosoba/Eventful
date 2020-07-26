@@ -7,9 +7,9 @@ import com.example.core.model.event.IEvent
 import com.example.core.util.LoadedSuccessfully
 import com.example.core.util.PagedDataList
 import com.example.coreandroid.base.ClearSelectionUpdate
-import com.example.coreandroid.base.EventSelectionConfirmedUpdate
+import com.example.coreandroid.base.ItemSelectionConfirmedUpdate
 import com.example.coreandroid.base.StateUpdate
-import com.example.coreandroid.base.ToggleEventSelectionUpdate
+import com.example.coreandroid.base.ToggleItemSelectionUpdate
 import com.example.coreandroid.controller.SnackbarAction
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.model.event.Event
@@ -21,11 +21,13 @@ import com.haroldadmin.cnradapter.NetworkResponse
 
 sealed class NearbyStateUpdate : StateUpdate<NearbyState> {
     data class ToggleEventSelection(
-        override val event: Event
+        override val item: Event
     ) : NearbyStateUpdate(),
-        ToggleEventSelectionUpdate<NearbyState>
+        ToggleItemSelectionUpdate<NearbyState, Event, String> {
+        override fun Event.id(): String = id
+    }
 
-    object ClearSelection : NearbyStateUpdate(), ClearSelectionUpdate<NearbyState>
+    object ClearSelection : NearbyStateUpdate(), ClearSelectionUpdate<NearbyState, Event>
 
     object NoConnectionSnackbar : NearbyStateUpdate() {
         override fun invoke(state: NearbyState): NearbyState = NearbyState(
@@ -70,8 +72,8 @@ sealed class NearbyStateUpdate : StateUpdate<NearbyState> {
     sealed class Events : NearbyStateUpdate() {
         data class Loading(val newLocation: Boolean) : Events() {
             override fun invoke(state: NearbyState): NearbyState = state.copy(
-                events = state.events.copyWithLoadingStatus,
-                snackbarState = if (newLocation && state.events.data.isNotEmpty())
+                items = state.items.copyWithLoadingStatus,
+                snackbarState = if (newLocation && state.items.data.isNotEmpty())
                     SnackbarState.Shown("Loading items in new location.")
                 else state.snackbarState
             )
@@ -84,12 +86,12 @@ sealed class NearbyStateUpdate : StateUpdate<NearbyState> {
             override fun invoke(state: NearbyState): NearbyState = state.run {
                 when (resource) {
                     is Resource.Success -> copy(
-                        events = if (clearEventsIfSuccess) PagedDataList(
+                        items = if (clearEventsIfSuccess) PagedDataList(
                             resource.data.items.map { Selectable(Event(it)) },
                             status = LoadedSuccessfully,
                             offset = resource.data.currentPage + 1,
                             limit = resource.data.totalPages
-                        ) else events.copyWithNewItems(
+                        ) else items.copyWithNewItems(
                             resource.data.items.map { Selectable(Event(it)) },
                             resource.data.currentPage + 1,
                             resource.data.totalPages
@@ -98,7 +100,7 @@ sealed class NearbyStateUpdate : StateUpdate<NearbyState> {
                     )
 
                     is Resource.Error<PagedResult<IEvent>> -> copy(
-                        events = events.copyWithFailureStatus(resource.error),
+                        items = items.copyWithFailureStatus(resource.error),
                         snackbarState = if (resource.error is NetworkResponse.ServerError<*>) {
                             if ((resource.error as NetworkResponse.ServerError<*>).code in 503..504) {
                                 SnackbarState.Shown("No connection.")
@@ -115,6 +117,6 @@ sealed class NearbyStateUpdate : StateUpdate<NearbyState> {
             override val snackbarText: String,
             override val onSnackbarDismissed: () -> Unit
         ) : NearbyStateUpdate(),
-            EventSelectionConfirmedUpdate<NearbyState>
+            ItemSelectionConfirmedUpdate<NearbyState, Event>
     }
 }

@@ -55,7 +55,7 @@ class FavouritesFlowProcessor(
     private fun Flow<FavouritesIntent.LoadFavourites>.loadFavouritesUpdates(
         currentState: () -> FavouritesState,
         states: Flow<FavouritesState>
-    ): Flow<FavouritesStateUpdate> = filterNot { currentState().events.limitHit }
+    ): Flow<FavouritesStateUpdate> = filterNot { currentState().items.limitHit }
         .flatMapLatest {
             states.map { it.searchText }
                 .onStart { emit(currentState().searchText) }
@@ -82,7 +82,7 @@ class FavouritesFlowProcessor(
         intent: suspend (FavouritesIntent) -> Unit,
         signal: suspend (FavouritesSignal) -> Unit
     ): Flow<FavouritesStateUpdate> = map {
-        val selectedEvents = currentState().events.data.filter { it.selected }.map { it.item }
+        val selectedEvents = currentState().items.data.filter { it.selected }.map { it.item }
         withContext(ioDispatcher) { deleteEvents(selectedEvents) }
         signal(FavouritesSignal.FavouritesRemoved)
         FavouritesStateUpdate.RemovedFromFavourites(

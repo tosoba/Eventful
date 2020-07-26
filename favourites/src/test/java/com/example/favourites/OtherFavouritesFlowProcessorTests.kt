@@ -35,7 +35,7 @@ internal class OtherFavouritesFlowProcessorTests : BaseFavouritesFlowProcessorTe
             .mapIndexed { index, event -> Selectable(event, index % 2 == 0) }
         val currentState = mockk<() -> FavouritesState> {
             every { this@mockk() } returns FavouritesState(
-                events = DataList(selectableEvents)
+                items = DataList(selectableEvents)
             )
         }
 
@@ -72,7 +72,7 @@ internal class OtherFavouritesFlowProcessorTests : BaseFavouritesFlowProcessorTe
     fun loadFavouritesLimitHitTest() = testScope.runBlockingTest {
         val getSavedEventsFlow = mockk<GetSavedEventsFlow>(relaxed = true)
         val currentState = mockk<() -> FavouritesState> {
-            every { this@mockk() } returns FavouritesState(events = DataList(limitHit = true))
+            every { this@mockk() } returns FavouritesState(items = DataList(limitHit = true))
         }
 
         flowProcessor(getSavedEventsFlow = getSavedEventsFlow)

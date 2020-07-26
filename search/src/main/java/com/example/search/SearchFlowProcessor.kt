@@ -80,7 +80,7 @@ class SearchFlowProcessor @Inject constructor(
     private fun ConnectedStateProvider.updates(
         currentState: () -> SearchState
     ): Flow<SearchStateUpdate> = connectedStates.filter { connected ->
-        connected && currentState().events.run { loadingFailed && data.isEmpty() }
+        connected && currentState().items.run { loadingFailed && data.isEmpty() }
     }.flatMapFirst {
         searchEventsUpdates(
             newSearch = true,
@@ -114,7 +114,7 @@ class SearchFlowProcessor @Inject constructor(
     private fun Flow<SearchIntent.LoadMoreResults>.loadMoreResultsUpdates(
         currentState: () -> SearchState
     ): Flow<SearchStateUpdate> = filterNot {
-        currentState().events.run { status is Loading || !canLoadMore || data.isEmpty() }
+        currentState().items.run { status is Loading || !canLoadMore || data.isEmpty() }
     }.flatMapFirst {
         searchEventsUpdates(
             newSearch = false,
@@ -129,7 +129,7 @@ class SearchFlowProcessor @Inject constructor(
         currentState: () -> SearchState
     ): Flow<SearchStateUpdate> = currentState().let { startState ->
         getPagedEventsFlow(
-            currentEvents = startState.events,
+            currentEvents = startState.items,
             toEvent = { selectable -> selectable.item }
         ) { offset ->
             searchEvents(
@@ -150,7 +150,7 @@ class SearchFlowProcessor @Inject constructor(
         intent: suspend (SearchIntent) -> Unit,
         signal: suspend (SearchSignal) -> Unit
     ): Flow<SearchStateUpdate> = map {
-        val selectedEvents = currentState().events.data.filter { it.selected }.map { it.item }
+        val selectedEvents = currentState().items.data.filter { it.selected }.map { it.item }
         withContext(ioDispatcher) { saveEvents(selectedEvents) }
         signal(SearchSignal.FavouritesSaved)
         SearchStateUpdate.Events.AddedToFavourites(

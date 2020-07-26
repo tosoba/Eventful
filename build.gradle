@@ -56,7 +56,6 @@ buildscript {
         mockkVersion = '1.9.3'
         testExtJunitVersion = '1.1.0'
         testRunnerVersion = '1.2.0-alpha03'
-        kotlin_version = '1.3.72'
     }
 
     repositories {

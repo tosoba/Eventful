@@ -28,7 +28,7 @@ internal class OtherNearbyFlowProcessorTests : BaseNearbyFlowProcessorTests() {
             .mapIndexed { index, event -> Selectable(event, index % 2 == 0) }
         val currentState = mockk<() -> NearbyState> {
             every { this@mockk() } returns NearbyState(
-                events = PagedDataList(selectableEvents)
+                items = PagedDataList(selectableEvents)
             )
         }
         val signal = mockk<Signal>(relaxed = true)

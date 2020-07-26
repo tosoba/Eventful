@@ -59,7 +59,7 @@ class NearbyFlowProcessor @Inject constructor(
         filterIsInstance<NearbyIntent.AddToFavouritesClicked>()
             .addToFavouritesUpdates(coroutineScope, currentState, intent, signal),
         filterIsInstance<NearbyIntent.ReloadLocation>()
-            .filter { currentState().events.data.isNotEmpty() }
+            .filter { currentState().items.data.isNotEmpty() }
             .onEach { locationStateProvider.reloadLocation() }
             .map { null }
             .filterNotNull()
@@ -69,7 +69,7 @@ class NearbyFlowProcessor @Inject constructor(
         currentState: () -> NearbyState,
         signal: suspend (NearbySignal) -> Unit
     ): Flow<NearbyStateUpdate> = connectedStates.filter { connected ->
-        connected && currentState().events.run { loadingFailed && data.isEmpty() }
+        connected && currentState().items.run { loadingFailed && data.isEmpty() }
     }.flatMapFirst {
         locationStateProvider.locationStates.notNullLatLng.take(1)
     }.flatMapLatest { latLng -> loadingEventsUpdates(latLng, false, currentState, signal) }
@@ -77,7 +77,7 @@ class NearbyFlowProcessor @Inject constructor(
     private fun ConnectedStateProvider.snackbarUpdates(
         currentState: () -> NearbyState
     ): Flow<NearbyStateUpdate> = connectedStates.filter { connected ->
-        !connected && currentState().events.loadingFailed
+        !connected && currentState().items.loadingFailed
     }.flatMapFirst {
         locationStateProvider.locationStates.notNullLatLng.take(1)
     }.map { NearbyStateUpdate.NoConnectionSnackbar }
@@ -103,14 +103,14 @@ class NearbyFlowProcessor @Inject constructor(
         .map { it.latLng }
         .filterNotNull()
         .distinctUntilChanged()
-        .filterNot { currentState().events.loadingFailed }
+        .filterNot { currentState().items.loadingFailed }
         .flatMapLatest { latLng -> loadingEventsUpdates(latLng, true, currentState, signal) }
 
     private fun Flow<NearbyIntent.LoadMoreResults>.loadMoreResultsUpdates(
         currentState: () -> NearbyState,
         signal: suspend (NearbySignal) -> Unit
     ): Flow<NearbyStateUpdate> = filterNot {
-        currentState().events.run { status is Loading || !canLoadMore || data.isEmpty() }
+        currentState().items.run { status is Loading || !canLoadMore || data.isEmpty() }
     }.flatMapFirst {
         locationStateProvider.locationStates.notNullLatLng.take(1)
     }.flatMapFirst { latLng -> loadingEventsUpdates(latLng, false, currentState, signal) }
@@ -123,7 +123,7 @@ class NearbyFlowProcessor @Inject constructor(
         currentState: () -> NearbyState,
         signal: suspend (NearbySignal) -> Unit
     ): Flow<NearbyStateUpdate> = getPagedEventsFlow(
-        currentEvents = currentState().events,
+        currentEvents = currentState().items,
         toEvent = { selectable -> selectable.item }
     ) { offset ->
         getNearbyEvents(latLng.latitude, latLng.longitude, offset = if (newLocation) 0 else offset)
@@ -138,7 +138,7 @@ class NearbyFlowProcessor @Inject constructor(
         intent: suspend (NearbyIntent) -> Unit,
         signal: suspend (NearbySignal) -> Unit
     ): Flow<NearbyStateUpdate> = map {
-        val selectedEvents = currentState().events.data.filter { it.selected }.map { it.item }
+        val selectedEvents = currentState().items.data.filter { it.selected }.map { it.item }
         withContext(ioDispatcher) { saveEvents(selectedEvents) }
         signal(NearbySignal.FavouritesSaved)
         NearbyStateUpdate.Events.AddedToFavourites(

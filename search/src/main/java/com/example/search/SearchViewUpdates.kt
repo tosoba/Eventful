@@ -21,13 +21,13 @@ sealed class SearchViewUpdate {
 @FlowPreview
 val SearchViewModel.viewUpdates: Flow<SearchViewUpdate>
     get() = merge(
-        states.map { it.events }
+        states.map { it.items }
             .distinctUntilChanged()
             .map { SearchViewUpdate.Events(it) },
         states.map { it.snackbarState }
             .distinctUntilChanged()
             .map { SearchViewUpdate.Snackbar(it) },
-        states.map { state -> state.events.data.count { it.selected } }
+        states.map { state -> state.items.data.count { it.selected } }
             .distinctUntilChanged()
             .map { SearchViewUpdate.UpdateActionMode(it) },
         states.map { it.searchSuggestions to it.searchText }

@@ -32,7 +32,7 @@ internal class LoadMoreResultsTests : BaseSearchFlowProcessorTests() {
     fun shouldNotLoadMoreWhenLoadingTest() = testScope.runBlockingTest {
         val currentState = mockk<() -> SearchState> {
             every { this@mockk() } returns SearchState(
-                events = PagedDataList(
+                items = PagedDataList(
                     status = Loading,
                     data = relaxedMockedList(10)
                 )
@@ -52,7 +52,7 @@ internal class LoadMoreResultsTests : BaseSearchFlowProcessorTests() {
     fun shouldNotLoadMoreWhenEventsEmptyTest() = testScope.runBlockingTest {
         val currentState = mockk<() -> SearchState> {
             every { this@mockk() } returns SearchState(
-                events = PagedDataList()
+                items = PagedDataList()
             )
         }
         val getPagedEventsFlow = mockk<GetPagedEventsFlow>(relaxed = true)
@@ -69,7 +69,7 @@ internal class LoadMoreResultsTests : BaseSearchFlowProcessorTests() {
     fun shouldNotLoadMoreWhenAllEventsAreLoaded() = testScope.runBlockingTest {
         val currentState = mockk<() -> SearchState> {
             every { this@mockk() } returns SearchState(
-                events = PagedDataList(
+                items = PagedDataList(
                     data = relaxedMockedList(10),
                     offset = 2,
                     limit = 1
@@ -91,7 +91,7 @@ internal class LoadMoreResultsTests : BaseSearchFlowProcessorTests() {
     fun loadMoreUpdatesTest() = testScope.runBlockingTest {
         val currentEvents = PagedDataList(data = mockedList(10) { Selectable(event(it)) })
         val currentState = mockk<() -> SearchState> {
-            every { this@mockk() } returns SearchState(events = currentEvents)
+            every { this@mockk() } returns SearchState(items = currentEvents)
         }
         val expectedResource = Resource.successWith(
             PagedResult<IEvent>(mockedList(10) { event(it) }, 1, 1)

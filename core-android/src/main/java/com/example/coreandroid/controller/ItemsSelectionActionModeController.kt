@@ -4,21 +4,20 @@ import android.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import com.example.coreandroid.util.ext.plusAssign
 
-interface EventsSelectionActionModeController {
-    fun update(numberOfSelectedEvents: Int)
+interface ItemsSelectionActionModeController {
+    fun update(numberOfSelectedItems: Int)
     fun finish(destroy: Boolean)
 }
 
-fun Fragment.eventsSelectionActionModeController(
+fun Fragment.itemsSelectionActionModeController(
     menuId: Int,
     itemClickedCallbacks: Map<Int, () -> Unit>,
     onDestroyActionMode: () -> Unit
-): EventsSelectionActionModeController {
+): ItemsSelectionActionModeController {
     var destroyOnFinish = true
     var actionMode: ActionMode? = null
     val callback = object : ActionMode.Callback {
@@ -45,15 +44,15 @@ fun Fragment.eventsSelectionActionModeController(
             destroyOnFinish = true
         }
     }
-    val controller = object : EventsSelectionActionModeController {
-        override fun update(numberOfSelectedEvents: Int) {
-            if (actionMode == null && numberOfSelectedEvents > 0) {
+    val controller = object : ItemsSelectionActionModeController {
+        override fun update(numberOfSelectedItems: Int) {
+            if (actionMode == null && numberOfSelectedItems > 0) {
                 actionMode = activity?.startActionMode(callback)?.apply {
-                    title = "$numberOfSelectedEvents selected"
+                    title = "$numberOfSelectedItems selected"
                 }
             } else if (actionMode != null) {
-                if (numberOfSelectedEvents > 0)
-                    actionMode?.title = "$numberOfSelectedEvents selected"
+                if (numberOfSelectedItems > 0)
+                    actionMode?.title = "$numberOfSelectedItems selected"
                 else finish(false)
             }
         }
@@ -65,10 +64,8 @@ fun Fragment.eventsSelectionActionModeController(
         }
     }
 
-    // TODO: replace this with DefaultLifecycleObserver
-    lifecycle += object : LifecycleObserver {
-        @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-        fun finishOnPause() {
+    lifecycle += object : DefaultLifecycleObserver {
+        override fun onPause(owner: LifecycleOwner) {
             controller.finish(false)
         }
     }

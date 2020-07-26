@@ -37,11 +37,10 @@ class EventRepository(
     override suspend fun searchEvents(
         searchText: String,
         offset: Int?
-    ): Resource<PagedResult<IEvent>> {
-        return ticketMasterApi.searchEvents(keyword = searchText, page = offset)
-            .await()
-            .asResource
-    }
+    ): Resource<PagedResult<IEvent>> = ticketMasterApi.searchEvents(
+        keyword = searchText,
+        page = offset
+    ).await().asResource
 
     override suspend fun saveEvent(event: IEvent): Boolean = eventDao.insertEvent(event)
 
@@ -77,7 +76,7 @@ class EventRepository(
                     body.page.totalPages
                 )
             )
-            is NetworkResponse.ServerError -> Resource.Error(this)
+            is NetworkResponse.ServerError -> Resource.Error(body)
             is NetworkResponse.NetworkError -> Resource.Error(error)
         }
 

@@ -4,8 +4,7 @@ import com.example.core.util.Data
 import com.example.core.util.LoadedSuccessfully
 import com.example.coreandroid.base.StateUpdate
 
-sealed class EventStateUpdate :
-    StateUpdate<EventState> {
+sealed class EventStateUpdate : StateUpdate<EventState> {
     sealed class FavouriteStatus : EventStateUpdate() {
         object Loading : FavouriteStatus() {
             override fun invoke(state: EventState): EventState = state.copy(
@@ -15,10 +14,7 @@ sealed class EventStateUpdate :
 
         class Loaded(private val favourite: Boolean) : FavouriteStatus() {
             override fun invoke(state: EventState): EventState = state.copy(
-                isFavourite = Data(
-                    favourite,
-                    LoadedSuccessfully
-                )
+                isFavourite = Data(favourite, LoadedSuccessfully)
             )
         }
     }

@@ -11,7 +11,7 @@ import androidx.viewbinding.ViewBinding
 import com.airbnb.epoxy.EpoxyRecyclerView
 import com.airbnb.epoxy.TypedEpoxyController
 import com.example.core.util.HoldsList
-import com.example.coreandroid.controller.eventsSelectionActionModeController
+import com.example.coreandroid.controller.itemsSelectionActionModeController
 import com.example.coreandroid.model.event.Event
 import com.example.coreandroid.model.event.Selectable
 import com.example.coreandroid.navigation.IFragmentFactory
@@ -35,7 +35,7 @@ import javax.inject.Inject
 @FlowPreview
 @ExperimentalCoroutinesApi
 abstract class SelectableEventListFragment<
-        VB : ViewBinding, D : Any, I : Any, S : SelectableEventsState<S>, VM : FlowViewModel<I, *, S, *>, VU>(
+        VB : ViewBinding, D : Any, I : Any, S : SelectableItemsState<S, Event>, VM : FlowViewModel<I, *, S, *>, VU>(
     @LayoutRes private val layoutRes: Int,
     viewBindingFactory: (View) -> VB,
     private val epoxyRecyclerView: VB.() -> EpoxyRecyclerView,
@@ -84,7 +84,7 @@ abstract class SelectableEventListFragment<
     }
 
     protected val actionModeController by lazy(LazyThreadSafetyMode.NONE) {
-        eventsSelectionActionModeController(
+        itemsSelectionActionModeController(
             menuId = eventsSelectionMenuRes,
             itemClickedCallbacks = mapOf(
                 selectionConfirmedActionId to {
@@ -134,7 +134,7 @@ abstract class SelectableEventListFragment<
 
         popBackStackSignalProviderJob = popBackStackSignalProvider.popBackStackSignals
             .onEach {
-                actionModeController.update(viewModel.state.events.data.count { it.selected })
+                actionModeController.update(viewModel.state.items.data.count { it.selected })
             }
             .launchIn(lifecycleScope)
     }

@@ -1,6 +1,8 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'org.jmailen.kotlinter'
 
 android {
     compileSdkVersion 29
@@ -26,11 +28,43 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'androidx.core:core-ktx:1.3.1'
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
 
+    implementation project(':core')
+    implementation project(':core-android')
+
+    implementation "androidx.appcompat:appcompat:$appCompatVersion"
+    implementation "androidx.constraintlayout:constraintlayout:$constraintLayoutVersion"
+    implementation 'androidx.core:core-ktx:1.3.1'
+    implementation "androidx.legacy:legacy-support-v4:$legacySupportV4Version"
+    implementation "androidx.recyclerview:recyclerview:$recyclerViewVersion"
+    implementation "com.google.android.material:material:$materialVersion"
+
+    implementation "io.github.reactivecircus.flowbinding:flowbinding-android:$flowBindingVersion"
+    implementation "io.github.reactivecircus.flowbinding:flowbinding-appcompat:$flowBindingVersion"
+    implementation "io.github.reactivecircus.flowbinding:flowbinding-core:$flowBindingVersion"
+    implementation "io.github.reactivecircus.flowbinding:flowbinding-viewpager:$flowBindingVersion"
+
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
+
+    implementation "com.google.dagger:dagger-android:$daggerVersion"
+    implementation "com.google.dagger:dagger-android-support:$daggerVersion"
+    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
+    kapt "com.google.dagger:dagger-android-processor:$daggerVersion"
+
+    compileOnly "com.squareup.inject:assisted-inject-annotations-dagger2:$assistedInjectVersion"
+    kapt "com.squareup.inject:assisted-inject-processor-dagger2:$assistedInjectVersion"
+
+    implementation "com.airbnb.android:epoxy:$epoxyVersion"
+    implementation "com.airbnb.android:epoxy-databinding:$epoxyVersion"
+    kapt "com.airbnb.android:epoxy-processor:$epoxyVersion"
+
+    testImplementation project(':test')
+    testImplementation "junit:junit:$junit4Version"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinxCoroutinesTestVersion"
+    testImplementation "io.mockk:mockk:$mockkVersion"
+    testImplementation "androidx.arch.core:core-testing:$archCoreTestingVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
+    androidTestImplementation "androidx.test:runner:$testRunnerVersion"
 }

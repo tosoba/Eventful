@@ -34,7 +34,7 @@ internal class LocationStateProviderUpdatesTests : BaseNearbyFlowProcessorTests(
     @DisplayName("When events status is Failed - should not call getPagedEventsFlow")
     fun loadingFailedTest() = testScope.runBlockingTest {
         val initialState = NearbyState(
-            events = PagedDataList(status = Failure(null))
+            items = PagedDataList(status = Failure(null))
         )
         val currentState = mockk<() -> NearbyState> {
             every { this@mockk() } returns initialState
@@ -52,14 +52,14 @@ internal class LocationStateProviderUpdatesTests : BaseNearbyFlowProcessorTests(
             currentState = currentState
         ).launchIn(this)
 
-        verify(exactly = 0) { getPagedEventsFlow(initialState.events, any(), any()) }
+        verify(exactly = 0) { getPagedEventsFlow(initialState.items, any(), any()) }
     }
 
     @Test
     @DisplayName("When location status is not found - should not call getPagedEventsFlow")
     fun locationStatusNotFoundTest() = testScope.runBlockingTest {
         val initialState = NearbyState(
-            events = PagedDataList(
+            items = PagedDataList(
                 status = LoadedSuccessfully,
                 data = relaxedMockedList(10)
             )
@@ -80,7 +80,7 @@ internal class LocationStateProviderUpdatesTests : BaseNearbyFlowProcessorTests(
             currentState = currentState
         ).launchIn(this)
 
-        verify(exactly = 0) { getPagedEventsFlow(initialState.events, any(), any()) }
+        verify(exactly = 0) { getPagedEventsFlow(initialState.items, any(), any()) }
     }
 
     @Test
@@ -89,7 +89,7 @@ internal class LocationStateProviderUpdatesTests : BaseNearbyFlowProcessorTests(
 |- should call getPagedEventsFlow, signal EventsLoadingFinished, emit Events.Loading and Loaded updates"""
     )
     fun allConditionsMetTest() = testScope.runBlockingTest {
-        val initialState = NearbyState(events = PagedDataList(status = LoadedSuccessfully))
+        val initialState = NearbyState(items = PagedDataList(status = LoadedSuccessfully))
         val currentState = mockk<() -> NearbyState> {
             every { this@mockk() } returns initialState
         }
@@ -97,7 +97,7 @@ internal class LocationStateProviderUpdatesTests : BaseNearbyFlowProcessorTests(
             PagedResult<IEvent>(mockedList(10) { event(it) }, 1, 1)
         )
         val getPagedEventsFlow = mockk<GetPagedEventsFlow> {
-            every { this@mockk(initialState.events, any(), any()) } returns flowOf(
+            every { this@mockk(initialState.items, any(), any()) } returns flowOf(
                 expectedResource
             )
         }
@@ -115,7 +115,7 @@ internal class LocationStateProviderUpdatesTests : BaseNearbyFlowProcessorTests(
             signal = signal::invoke
         ).toList()
 
-        verify(exactly = 1) { getPagedEventsFlow(initialState.events, any(), any()) }
+        verify(exactly = 1) { getPagedEventsFlow(initialState.items, any(), any()) }
         coVerify(exactly = 1) { signal.invoke(NearbySignal.EventsLoadingFinished) }
         assert(updates.size == 2)
         val loadingUpdate = updates.first()
@@ -131,7 +131,7 @@ internal class LocationStateProviderUpdatesTests : BaseNearbyFlowProcessorTests(
     @Test
     @DisplayName("On more than one equal consecutive latLng - should call getPagedEventsFlow only once")
     fun latLngDistinctTest() = testScope.runBlockingTest {
-        val initialState = NearbyState(events = PagedDataList(status = LoadedSuccessfully))
+        val initialState = NearbyState(items = PagedDataList(status = LoadedSuccessfully))
         val currentState = mockk<() -> NearbyState> {
             every { this@mockk() } returns initialState
         }
@@ -147,6 +147,6 @@ internal class LocationStateProviderUpdatesTests : BaseNearbyFlowProcessorTests(
             currentState = currentState
         ).launchIn(this)
 
-        verify(exactly = 1) { getPagedEventsFlow(initialState.events, any(), any()) }
+        verify(exactly = 1) { getPagedEventsFlow(initialState.items, any(), any()) }
     }
 }

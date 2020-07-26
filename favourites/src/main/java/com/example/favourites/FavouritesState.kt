@@ -4,24 +4,24 @@ import com.example.core.util.DataList
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.model.event.Event
 import com.example.coreandroid.model.event.Selectable
-import com.example.coreandroid.base.SelectableEventsSnackbarState
+import com.example.coreandroid.base.SelectableItemsSnackbarState
 
 data class FavouritesState(
     val searchText: String = "",
-    override val events: DataList<Selectable<Event>> = DataList(),
+    override val items: DataList<Selectable<Event>> = DataList(),
     val limit: Int = 0,
     val snackbarState: SnackbarState = SnackbarState.Hidden
-) : SelectableEventsSnackbarState<FavouritesState> {
+) : SelectableItemsSnackbarState<FavouritesState, Event> {
 
-    override fun copyWithTransformedEvents(
+    override fun copyWithTransformedItems(
         transform: (Selectable<Event>) -> Selectable<Event>
-    ): FavouritesState = copy(events = events.transformItems(transform))
+    ): FavouritesState = copy(items = items.transformItems(transform))
 
-    override fun copyWithSnackbarStateAndTransformedEvents(
+    override fun copyWithSnackbarStateAndTransformedItems(
         snackbarState: SnackbarState,
         transform: (Selectable<Event>) -> Selectable<Event>
     ): FavouritesState = copy(
-        events = events.transformItems(transform),
+        items = items.transformItems(transform),
         snackbarState = snackbarState
     )
 

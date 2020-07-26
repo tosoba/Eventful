@@ -109,7 +109,7 @@ internal class NewSearchTests : BaseSearchFlowProcessorTests() {
             PagedResult<IEvent>(mockedList(10) { event(it) }, 1, 1)
         )
         val getPagedEventsFlow = mockk<GetPagedEventsFlow> {
-            every { this@mockk(initialState.events, any(), any()) } returns flowOf(
+            every { this@mockk(initialState.items, any(), any()) } returns flowOf(
                 expectedResource
             )
         }
