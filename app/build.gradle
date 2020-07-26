@@ -47,16 +47,17 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
 
-    implementation project(':ticketmaster-api')
-    implementation project(':darksky-api')
+    implementation project(':alarms')
     implementation project(':core')
     implementation project(':core-android')
+    implementation project(':darksky-api')
     implementation project(':db')
     implementation project(':event')
     implementation project(':favourites')
     implementation project(':nearby')
     implementation project(':repo')
     implementation project(':search')
+    implementation project(':ticketmaster-api')
     implementation project(':weather')
 
     implementation "androidx.appcompat:appcompat:$appCompatVersion"

@@ -1,6 +1,7 @@
 package com.example.eventsnearby
 
 import androidx.lifecycle.ViewModel
+import com.example.alarms.AlarmsModule
 import com.example.coreandroid.base.savedStateViewModelFrom
 import com.example.coreandroid.di.scope.ActivityScoped
 import com.example.coreandroid.di.viewmodel.AssistedSavedStateViewModelFactory
@@ -37,6 +38,7 @@ abstract class MainActivityModule {
             NearbyModule::class,
             SearchModule::class,
             FavouritesModule::class,
+            AlarmsModule::class,
             EventModule::class,
             WeatherModule::class,
             MainFragmentModule::class

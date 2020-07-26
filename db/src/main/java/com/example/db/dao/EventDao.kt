@@ -110,4 +110,12 @@ interface EventDao {
 
     @Query("DELETE FROM ${Tables.EVENT} WHERE id IN (:ids)")
     suspend fun deleteEvents(ids: List<String>)
+
+    @Transaction
+    @Query("SELECT * FROM ${Tables.EVENT} WHERE id = :id")
+    fun getEventAlarms(id: String): Flow<List<EventAlarmsEntity>>
+
+    @Transaction
+    @Query("SELECT * FROM ${Tables.EVENT}")
+    fun getAlarms(): Flow<List<EventAlarmsEntity>>
 }

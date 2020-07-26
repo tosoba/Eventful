@@ -2,21 +2,24 @@ package com.example.alarms
 
 import android.os.Bundle
 import androidx.core.os.bundleOf
-import androidx.fragment.app.Fragment
+import com.example.coreandroid.base.DaggerViewModelFragment
 import com.example.coreandroid.base.HasArgs
-import com.example.coreandroid.model.event.Event
-import com.example.coreandroid.util.delegate.NullableFragmentArgument
+import com.example.coreandroid.util.delegate.FragmentArgument
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 
-class AlarmsFragment : Fragment(R.layout.fragment_alarms), HasArgs {
+@FlowPreview
+@ExperimentalCoroutinesApi
+class AlarmsFragment : DaggerViewModelFragment<AlarmsViewModel>(R.layout.fragment_alarms), HasArgs {
 
-    private var event: Event? by NullableFragmentArgument()
-    override val args: Bundle get() = bundleOf(EVENT_ARG_KEY to event)
+    private var mode: AlarmsMode by FragmentArgument()
+    override val args: Bundle get() = bundleOf(MODE_ARG_KEY to mode)
 
     companion object {
-        fun new(event: Event?): AlarmsFragment = AlarmsFragment().also {
-            it.event = event
+        fun new(mode: AlarmsMode): AlarmsFragment = AlarmsFragment().also {
+            it.mode = mode
         }
 
-        const val EVENT_ARG_KEY = "event"
+        const val MODE_ARG_KEY = "mode"
     }
 }

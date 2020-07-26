@@ -2,6 +2,7 @@ package com.example.db
 
 import android.content.Context
 import androidx.room.Room
+import com.example.db.dao.AlarmDao
 import com.example.db.dao.EventDao
 import com.example.db.dao.SearchSuggestionDao
 import dagger.Module
@@ -18,9 +19,13 @@ object DbModule {
 
     @Provides
     @Singleton
-    fun searchSuggestionDao(db: EventfulDb): SearchSuggestionDao = db.searchSuggestionDao()
+    fun alarmDao(db: EventfulDb): AlarmDao = db.alarmDao()
 
     @Provides
     @Singleton
     fun eventDao(db: EventfulDb): EventDao = db.eventDao()
+
+    @Provides
+    @Singleton
+    fun searchSuggestionDao(db: EventfulDb): SearchSuggestionDao = db.searchSuggestionDao()
 }

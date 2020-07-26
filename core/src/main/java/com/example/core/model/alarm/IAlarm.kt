@@ -1,7 +1,9 @@
 package com.example.core.model.alarm
 
+import com.example.core.model.event.IEvent
+
 interface IAlarm {
     val id: Long
-    val eventId: String
+    val event: IEvent
     val timestamp: Long
 }
