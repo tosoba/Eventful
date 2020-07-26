@@ -4,6 +4,7 @@ import com.example.core.model.alarm.IAlarm
 import kotlinx.coroutines.flow.Flow
 
 interface IAlarmRepository {
-    fun getAlarms(): Flow<List<IAlarm>>
+    val alarms: Flow<List<IAlarm>>
     fun getAlarmsForEvent(eventId: String): Flow<List<IAlarm>>
+    suspend fun deleteAlarms(alarms: List<IAlarm>)
 }

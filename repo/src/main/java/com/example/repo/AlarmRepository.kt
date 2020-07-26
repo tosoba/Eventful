@@ -17,7 +17,7 @@ class AlarmRepository @Inject constructor(
     private val eventsDao: EventDao
 ) : IAlarmRepository {
 
-    override fun getAlarms(): Flow<List<IAlarm>> = eventsDao.getAlarms().asAlarmList
+    override val alarms: Flow<List<IAlarm>> get() = eventsDao.getAlarms().asAlarmList
 
     override fun getAlarmsForEvent(eventId: String): Flow<List<IAlarm>> = eventsDao
         .getEventAlarms(eventId)
@@ -28,4 +28,8 @@ class AlarmRepository @Inject constructor(
             eventAlarms.map { (event, alarms) -> alarms.map { Alarm(it.id, event, it.timestamp) } }
                 .flatten()
         }
+
+    override suspend fun deleteAlarms(alarms: List<IAlarm>) {
+        alarmDao.deleteAlarms(alarms.map(IAlarm::id))
+    }
 }

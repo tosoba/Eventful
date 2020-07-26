@@ -51,12 +51,22 @@ interface ItemSelectionConfirmedUpdate<S : SelectableItemsSnackbarState<S, I>, I
     }
 }
 
+fun addedToAlarmsMessage(alarmsCount: Int): String =
+    """$alarmsCount
+            |${if (alarmsCount > 1) " alarms were" else " event was"} 
+            |added.""".trimMargin().replace("\n", "")
+
+fun removedFromAlarmsMessage(alarmsCount: Int): String =
+    """$alarmsCount
+            |${if (alarmsCount > 1) " alarms were" else " event was"} 
+            |removed.""".trimMargin().replace("\n", "")
+
 fun addedToFavouritesMessage(eventsCount: Int): String =
     """$eventsCount
             |${if (eventsCount > 1) " events were" else " event was"} 
-            |added to favourites""".trimMargin().replace("\n", "")
+            |added to favourites.""".trimMargin().replace("\n", "")
 
 fun removedFromFavouritesMessage(eventsCount: Int): String =
     """$eventsCount
             |${if (eventsCount > 1) " events were" else " event was"} 
-            |removed from favourites""".trimMargin().replace("\n", "")
+            |removed from favourites.""".trimMargin().replace("\n", "")

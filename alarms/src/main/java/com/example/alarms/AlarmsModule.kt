@@ -1,9 +1,8 @@
 package com.example.alarms
 
 import androidx.lifecycle.ViewModel
-import com.example.core.usecase.DeleteEvents
+import com.example.core.usecase.DeleteAlarms
 import com.example.core.usecase.GetAlarms
-import com.example.core.usecase.GetSavedEventsFlow
 import com.example.coreandroid.base.savedStateViewModelFrom
 import com.example.coreandroid.di.scope.FragmentScoped
 import com.example.coreandroid.di.viewmodel.AssistedSavedStateViewModelFactory
@@ -40,8 +39,9 @@ abstract class AlarmsModule {
         @Provides
         fun alarmsFlowProcessor(
             getAlarms: GetAlarms,
+            deleteAlarms: DeleteAlarms,
             ioDispatcher: CoroutineDispatcher
-        ): AlarmsFlowProcessor = AlarmsFlowProcessor(getAlarms, ioDispatcher)
+        ): AlarmsFlowProcessor = AlarmsFlowProcessor(getAlarms, deleteAlarms, ioDispatcher)
     }
 
     @Module
