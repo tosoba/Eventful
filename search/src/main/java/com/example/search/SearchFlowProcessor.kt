@@ -4,7 +4,11 @@ import androidx.lifecycle.SavedStateHandle
 import com.example.core.model.PagedResult
 import com.example.core.model.Resource
 import com.example.core.model.event.IEvent
-import com.example.core.usecase.*
+import com.example.core.usecase.event.GetPagedEventsFlow
+import com.example.core.usecase.event.SaveEvents
+import com.example.core.usecase.event.SearchEvents
+import com.example.core.usecase.search.GetSearchSuggestions
+import com.example.core.usecase.search.SaveSearchSuggestion
 import com.example.core.util.Loading
 import com.example.core.util.ext.flatMapFirst
 import com.example.coreandroid.base.FlowProcessor

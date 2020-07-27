@@ -1,6 +1,10 @@
 package com.example.search
 
-import com.example.core.usecase.*
+import com.example.core.usecase.event.GetPagedEventsFlow
+import com.example.core.usecase.event.SaveEvents
+import com.example.core.usecase.event.SearchEvents
+import com.example.core.usecase.search.GetSearchSuggestions
+import com.example.core.usecase.search.SaveSearchSuggestion
 import com.example.coreandroid.provider.ConnectedStateProvider
 import com.example.test.rule.mockLog
 import io.mockk.every
@@ -37,7 +41,9 @@ internal abstract class BaseSearchFlowProcessorTests {
 
     protected fun flowProcessor(
         searchEvents: SearchEvents = mockk(relaxed = true),
-        getPagedEventsFlow: GetPagedEventsFlow = GetPagedEventsFlow(testDispatcher),
+        getPagedEventsFlow: GetPagedEventsFlow = GetPagedEventsFlow(
+            testDispatcher
+        ),
         saveEvents: SaveEvents = mockk(relaxed = true),
         getSearchSuggestions: GetSearchSuggestions = mockk(relaxed = true),
         saveSearchSuggestion: SaveSearchSuggestion = mockk(relaxed = true),

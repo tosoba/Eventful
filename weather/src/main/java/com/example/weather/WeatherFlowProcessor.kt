@@ -1,6 +1,6 @@
 package com.example.weather
 
-import com.example.core.usecase.GetForecast
+import com.example.core.usecase.weather.GetForecast
 import com.example.coreandroid.base.FlowProcessor
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.*

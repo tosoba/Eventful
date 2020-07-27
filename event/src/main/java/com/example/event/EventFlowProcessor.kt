@@ -1,8 +1,8 @@
 package com.example.event
 
-import com.example.core.usecase.DeleteEvent
-import com.example.core.usecase.IsEventSavedFlow
-import com.example.core.usecase.SaveEvent
+import com.example.core.usecase.event.DeleteEvent
+import com.example.core.usecase.event.IsEventSavedFlow
+import com.example.core.usecase.event.SaveEvent
 import com.example.core.util.Initial
 import com.example.coreandroid.base.FlowProcessor
 import kotlinx.coroutines.CoroutineScope

@@ -1,4 +1,4 @@
-package com.example.core.usecase
+package com.example.core.usecase.connection
 
 import com.example.core.repo.IAppRepository
 import kotlinx.coroutines.flow.Flow

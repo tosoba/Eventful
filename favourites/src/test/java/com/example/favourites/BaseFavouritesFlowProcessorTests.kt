@@ -1,8 +1,8 @@
 package com.example.favourites
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.example.core.usecase.DeleteEvents
-import com.example.core.usecase.GetSavedEventsFlow
+import com.example.core.usecase.event.DeleteEvents
+import com.example.core.usecase.event.GetSavedEventsFlow
 import com.example.test.rule.mockLog
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineDispatcher

@@ -1,6 +1,6 @@
 package com.example.search
 
-import com.example.core.usecase.GetPagedEventsFlow
+import com.example.core.usecase.event.GetPagedEventsFlow
 import com.example.core.util.Failure
 import com.example.core.util.LoadedSuccessfully
 import com.example.core.util.PagedDataList

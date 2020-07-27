@@ -1,8 +1,8 @@
 package com.example.nearby
 
-import com.example.core.usecase.GetNearbyEvents
-import com.example.core.usecase.GetPagedEventsFlow
-import com.example.core.usecase.SaveEvents
+import com.example.core.usecase.event.GetNearbyEvents
+import com.example.core.usecase.event.GetPagedEventsFlow
+import com.example.core.usecase.event.SaveEvents
 import com.example.core.util.Loading
 import com.example.core.util.ext.flatMapFirst
 import com.example.coreandroid.base.FlowProcessor

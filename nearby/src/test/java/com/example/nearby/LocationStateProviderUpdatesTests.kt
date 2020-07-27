@@ -3,7 +3,7 @@ package com.example.nearby
 import com.example.core.model.PagedResult
 import com.example.core.model.Resource
 import com.example.core.model.event.IEvent
-import com.example.core.usecase.GetPagedEventsFlow
+import com.example.core.usecase.event.GetPagedEventsFlow
 import com.example.core.util.Failure
 import com.example.core.util.LoadedSuccessfully
 import com.example.core.util.PagedDataList

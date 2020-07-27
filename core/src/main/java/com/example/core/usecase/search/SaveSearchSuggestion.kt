@@ -1,4 +1,4 @@
-package com.example.core.usecase
+package com.example.core.usecase.search
 
 import com.example.core.repo.IEventRepository
 import javax.inject.Inject

@@ -1,4 +1,4 @@
-package com.example.core.usecase
+package com.example.core.usecase.location
 
 import com.example.core.repo.IAppRepository
 import kotlinx.coroutines.flow.Flow

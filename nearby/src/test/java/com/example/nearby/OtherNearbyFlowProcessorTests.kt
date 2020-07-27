@@ -1,6 +1,6 @@
 package com.example.nearby
 
-import com.example.core.usecase.SaveEvents
+import com.example.core.usecase.event.SaveEvents
 import com.example.core.util.PagedDataList
 import com.example.coreandroid.base.addedToFavouritesMessage
 import com.example.coreandroid.model.event.Selectable

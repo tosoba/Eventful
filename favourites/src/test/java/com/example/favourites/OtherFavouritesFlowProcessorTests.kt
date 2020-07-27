@@ -1,7 +1,7 @@
 package com.example.favourites
 
-import com.example.core.usecase.DeleteEvents
-import com.example.core.usecase.GetSavedEventsFlow
+import com.example.core.usecase.event.DeleteEvents
+import com.example.core.usecase.event.GetSavedEventsFlow
 import com.example.core.util.DataList
 import com.example.coreandroid.base.removedFromFavouritesMessage
 import com.example.coreandroid.model.event.Selectable

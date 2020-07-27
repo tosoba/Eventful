@@ -4,9 +4,9 @@ import com.example.core.model.PagedResult
 import com.example.core.model.Resource
 import com.example.core.model.event.IEvent
 import com.example.core.model.search.SearchSuggestion
-import com.example.core.usecase.GetPagedEventsFlow
-import com.example.core.usecase.GetSearchSuggestions
-import com.example.core.usecase.SaveSearchSuggestion
+import com.example.core.usecase.event.GetPagedEventsFlow
+import com.example.core.usecase.search.GetSearchSuggestions
+import com.example.core.usecase.search.SaveSearchSuggestion
 import com.example.coreandroid.model.event.Event
 import com.example.coreandroid.model.event.Selectable
 import com.example.test.rule.event
