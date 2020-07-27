@@ -12,7 +12,7 @@ import com.example.coreandroid.model.event.Selectable
 
 open class EventItem(
     private val clicked: View.OnClickListener,
-    background: EventSelectableBackgroundBindingModel_,
+    background: SelectableBackgroundBindingModel_,
     thumbnail: EventThumbnailBindingModel_,
     info: EventInfoBindingModel_,
     kindsCarousel: CarouselModel_
@@ -26,7 +26,7 @@ open class EventItem(
 
 fun Event.listItem(clicked: View.OnClickListener) = EventItem(
     clicked,
-    EventSelectableBackgroundBindingModel_().id("${id}b")
+    SelectableBackgroundBindingModel_().id("${id}b")
         .selected(false),
     EventThumbnailBindingModel_().id("${id}t")
         .event(this),
@@ -38,7 +38,7 @@ fun Event.listItem(clicked: View.OnClickListener) = EventItem(
 class SelectableEventItem(
     clicked: View.OnClickListener,
     private val longClicked: View.OnLongClickListener,
-    background: EventSelectableBackgroundBindingModel_,
+    background: SelectableBackgroundBindingModel_,
     thumbnail: EventThumbnailBindingModel_,
     info: EventInfoBindingModel_,
     kindsCarousel: CarouselModel_
@@ -56,7 +56,7 @@ fun Selectable<Event>.listItem(
 ) = SelectableEventItem(
     clicked,
     longClicked,
-    EventSelectableBackgroundBindingModel_().id("${item.id}b")
+    SelectableBackgroundBindingModel_().id("${item.id}b")
         .selected(selected),
     EventThumbnailBindingModel_().id("${item.id}t")
         .event(item),
