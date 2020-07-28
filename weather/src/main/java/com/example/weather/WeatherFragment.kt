@@ -117,9 +117,9 @@ class WeatherFragment :
     }
 
     companion object {
-        fun new(latLng: LatLng?, locationName: String?): WeatherFragment = WeatherFragment().apply {
-            this.latLng = latLng
-            this.locationName = locationName
+        fun new(latLng: LatLng?, locationName: String?): WeatherFragment = WeatherFragment().also {
+            it.latLng = latLng
+            it.locationName = locationName
         }
 
         const val LAT_LNG_ARG_KEY = "LAT_LNG_ARG_KEY"

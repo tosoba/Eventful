@@ -46,10 +46,10 @@ class FragmentViewBindingDelegate<T : ViewBinding>(
     }
 }
 
-fun <T : ViewBinding> Fragment.viewBinding(viewBindingFactory: (View) -> T): FragmentViewBindingDelegate<T> {
-    return FragmentViewBindingDelegate(this, viewBindingFactory)
-}
+fun <T : ViewBinding> Fragment.viewBinding(
+    viewBindingFactory: (View) -> T
+): FragmentViewBindingDelegate<T> = FragmentViewBindingDelegate(this, viewBindingFactory)
 
-inline fun <T : ViewBinding> AppCompatActivity.viewBinding(crossinline bindingInflater: (LayoutInflater) -> T): Lazy<T> {
-    return lazy(LazyThreadSafetyMode.NONE) { bindingInflater.invoke(layoutInflater) }
-}
+inline fun <T : ViewBinding> AppCompatActivity.viewBinding(
+    crossinline bindingInflater: (LayoutInflater) -> T
+): Lazy<T> = lazy(LazyThreadSafetyMode.NONE) { bindingInflater.invoke(layoutInflater) }

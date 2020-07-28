@@ -55,6 +55,15 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:$recyclerViewVersion"
     implementation "com.google.android.material:material:$materialVersion"
 
+    implementation "android.arch.lifecycle:runtime:$lifecycleVersion"
+    implementation "android.arch.lifecycle:extensions:$lifecycleVersion"
+    kapt "android.arch.lifecycle:compiler:$lifecycleVersion"
+    implementation "com.github.hadilq.liveevent:liveevent:$liveEventVersion"
+    implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycleRuntimeKtxVersion"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$liveDataKtxVersion"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleRuntimeKtxVersion"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleViewModelKtxVersion"
+
     implementation "io.github.reactivecircus.flowbinding:flowbinding-android:$flowBindingVersion"
     implementation "io.github.reactivecircus.flowbinding:flowbinding-appcompat:$flowBindingVersion"
     implementation "io.github.reactivecircus.flowbinding:flowbinding-core:$flowBindingVersion"

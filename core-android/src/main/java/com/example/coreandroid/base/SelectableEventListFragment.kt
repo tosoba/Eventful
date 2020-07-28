@@ -10,10 +10,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.viewbinding.ViewBinding
 import com.airbnb.epoxy.EpoxyRecyclerView
 import com.airbnb.epoxy.TypedEpoxyController
+import com.example.core.model.Selectable
 import com.example.core.util.HoldsList
+import com.example.coreandroid.controller.ItemsSelectionActionModeController
 import com.example.coreandroid.controller.itemsSelectionActionModeController
 import com.example.coreandroid.model.event.Event
-import com.example.core.model.Selectable
 import com.example.coreandroid.navigation.IFragmentFactory
 import com.example.coreandroid.provider.PopBackStackSignalProvider
 import com.example.coreandroid.util.delegate.viewBinding
@@ -83,7 +84,9 @@ abstract class SelectableEventListFragment<
         }
     }
 
-    protected val actionModeController by lazy(LazyThreadSafetyMode.NONE) {
+    protected val actionModeController: ItemsSelectionActionModeController by lazy(
+        LazyThreadSafetyMode.NONE
+    ) {
         itemsSelectionActionModeController(
             menuId = eventsSelectionMenuRes,
             itemClickedCallbacks = mapOf(
