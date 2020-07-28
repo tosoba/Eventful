@@ -1,8 +1,8 @@
 package com.example.nearby
 
-import com.example.core.usecase.GetNearbyEvents
-import com.example.core.usecase.GetPagedEventsFlow
-import com.example.core.usecase.SaveEvents
+import com.example.core.usecase.event.GetNearbyEvents
+import com.example.core.usecase.event.GetPagedEventsFlow
+import com.example.core.usecase.event.SaveEvents
 import com.example.coreandroid.provider.ConnectedStateProvider
 import com.example.coreandroid.provider.LocationStateProvider
 import com.example.test.rule.mockLog
@@ -41,7 +41,9 @@ internal abstract class BaseNearbyFlowProcessorTests {
     protected fun flowProcessor(
         getNearbyEvents: GetNearbyEvents = mockk(relaxed = true),
         saveEvents: SaveEvents = mockk(relaxed = true),
-        getPagedEventsFlow: GetPagedEventsFlow = GetPagedEventsFlow(testDispatcher),
+        getPagedEventsFlow: GetPagedEventsFlow = GetPagedEventsFlow(
+            testDispatcher
+        ),
         connectedStateProvider: ConnectedStateProvider = mockk(relaxed = true),
         locationStateProvider: LocationStateProvider = mockk(relaxed = true),
         ioDispatcher: CoroutineDispatcher = testDispatcher

@@ -2,9 +2,9 @@ package com.example.eventsnearby
 
 import androidx.lifecycle.SavedStateHandle
 import com.example.core.model.location.LocationResult
-import com.example.core.usecase.GetLocation
-import com.example.core.usecase.IsConnectedFlow
-import com.example.core.usecase.IsLocationAvailableFlow
+import com.example.core.usecase.location.GetLocation
+import com.example.core.usecase.connection.IsConnectedFlow
+import com.example.core.usecase.location.IsLocationAvailableFlow
 import com.example.core.util.ext.flatMapFirst
 import com.example.core.util.ext.takeWhileInclusive
 import com.example.coreandroid.base.FlowProcessor

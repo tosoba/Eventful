@@ -1,8 +1,8 @@
 package com.example.favourites
 
 import androidx.lifecycle.ViewModel
-import com.example.core.usecase.DeleteEvents
-import com.example.core.usecase.GetSavedEventsFlow
+import com.example.core.usecase.event.DeleteEvents
+import com.example.core.usecase.event.GetSavedEventsFlow
 import com.example.coreandroid.base.savedStateViewModelFrom
 import com.example.coreandroid.di.scope.FragmentScoped
 import com.example.coreandroid.di.viewmodel.AssistedSavedStateViewModelFactory

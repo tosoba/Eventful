@@ -1,7 +1,7 @@
 package com.example.alarms
 
-import com.example.core.usecase.DeleteAlarms
-import com.example.core.usecase.GetAlarms
+import com.example.core.usecase.alarm.DeleteAlarms
+import com.example.core.usecase.alarm.GetAlarms
 import com.example.coreandroid.base.FlowProcessor
 import com.example.coreandroid.base.removedFromAlarmsMessage
 import kotlinx.coroutines.*

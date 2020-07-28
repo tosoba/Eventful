@@ -1,6 +1,6 @@
 package com.example.favourites
 
-import com.example.core.usecase.GetSavedEventsFlow
+import com.example.core.usecase.event.GetSavedEventsFlow
 import com.example.core.util.ext.lowerCasedTrimmed
 import com.example.test.rule.event
 import com.example.test.rule.mockedList

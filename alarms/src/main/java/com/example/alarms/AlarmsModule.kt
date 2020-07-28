@@ -1,8 +1,8 @@
 package com.example.alarms
 
 import androidx.lifecycle.ViewModel
-import com.example.core.usecase.DeleteAlarms
-import com.example.core.usecase.GetAlarms
+import com.example.core.usecase.alarm.DeleteAlarms
+import com.example.core.usecase.alarm.GetAlarms
 import com.example.coreandroid.base.savedStateViewModelFrom
 import com.example.coreandroid.di.scope.FragmentScoped
 import com.example.coreandroid.di.viewmodel.AssistedSavedStateViewModelFactory

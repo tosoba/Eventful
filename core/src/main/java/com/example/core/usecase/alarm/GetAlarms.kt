@@ -1,4 +1,4 @@
-package com.example.core.usecase
+package com.example.core.usecase.alarm
 
 import com.example.core.model.alarm.IAlarm
 import com.example.core.repo.IAlarmRepository

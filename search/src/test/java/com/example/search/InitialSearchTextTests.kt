@@ -1,7 +1,7 @@
 package com.example.search
 
-import com.example.core.usecase.GetPagedEventsFlow
-import com.example.core.usecase.GetSearchSuggestions
+import com.example.core.usecase.event.GetPagedEventsFlow
+import com.example.core.usecase.search.GetSearchSuggestions
 import com.example.coreandroid.model.event.Event
 import com.example.coreandroid.model.event.Selectable
 import io.mockk.coEvery

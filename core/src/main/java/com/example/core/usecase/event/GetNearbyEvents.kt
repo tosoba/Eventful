@@ -1,4 +1,4 @@
-package com.example.core.usecase
+package com.example.core.usecase.event
 
 import com.example.core.model.PagedResult
 import com.example.core.model.Resource

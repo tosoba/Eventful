@@ -1,4 +1,4 @@
-package com.example.core.usecase
+package com.example.core.usecase.weather
 
 import com.example.core.model.Resource
 import com.example.core.model.weather.Forecast
