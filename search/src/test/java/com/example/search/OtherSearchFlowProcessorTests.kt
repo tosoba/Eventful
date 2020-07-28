@@ -2,7 +2,7 @@ package com.example.search
 
 import com.example.core.usecase.event.SaveEvents
 import com.example.core.util.PagedDataList
-import com.example.coreandroid.model.event.Selectable
+import com.example.core.model.Selectable
 import com.example.coreandroid.base.addedToFavouritesMessage
 import com.example.test.rule.event
 import com.example.test.rule.mockedList

@@ -5,7 +5,7 @@ import com.example.core.util.Failure
 import com.example.core.util.LoadedSuccessfully
 import com.example.core.util.PagedDataList
 import com.example.coreandroid.model.event.Event
-import com.example.coreandroid.model.event.Selectable
+import com.example.core.model.Selectable
 import com.example.coreandroid.provider.ConnectedStateProvider
 import com.example.test.rule.relaxedMockedList
 import io.mockk.every

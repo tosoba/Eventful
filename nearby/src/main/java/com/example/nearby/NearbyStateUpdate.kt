@@ -3,6 +3,7 @@ package com.example.nearby
 import android.view.View
 import com.example.core.model.PagedResult
 import com.example.core.model.Resource
+import com.example.core.model.Selectable
 import com.example.core.model.event.IEvent
 import com.example.core.util.LoadedSuccessfully
 import com.example.core.util.PagedDataList
@@ -13,7 +14,6 @@ import com.example.coreandroid.base.ToggleItemSelectionUpdate
 import com.example.coreandroid.controller.SnackbarAction
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.model.event.Event
-import com.example.coreandroid.model.event.Selectable
 import com.example.coreandroid.model.location.LocationStatus
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.snackbar.Snackbar

@@ -8,7 +8,7 @@ import com.example.core.usecase.event.GetPagedEventsFlow
 import com.example.core.util.LoadedSuccessfully
 import com.example.core.util.Loading
 import com.example.core.util.PagedDataList
-import com.example.coreandroid.model.event.Selectable
+import com.example.core.model.Selectable
 import com.example.coreandroid.model.location.LocationState
 import com.example.coreandroid.model.location.LocationStatus
 import com.example.coreandroid.provider.LocationStateProvider

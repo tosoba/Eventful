@@ -9,7 +9,7 @@ import com.example.coreandroid.base.StateUpdate
 import com.example.coreandroid.base.ToggleItemSelectionUpdate
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.model.event.Event
-import com.example.coreandroid.model.event.Selectable
+import com.example.core.model.Selectable
 
 sealed class FavouritesStateUpdate : StateUpdate<FavouritesState> {
     data class SearchText(val searchText: String) : FavouritesStateUpdate() {

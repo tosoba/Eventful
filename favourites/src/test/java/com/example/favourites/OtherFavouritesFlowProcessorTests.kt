@@ -4,7 +4,7 @@ import com.example.core.usecase.event.DeleteEvents
 import com.example.core.usecase.event.GetSavedEventsFlow
 import com.example.core.util.DataList
 import com.example.coreandroid.base.removedFromFavouritesMessage
-import com.example.coreandroid.model.event.Selectable
+import com.example.core.model.Selectable
 import com.example.test.rule.event
 import com.example.test.rule.mockedList
 import io.mockk.coVerify

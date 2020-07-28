@@ -3,7 +3,7 @@ package com.example.favourites
 import com.example.core.util.DataList
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.model.event.Event
-import com.example.coreandroid.model.event.Selectable
+import com.example.core.model.Selectable
 import com.example.coreandroid.base.SelectableItemsSnackbarState
 
 data class FavouritesState(

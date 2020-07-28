@@ -13,7 +13,7 @@ import com.airbnb.epoxy.TypedEpoxyController
 import com.example.core.util.HoldsList
 import com.example.coreandroid.controller.itemsSelectionActionModeController
 import com.example.coreandroid.model.event.Event
-import com.example.coreandroid.model.event.Selectable
+import com.example.core.model.Selectable
 import com.example.coreandroid.navigation.IFragmentFactory
 import com.example.coreandroid.provider.PopBackStackSignalProvider
 import com.example.coreandroid.util.delegate.viewBinding

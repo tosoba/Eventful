@@ -1,8 +1,8 @@
 package com.example.coreandroid.base
 
+import com.example.core.model.Selectable
 import com.example.core.util.HoldsList
 import com.example.coreandroid.controller.SnackbarState
-import com.example.coreandroid.model.event.Selectable
 import com.google.android.material.snackbar.Snackbar
 
 interface SelectableItemsState<S : SelectableItemsState<S, I>, I> {

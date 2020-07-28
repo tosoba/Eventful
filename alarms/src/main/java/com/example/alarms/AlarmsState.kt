@@ -4,7 +4,7 @@ import com.example.core.util.DataList
 import com.example.coreandroid.base.SelectableItemsSnackbarState
 import com.example.coreandroid.controller.SnackbarState
 import com.example.coreandroid.model.alarm.Alarm
-import com.example.coreandroid.model.event.Selectable
+import com.example.core.model.Selectable
 
 data class AlarmsState(
     val mode: AlarmsMode,

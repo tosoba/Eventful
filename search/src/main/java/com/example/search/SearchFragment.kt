@@ -9,7 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.core.util.HoldsList
 import com.example.coreandroid.base.SelectableEventListFragment
 import com.example.coreandroid.model.event.Event
-import com.example.coreandroid.model.event.Selectable
+import com.example.core.model.Selectable
 import com.example.coreandroid.util.ext.menuController
 import com.example.coreandroid.util.ext.snackbarController
 import com.example.search.databinding.FragmentSearchBinding

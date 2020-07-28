@@ -8,7 +8,7 @@ import com.example.core.usecase.event.GetPagedEventsFlow
 import com.example.core.usecase.search.GetSearchSuggestions
 import com.example.core.usecase.search.SaveSearchSuggestion
 import com.example.coreandroid.model.event.Event
-import com.example.coreandroid.model.event.Selectable
+import com.example.core.model.Selectable
 import com.example.test.rule.event
 import com.example.test.rule.mockedList
 import com.example.test.rule.relaxedMockedList

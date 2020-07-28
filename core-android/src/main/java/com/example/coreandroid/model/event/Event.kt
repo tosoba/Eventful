@@ -57,5 +57,3 @@ data class Event(
             get() = toString().substringBeforeLast(".")
     }
 }
-
-data class Selectable<T>(val item: T, val selected: Boolean = false)
