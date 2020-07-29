@@ -8,9 +8,9 @@ import com.eventful.core.util.Loading
 import com.eventful.core.util.PagedDataList
 import com.eventful.core.android.model.event.Event
 import com.eventful.core.model.Selectable
-import com.eventful.test.rule.event
-import com.eventful.test.rule.mockedList
-import com.eventful.test.rule.relaxedMockedList
+import com.eventful.test.event
+import com.eventful.test.mockedList
+import com.eventful.test.relaxedMockedList
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -89,12 +89,20 @@ internal class LoadMoreResultsTests : BaseSearchFlowProcessorTests() {
     @Test
     @DisplayName("On load more - should emit loading and events loaded updates")
     fun loadMoreUpdatesTest() = testScope.runBlockingTest {
-        val currentEvents = PagedDataList(data = mockedList(10) { Selectable(event(it)) })
+        val currentEvents = PagedDataList(data = mockedList(10) {
+            Selectable(
+                event(it)
+            )
+        })
         val currentState = mockk<() -> SearchState> {
             every { this@mockk() } returns SearchState(items = currentEvents)
         }
         val expectedResource = Resource.successWith(
-            PagedResult<IEvent>(mockedList(10) { event(it) }, 1, 1)
+            PagedResult<IEvent>(mockedList(10) {
+                event(
+                    it
+                )
+            }, 1, 1)
         )
         val getPagedEventsFlow = mockk<GetPagedEventsFlow> {
             every { this@mockk<Selectable<Event>>(any(), any(), any()) } returns flowOf(

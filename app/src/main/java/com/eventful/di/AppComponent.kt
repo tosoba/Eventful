@@ -4,8 +4,8 @@ import com.eventful.db.DbModule
 import com.eventful.EventfulApp
 import com.eventful.MainActivityModule
 import com.eventful.repo.RepoModule
-import com.eventful.ticketmaster.TicketMasterApiModule
-import com.eventful.darsky.model.DarkSkyApiModule
+import com.eventful.ticketmaster.api.TicketMasterApiModule
+import com.eventful.darsky.api.DarkSkyApiModule
 import dagger.Component
 import dagger.android.AndroidInjector
 import dagger.android.support.AndroidSupportInjectionModule

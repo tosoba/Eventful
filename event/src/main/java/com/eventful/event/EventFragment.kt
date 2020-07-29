@@ -22,7 +22,7 @@ import com.eventful.core.android.view.ViewPagerPageSelectedListener
 import com.eventful.core.android.view.ext.hideAndShow
 import com.eventful.core.android.view.titledFragmentsPagerAdapter
 import com.eventful.event.databinding.FragmentEventBinding
-import com.eventful.eventdetails.EventDetailsFragment
+import com.eventful.event.details.EventDetailsFragment
 import com.eventful.weather.WeatherFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton

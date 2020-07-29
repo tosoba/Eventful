@@ -9,9 +9,9 @@ import com.eventful.core.usecase.search.GetSearchSuggestions
 import com.eventful.core.usecase.search.SaveSearchSuggestion
 import com.eventful.core.android.model.event.Event
 import com.eventful.core.model.Selectable
-import com.eventful.test.rule.event
-import com.eventful.test.rule.mockedList
-import com.eventful.test.rule.relaxedMockedList
+import com.eventful.test.event
+import com.eventful.test.mockedList
+import com.eventful.test.relaxedMockedList
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -106,7 +106,11 @@ internal class NewSearchTests : BaseSearchFlowProcessorTests() {
             every { this@mockk() } returns initialState
         }
         val expectedResource = Resource.successWith(
-            PagedResult<IEvent>(mockedList(10) { event(it) }, 1, 1)
+            PagedResult<IEvent>(mockedList(10) {
+                event(
+                    it
+                )
+            }, 1, 1)
         )
         val getPagedEventsFlow = mockk<GetPagedEventsFlow> {
             every { this@mockk(initialState.items, any(), any()) } returns flowOf(

@@ -1,8 +1,8 @@
 package com.eventful.favourites
 
 import com.eventful.core.usecase.event.GetSavedEventsFlow
-import com.eventful.test.rule.event
-import com.eventful.test.rule.mockedList
+import com.eventful.test.event
+import com.eventful.test.mockedList
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -22,7 +22,9 @@ internal class LoadFavouritesTests : BaseFavouritesFlowProcessorTests() {
     @Test
     @DisplayName("On LoadFavourites - should call getSavedEventsFlow and emit Update.Events")
     fun loadFavouritesTest() = testScope.runBlockingTest {
-        val events = mockedList(20) { event(it) }
+        val events = mockedList(20) {
+            event(it)
+        }
         val getSavedEventsFlow = mockk<GetSavedEventsFlow> {
             every { this@mockk(any()) } returns flowOf(events)
         }
@@ -46,8 +48,12 @@ internal class LoadFavouritesTests : BaseFavouritesFlowProcessorTests() {
     @Test
     @DisplayName("On LoadFavourites - should call getSavedEventsFlow and emit an Update.Events for each event flow emission")
     fun loadFavouritesMultipleEmissionsTest() = testScope.runBlockingTest {
-        val events1stEmission = mockedList(20) { event(it) }
-        val events2ndEmission = mockedList(25) { event(it) }
+        val events1stEmission = mockedList(20) {
+            event(it)
+        }
+        val events2ndEmission = mockedList(25) {
+            event(it)
+        }
         val getSavedEventsFlow = mockk<GetSavedEventsFlow> {
             every { this@mockk(any()) } returns flowOf(events1stEmission, events2ndEmission)
         }
@@ -73,7 +79,10 @@ internal class LoadFavouritesTests : BaseFavouritesFlowProcessorTests() {
     @DisplayName("When loadFavouritesOnStart is true - should call getSavedEventsFlow")
     fun loadingFavouritesOnStartTest() = testScope.runBlockingTest {
         val getSavedEventsFlow = mockk<GetSavedEventsFlow> {
-            every { this@mockk(any()) } returns flowOf(mockedList(20) { event(it) })
+            every { this@mockk(any()) } returns flowOf(
+                mockedList(
+                    20
+                ) { event(it) })
         }
         val currentState = mockk<() -> FavouritesState> {
             every { this@mockk() } returns FavouritesState()

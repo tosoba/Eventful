@@ -2,8 +2,8 @@ package com.eventful.favourites
 
 import com.eventful.core.usecase.event.GetSavedEventsFlow
 import com.eventful.core.util.ext.lowerCasedTrimmed
-import com.eventful.test.rule.event
-import com.eventful.test.rule.mockedList
+import com.eventful.test.event
+import com.eventful.test.mockedList
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -40,7 +40,9 @@ internal class NewSearchTests : BaseFavouritesFlowProcessorTests() {
     @Test
     @DisplayName("After NewSearch update is applied to state - should emit Update.Events with filtered events")
     fun newSearchLoadFavouritesTest() = testScope.runBlockingTest {
-        val events = mockedList(20) { event(it) }
+        val events = mockedList(20) {
+            event(it)
+        }
         val getSavedEventsFlow = mockk<GetSavedEventsFlow> {
             every { this@mockk(any()) } returns flowOf(events)
         }

@@ -8,11 +8,11 @@ import com.eventful.core.repo.IEventRepository
 import com.eventful.db.dao.EventDao
 import com.eventful.db.dao.SearchSuggestionDao
 import com.eventful.db.entity.SearchSuggestionEntity
-import com.eventful.ticketmaster.TicketMasterApi
-import com.eventful.ticketmaster.model.EventSearchResponse
-import com.eventful.ticketmaster.model.TicketMasterErrorResponse
-import com.eventful.ticketmaster.queryparam.GeoPoint
-import com.eventful.ticketmaster.queryparam.RadiusUnit
+import com.eventful.ticketmaster.api.TicketMasterApi
+import com.eventful.ticketmaster.api.model.EventSearchResponse
+import com.eventful.ticketmaster.api.model.TicketMasterErrorResponse
+import com.eventful.ticketmaster.api.queryparam.GeoPoint
+import com.eventful.ticketmaster.api.queryparam.RadiusUnit
 import com.haroldadmin.cnradapter.NetworkResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -30,7 +30,7 @@ class EventRepository @Inject constructor(
         lat: Double,
         lon: Double,
         offset: Int?
-    ): Resource<PagedResult<IEvent>> = ticketMasterApi.searchEvents(
+    ): Resource<PagedResult<IEvent>> = ticketMasterApi.searchEventsAsync(
         radius = DEFAULT_RADIUS,
         radiusUnit = RadiusUnit.KM,
         geoPoint = GeoPoint(lat, lon),
@@ -40,7 +40,7 @@ class EventRepository @Inject constructor(
     override suspend fun searchEvents(
         searchText: String,
         offset: Int?
-    ): Resource<PagedResult<IEvent>> = ticketMasterApi.searchEvents(
+    ): Resource<PagedResult<IEvent>> = ticketMasterApi.searchEventsAsync(
         keyword = searchText,
         page = offset
     ).await().resource

@@ -4,8 +4,8 @@ import com.eventful.core.usecase.event.SaveEvents
 import com.eventful.core.util.PagedDataList
 import com.eventful.core.model.Selectable
 import com.eventful.core.android.base.addedToFavouritesMessage
-import com.eventful.test.rule.event
-import com.eventful.test.rule.mockedList
+import com.eventful.test.event
+import com.eventful.test.mockedList
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -25,7 +25,11 @@ internal class OtherSearchFlowProcessorTests : BaseSearchFlowProcessorTests() {
     @DisplayName("On AddToFavouritesClicked  - should saveEvents, signal events were saved and emit AddedToFavourites")
     fun addToFavouritesTest() = testScope.runBlockingTest {
         val saveEvents = mockk<SaveEvents>(relaxed = true)
-        val selectableEvents = mockedList(20) { event(it) }
+        val selectableEvents = mockedList(20) {
+            event(
+                it
+            )
+        }
             .mapIndexed { index, event -> Selectable(event, index % 2 == 0) }
         val currentState = mockk<() -> SearchState> {
             every { this@mockk() } returns SearchState(

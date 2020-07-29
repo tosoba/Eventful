@@ -7,7 +7,7 @@ import com.eventful.core.util.PagedDataList
 import com.eventful.core.android.model.event.Event
 import com.eventful.core.model.Selectable
 import com.eventful.core.android.provider.ConnectedStateProvider
-import com.eventful.test.rule.relaxedMockedList
+import com.eventful.test.relaxedMockedList
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -74,7 +74,10 @@ internal class ConnectedStateProviderUpdatesTests : BaseSearchFlowProcessorTests
     fun eventsNotEmptyTest() {
         val currentState = mockk<() -> SearchState> {
             every { this@mockk() } returns SearchState(
-                items = PagedDataList(status = LoadedSuccessfully, data = relaxedMockedList(1))
+                items = PagedDataList(status = LoadedSuccessfully, data = relaxedMockedList(
+                    1
+                )
+                )
             )
         }
         val connectedStateProvider = mockk<ConnectedStateProvider> {

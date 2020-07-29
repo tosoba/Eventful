@@ -3,7 +3,7 @@ package com.eventful.favourites
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.eventful.core.usecase.event.DeleteEvents
 import com.eventful.core.usecase.event.GetSavedEventsFlow
-import com.eventful.test.rule.mockLog
+import com.eventful.test.mockLog
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers

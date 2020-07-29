@@ -9,9 +9,9 @@ import com.eventful.core.util.LoadedSuccessfully
 import com.eventful.core.util.PagedDataList
 import com.eventful.core.android.model.location.LocationState
 import com.eventful.core.android.model.location.LocationStatus
-import com.eventful.test.rule.event
-import com.eventful.test.rule.mockedList
-import com.eventful.test.rule.relaxedMockedList
+import com.eventful.test.event
+import com.eventful.test.mockedList
+import com.eventful.test.relaxedMockedList
 import com.google.android.gms.maps.model.LatLng
 import io.mockk.coVerify
 import io.mockk.every
@@ -94,7 +94,11 @@ internal class LocationStateProviderUpdatesTests : BaseNearbyFlowProcessorTests(
             every { this@mockk() } returns initialState
         }
         val expectedResource = Resource.successWith(
-            PagedResult<IEvent>(mockedList(10) { event(it) }, 1, 1)
+            PagedResult<IEvent>(mockedList(10) {
+                event(
+                    it
+                )
+            }, 1, 1)
         )
         val getPagedEventsFlow = mockk<GetPagedEventsFlow> {
             every { this@mockk(initialState.items, any(), any()) } returns flowOf(

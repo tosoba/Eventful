@@ -5,7 +5,7 @@ import com.eventful.core.usecase.event.GetPagedEventsFlow
 import com.eventful.core.usecase.event.SaveEvents
 import com.eventful.core.android.provider.ConnectedStateProvider
 import com.eventful.core.android.provider.LocationStateProvider
-import com.eventful.test.rule.mockLog
+import com.eventful.test.mockLog
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineDispatcher

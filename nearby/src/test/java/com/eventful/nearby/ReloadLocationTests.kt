@@ -2,7 +2,7 @@ package com.eventful.nearby
 
 import com.eventful.core.util.PagedDataList
 import com.eventful.core.android.provider.LocationStateProvider
-import com.eventful.test.rule.relaxedMockedList
+import com.eventful.test.relaxedMockedList
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -43,7 +43,10 @@ internal class ReloadLocationTests : BaseNearbyFlowProcessorTests() {
                 intents = flowOf(NearbyIntent.ReloadLocation),
                 currentState = mockk {
                     every { this@mockk() } returns NearbyState(
-                        items = PagedDataList(data = relaxedMockedList(10))
+                        items = PagedDataList(data = relaxedMockedList(
+                            10
+                        )
+                        )
                     )
                 }
             )

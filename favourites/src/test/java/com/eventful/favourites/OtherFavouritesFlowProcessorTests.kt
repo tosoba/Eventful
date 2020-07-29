@@ -5,8 +5,8 @@ import com.eventful.core.usecase.event.GetSavedEventsFlow
 import com.eventful.core.util.DataList
 import com.eventful.core.android.base.removedFromFavouritesMessage
 import com.eventful.core.model.Selectable
-import com.eventful.test.rule.event
-import com.eventful.test.rule.mockedList
+import com.eventful.test.event
+import com.eventful.test.mockedList
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -31,7 +31,11 @@ internal class OtherFavouritesFlowProcessorTests : BaseFavouritesFlowProcessorTe
     )
     fun removeFromFavouritesTest() = testScope.runBlockingTest {
         val deleteEvents = mockk<DeleteEvents>(relaxed = true)
-        val selectableEvents = mockedList(20) { event(it) }
+        val selectableEvents = mockedList(20) {
+            event(
+                it
+            )
+        }
             .mapIndexed { index, event -> Selectable(event, index % 2 == 0) }
         val currentState = mockk<() -> FavouritesState> {
             every { this@mockk() } returns FavouritesState(

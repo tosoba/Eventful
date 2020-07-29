@@ -6,7 +6,7 @@ import com.eventful.core.usecase.event.SearchEvents
 import com.eventful.core.usecase.search.GetSearchSuggestions
 import com.eventful.core.usecase.search.SaveSearchSuggestion
 import com.eventful.core.android.provider.ConnectedStateProvider
-import com.eventful.test.rule.mockLog
+import com.eventful.test.mockLog
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineDispatcher

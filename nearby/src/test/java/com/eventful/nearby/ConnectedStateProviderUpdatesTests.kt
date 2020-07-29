@@ -10,7 +10,7 @@ import com.eventful.core.android.model.location.LocationState
 import com.eventful.core.android.model.location.LocationStatus
 import com.eventful.core.android.provider.ConnectedStateProvider
 import com.eventful.core.android.provider.LocationStateProvider
-import com.eventful.test.rule.relaxedMockedList
+import com.eventful.test.relaxedMockedList
 import com.google.android.gms.maps.model.LatLng
 import io.mockk.coVerify
 import io.mockk.every
@@ -77,7 +77,10 @@ internal class ConnectedStateProviderUpdatesTests : BaseNearbyFlowProcessorTests
     fun eventsNotEmptyTest() {
         val currentState = mockk<() -> NearbyState> {
             every { this@mockk() } returns NearbyState(
-                items = PagedDataList(status = LoadedSuccessfully, data = relaxedMockedList(1))
+                items = PagedDataList(status = LoadedSuccessfully, data = relaxedMockedList(
+                    1
+                )
+                )
             )
         }
         val connectedStateProvider = mockk<ConnectedStateProvider> {
