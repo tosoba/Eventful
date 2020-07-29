@@ -1,12 +1,6 @@
 package com.eventful.nearby
 
 import android.view.View
-import com.eventful.core.model.PagedResult
-import com.eventful.core.model.Resource
-import com.eventful.core.model.Selectable
-import com.eventful.core.model.event.IEvent
-import com.eventful.core.util.LoadedSuccessfully
-import com.eventful.core.util.PagedDataList
 import com.eventful.core.android.base.ClearSelectionUpdate
 import com.eventful.core.android.base.ItemSelectionConfirmedUpdate
 import com.eventful.core.android.base.StateUpdate
@@ -15,6 +9,13 @@ import com.eventful.core.android.controller.SnackbarAction
 import com.eventful.core.android.controller.SnackbarState
 import com.eventful.core.android.model.event.Event
 import com.eventful.core.android.model.location.LocationStatus
+import com.eventful.core.model.PagedResult
+import com.eventful.core.model.Resource
+import com.eventful.core.model.Selectable
+import com.eventful.core.model.event.IEvent
+import com.eventful.core.util.LoadedSuccessfully
+import com.eventful.core.util.Loading
+import com.eventful.core.util.PagedDataList
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.snackbar.Snackbar
 import com.haroldadmin.cnradapter.NetworkResponse
@@ -93,8 +94,8 @@ sealed class NearbyStateUpdate : StateUpdate<NearbyState> {
                             limit = resource.data.totalPages
                         ) else items.copyWithNewItems(
                             resource.data.items.map { Selectable(Event(it)) },
-                            resource.data.currentPage + 1,
-                            resource.data.totalPages
+                            offset = resource.data.currentPage + 1,
+                            limit = resource.data.totalPages
                         ),
                         snackbarState = SnackbarState.Hidden
                     )

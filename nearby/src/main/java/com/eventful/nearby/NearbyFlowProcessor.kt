@@ -1,16 +1,17 @@
 package com.eventful.nearby
 
-import com.eventful.core.usecase.event.GetNearbyEvents
-import com.eventful.core.usecase.event.GetPagedEventsFlow
-import com.eventful.core.usecase.event.SaveEvents
-import com.eventful.core.util.Loading
-import com.eventful.core.util.ext.flatMapFirst
 import com.eventful.core.android.base.FlowProcessor
 import com.eventful.core.android.base.addedToFavouritesMessage
 import com.eventful.core.android.model.location.LocationState
 import com.eventful.core.android.model.location.LocationStatus
 import com.eventful.core.android.provider.ConnectedStateProvider
 import com.eventful.core.android.provider.LocationStateProvider
+import com.eventful.core.usecase.event.GetNearbyEvents
+import com.eventful.core.usecase.event.GetPagedEventsFlow
+import com.eventful.core.usecase.event.SaveEvents
+import com.eventful.core.util.Loading
+import com.eventful.core.util.PagedDataList
+import com.eventful.core.util.ext.flatMapFirst
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -102,7 +103,6 @@ class NearbyFlowProcessor @Inject constructor(
         .filter { (_, status) -> status is LocationStatus.Found }
         .map { it.latLng }
         .filterNotNull()
-        .distinctUntilChanged()
         .filterNot { currentState().items.loadingFailed }
         .flatMapLatest { latLng -> loadingEventsUpdates(latLng, true, currentState, signal) }
 
@@ -123,7 +123,7 @@ class NearbyFlowProcessor @Inject constructor(
         currentState: () -> NearbyState,
         signal: suspend (NearbySignal) -> Unit
     ): Flow<NearbyStateUpdate> = getPagedEventsFlow(
-        currentEvents = currentState().items,
+        currentEvents = if (newLocation) PagedDataList() else currentState().items,
         toEvent = { selectable -> selectable.item }
     ) { offset ->
         getNearbyEvents(latLng.latitude, latLng.longitude, offset = if (newLocation) 0 else offset)
