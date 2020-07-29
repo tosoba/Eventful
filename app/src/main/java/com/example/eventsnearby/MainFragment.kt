@@ -7,14 +7,12 @@ import android.view.View
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.PagerAdapter
 import com.example.coreandroid.controller.*
+import com.example.coreandroid.navigation.IFragmentFactory
 import com.example.coreandroid.provider.PopBackStackSignalProvider
 import com.example.coreandroid.util.delegate.bottomNavItemSelectedViewPagerListener
 import com.example.coreandroid.util.delegate.viewBinding
 import com.example.coreandroid.util.delegate.viewPagerPageSelectedBottomNavListener
-import com.example.coreandroid.util.ext.setupToolbar
-import com.example.coreandroid.util.ext.setupToolbarWithDrawerToggle
-import com.example.coreandroid.util.ext.statusBarColor
-import com.example.coreandroid.util.ext.themeColor
+import com.example.coreandroid.util.ext.*
 import com.example.coreandroid.view.ViewPagerPageSelectedListener
 import com.example.coreandroid.view.titledFragmentsPagerAdapter
 import com.example.eventsnearby.databinding.FragmentMainBinding
@@ -27,6 +25,7 @@ import com.google.common.collect.HashBiMap
 import dagger.android.support.DaggerFragment
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -57,6 +56,11 @@ class MainFragment : DaggerFragment(R.layout.fragment_main), MenuController, Sna
     @Inject
     internal lateinit var popBackStackSignalProvider: PopBackStackSignalProvider
 
+    @Inject
+    internal lateinit var fragmentFactory: IFragmentFactory
+
+    private var popBackStackSignalProviderJob: Job? = null
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         with(binding) {
             setupToolbar(mainToolbar)
@@ -68,11 +72,13 @@ class MainFragment : DaggerFragment(R.layout.fragment_main), MenuController, Sna
             mainViewPager.addOnPageChangeListener(viewPagerSwipedListener)
             mainViewPager.offscreenPageLimit = 2
 
-            mainFab.setOnClickListener {}
+            mainFab.setOnClickListener {
+                navigationFragment?.showFragment(fragmentFactory.alarmsFragment(null))
+            }
 
             snackbarStateChannel = handleSnackbarState(mainFab)
 
-            popBackStackSignalProvider.popBackStackSignals
+            popBackStackSignalProviderJob = popBackStackSignalProvider.popBackStackSignals
                 .onEach {
                     setupToolbar(mainToolbar)
                     activity?.statusBarColor = context?.themeColor(R.attr.colorPrimaryDark)
@@ -84,6 +90,7 @@ class MainFragment : DaggerFragment(R.layout.fragment_main), MenuController, Sna
     override fun onDestroyView() {
         super.onDestroyView()
         snackbarStateChannel.close()
+        popBackStackSignalProviderJob?.cancel()
     }
 
     override fun initializeMenu(menuRes: Int, inflater: MenuInflater, initialize: (Menu) -> Unit) {

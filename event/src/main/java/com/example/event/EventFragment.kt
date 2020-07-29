@@ -6,6 +6,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.PagerAdapter
+import com.example.alarms.AlarmsFragment
+import com.example.alarms.AlarmsMode
 import com.example.coreandroid.base.DaggerViewModelFragment
 import com.example.coreandroid.base.HasArgs
 import com.example.coreandroid.controller.SnackbarController
@@ -53,7 +55,8 @@ class EventFragment :
         val venue = event.venues?.firstOrNull()
         arrayOf(
             getString(R.string.details) to EventDetailsFragment.new(event),
-            getString(R.string.weather) to WeatherFragment.new(venue?.latLng, venue?.city)
+            getString(R.string.weather) to WeatherFragment.new(venue?.latLng, venue?.city),
+            getString(R.string.alarms) to AlarmsFragment.new(AlarmsMode.SingleEvent(event))
         )
     }
 
@@ -72,7 +75,7 @@ class EventFragment :
             with(eventViewPager) {
                 adapter = eventViewPagerAdapter
                 addOnPageChangeListener(viewPagerSwipedListener)
-                offscreenPageLimit = 2
+                offscreenPageLimit = eventViewPagerAdapter.count - 1
                 pageSelections()
                     .skipInitialValue()
                     .distinctUntilChanged()
