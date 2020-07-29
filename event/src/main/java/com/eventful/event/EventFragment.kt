@@ -140,6 +140,7 @@ class EventFragment :
         private val navigationItems: BiMap<Int, Int> = HashBiMap.create<Int, Int>().apply {
             put(R.id.bottom_nav_event_details, 0)
             put(R.id.bottom_nav_weather, 1)
+            put(R.id.bottom_nav_alarms, 2)
         }
 
         const val EVENT_ARG_KEY = "event"
