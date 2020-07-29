@@ -54,7 +54,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:background="?android:attr/windowBackground"
-        app:layout_behavior="com.example.coreandroid.view.BottomNavLayoutBehavior"
+        app:layout_behavior="com.eventful.core.android.view.BottomNavLayoutBehavior"
         app:menu="@menu/main_bottom_nav_menu" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -65,7 +65,7 @@
         app:fabSize="normal"
         app:layout_anchor="@id/main_bottom_nav_view"
         app:layout_anchorGravity="top|end"
-        app:layout_behavior="com.example.coreandroid.view.BottomFabLayoutBehavior"
+        app:layout_behavior="com.eventful.core.android.view.BottomFabLayoutBehavior"
         app:srcCompat="@drawable/alarms"
         app:useCompatPadding="true" />
 

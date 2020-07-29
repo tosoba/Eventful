@@ -5,18 +5,18 @@
 
         <variable
             name="event"
-            type="com.example.coreandroid.model.event.Event" />
+            type="com.eventful.core.android.model.event.Event" />
 
         <import type="android.view.View" />
     </data>
 
-    <com.example.coreandroid.view.NestedCoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <com.eventful.core.android.view.NestedCoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="false"
-        tools:context="com.example.eventdetails.EventDetailsFragment">
+        tools:context="com.eventful.eventdetails.EventDetailsFragment">
 
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/event_details_app_bar_layout"
@@ -76,5 +76,5 @@
             app:layout_anchorGravity="bottom|end"
             app:srcCompat="@android:drawable/ic_dialog_info" />
 
-    </com.example.coreandroid.view.NestedCoordinatorLayout>
+    </com.eventful.core.android.view.NestedCoordinatorLayout>
 </layout>
