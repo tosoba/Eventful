@@ -45,9 +45,9 @@
                     android:id="@+id/event_details_toolbar"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
-                    app:title="@{event.name}"
                     app:layout_collapseMode="pin"
-                    app:popupTheme="@style/AppTheme.PopupOverlay" />
+                    app:popupTheme="@style/AppTheme.PopupOverlay"
+                    app:title="@{event.name}" />
 
             </com.google.android.material.appbar.CollapsingToolbarLayout>
 

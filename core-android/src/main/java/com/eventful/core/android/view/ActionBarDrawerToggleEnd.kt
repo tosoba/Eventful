@@ -42,7 +42,7 @@ class ActionBarDrawerToggleEnd(
         }
     }
 
-    fun toggle() {
+    private fun toggle() {
         if (drawerLayout.isDrawerOpen(GravityCompat.END)) {
             drawerLayout.closeDrawer(GravityCompat.END)
         } else {
@@ -50,7 +50,7 @@ class ActionBarDrawerToggleEnd(
         }
     }
 
-    fun setPosition(position: Float) {
+    private fun setPosition(position: Float) {
         if (position == 1f) {
             arrowDrawable.setVerticalMirror(true)
             toggleButton.contentDescription = closeDrawerContentDesc

@@ -1,6 +1,8 @@
 package com.eventful.event.details
 
+import android.content.Intent
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -21,6 +23,7 @@ import com.eventful.core.android.util.ext.*
 import com.eventful.core.android.view.binding.eventRequestOptions
 import com.eventful.core.android.view.epoxy.asyncController
 import com.eventful.core.android.view.epoxy.kindsCarousel
+import com.eventful.core.android.wideButton
 import com.eventful.event.details.databinding.FragmentEventDetailsBinding
 import kotlinx.android.synthetic.main.fragment_event_details.*
 import kotlinx.coroutines.Dispatchers
@@ -34,16 +37,28 @@ class EventDetailsFragment : Fragment() {
 
     private val epoxyController: AsyncEpoxyController by lazy(LazyThreadSafetyMode.NONE) {
         asyncController {
+            val marginValue = requireContext().toPx(15f).toInt()
             eventInfo {
                 id("${event.id}i")
                 event(event)
-                margin(requireContext().toPx(15f).toInt())
+                margin(marginValue)
             }
             event.kindsCarousel.addTo(this)
             description {
                 id("${event.id}d")
                 text(event.info ?: "No details available")
-                margin(requireContext().toPx(15f).toInt())
+                margin(marginValue)
+            }
+            wideButton {
+                id("${event.id}url")
+                text(getString(R.string.go_to_website))
+                margin(marginValue)
+                clicked { _ ->
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(event.url))
+                    if (intent.resolveActivity(requireActivity().packageManager) != null) {
+                        startActivity(intent)
+                    }
+                }
             }
         }
     }

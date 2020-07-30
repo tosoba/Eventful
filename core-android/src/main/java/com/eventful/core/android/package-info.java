@@ -9,7 +9,8 @@
                 R2.layout.loading_more_indicator,
                 R2.layout.no_items_text,
                 R2.layout.description,
-                R2.layout.unknown_location
+                R2.layout.unknown_location,
+                R2.layout.wide_button
         }
 )
 package com.eventful.core.android;

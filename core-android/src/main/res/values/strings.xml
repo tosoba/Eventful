@@ -16,4 +16,6 @@
 
     <string name="details">Details</string>
     <string name="weather">Weather</string>
+
+    <string name="go_to_website">Go to website</string>
 </resources>
