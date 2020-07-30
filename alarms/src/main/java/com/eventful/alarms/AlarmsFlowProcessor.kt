@@ -1,9 +1,10 @@
 package com.eventful.alarms
 
-import com.eventful.core.usecase.alarm.DeleteAlarms
-import com.eventful.core.usecase.alarm.GetAlarms
 import com.eventful.core.android.base.FlowProcessor
 import com.eventful.core.android.base.removedFromAlarmsMessage
+import com.eventful.core.usecase.alarm.DeleteAlarms
+import com.eventful.core.usecase.alarm.GetAlarms
+import com.eventful.core.usecase.alarm.InsertAlarm
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.*
 class AlarmsFlowProcessor(
     private val getAlarms: GetAlarms,
     private val deleteAlarms: DeleteAlarms,
+    private val insertAlarm: InsertAlarm,
     private val ioDispatcher: CoroutineDispatcher,
     private val loadAlarmsOnStart: Boolean = true
 ) : FlowProcessor<AlarmsIntent, AlarmsStateUpdate, AlarmsState, AlarmsSignal> {
@@ -44,7 +46,14 @@ class AlarmsFlowProcessor(
         filterIsInstance<AlarmsIntent.HideSnackbar>()
             .map { AlarmsStateUpdate.HideSnackbar },
         filterIsInstance<AlarmsIntent.RemoveAlarmsClicked>()
-            .removeFromAlarmsUpdates(coroutineScope, currentState, intent, signal)
+            .removeFromAlarmsUpdates(coroutineScope, currentState, intent, signal),
+        filterIsInstance<AlarmsIntent.AddAlarm>()
+            .map { (alarm) ->
+                insertAlarm(alarm)
+                signal(AlarmsSignal.AlarmAdded)
+                null
+            }
+            .filterNotNull()
     )
 
     private fun Flow<AlarmsIntent.LoadAlarms>.loadAlarmsUpdates(

@@ -1,13 +1,14 @@
 package com.eventful.alarms
 
 import androidx.lifecycle.ViewModel
-import com.eventful.core.usecase.alarm.DeleteAlarms
-import com.eventful.core.usecase.alarm.GetAlarms
 import com.eventful.core.android.base.savedStateViewModelFrom
 import com.eventful.core.android.di.scope.FragmentScoped
 import com.eventful.core.android.di.viewmodel.AssistedSavedStateViewModelFactory
 import com.eventful.core.android.di.viewmodel.InjectingSavedStateViewModelFactory
 import com.eventful.core.android.di.viewmodel.ViewModelKey
+import com.eventful.core.usecase.alarm.DeleteAlarms
+import com.eventful.core.usecase.alarm.GetAlarms
+import com.eventful.core.usecase.alarm.InsertAlarm
 import com.squareup.inject.assisted.dagger2.AssistedModule
 import dagger.Binds
 import dagger.Module
@@ -40,8 +41,14 @@ abstract class AlarmsModule {
         fun alarmsFlowProcessor(
             getAlarms: GetAlarms,
             deleteAlarms: DeleteAlarms,
+            insertAlarm: InsertAlarm,
             ioDispatcher: CoroutineDispatcher
-        ): AlarmsFlowProcessor = AlarmsFlowProcessor(getAlarms, deleteAlarms, ioDispatcher)
+        ): AlarmsFlowProcessor = AlarmsFlowProcessor(
+            getAlarms,
+            deleteAlarms,
+            insertAlarm,
+            ioDispatcher
+        )
     }
 
     @Module
