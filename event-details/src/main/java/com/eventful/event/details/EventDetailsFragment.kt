@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.airbnb.epoxy.AsyncEpoxyController
@@ -20,9 +19,8 @@ import com.eventful.core.android.model.event.Event
 import com.eventful.core.android.util.delegate.FragmentArgument
 import com.eventful.core.android.util.ext.*
 import com.eventful.core.android.view.binding.eventRequestOptions
-import com.eventful.core.android.view.epoxy.kindsCarousel
 import com.eventful.core.android.view.epoxy.asyncController
-import com.eventful.event.details.R
+import com.eventful.core.android.view.epoxy.kindsCarousel
 import com.eventful.event.details.databinding.FragmentEventDetailsBinding
 import kotlinx.android.synthetic.main.fragment_event_details.*
 import kotlinx.coroutines.Dispatchers
@@ -51,48 +49,45 @@ class EventDetailsFragment : Fragment() {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? = DataBindingUtil.inflate<FragmentEventDetailsBinding>(
-        inflater,
-        R.layout.fragment_event_details, container, false
-    ).apply {
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View? = FragmentEventDetailsBinding.inflate(inflater, container, false).apply {
         event = this@EventDetailsFragment.event
         eventDetailsRecyclerView.setController(epoxyController)
         setupToolbarWithDrawerToggle(eventDetailsToolbar)
-        Glide.with(expandedImage)
-            .load(this@EventDetailsFragment.event.imageUrl)
-            .apply(eventRequestOptions)
-            .addListener(object : RequestListener<Drawable> {
-                override fun onLoadFailed(
-                    e: GlideException?,
-                    model: Any?,
-                    target: Target<Drawable>?,
-                    isFirstResource: Boolean
-                ): Boolean = false
+        if (savedInstanceState?.containsKey(KEY_STATUS_BAR_COLOR) != true) {
+            Glide.with(expandedImage)
+                .load(this@EventDetailsFragment.event.imageUrl)
+                .apply(eventRequestOptions)
+                .addListener(object : RequestListener<Drawable> {
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: Target<Drawable>?,
+                        isFirstResource: Boolean
+                    ): Boolean = false
 
-                override fun onResourceReady(
-                    resource: Drawable?,
-                    model: Any?,
-                    target: Target<Drawable>?,
-                    dataSource: DataSource?,
-                    isFirstResource: Boolean
-                ): Boolean {
-                    resource?.let { drawable ->
-                        lifecycleScope.launch {
-                            statusBarColor = withContext(Dispatchers.Default) {
-                                drawable.bitmap.dominantColor
-                            }.also {
-                                statusBarColor = it
-                                activity?.statusBarColor = it
+                    override fun onResourceReady(
+                        resource: Drawable?,
+                        model: Any?,
+                        target: Target<Drawable>?,
+                        dataSource: DataSource?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        resource?.let { drawable ->
+                            lifecycleScope.launch {
+                                statusBarColor = withContext(Dispatchers.Default) {
+                                    drawable.bitmap.dominantColor
+                                }.also {
+                                    statusBarColor = it
+                                    activity?.statusBarColor = it
+                                }
                             }
                         }
+                        return false
                     }
-                    return false
-                }
-            })
-            .into(expandedImage)
+                })
+                .into(expandedImage)
+        }
     }.root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -102,8 +97,9 @@ class EventDetailsFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (savedInstanceState?.containsKey(KEY_STATUS_BAR_COLOR) == true)
+        if (savedInstanceState?.containsKey(KEY_STATUS_BAR_COLOR) == true) {
             statusBarColor = savedInstanceState.getInt(KEY_STATUS_BAR_COLOR)
+        }
     }
 
     override fun onResume() {
