@@ -94,11 +94,7 @@ internal class LocationStateProviderUpdatesTests : BaseNearbyFlowProcessorTests(
             every { this@mockk() } returns initialState
         }
         val expectedResource = Resource.successWith(
-            PagedResult<IEvent>(mockedList(10) {
-                event(
-                    it
-                )
-            }, 1, 1)
+            PagedResult<IEvent>(mockedList(10) { event(it) }, 1, 1)
         )
         val getPagedEventsFlow = mockk<GetPagedEventsFlow> {
             every { this@mockk(initialState.items, any(), any()) } returns flowOf(

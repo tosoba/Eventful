@@ -24,11 +24,7 @@ internal class OtherNearbyFlowProcessorTests : BaseNearbyFlowProcessorTests() {
     @DisplayName("On AddToFavouritesClicked  - should saveEvents, signal events were saved and emit AddedToFavourites")
     fun addToFavouritesTest() = testScope.runBlockingTest {
         val saveEvents = mockk<SaveEvents>(relaxed = true)
-        val selectableEvents = mockedList(20) {
-            event(
-                it
-            )
-        }
+        val selectableEvents = mockedList(20) { event(it) }
             .mapIndexed { index, event -> Selectable(event, index % 2 == 0) }
         val currentState = mockk<() -> NearbyState> {
             every { this@mockk() } returns NearbyState(

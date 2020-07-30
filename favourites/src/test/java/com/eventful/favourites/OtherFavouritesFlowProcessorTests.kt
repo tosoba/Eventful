@@ -31,11 +31,7 @@ internal class OtherFavouritesFlowProcessorTests : BaseFavouritesFlowProcessorTe
     )
     fun removeFromFavouritesTest() = testScope.runBlockingTest {
         val deleteEvents = mockk<DeleteEvents>(relaxed = true)
-        val selectableEvents = mockedList(20) {
-            event(
-                it
-            )
-        }
+        val selectableEvents = mockedList(20) { event(it) }
             .mapIndexed { index, event -> Selectable(event, index % 2 == 0) }
         val currentState = mockk<() -> FavouritesState> {
             every { this@mockk() } returns FavouritesState(

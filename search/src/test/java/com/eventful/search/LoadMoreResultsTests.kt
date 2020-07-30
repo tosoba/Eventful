@@ -98,11 +98,7 @@ internal class LoadMoreResultsTests : BaseSearchFlowProcessorTests() {
             every { this@mockk() } returns SearchState(items = currentEvents)
         }
         val expectedResource = Resource.successWith(
-            PagedResult<IEvent>(mockedList(10) {
-                event(
-                    it
-                )
-            }, 1, 1)
+            PagedResult<IEvent>(mockedList(10) { event(it) }, 1, 1)
         )
         val getPagedEventsFlow = mockk<GetPagedEventsFlow> {
             every { this@mockk<Selectable<Event>>(any(), any(), any()) } returns flowOf(

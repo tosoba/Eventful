@@ -25,11 +25,7 @@ internal class OtherSearchFlowProcessorTests : BaseSearchFlowProcessorTests() {
     @DisplayName("On AddToFavouritesClicked  - should saveEvents, signal events were saved and emit AddedToFavourites")
     fun addToFavouritesTest() = testScope.runBlockingTest {
         val saveEvents = mockk<SaveEvents>(relaxed = true)
-        val selectableEvents = mockedList(20) {
-            event(
-                it
-            )
-        }
+        val selectableEvents = mockedList(20) {event(it) }
             .mapIndexed { index, event -> Selectable(event, index % 2 == 0) }
         val currentState = mockk<() -> SearchState> {
             every { this@mockk() } returns SearchState(

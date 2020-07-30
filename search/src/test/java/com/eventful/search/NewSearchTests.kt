@@ -1,14 +1,14 @@
 package com.eventful.search
 
+import com.eventful.core.android.model.event.Event
 import com.eventful.core.model.PagedResult
 import com.eventful.core.model.Resource
+import com.eventful.core.model.Selectable
 import com.eventful.core.model.event.IEvent
 import com.eventful.core.model.search.SearchSuggestion
 import com.eventful.core.usecase.event.GetPagedEventsFlow
 import com.eventful.core.usecase.search.GetSearchSuggestions
 import com.eventful.core.usecase.search.SaveSearchSuggestion
-import com.eventful.core.android.model.event.Event
-import com.eventful.core.model.Selectable
 import com.eventful.test.event
 import com.eventful.test.mockedList
 import com.eventful.test.relaxedMockedList
@@ -106,11 +106,7 @@ internal class NewSearchTests : BaseSearchFlowProcessorTests() {
             every { this@mockk() } returns initialState
         }
         val expectedResource = Resource.successWith(
-            PagedResult<IEvent>(mockedList(10) {
-                event(
-                    it
-                )
-            }, 1, 1)
+            PagedResult<IEvent>(mockedList(10) { event(it) }, 1, 1)
         )
         val getPagedEventsFlow = mockk<GetPagedEventsFlow> {
             every { this@mockk(initialState.items, any(), any()) } returns flowOf(
