@@ -20,7 +20,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
             android:gravity="center"
-            app:layout_scrollFlags="noScroll"
+            app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"
             app:popupTheme="@style/AppTheme.PopupOverlay">
 
             <TextView
@@ -46,13 +46,25 @@
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
 
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/alarms_bottom_nav_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="?android:attr/windowBackground"
+        app:layout_behavior="com.eventful.core.android.view.BottomNavLayoutBehavior"
+        app:menu="@menu/event_bottom_nav_menu" />
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/alarms_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="15dp"
-        app:layout_anchor="@id/alarms_app_bar_layout"
-        app:layout_anchorGravity="bottom|end"
-        app:srcCompat="@android:drawable/ic_menu_add" />
+        android:layout_gravity="top"
+        android:src="@drawable/add"
+        app:fabSize="normal"
+        app:layout_anchor="@id/alarms_bottom_nav_view"
+        app:layout_anchorGravity="top|end"
+        app:layout_behavior="com.eventful.core.android.view.BottomFabLayoutBehavior"
+        app:useCompatPadding="true" />
 
 </com.eventful.core.android.view.NestedCoordinatorLayout>

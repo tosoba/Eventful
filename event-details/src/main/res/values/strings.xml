@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="event_added">Event was added to favourites</string>
+    <string name="event_removed">Event was removed from favourites</string>
+</resources>

@@ -7,11 +7,13 @@ import com.eventful.core.android.di.scope.ActivityScoped
 import com.eventful.core.android.di.viewmodel.AssistedSavedStateViewModelFactory
 import com.eventful.core.android.di.viewmodel.InjectingSavedStateViewModelFactory
 import com.eventful.core.android.di.viewmodel.ViewModelKey
-import com.eventful.core.android.navigation.IFragmentFactory
+import com.eventful.core.android.navigation.IMainChildFragmentNavDestinations
 import com.eventful.core.android.provider.ConnectedStateProvider
 import com.eventful.core.android.provider.LocationStateProvider
 import com.eventful.core.android.provider.PopBackStackSignalProvider
 import com.eventful.event.EventModule
+import com.eventful.event.IEventChildFragmentsFactory
+import com.eventful.event.details.EventDetailsModule
 import com.eventful.favourites.FavouritesModule
 import com.eventful.nearby.NearbyModule
 import com.eventful.search.SearchModule
@@ -40,6 +42,7 @@ abstract class MainActivityModule {
             FavouritesModule::class,
             AlarmsModule::class,
             EventModule::class,
+            EventDetailsModule::class,
             WeatherModule::class,
             MainFragmentModule::class
         ]
@@ -76,6 +79,12 @@ abstract class MainActivityModule {
         ): MainViewModel = mainActivity.savedStateViewModelFrom(factory)
 
         @Provides
-        fun fragmentProvider(): IFragmentFactory = FragmentFactory
+        fun mainFragmentNavDestinations(): IMainFragmentNavDestinations = FragmentFactory
+
+        @Provides
+        fun mainChildFragmentNavDestinations(): IMainChildFragmentNavDestinations = FragmentFactory
+
+        @Provides
+        fun eventChildFragmentsFactory(): IEventChildFragmentsFactory = FragmentFactory
     }
 }

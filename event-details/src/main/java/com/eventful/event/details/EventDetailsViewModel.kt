@@ -1,4 +1,4 @@
-package com.eventful.event
+package com.eventful.event.details
 
 import androidx.lifecycle.SavedStateHandle
 import com.eventful.core.android.base.FlowViewModel
@@ -10,16 +10,16 @@ import kotlinx.coroutines.FlowPreview
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class EventViewModel @AssistedInject constructor(
-    processor: EventFlowProcessor,
+class EventDetailsViewModel @AssistedInject constructor(
+    processor: EventDetailsFlowProcessor,
     @Assisted savedStateHandle: SavedStateHandle
-) : FlowViewModel<EventIntent, EventStateUpdate, EventState, EventSignal>(
-    initialState = EventState(event = savedStateHandle[EventFragment.EVENT_ARG_KEY]!!),
+) : FlowViewModel<EventDetailsIntent, EventDetailsStateUpdate, EventDetailsState, EventDetailsSignal>(
+    initialState = EventDetailsState(event = savedStateHandle[EventDetailsFragment.EVENT_ARG_KEY]!!),
     processor = processor,
     savedStateHandle = savedStateHandle
 ) {
     @AssistedInject.Factory
-    interface Factory : AssistedSavedStateViewModelFactory<EventViewModel> {
-        override fun create(savedStateHandle: SavedStateHandle): EventViewModel
+    interface Factory : AssistedSavedStateViewModelFactory<EventDetailsViewModel> {
+        override fun create(savedStateHandle: SavedStateHandle): EventDetailsViewModel
     }
 }

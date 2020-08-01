@@ -15,7 +15,7 @@ import com.eventful.core.util.HoldsList
 import com.eventful.core.android.controller.ItemsSelectionActionModeController
 import com.eventful.core.android.controller.itemsSelectionActionModeController
 import com.eventful.core.android.model.event.Event
-import com.eventful.core.android.navigation.IFragmentFactory
+import com.eventful.core.android.navigation.IMainChildFragmentNavDestinations
 import com.eventful.core.android.provider.PopBackStackSignalProvider
 import com.eventful.core.android.util.delegate.viewBinding
 import com.eventful.core.android.util.ext.navigationFragment
@@ -52,7 +52,7 @@ abstract class SelectableEventListFragment<
 ) : DaggerViewModelFragment<VM>(layoutRes) {
 
     @Inject
-    internal lateinit var fragmentFactory: IFragmentFactory
+    internal lateinit var navDestinations: IMainChildFragmentNavDestinations
 
     @Inject
     internal lateinit var epoxyThreads: EpoxyThreads
@@ -72,7 +72,7 @@ abstract class SelectableEventListFragment<
             selectable.listItem(
                 clicked = View.OnClickListener {
                     actionModeController.finish(false)
-                    navigationFragment?.showFragment(fragmentFactory.eventFragment(selectable.item))
+                    navigationFragment?.showFragment(navDestinations.eventFragment(selectable.item))
                 },
                 longClicked = View.OnLongClickListener {
                     lifecycleScope.launch {

@@ -5,20 +5,22 @@ import android.view.View
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import com.airbnb.epoxy.TypedEpoxyController
+import com.eventful.alarms.databinding.AddEditAlarmDialogBinding
 import com.eventful.alarms.databinding.FragmentAlarmsBinding
-import com.eventful.core.model.Selectable
-import com.eventful.core.util.HoldsList
 import com.eventful.core.android.base.DaggerViewModelFragment
 import com.eventful.core.android.base.HasArgs
-import com.eventful.core.android.controller.ItemsSelectionActionModeController
-import com.eventful.core.android.controller.itemsSelectionActionModeController
+import com.eventful.core.android.controller.*
 import com.eventful.core.android.model.alarm.Alarm
-import com.eventful.core.android.navigation.IFragmentFactory
+import com.eventful.core.android.navigation.IMainChildFragmentNavDestinations
 import com.eventful.core.android.util.delegate.FragmentArgument
 import com.eventful.core.android.util.delegate.viewBinding
 import com.eventful.core.android.util.ext.*
+import com.eventful.core.android.view.ViewPagerPageSelectedListener
 import com.eventful.core.android.view.epoxy.EpoxyThreads
 import com.eventful.core.android.view.epoxy.infiniteItemListController
+import com.eventful.core.model.Selectable
+import com.eventful.core.util.HoldsList
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
@@ -40,7 +42,7 @@ class AlarmsFragment : DaggerViewModelFragment<AlarmsViewModel>(R.layout.fragmen
     internal lateinit var epoxyThreads: EpoxyThreads
 
     @Inject
-    internal lateinit var fragmentFactory: IFragmentFactory
+    internal lateinit var fragmentFactory: IMainChildFragmentNavDestinations
 
     private val epoxyController: TypedEpoxyController<HoldsList<Selectable<Alarm>>> by lazy(
         LazyThreadSafetyMode.NONE
@@ -88,9 +90,36 @@ class AlarmsFragment : DaggerViewModelFragment<AlarmsViewModel>(R.layout.fragmen
         )
     }
 
+    private val onPageSelectedListener: ViewPagerPageSelectedListener by lazy(LazyThreadSafetyMode.NONE) {
+        EventNavigationController.onPageSelectedListenerWith(binding.alarmsBottomNavView)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         if (mode is AlarmsMode.All) binding.alarmsFab.visibility = View.GONE
+        else binding.alarmsFab.setOnClickListener {
+            BottomSheetDialog(requireContext()).apply {
+                setContentView(
+                    AddEditAlarmDialogBinding.inflate(layoutInflater, null, false)
+                        .apply {
+                            title = getString(R.string.add_alarm)
+                        }
+                        .root
+                )
+                show()
+            }
+        }
+
+        addOnEventPageChangeListener(onPageSelectedListener)
+        binding.alarmsBottomNavView.setOnNavigationItemSelectedListener(
+            eventNavigationItemSelectedListener
+        )
+
         binding.alarmsRecyclerView.setController(epoxyController)
+    }
+
+    override fun onDestroyView() {
+        removeOnEventPageChangeListener(onPageSelectedListener)
+        super.onDestroyView()
     }
 
     private var viewUpdatesJob: Job? = null

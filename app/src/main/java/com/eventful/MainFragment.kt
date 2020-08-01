@@ -7,7 +7,6 @@ import android.view.View
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.PagerAdapter
 import com.eventful.core.android.controller.*
-import com.eventful.core.android.navigation.IFragmentFactory
 import com.eventful.core.android.provider.PopBackStackSignalProvider
 import com.eventful.core.android.util.delegate.bottomNavItemSelectedViewPagerListener
 import com.eventful.core.android.util.delegate.viewBinding
@@ -57,7 +56,7 @@ class MainFragment : DaggerFragment(R.layout.fragment_main), MenuController, Sna
     internal lateinit var popBackStackSignalProvider: PopBackStackSignalProvider
 
     @Inject
-    internal lateinit var fragmentFactory: IFragmentFactory
+    internal lateinit var navDestinations: IMainFragmentNavDestinations
 
     private var popBackStackSignalProviderJob: Job? = null
 
@@ -73,7 +72,7 @@ class MainFragment : DaggerFragment(R.layout.fragment_main), MenuController, Sna
             mainViewPager.offscreenPageLimit = 2
 
             mainFab.setOnClickListener {
-                navigationFragment?.showFragment(fragmentFactory.alarmsFragment(null))
+                navigationFragment?.showFragment(navDestinations.alarmsFragment)
             }
 
             snackbarStateChannel = handleSnackbarState(mainFab)

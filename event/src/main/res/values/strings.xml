@@ -1,6 +1,4 @@
 <resources>
     <string name="weather">Weather</string>
     <string name="details">Details</string>
-    <string name="event_added">Event was added to favourites</string>
-    <string name="event_removed">Event was removed from favourites</string>
 </resources>

@@ -53,6 +53,7 @@ dependencies {
     implementation project(':darksky-api')
     implementation project(':db')
     implementation project(':event')
+    implementation project(':event-details')
     implementation project(':favourites')
     implementation project(':nearby')
     implementation project(':repo')

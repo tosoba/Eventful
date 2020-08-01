@@ -10,7 +10,7 @@
         <import type="android.view.View" />
     </data>
 
-    <com.eventful.core.android.view.NestedCoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
@@ -76,5 +76,26 @@
             app:layout_anchorGravity="bottom|end"
             app:srcCompat="@android:drawable/ic_dialog_info" />
 
-    </com.eventful.core.android.view.NestedCoordinatorLayout>
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/event_details_bottom_nav_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="?android:attr/windowBackground"
+            app:layout_behavior="com.eventful.core.android.view.BottomNavLayoutBehavior"
+            app:menu="@menu/event_bottom_nav_menu" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/event_fav_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:src="@drawable/favourite"
+            app:fabSize="normal"
+            app:layout_anchor="@id/event_details_bottom_nav_view"
+            app:layout_anchorGravity="top|end"
+            app:layout_behavior="com.eventful.core.android.view.BottomFabLayoutBehavior"
+            app:useCompatPadding="true" />
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

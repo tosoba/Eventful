@@ -2,4 +2,6 @@
 <resources>
     <string name="alarms">Alarms</string>
     <string name="no_created_alarms">No created alarms</string>
+    <string name="add_alarm">Add alarm</string>
+    <string name="edit_alarm">Edit alarm</string>
 </resources>
