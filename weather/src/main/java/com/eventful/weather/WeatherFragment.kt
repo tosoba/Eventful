@@ -6,16 +6,12 @@ import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import com.eventful.core.android.base.DaggerViewModelFragment
 import com.eventful.core.android.base.HasArgs
-import com.eventful.core.android.controller.EventNavigationController
-import com.eventful.core.android.controller.addOnEventPageChangeListener
 import com.eventful.core.android.controller.eventNavigationItemSelectedListener
-import com.eventful.core.android.controller.removeOnEventPageChangeListener
 import com.eventful.core.android.loadingIndicator
 import com.eventful.core.android.unknownLocation
 import com.eventful.core.android.util.delegate.NullableFragmentArgument
 import com.eventful.core.android.util.delegate.viewBinding
 import com.eventful.core.android.util.ext.*
-import com.eventful.core.android.view.ViewPagerPageSelectedListener
 import com.eventful.core.android.view.epoxy.EpoxyThreads
 import com.eventful.core.android.view.epoxy.typedController
 import com.eventful.weather.databinding.FragmentWeatherBinding
@@ -83,31 +79,25 @@ class WeatherFragment :
         }
     }
 
-    private val onPageSelectedListener: ViewPagerPageSelectedListener by lazy(LazyThreadSafetyMode.NONE) {
-        EventNavigationController.onPageSelectedListenerWith(binding.weatherBottomNavView)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setupToolbarWithDrawerToggle(binding.weatherToolbar)
         binding.weatherRecyclerView.setController(epoxyController)
-        binding.weatherBottomNavView.setOnNavigationItemSelectedListener(
-            eventNavigationItemSelectedListener
-        )
-        addOnEventPageChangeListener(onPageSelectedListener)
-    }
-
-    override fun onDestroyView() {
-        removeOnEventPageChangeListener(onPageSelectedListener)
-        super.onDestroyView()
+        with(binding.weatherBottomNavView) {
+            setOnNavigationItemSelectedListener(eventNavigationItemSelectedListener)
+            selectedItemId = R.id.bottom_nav_weather
+        }
     }
 
     private var viewUpdatesJob: Job? = null
 
     override fun onResume() {
         super.onResume()
+
         setupToolbar(binding.weatherToolbar)
         showBackNavArrow()
         activity?.statusBarColor = context?.themeColor(R.attr.colorPrimaryDark)
+
+        binding.weatherBottomNavView.selectedItemId = R.id.bottom_nav_weather
 
         viewUpdatesJob = viewModel.viewUpdates
             .onEach { viewUpdate ->

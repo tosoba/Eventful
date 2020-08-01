@@ -18,13 +18,15 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.eventful.core.android.base.DaggerViewModelFragment
 import com.eventful.core.android.base.HasArgs
-import com.eventful.core.android.controller.*
+import com.eventful.core.android.controller.SnackbarController
+import com.eventful.core.android.controller.SnackbarState
+import com.eventful.core.android.controller.eventNavigationItemSelectedListener
+import com.eventful.core.android.controller.handleSnackbarState
 import com.eventful.core.android.description
 import com.eventful.core.android.eventInfo
 import com.eventful.core.android.model.event.Event
 import com.eventful.core.android.util.delegate.FragmentArgument
 import com.eventful.core.android.util.ext.*
-import com.eventful.core.android.view.ViewPagerPageSelectedListener
 import com.eventful.core.android.view.binding.eventRequestOptions
 import com.eventful.core.android.view.epoxy.asyncController
 import com.eventful.core.android.view.epoxy.kindsCarousel
@@ -82,10 +84,6 @@ class EventDetailsFragment :
 
     private lateinit var snackbarStateChannel: SendChannel<SnackbarState>
 
-    private val onPageSelectedListener: ViewPagerPageSelectedListener by lazy(LazyThreadSafetyMode.NONE) {
-        EventNavigationController.onPageSelectedListenerWith(event_details_bottom_nav_view)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? = FragmentEventDetailsBinding.inflate(inflater, container, false).apply {
@@ -93,15 +91,15 @@ class EventDetailsFragment :
         eventDetailsRecyclerView.setController(epoxyController)
         setupToolbarWithDrawerToggle(eventDetailsToolbar)
 
-        eventDetailsBottomNavView.setOnNavigationItemSelectedListener(
-            eventNavigationItemSelectedListener
-        )
-        addOnEventPageChangeListener(onPageSelectedListener)
-
         eventFavFab.clicks()
             .onEach { viewModel.intent(EventDetailsIntent.ToggleFavourite) }
             .launchIn(lifecycleScope)
         snackbarStateChannel = handleSnackbarState(eventFavFab)
+
+        with(eventDetailsBottomNavView) {
+            setOnNavigationItemSelectedListener(eventNavigationItemSelectedListener)
+            selectedItemId = R.id.bottom_nav_event_details
+        }
 
         if (savedInstanceState?.containsKey(KEY_STATUS_BAR_COLOR) != true) {
             Glide.with(expandedImage)
@@ -141,7 +139,6 @@ class EventDetailsFragment :
 
     override fun onDestroyView() {
         snackbarStateChannel.close()
-        removeOnEventPageChangeListener(onPageSelectedListener)
         super.onDestroyView()
     }
 
@@ -176,6 +173,8 @@ class EventDetailsFragment :
             showBackNavArrow()
         }
         statusBarColor?.let { activity?.statusBarColor = it }
+
+        event_details_bottom_nav_view.selectedItemId = R.id.bottom_nav_event_details
 
         viewUpdatesJob = viewModel.viewUpdates
             .onEach {
