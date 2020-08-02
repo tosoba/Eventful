@@ -18,7 +18,7 @@ sealed class AddEditAlarmDialogMode : Parcelable {
             is Add -> {
                 val startTime = requireNotNull(event.startTime)
                 val splitTime = startTime.split(':')
-                splitTime.first().toInt()
+                splitTime[0].toInt()
             }
             is Edit -> {
                 val calendar = GregorianCalendar.getInstance()
@@ -32,7 +32,7 @@ sealed class AddEditAlarmDialogMode : Parcelable {
             is Add -> {
                 val startTime = requireNotNull(event.startTime)
                 val splitTime = startTime.split(':')
-                splitTime.last().toInt()
+                splitTime[1].toInt()
             }
             is Edit -> {
                 val calendar = GregorianCalendar.getInstance()

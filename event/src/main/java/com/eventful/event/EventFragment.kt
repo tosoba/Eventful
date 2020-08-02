@@ -30,15 +30,15 @@ class EventFragment : DaggerFragment(R.layout.fragment_event), EventNavigationCo
     private val eventViewPagerAdapter: PagerAdapter by titledFragmentsPagerAdapter {
         val details = getString(R.string.details) to fragmentsFactory.eventDetailsFragment(
             event,
-            !event.startDateTimeSet
+            !event.startDateTimeSetInFuture
         )
         val venue = event.venues?.firstOrNull()
         val weather = getString(R.string.weather) to fragmentsFactory.weatherFragment(
             venue?.latLng,
             venue?.city,
-            !event.startDateTimeSet
+            !event.startDateTimeSetInFuture
         )
-        if (event.startDateTimeSet) {
+        if (event.startDateTimeSetInFuture) {
             arrayOf(
                 details,
                 weather,

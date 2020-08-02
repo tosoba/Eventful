@@ -53,11 +53,16 @@ data class Event(
     val formattedStartTime: String?
         get() = startTime?.substringBeforeLast(':')
 
-    val startDateTimeSet: Boolean
+    val startDateTimeSetInFuture: Boolean
         get() {
             if (startTime == null || startDate == null) return false
             val splitTime = startTime.split(':')
-            return splitTime.size == 3 && splitTime.all { it.isDigitsOnly() }
+            if (splitTime.size != 3 || !splitTime.all { it.isDigitsOnly() }) return false
+            val calendar = GregorianCalendar.getInstance()
+            calendar.time = startDate
+            calendar.set(Calendar.HOUR_OF_DAY, splitTime[0].toInt())
+            calendar.set(Calendar.MINUTE, splitTime[1].toInt())
+            return calendar.timeInMillis > System.currentTimeMillis()
         }
 
     companion object {

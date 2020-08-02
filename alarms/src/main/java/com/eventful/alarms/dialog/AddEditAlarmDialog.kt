@@ -71,7 +71,11 @@ fun Fragment.showAddEditAlarmDialog(
                     calendar[Calendar.YEAR],
                     calendar[Calendar.MONTH],
                     calendar[Calendar.DAY_OF_MONTH]
-                ).show()
+                ).apply {
+                    datePicker.minDate = System.currentTimeMillis()
+                    datePicker.maxDate = calendar.timeInMillis
+                    show()
+                }
             }
         }.root
     )
