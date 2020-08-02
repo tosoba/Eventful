@@ -110,40 +110,42 @@ class EventDetailsFragment :
             if (removeAlarmsItem) menu.removeItem(R.id.bottom_nav_alarms)
         }
 
-        if (savedInstanceState?.containsKey(KEY_STATUS_BAR_COLOR) != true) {
-            Glide.with(expandedImage)
-                .load(this@EventDetailsFragment.event.imageUrl)
-                .apply(eventRequestOptions)
-                .addListener(object : RequestListener<Drawable> {
-                    override fun onLoadFailed(
-                        e: GlideException?,
-                        model: Any?,
-                        target: Target<Drawable>?,
-                        isFirstResource: Boolean
-                    ): Boolean = false
+        Glide.with(expandedImage)
+            .load(this@EventDetailsFragment.event.imageUrl)
+            .apply(eventRequestOptions)
+            .run {
+                if (savedInstanceState?.containsKey(KEY_STATUS_BAR_COLOR) != true) {
+                    addListener(object : RequestListener<Drawable> {
+                        override fun onLoadFailed(
+                            e: GlideException?,
+                            model: Any?,
+                            target: Target<Drawable>?,
+                            isFirstResource: Boolean
+                        ): Boolean = false
 
-                    override fun onResourceReady(
-                        resource: Drawable?,
-                        model: Any?,
-                        target: Target<Drawable>?,
-                        dataSource: DataSource?,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        resource?.let { drawable ->
-                            lifecycleScope.launch {
-                                statusBarColor = withContext(Dispatchers.Default) {
-                                    drawable.bitmap.dominantColor
-                                }.also {
-                                    statusBarColor = it
-                                    activity?.statusBarColor = it
+                        override fun onResourceReady(
+                            resource: Drawable?,
+                            model: Any?,
+                            target: Target<Drawable>?,
+                            dataSource: DataSource?,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            resource?.let { drawable ->
+                                lifecycleScope.launch {
+                                    statusBarColor = withContext(Dispatchers.Default) {
+                                        drawable.bitmap.dominantColor
+                                    }.also {
+                                        statusBarColor = it
+                                        activity?.statusBarColor = it
+                                    }
                                 }
                             }
+                            return false
                         }
-                        return false
-                    }
-                })
-                .into(expandedImage)
-        }
+                    })
+                } else this
+            }
+            .into(expandedImage)
     }.root
 
     override fun onDestroyView() {
