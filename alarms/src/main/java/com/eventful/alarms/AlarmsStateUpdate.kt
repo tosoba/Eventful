@@ -1,5 +1,6 @@
 package com.eventful.alarms
 
+import com.eventful.alarms.dialog.AddEditAlarmDialogStatus
 import com.eventful.core.android.base.ClearSelectionUpdate
 import com.eventful.core.android.base.ItemSelectionConfirmedUpdate
 import com.eventful.core.android.base.StateUpdate
@@ -41,4 +42,10 @@ sealed class AlarmsStateUpdate : StateUpdate<AlarmsState> {
         override val onSnackbarDismissed: () -> Unit
     ) : AlarmsStateUpdate(),
         ItemSelectionConfirmedUpdate<AlarmsState, Alarm>
+
+    data class DialogStatus(val status: AddEditAlarmDialogStatus) : AlarmsStateUpdate() {
+        override fun invoke(state: AlarmsState): AlarmsState = state.copy(
+            dialogStatus = status
+        )
+    }
 }

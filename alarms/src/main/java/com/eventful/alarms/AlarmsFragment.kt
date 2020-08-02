@@ -4,8 +4,13 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewModelScope
 import com.airbnb.epoxy.TypedEpoxyController
 import com.eventful.alarms.databinding.FragmentAlarmsBinding
+import com.eventful.alarms.dialog.AddEditAlarmDialog
+import com.eventful.alarms.dialog.AddEditAlarmDialogMode
+import com.eventful.alarms.dialog.AddEditAlarmDialogStatus
+import com.eventful.alarms.dialog.showAddEditAlarmDialog
 import com.eventful.core.android.base.DaggerViewModelFragment
 import com.eventful.core.android.base.HasArgs
 import com.eventful.core.android.controller.ItemsSelectionActionModeController
@@ -89,6 +94,10 @@ class AlarmsFragment : DaggerViewModelFragment<AlarmsViewModel>(R.layout.fragmen
         )
     }
 
+    private var addEditAlarmDialog: AddEditAlarmDialog? = null
+
+    private var viewUpdatesJob: Job? = null
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         when (val modeArg = mode) {
             is AlarmsMode.All -> {
@@ -96,11 +105,44 @@ class AlarmsFragment : DaggerViewModelFragment<AlarmsViewModel>(R.layout.fragmen
                 binding.alarmsBottomNavView.visibility = View.GONE
             }
             is AlarmsMode.SingleEvent -> binding.alarmsFab.setOnClickListener {
-                showAddEditAlarmDialog(AlarmMode.Add(event = modeArg.event)) { timestamp ->
-                    //viewModel.intent(AlarmsIntent.AddAlarm())
+                lifecycleScope.launch {
+                    viewModel.intent(
+                        AlarmsIntent.UpdateDialogStatus(
+                            AddEditAlarmDialogStatus.WithMode.Shown(
+                                AddEditAlarmDialogMode.Add(event = modeArg.event)
+                            )
+                        )
+                    )
                 }
             }
         }
+
+        viewUpdatesJob = viewModel.viewUpdates
+            .onEach { update ->
+                when (update) {
+                    is AlarmsViewUpdate.Events -> epoxyController.setData(update.alarms)
+                    is AlarmsViewUpdate.ShowDialog -> {
+                        addEditAlarmDialog = showAddEditAlarmDialog(
+                            mode = update.mode,
+                            initialState = update.previousState
+                        ) { timestamp ->
+                            //viewModel.intent(AlarmsIntent.AddAlarm())
+                        }.apply {
+                            setOnCancelListener {
+                                addEditAlarmDialog = null
+                                lifecycleScope.launch {
+                                    viewModel.intent(
+                                        AlarmsIntent.UpdateDialogStatus(
+                                            AddEditAlarmDialogStatus.Hidden
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            .launchIn(lifecycleScope)
 
         with(binding.alarmsBottomNavView) {
             selectedItemId = R.id.bottom_nav_alarms
@@ -110,7 +152,21 @@ class AlarmsFragment : DaggerViewModelFragment<AlarmsViewModel>(R.layout.fragmen
         binding.alarmsRecyclerView.setController(epoxyController)
     }
 
-    private var viewUpdatesJob: Job? = null
+    override fun onDestroyView() {
+        viewUpdatesJob?.cancel()
+        addEditAlarmDialog?.let {
+            viewModel.viewModelScope.launch {
+                viewModel.intent(
+                    AlarmsIntent.UpdateDialogStatus(
+                        status = AddEditAlarmDialogStatus.WithMode.ShownWithState(it.mode, it.state)
+                    )
+                )
+            }
+        }
+        super.onDestroyView()
+    }
+
+    private var resumedOnlyViewUpdatesJob: Job? = null
 
     override fun onResume() {
         super.onResume()
@@ -121,10 +177,9 @@ class AlarmsFragment : DaggerViewModelFragment<AlarmsViewModel>(R.layout.fragmen
 
         binding.alarmsBottomNavView.selectedItemId = R.id.bottom_nav_alarms
 
-        viewModel.viewUpdates
+        viewModel.resumedOnlyViewUpdates
             .onEach { update ->
                 when (update) {
-                    is AlarmsViewUpdate.Events -> epoxyController.setData(update.alarms)
                     is AlarmsViewUpdate.Snackbar -> snackbarController?.transitionToSnackbarState(
                         update.state
                     )
@@ -138,7 +193,7 @@ class AlarmsFragment : DaggerViewModelFragment<AlarmsViewModel>(R.layout.fragmen
     }
 
     override fun onPause() {
-        viewUpdatesJob?.cancel()
+        resumedOnlyViewUpdatesJob?.cancel()
         super.onPause()
     }
 

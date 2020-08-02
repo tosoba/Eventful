@@ -14,7 +14,7 @@ class AlarmsViewModel @AssistedInject constructor(
     processor: AlarmsFlowProcessor,
     @Assisted savedStateHandle: SavedStateHandle
 ) : FlowViewModel<AlarmsIntent, AlarmsStateUpdate, AlarmsState, AlarmsSignal>(
-    initialState = AlarmsState(mode = savedStateHandle[AlarmsFragment.MODE_ARG_KEY]!!),
+    initialState = AlarmsState(savedStateHandle),
     processor = processor,
     savedStateHandle = savedStateHandle
 ) {

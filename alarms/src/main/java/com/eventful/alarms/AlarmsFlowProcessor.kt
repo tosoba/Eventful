@@ -1,5 +1,6 @@
 package com.eventful.alarms
 
+import androidx.lifecycle.SavedStateHandle
 import com.eventful.core.android.base.FlowProcessor
 import com.eventful.core.android.base.removedFromAlarmsMessage
 import com.eventful.core.usecase.alarm.DeleteAlarms
@@ -8,6 +9,7 @@ import com.eventful.core.usecase.alarm.InsertAlarm
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
+@FlowPreview
 @ExperimentalCoroutinesApi
 class AlarmsFlowProcessor(
     private val getAlarms: GetAlarms,
@@ -31,6 +33,17 @@ class AlarmsFlowProcessor(
         }
         .updates(coroutineScope, currentState, intent, signal)
 
+    override fun stateWillUpdate(
+        currentState: AlarmsState,
+        nextState: AlarmsState,
+        update: AlarmsStateUpdate,
+        savedStateHandle: SavedStateHandle
+    ) {
+        if (update is AlarmsStateUpdate.DialogStatus) {
+            savedStateHandle[AlarmsState.KEY_DIALOG_STATUS] = update.status
+        }
+    }
+
     private fun Flow<AlarmsIntent>.updates(
         coroutineScope: CoroutineScope,
         currentState: () -> AlarmsState,
@@ -53,7 +66,9 @@ class AlarmsFlowProcessor(
                 signal(AlarmsSignal.AlarmAdded)
                 null
             }
-            .filterNotNull()
+            .filterNotNull(),
+        filterIsInstance<AlarmsIntent.UpdateDialogStatus>()
+            .map { (status) -> AlarmsStateUpdate.DialogStatus(status) }
     )
 
     private fun Flow<AlarmsIntent.LoadAlarms>.loadAlarmsUpdates(
