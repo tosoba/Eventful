@@ -1,0 +1,95 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'com.jakewharton.butterknife'
+apply plugin: 'org.jmailen.kotlinter'
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "30.0.0"
+
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
+    buildFeatures {
+        dataBinding true
+        viewBinding true
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+
+    implementation project(':core')
+    implementation project(':core-android')
+
+    implementation "androidx.appcompat:appcompat:$appCompatVersion"
+    implementation "androidx.constraintlayout:constraintlayout:$constraintLayoutVersion"
+    implementation "androidx.core:core-ktx:$coreKtxVersion"
+    implementation "androidx.fragment:fragment-ktx:$fragmentKtxVersion"
+    implementation "androidx.legacy:legacy-support-v4:$legacySupportV4Version"
+    implementation "androidx.recyclerview:recyclerview:$recyclerViewVersion"
+    implementation "com.google.android.material:material:$materialVersion"
+
+    implementation "android.arch.lifecycle:runtime:$lifecycleVersion"
+    implementation "android.arch.lifecycle:extensions:$lifecycleVersion"
+    kapt "android.arch.lifecycle:compiler:$lifecycleVersion"
+    implementation "com.github.hadilq.liveevent:liveevent:$liveEventVersion"
+    implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycleRuntimeKtxVersion"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$liveDataKtxVersion"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleRuntimeKtxVersion"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleViewModelKtxVersion"
+
+    implementation "io.github.reactivecircus.flowbinding:flowbinding-android:$flowBindingVersion"
+    implementation "io.github.reactivecircus.flowbinding:flowbinding-appcompat:$flowBindingVersion"
+    implementation "io.github.reactivecircus.flowbinding:flowbinding-core:$flowBindingVersion"
+    implementation "io.github.reactivecircus.flowbinding:flowbinding-viewpager:$flowBindingVersion"
+
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
+
+    implementation "com.google.dagger:dagger-android:$daggerVersion"
+    implementation "com.google.dagger:dagger-android-support:$daggerVersion"
+    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
+    kapt "com.google.dagger:dagger-android-processor:$daggerVersion"
+
+    compileOnly "com.squareup.inject:assisted-inject-annotations-dagger2:$assistedInjectVersion"
+    kapt "com.squareup.inject:assisted-inject-processor-dagger2:$assistedInjectVersion"
+
+    implementation "com.airbnb.android:epoxy:$epoxyVersion"
+    implementation "com.airbnb.android:epoxy-databinding:$epoxyVersion"
+    kapt "com.airbnb.android:epoxy-processor:$epoxyVersion"
+
+    testImplementation project(':test')
+    testImplementation "junit:junit:$junit4Version"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinxCoroutinesTestVersion"
+    testImplementation "io.mockk:mockk:$mockkVersion"
+    testImplementation "androidx.arch.core:core-testing:$archCoreTestingVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
+    androidTestImplementation "androidx.test:runner:$testRunnerVersion"
+}

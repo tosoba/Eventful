@@ -1,6 +1,7 @@
 package com.eventful.core.android.model.event
 
 import android.os.Parcelable
+import androidx.core.text.isDigitsOnly
 import com.eventful.core.model.event.IEvent
 import kotlinx.android.parcel.Parcelize
 import java.util.*
@@ -51,6 +52,13 @@ data class Event(
 
     val formattedStartTime: String?
         get() = startTime?.substringBeforeLast(':')
+
+    val startDateTimeSet: Boolean
+        get() {
+            if (startTime == null || startDate == null) return false
+            val splitTime = startTime.split(':')
+            return splitTime.size == 3 && splitTime.all { it.isDigitsOnly() }
+        }
 
     companion object {
         private val Double.stringNoDecimal: String

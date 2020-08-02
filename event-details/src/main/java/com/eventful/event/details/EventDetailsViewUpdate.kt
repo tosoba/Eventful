@@ -19,15 +19,7 @@ internal val EventDetailsViewModel.viewUpdates: Flow<EventDetailsViewUpdate>
             .map { it.data }
             .filterNotNull()
             .distinctUntilChanged()
-            .map {
-                EventDetailsViewUpdate.FloatingActionButtonDrawable(
-                    it
-                )
-            },
+            .map { EventDetailsViewUpdate.FloatingActionButtonDrawable(it) },
         signals.filterIsInstance<EventDetailsSignal.FavouriteStateToggled>()
-            .map { (isFavourite) ->
-                EventDetailsViewUpdate.FavouriteStatusSnackbar(
-                    isFavourite
-                )
-            }
+            .map { (isFavourite) -> EventDetailsViewUpdate.FavouriteStatusSnackbar(isFavourite) }
     )

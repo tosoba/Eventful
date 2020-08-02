@@ -25,18 +25,28 @@ class EventFragment : DaggerFragment(R.layout.fragment_event), EventNavigationCo
     override val viewPager: ViewPager get() = binding.eventViewPager
 
     @Inject
-    internal lateinit var childFragmentsFactory: IEventChildFragmentsFactory
+    internal lateinit var fragmentsFactory: IEventChildFragmentsFactory
 
     private val eventViewPagerAdapter: PagerAdapter by titledFragmentsPagerAdapter {
-        val venue = event.venues?.firstOrNull()
-        arrayOf(
-            getString(R.string.details) to childFragmentsFactory.eventDetailsFragment(event),
-            getString(R.string.weather) to childFragmentsFactory.weatherFragment(
-                venue?.latLng,
-                venue?.city
-            ),
-            getString(R.string.alarms) to childFragmentsFactory.eventAlarmsFragment(event)
+        val details = getString(R.string.details) to fragmentsFactory.eventDetailsFragment(
+            event,
+            !event.startDateTimeSet
         )
+        val venue = event.venues?.firstOrNull()
+        val weather = getString(R.string.weather) to fragmentsFactory.weatherFragment(
+            venue?.latLng,
+            venue?.city,
+            !event.startDateTimeSet
+        )
+        if (event.startDateTimeSet) {
+            arrayOf(
+                details,
+                weather,
+                getString(R.string.alarms) to fragmentsFactory.eventAlarmsFragment(event)
+            )
+        } else {
+            arrayOf(details, weather)
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

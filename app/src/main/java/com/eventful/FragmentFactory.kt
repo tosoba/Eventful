@@ -24,12 +24,14 @@ object FragmentFactory :
 
     override val alarmsFragment: AlarmsFragment get() = AlarmsFragment.new(AlarmsMode.All)
 
-    override fun eventDetailsFragment(event: Event): EventDetailsFragment = EventDetailsFragment
-        .new(event)
+    override fun eventDetailsFragment(
+        event: Event,
+        removeAlarmItem: Boolean
+    ): EventDetailsFragment = EventDetailsFragment.new(event, removeAlarmItem)
 
     override fun weatherFragment(
-        latLng: LatLng?, locationName: String?
-    ): WeatherFragment = WeatherFragment.new(latLng, locationName)
+        latLng: LatLng?, locationName: String?, removeAlarmItem: Boolean
+    ): WeatherFragment = WeatherFragment.new(latLng, locationName, removeAlarmItem)
 
     override fun eventAlarmsFragment(event: Event): AlarmsFragment = AlarmsFragment
         .new(AlarmsMode.SingleEvent(event))

@@ -9,6 +9,7 @@ import com.eventful.core.android.base.HasArgs
 import com.eventful.core.android.controller.eventNavigationItemSelectedListener
 import com.eventful.core.android.loadingIndicator
 import com.eventful.core.android.unknownLocation
+import com.eventful.core.android.util.delegate.FragmentArgument
 import com.eventful.core.android.util.delegate.NullableFragmentArgument
 import com.eventful.core.android.util.delegate.viewBinding
 import com.eventful.core.android.util.ext.*
@@ -31,6 +32,7 @@ class WeatherFragment :
 
     private var latLng: LatLng? by NullableFragmentArgument()
     private var locationName: String? by NullableFragmentArgument()
+    private var removeAlarmsItem: Boolean by FragmentArgument()
     override val args: Bundle get() = bundleOf(LAT_LNG_ARG_KEY to latLng)
 
     private val binding: FragmentWeatherBinding by viewBinding(FragmentWeatherBinding::bind)
@@ -85,6 +87,7 @@ class WeatherFragment :
         with(binding.weatherBottomNavView) {
             setOnNavigationItemSelectedListener(eventNavigationItemSelectedListener)
             selectedItemId = R.id.bottom_nav_weather
+            if (removeAlarmsItem) menu.removeItem(R.id.bottom_nav_alarms)
         }
     }
 
@@ -125,9 +128,14 @@ class WeatherFragment :
     }
 
     companion object {
-        fun new(latLng: LatLng?, locationName: String?): WeatherFragment = WeatherFragment().also {
+        fun new(
+            latLng: LatLng?,
+            locationName: String?,
+            removeAlarmsItem: Boolean
+        ): WeatherFragment = WeatherFragment().also {
             it.latLng = latLng
             it.locationName = locationName
+            it.removeAlarmsItem = removeAlarmsItem
         }
 
         const val LAT_LNG_ARG_KEY = "LAT_LNG_ARG_KEY"

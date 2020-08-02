@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import com.airbnb.epoxy.AsyncEpoxyController
@@ -30,7 +29,6 @@ import com.eventful.core.android.util.ext.*
 import com.eventful.core.android.view.binding.eventRequestOptions
 import com.eventful.core.android.view.epoxy.asyncController
 import com.eventful.core.android.view.epoxy.kindsCarousel
-import com.eventful.core.android.view.ext.hideAndShow
 import com.eventful.core.android.wideButton
 import com.eventful.event.details.databinding.FragmentEventDetailsBinding
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -38,6 +36,7 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_event_details.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import reactivecircus.flowbinding.android.view.clicks
@@ -50,6 +49,7 @@ class EventDetailsFragment :
     HasArgs {
 
     private var event: Event by FragmentArgument()
+    private var removeAlarmsItem: Boolean by FragmentArgument()
     override val args: Bundle get() = bundleOf(EVENT_ARG_KEY to event)
 
     private var statusBarColor: Int? = null
@@ -84,6 +84,8 @@ class EventDetailsFragment :
 
     private lateinit var snackbarStateChannel: SendChannel<SnackbarState>
 
+    private var fabDrawableUpdatesJob: Job? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? = FragmentEventDetailsBinding.inflate(inflater, container, false).apply {
@@ -94,11 +96,18 @@ class EventDetailsFragment :
         eventFavFab.clicks()
             .onEach { viewModel.intent(EventDetailsIntent.ToggleFavourite) }
             .launchIn(lifecycleScope)
+
+        fabDrawableUpdatesJob = viewModel.viewUpdates
+            .filterIsInstance<EventDetailsViewUpdate.FloatingActionButtonDrawable>()
+            .onEach { eventFavFab.updateDrawable(it.isFavourite) }
+            .launchIn(lifecycleScope)
+
         snackbarStateChannel = handleSnackbarState(eventFavFab)
 
         with(eventDetailsBottomNavView) {
             setOnNavigationItemSelectedListener(eventNavigationItemSelectedListener)
             selectedItemId = R.id.bottom_nav_event_details
+            if (removeAlarmsItem) menu.removeItem(R.id.bottom_nav_alarms)
         }
 
         if (savedInstanceState?.containsKey(KEY_STATUS_BAR_COLOR) != true) {
@@ -139,6 +148,7 @@ class EventDetailsFragment :
 
     override fun onDestroyView() {
         snackbarStateChannel.close()
+        fabDrawableUpdatesJob?.cancel()
         super.onDestroyView()
     }
 
@@ -163,7 +173,7 @@ class EventDetailsFragment :
         statusBarColor?.let { outState.putInt(KEY_STATUS_BAR_COLOR, it) }
     }
 
-    private var viewUpdatesJob: Job? = null
+    private var snackbarStateUpdatesJob: Job? = null
 
     override fun onResume() {
         super.onResume()
@@ -176,43 +186,35 @@ class EventDetailsFragment :
 
         event_details_bottom_nav_view.selectedItemId = R.id.bottom_nav_event_details
 
-        viewUpdatesJob = viewModel.viewUpdates
+        snackbarStateUpdatesJob = viewModel.viewUpdates
+            .filterIsInstance<EventDetailsViewUpdate.FavouriteStatusSnackbar>()
             .onEach {
-                when (it) {
-                    is EventDetailsViewUpdate.FloatingActionButtonDrawable -> event_fav_fab
-                        ?.updateDrawable(it.isFavourite)
-                    is EventDetailsViewUpdate.FavouriteStatusSnackbar -> transitionToSnackbarState(
-                        SnackbarState.Shown(
-                            text = if (it.isFavourite) getString(R.string.event_added)
-                            else getString(R.string.event_removed),
-                            length = Snackbar.LENGTH_SHORT
-                        )
+                transitionToSnackbarState(
+                    SnackbarState.Shown(
+                        text = if (it.isFavourite) getString(R.string.event_added)
+                        else getString(R.string.event_removed),
+                        length = Snackbar.LENGTH_SHORT
                     )
-                }
+                )
             }
             .launchIn(lifecycleScope)
     }
 
     override fun onPause() {
-        viewUpdatesJob?.cancel()
+        snackbarStateUpdatesJob?.cancel()
         super.onPause()
     }
 
     private fun FloatingActionButton.updateDrawable(isFavourite: Boolean) {
-        context?.let {
-            setImageDrawable(
-                ContextCompat.getDrawable(
-                    it,
-                    if (isFavourite) R.drawable.delete else R.drawable.favourite
-                )
-            )
-            hideAndShow()
-        }
+        setImageResource(if (isFavourite) R.drawable.delete else R.drawable.favourite)
     }
 
     companion object {
-        fun new(event: Event): EventDetailsFragment = EventDetailsFragment().also {
+        fun new(
+            event: Event, removeAlarmsItem: Boolean
+        ): EventDetailsFragment = EventDetailsFragment().also {
             it.event = event
+            it.removeAlarmsItem = removeAlarmsItem
         }
 
         const val EVENT_ARG_KEY = "event"

@@ -1,16 +1,19 @@
 package com.eventful.core.android.model.alarm
 
+import android.os.Parcelable
+import com.eventful.core.android.model.event.Event
 import com.eventful.core.model.alarm.IAlarm
 import com.eventful.core.model.event.IEvent
-import com.eventful.core.android.model.event.Event
+import kotlinx.android.parcel.Parcelize
 import java.text.SimpleDateFormat
 import java.util.*
 
+@Parcelize
 data class Alarm(
     override val id: Long,
     override val event: Event,
     override val timestamp: Long
-) : IAlarm {
+) : IAlarm, Parcelable {
     constructor(other: IAlarm) : this(other.id, Event(other.event), other.timestamp)
     constructor(id: Long, event: IEvent, timestamp: Long) : this(id, Event(event), timestamp)
 
