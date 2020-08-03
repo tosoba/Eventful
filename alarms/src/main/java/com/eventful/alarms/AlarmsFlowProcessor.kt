@@ -61,12 +61,7 @@ class AlarmsFlowProcessor(
         filterIsInstance<AlarmsIntent.RemoveAlarmsClicked>()
             .removeFromAlarmsUpdates(coroutineScope, currentState, intent, signal),
         filterIsInstance<AlarmsIntent.AddAlarm>()
-            .map { (alarm) ->
-                insertAlarm(alarm)
-                signal(AlarmsSignal.AlarmAdded)
-                null
-            }
-            .filterNotNull(),
+            .addAlarmUpdates(signal),
         filterIsInstance<AlarmsIntent.UpdateDialogStatus>()
             .map { (status) -> AlarmsStateUpdate.DialogStatus(status) }
     )
@@ -99,4 +94,12 @@ class AlarmsFlowProcessor(
             }
         )
     }
+
+    private fun Flow<AlarmsIntent.AddAlarm>.addAlarmUpdates(
+        signal: suspend (AlarmsSignal) -> Unit
+    ): Flow<AlarmsStateUpdate> = map { (alarm) ->
+        insertAlarm(alarm)
+        signal(AlarmsSignal.AlarmAdded)
+        null
+    }.filterNotNull()
 }

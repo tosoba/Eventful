@@ -3,6 +3,7 @@ package com.eventful.alarms.dialog
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import com.eventful.alarms.R
@@ -23,57 +24,79 @@ fun Fragment.showAddEditAlarmDialog(
                 context.getString(R.string.add_alarm)
             }
 
+            val startTimestampCalendar = mode.startDateCalendar
+            startTimestampCalendar.set(Calendar.HOUR_OF_DAY, mode.hour)
+            startTimestampCalendar.set(Calendar.MINUTE, mode.minute)
+
             alarmSaveBtn.setOnClickListener {
                 val alarmTime = requireNotNull(time.value)
                 val alarmDate = requireNotNull(date.value)
-                val timestamp = Calendar.getInstance().apply {
+                val alarmTimestamp = Calendar.getInstance().apply {
                     set(Calendar.YEAR, alarmDate.year)
                     set(Calendar.MONTH, alarmDate.month)
                     set(Calendar.DAY_OF_MONTH, alarmDate.day)
                     set(Calendar.HOUR_OF_DAY, alarmTime.hourOfDay)
                     set(Calendar.MINUTE, alarmTime.minute)
                 }.timeInMillis
-                saveClicked(timestamp)
+
+                if (alarmTimestamp + 1000 * 60 * 60 > startTimestampCalendar.timeInMillis) {
+                    Toast.makeText(
+                        this@showAddEditAlarmDialog.context,
+                        getString(R.string.invalid_alarm_timestamp, "1 hour"),
+                        Toast.LENGTH_LONG
+                    ).show()
+                    return@setOnClickListener
+                }
+
+                saveClicked(alarmTimestamp)
                 dismiss()
             }
 
             alarmCancelBtn.setOnClickListener { dismiss() }
 
             time.observe({ lifecycle }) { (hour, minute) ->
-                alarmTimeTxt.text =
-                    "${String.format("%02d", hour)}:${String.format("%02d", minute)}"
+                alarmTimeTxt.text = getString(
+                    R.string.alarm_time,
+                    String.format("%02d", hour),
+                    String.format("%02d", minute)
+                )
             }
 
             editTimeBtn.setOnClickListener {
+                val timeValue = time.value!!
                 TimePickerDialog(
                     context,
                     TimePickerDialog.OnTimeSetListener { _, hourOfDay, minute ->
                         time.value = AlarmTime(hourOfDay, minute)
                     },
-                    mode.hour,
-                    mode.minute,
+                    timeValue.hourOfDay,
+                    timeValue.minute,
                     true
                 ).show()
             }
 
             date.observe({ lifecycle }) { (year, month, day) ->
-                alarmDateTxt.text =
-                    "${String.format("%02d", day)}.${String.format("%02d", month + 1)}.$year"
+                alarmDateTxt.text = getString(
+                    R.string.alarm_date,
+                    String.format("%02d", day),
+                    String.format("%02d", month + 1),
+                    year.toString()
+                )
             }
 
             editDateBtn.setOnClickListener {
-                val calendar = mode.startDateCalendar
+                val dateValue = date.value!!
                 DatePickerDialog(
                     context,
                     DatePickerDialog.OnDateSetListener { _, year, month, day ->
                         date.value = AlarmDate(year, month, day)
                     },
-                    calendar[Calendar.YEAR],
-                    calendar[Calendar.MONTH],
-                    calendar[Calendar.DAY_OF_MONTH]
+                    dateValue.year,
+                    dateValue.month,
+                    dateValue.day
                 ).apply {
                     datePicker.minDate = System.currentTimeMillis()
-                    datePicker.maxDate = calendar.timeInMillis
+                    datePicker.maxDate = startTimestampCalendar.timeInMillis
                     show()
                 }
             }

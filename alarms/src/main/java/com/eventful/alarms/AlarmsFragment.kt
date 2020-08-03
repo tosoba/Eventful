@@ -120,13 +120,26 @@ class AlarmsFragment : DaggerViewModelFragment<AlarmsViewModel>(R.layout.fragmen
         viewUpdatesJob = viewModel.viewUpdates
             .onEach { update ->
                 when (update) {
-                    is AlarmsViewUpdate.Events -> epoxyController.setData(update.alarms)
+                    is AlarmsViewUpdate.Alarms -> epoxyController.setData(update.alarms)
                     is AlarmsViewUpdate.ShowDialog -> {
                         addEditAlarmDialog = showAddEditAlarmDialog(
                             mode = update.mode,
                             initialState = update.previousState
                         ) { timestamp ->
-                            //viewModel.intent(AlarmsIntent.AddAlarm())
+                            lifecycleScope.launch {
+                                viewModel.intent(
+                                    AlarmsIntent.AddAlarm(
+                                        Alarm(
+                                            id = System.currentTimeMillis(),
+                                            event = when (update.mode) {
+                                                is AddEditAlarmDialogMode.Add -> update.mode.event
+                                                is AddEditAlarmDialogMode.Edit -> update.mode.alarm.event
+                                            },
+                                            timestamp = timestamp
+                                        )
+                                    )
+                                )
+                            }
                         }.apply {
                             setOnCancelListener {
                                 addEditAlarmDialog = null
