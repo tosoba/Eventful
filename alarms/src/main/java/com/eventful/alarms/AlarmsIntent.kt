@@ -2,10 +2,11 @@ package com.eventful.alarms
 
 import com.eventful.alarms.dialog.AddEditAlarmDialogStatus
 import com.eventful.core.android.model.alarm.Alarm
+import com.eventful.core.android.model.event.Event
 
 sealed class AlarmsIntent {
     object LoadAlarms : AlarmsIntent()
-    data class AddAlarm(val alarm: Alarm) : AlarmsIntent()
+    data class AddAlarm(val event: Event, val timestamp: Long) : AlarmsIntent()
     object RemoveAlarmsClicked : AlarmsIntent()
     data class AlarmLongClicked(val alarm: Alarm) : AlarmsIntent()
     object ClearSelectionClicked : AlarmsIntent()

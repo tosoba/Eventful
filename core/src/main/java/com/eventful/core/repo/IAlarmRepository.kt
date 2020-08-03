@@ -7,5 +7,5 @@ interface IAlarmRepository {
     val alarms: Flow<List<IAlarm>>
     fun getAlarmsForEvent(eventId: String): Flow<List<IAlarm>>
     suspend fun deleteAlarms(alarms: List<IAlarm>)
-    suspend fun insertAlarm(alarm: IAlarm)
+    suspend fun insertAlarm(eventId: String, timestamp: Long): Int
 }

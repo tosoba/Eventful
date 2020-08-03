@@ -1,14 +1,10 @@
 package com.eventful.db.entity
 
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.ForeignKey
-import androidx.room.Index
+import androidx.room.*
 import com.eventful.db.Tables
 
 @Entity(
     tableName = Tables.ALARM,
-    primaryKeys = ["id"],
     foreignKeys = [
         ForeignKey(
             entity = EventEntity::class,
@@ -22,7 +18,9 @@ import com.eventful.db.Tables
     ]
 )
 data class AlarmEntity(
-    val id: Long,
     @ColumnInfo(name = "event_id") val eventId: String,
     val timestamp: Long
-)
+) {
+    @PrimaryKey(autoGenerate = true)
+    var id: Int = 0
+}

@@ -129,14 +129,11 @@ class AlarmsFragment : DaggerViewModelFragment<AlarmsViewModel>(R.layout.fragmen
                             lifecycleScope.launch {
                                 viewModel.intent(
                                     AlarmsIntent.AddAlarm(
-                                        Alarm(
-                                            id = System.currentTimeMillis(),
-                                            event = when (update.mode) {
-                                                is AddEditAlarmDialogMode.Add -> update.mode.event
-                                                is AddEditAlarmDialogMode.Edit -> update.mode.alarm.event
-                                            },
-                                            timestamp = timestamp
-                                        )
+                                        event = when (update.mode) {
+                                            is AddEditAlarmDialogMode.Add -> update.mode.event
+                                            is AddEditAlarmDialogMode.Edit -> update.mode.alarm.event
+                                        },
+                                        timestamp = timestamp
                                     )
                                 )
                             }

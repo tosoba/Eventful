@@ -10,12 +10,12 @@ import java.util.*
 
 @Parcelize
 data class Alarm(
-    override val id: Long,
+    override val id: Int,
     override val event: Event,
     override val timestamp: Long
 ) : IAlarm, Parcelable {
     constructor(other: IAlarm) : this(other.id, Event(other.event), other.timestamp)
-    constructor(id: Long, event: IEvent, timestamp: Long) : this(id, Event(event), timestamp)
+    constructor(id: Int, event: IEvent, timestamp: Long) : this(id, Event(event), timestamp)
 
     companion object {
         fun from(other: IAlarm): Alarm = if (other is Alarm) other else Alarm(other)

@@ -34,7 +34,7 @@ class AlarmRepository @Inject constructor(
         alarmDao.deleteAlarms(alarms.map(IAlarm::id))
     }
 
-    override suspend fun insertAlarm(alarm: IAlarm) {
-        alarmDao.insertAlarm(AlarmEntity(alarm.id, alarm.event.id, alarm.timestamp))
-    }
+    override suspend fun insertAlarm(eventId: String, timestamp: Long): Int = alarmDao
+        .insertAlarm(AlarmEntity(eventId, timestamp))
+        .toInt()
 }

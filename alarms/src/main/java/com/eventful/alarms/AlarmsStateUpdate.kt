@@ -11,7 +11,11 @@ import com.eventful.core.model.Selectable
 import com.eventful.core.model.alarm.IAlarm
 import com.eventful.core.util.DataList
 import com.eventful.core.util.LoadedSuccessfully
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 
+@ExperimentalCoroutinesApi
+@FlowPreview
 sealed class AlarmsStateUpdate : StateUpdate<AlarmsState> {
     data class Alarms(val alarms: List<IAlarm>) : AlarmsStateUpdate() {
         override fun invoke(state: AlarmsState): AlarmsState = state.copy(
@@ -26,8 +30,8 @@ sealed class AlarmsStateUpdate : StateUpdate<AlarmsState> {
     data class ToggleAlarmSelection(
         override val item: Alarm
     ) : AlarmsStateUpdate(),
-        ToggleItemSelectionUpdate<AlarmsState, Alarm, Long> {
-        override fun Alarm.id(): Long = id
+        ToggleItemSelectionUpdate<AlarmsState, Alarm, Int> {
+        override fun Alarm.id(): Int = id
     }
 
     object ClearSelection : AlarmsStateUpdate(), ClearSelectionUpdate<AlarmsState, Alarm>

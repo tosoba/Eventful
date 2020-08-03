@@ -1,10 +1,12 @@
 package com.eventful.di
 
 import android.content.Context
+import com.eventful.EventfulApp
+import com.eventful.core.android.manager.EventAlarmManager
+import com.eventful.core.android.util.ext.isConnected
+import com.eventful.core.manager.IEventAlarmManager
 import com.eventful.core.util.offlineCacheInterceptor
 import com.eventful.core.util.onlineCacheInterceptor
-import com.eventful.core.android.util.ext.isConnected
-import com.eventful.EventfulApp
 import com.flickr4java.flickr.Flickr
 import com.flickr4java.flickr.REST
 import com.patloew.rxlocation.RxLocation
@@ -24,6 +26,9 @@ abstract class AppModule {
 
     @Binds
     abstract fun applicationContext(application: EventfulApp): Context
+
+    @Binds
+    abstract fun eventAlarmManager(manager: EventAlarmManager): IEventAlarmManager
 
     companion object {
 

@@ -1,6 +1,7 @@
 package com.eventful
 
 import android.util.Log
+import com.eventful.core.android.notification.AlarmNotifications
 import com.eventful.core.android.view.BannerSliderImageLoadingService
 import com.eventful.di.DaggerAppComponent
 import dagger.android.AndroidInjector
@@ -24,5 +25,6 @@ class EventfulApp : DaggerApplication() {
         RxJavaPlugins.setErrorHandler {
             Log.e("Rx error", it?.message ?: "Unknown message")
         }
+        AlarmNotifications.createChannel(this)
     }
 }

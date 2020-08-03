@@ -10,11 +10,11 @@ import com.eventful.db.entity.AlarmEntity
 @Dao
 interface AlarmDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAlarm(alarmEntity: AlarmEntity)
+    suspend fun insertAlarm(alarmEntity: AlarmEntity): Long
 
     @Query("DELETE FROM ${Tables.ALARM} WHERE id = :id")
-    suspend fun deleteAlarm(id: Long)
+    suspend fun deleteAlarm(id: Int)
 
     @Query("DELETE FROM ${Tables.ALARM} WHERE id IN (:ids)")
-    suspend fun deleteAlarms(ids: List<Long>)
+    suspend fun deleteAlarms(ids: List<Int>)
 }

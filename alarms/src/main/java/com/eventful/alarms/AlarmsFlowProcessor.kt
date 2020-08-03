@@ -5,7 +5,7 @@ import com.eventful.core.android.base.FlowProcessor
 import com.eventful.core.android.base.removedFromAlarmsMessage
 import com.eventful.core.usecase.alarm.DeleteAlarms
 import com.eventful.core.usecase.alarm.GetAlarms
-import com.eventful.core.usecase.alarm.InsertAlarm
+import com.eventful.core.usecase.alarm.CreateAlarm
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.*
 class AlarmsFlowProcessor(
     private val getAlarms: GetAlarms,
     private val deleteAlarms: DeleteAlarms,
-    private val insertAlarm: InsertAlarm,
+    private val createAlarm: CreateAlarm,
     private val ioDispatcher: CoroutineDispatcher,
     private val loadAlarmsOnStart: Boolean = true
 ) : FlowProcessor<AlarmsIntent, AlarmsStateUpdate, AlarmsState, AlarmsSignal> {
@@ -97,8 +97,8 @@ class AlarmsFlowProcessor(
 
     private fun Flow<AlarmsIntent.AddAlarm>.addAlarmUpdates(
         signal: suspend (AlarmsSignal) -> Unit
-    ): Flow<AlarmsStateUpdate> = map { (alarm) ->
-        insertAlarm(alarm)
+    ): Flow<AlarmsStateUpdate> = map { (event, timestamp) ->
+        createAlarm(event.id, timestamp)
         signal(AlarmsSignal.AlarmAdded)
         null
     }.filterNotNull()
