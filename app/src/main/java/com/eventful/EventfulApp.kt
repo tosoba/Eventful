@@ -9,6 +9,7 @@ import dagger.android.DaggerApplication
 import io.reactivex.plugins.RxJavaPlugins
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import net.danlew.android.joda.JodaTimeAndroid
 import ss.com.bannerslider.Slider
 
 @ExperimentalCoroutinesApi
@@ -22,6 +23,7 @@ class EventfulApp : DaggerApplication() {
     override fun onCreate() {
         super.onCreate()
         Slider.init(BannerSliderImageLoadingService)
+        JodaTimeAndroid.init(this)
         RxJavaPlugins.setErrorHandler {
             Log.e("Rx error", it?.message ?: "Unknown message")
         }

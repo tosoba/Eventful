@@ -48,7 +48,7 @@
         android:id="@+id/weather_humidity"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_margin="20dp"
+        android:layout_margin="30dp"
         android:inflatedId="@id/weather_humidity"
         app:layout_constraintBottom_toTopOf="@+id/weather_description"
         app:layout_constraintDimensionRatio="1:1"

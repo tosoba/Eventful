@@ -56,8 +56,7 @@ class WeatherFragment :
                         WeatherSymbolInfoBindingModel_()
                             .id("weather-forecast-info")
                             .symbolResource(WeatherStatus.fromIcon(currently.icon).resource)
-                            .title("Forecast")
-                            .info(currently.summary),
+                            .title("Forecast"),
                         WeatherSymbolInfoBindingModel_()
                             .id("weather-wind-info")
                             .symbolResource(R.drawable.wind_info)

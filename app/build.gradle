@@ -112,6 +112,7 @@ dependencies {
     implementation "com.flickr4java:flickr4java:$flickrVersion"
     implementation "com.google.code.gson:gson:$gsonVersion"
     api "com.google.guava:guava:$guavaVersion"
+    implementation "net.danlew:android.joda:$jodaTimeVersion"
     implementation "com.markodevcic.peko:peko:$pekoVersion"
 
     testImplementation "junit:junit:$junit4Version"

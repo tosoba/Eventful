@@ -45,6 +45,7 @@ buildscript {
         glideVersion = '4.9.0'
         gsonVersion = '2.8.5'
         guavaVersion = '27.1-android'
+        jodaTimeVersion = '2.10.6'
         jsoupVersion = '1.12.1'
         pekoVersion = '1.0.1'
         roomVersion = '2.2.0-rc01'

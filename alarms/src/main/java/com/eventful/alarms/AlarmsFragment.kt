@@ -3,6 +3,7 @@ package com.eventful.alarms
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
@@ -60,12 +61,18 @@ class AlarmsFragment : DaggerViewModelFragment<AlarmsViewModel>(R.layout.fragmen
         ) { selectable ->
             selectable.listItem(
                 clicked = View.OnClickListener {
-                    if (mode is AlarmsMode.All) {
-                        actionModeController.finish(false)
-                        navigationFragment?.showFragment(
-                            fragmentFactory.eventFragment(selectable.item.event)
-                        )
-                    }
+                    //TODO: move this to popup menu
+//                    if (mode is AlarmsMode.All) {
+//                        actionModeController.finish(false)
+//                        navigationFragment?.showFragment(
+//                            fragmentFactory.eventFragment(selectable.item.event)
+//                        )
+//                    }
+                    Toast.makeText(
+                        context,
+                        "Time left: ${selectable.item.formattedTimeLeft}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 },
                 longClicked = View.OnLongClickListener {
                     lifecycleScope.launch {
