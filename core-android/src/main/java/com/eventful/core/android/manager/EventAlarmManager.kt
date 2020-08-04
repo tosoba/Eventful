@@ -12,20 +12,19 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class EventAlarmManager : BroadcastReceiver(), IEventAlarmManager {
+class EventAlarmManager @Inject constructor(private val context: Context) : IEventAlarmManager {
 
-    @Inject
-    lateinit var context: Context
+    class Receiver : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent == null || context == null) return
+            val extras = intent.extras
+            if (extras == null || !extras.containsKey(EXTRA_ID)) return
+            AlarmNotifications.show(context, extras.getInt(EXTRA_ID))
+        }
+    }
 
     private val manager: AlarmManager = context
         .getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-    override fun onReceive(context: Context?, intent: Intent?) {
-        if (intent == null) return
-        val extras = intent.extras
-        if (extras == null || !extras.containsKey(EXTRA_ID)) return
-        AlarmNotifications.show(this.context, extras.getInt(EXTRA_ID))
-    }
 
     override fun create(id: Int, timestamp: Long) {
         create(pendingIntent(id), timestamp)

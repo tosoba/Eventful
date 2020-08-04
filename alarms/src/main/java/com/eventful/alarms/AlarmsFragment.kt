@@ -1,6 +1,7 @@
 package com.eventful.alarms
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
@@ -118,6 +119,12 @@ class AlarmsFragment : DaggerViewModelFragment<AlarmsViewModel>(R.layout.fragmen
         }
 
         viewUpdatesJob = viewModel.viewUpdates
+            .onEach {
+                Log.e(
+                    "VIEW_UPDATE",
+                    "${javaClass.simpleName.replace("Fragment", "")}:${it}"
+                )
+            }
             .onEach { update ->
                 when (update) {
                     is AlarmsViewUpdate.Alarms -> epoxyController.setData(update.alarms)
@@ -138,7 +145,7 @@ class AlarmsFragment : DaggerViewModelFragment<AlarmsViewModel>(R.layout.fragmen
                                 )
                             }
                         }.apply {
-                            setOnCancelListener {
+                            fun updateDialogStatusToHidden() {
                                 addEditAlarmDialog = null
                                 lifecycleScope.launch {
                                     viewModel.intent(
@@ -148,6 +155,8 @@ class AlarmsFragment : DaggerViewModelFragment<AlarmsViewModel>(R.layout.fragmen
                                     )
                                 }
                             }
+                            setOnCancelListener { updateDialogStatusToHidden() }
+                            setOnDismissListener { updateDialogStatusToHidden() }
                         }
                     }
                 }
