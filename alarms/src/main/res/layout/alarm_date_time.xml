@@ -9,12 +9,8 @@
     </data>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginBottom="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:gravity="end"
         android:orientation="vertical">
 
@@ -24,6 +20,7 @@
             android:layout_gravity="end"
             android:text="@{alarm.formattedTime}"
             android:textAlignment="gravity"
+            android:textColor="@color/blueText"
             android:textSize="25sp" />
 
         <TextView
@@ -31,7 +28,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:text="@{alarm.formattedDate}"
-            android:textAlignment="gravity" />
+            android:textAlignment="gravity"
+            android:textColor="@color/blueText" />
 
     </LinearLayout>
 </layout>
