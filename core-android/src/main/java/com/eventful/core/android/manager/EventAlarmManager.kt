@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import com.eventful.core.android.notification.AlarmNotifications
 import com.eventful.core.manager.IEventAlarmManager
 import javax.inject.Inject
@@ -40,8 +41,12 @@ class EventAlarmManager @Inject constructor(private val context: Context) : IEve
         create(intent, timestamp)
     }
 
-    private fun pendingIntent(id: Int): PendingIntent = PendingIntent
-        .getBroadcast(context, id, Intent(context, javaClass).apply { putExtra(EXTRA_ID, id) }, 0)
+    private fun pendingIntent(id: Int): PendingIntent = PendingIntent.getBroadcast(
+        context,
+        id,
+        Intent(context, Receiver::class.java).apply { putExtra(EXTRA_ID, id) },
+        0
+    )
 
     private fun create(pendingIntent: PendingIntent, timestamp: Long) {
         when {

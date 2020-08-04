@@ -28,7 +28,7 @@
         </activity>
 
         <receiver
-            android:name=".core.android.manager.EventAlarmManager$Receiver"
+            android:name="com.eventful.core.android.manager.EventAlarmManager$Receiver"
             android:enabled="true"
             android:exported="true" />
 
