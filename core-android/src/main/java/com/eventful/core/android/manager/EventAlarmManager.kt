@@ -7,7 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import com.eventful.core.android.notification.AlarmNotifications
-import com.eventful.core.android.service.AlarmDeleterService
+import com.eventful.core.android.service.EventAlarmService
 import com.eventful.core.manager.IEventAlarmManager
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -23,9 +23,13 @@ class EventAlarmManager @Inject constructor(private val context: Context) : IEve
             //TODO: show notification from service instead (rename it to EventAlarmService)
             //customize notification with Event thumbnail, name, address + remaining time till eventStart
             //for ex. Starts in:
-            val alarmId = extras.getInt(EXTRA_ID)
-            AlarmNotifications.show(context, alarmId)
-            context.startService(AlarmDeleterService.intent(context, alarmId))
+            context.startService(EventAlarmService.intent(context, extras.getInt(EXTRA_ID)))
+        }
+
+        companion object {
+            fun intent(
+                context: Context, alarmId: Int
+            ): Intent = Intent(context, Receiver::class.java).apply { putExtra(EXTRA_ID, alarmId) }
         }
     }
 
@@ -47,10 +51,7 @@ class EventAlarmManager @Inject constructor(private val context: Context) : IEve
     }
 
     private fun pendingIntent(id: Int): PendingIntent = PendingIntent.getBroadcast(
-        context,
-        id,
-        Intent(context, Receiver::class.java).apply { putExtra(EXTRA_ID, id) },
-        0
+        context, id, Receiver.intent(context, id), 0
     )
 
     private fun create(pendingIntent: PendingIntent, timestamp: Long) {

@@ -70,6 +70,8 @@ class EventRepository @Inject constructor(
     override fun isEventSavedFlow(id: String): Flow<Boolean> = eventDao.getEventFlow(id)
         .map { it != null }
 
+    override suspend fun getEventOfAlarm(alarmId: Int): IEvent = eventDao.getEventByAlarmId(alarmId)
+
     private val NetworkResponse<EventSearchResponse, TicketMasterErrorResponse>.resource: Resource<PagedResult<IEvent>>
         get() = when (this) {
             is NetworkResponse.Success -> Resource.Success(

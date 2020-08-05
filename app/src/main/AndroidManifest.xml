@@ -28,12 +28,12 @@
         </activity>
 
         <receiver
-            android:name=".core.android.manager.EventAlarmManager$Receiver"
+            android:name="com.eventful.core.android.manager.EventAlarmManager$Receiver"
             android:enabled="true"
             android:exported="true" />
 
         <service
-            android:name=".core.android.service.AlarmDeleterService"
+            android:name="com.eventful.core.android.service.EventAlarmService"
             android:enabled="true"
             android:exported="false" />
 

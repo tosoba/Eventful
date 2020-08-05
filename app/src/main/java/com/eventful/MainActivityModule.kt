@@ -11,7 +11,7 @@ import com.eventful.core.android.navigation.IMainChildFragmentNavDestinations
 import com.eventful.core.android.provider.ConnectedStateProvider
 import com.eventful.core.android.provider.LocationStateProvider
 import com.eventful.core.android.provider.PopBackStackSignalProvider
-import com.eventful.core.android.service.AlarmDeleterService
+import com.eventful.core.android.service.EventAlarmService
 import com.eventful.event.EventModule
 import com.eventful.event.IEventChildFragmentsFactory
 import com.eventful.event.details.EventDetailsModule
@@ -73,7 +73,7 @@ abstract class MainActivityModule {
     abstract fun popBackStackSignalProvider(mainViewModel: MainViewModel): PopBackStackSignalProvider
 
     @ContributesAndroidInjector
-    abstract fun alarmDeleterService(): AlarmDeleterService
+    abstract fun eventAlarmService(): EventAlarmService
 
     companion object {
         @Provides
