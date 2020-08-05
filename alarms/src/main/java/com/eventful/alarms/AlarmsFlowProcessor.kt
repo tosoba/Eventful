@@ -3,9 +3,10 @@ package com.eventful.alarms
 import androidx.lifecycle.SavedStateHandle
 import com.eventful.core.android.base.FlowProcessor
 import com.eventful.core.android.base.removedFromAlarmsMessage
+import com.eventful.core.android.model.alarm.Alarm
+import com.eventful.core.usecase.alarm.CreateAlarm
 import com.eventful.core.usecase.alarm.DeleteAlarms
 import com.eventful.core.usecase.alarm.GetAlarms
-import com.eventful.core.usecase.alarm.CreateAlarm
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
@@ -85,7 +86,7 @@ class AlarmsFlowProcessor(
         signal: suspend (AlarmsSignal) -> Unit
     ): Flow<AlarmsStateUpdate> = map {
         val selectedAlarms = currentState().items.data.filter { it.selected }.map { it.item }
-        withContext(ioDispatcher) { deleteAlarms(selectedAlarms) }
+        withContext(ioDispatcher) { deleteAlarms(selectedAlarms.map(Alarm::id)) }
         signal(AlarmsSignal.AlarmsRemoved)
         AlarmsStateUpdate.RemovedAlarms(
             snackbarText = removedFromAlarmsMessage(alarmsCount = selectedAlarms.size),

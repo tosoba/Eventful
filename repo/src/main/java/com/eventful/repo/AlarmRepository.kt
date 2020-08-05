@@ -30,8 +30,8 @@ class AlarmRepository @Inject constructor(
                 .flatten()
         }
 
-    override suspend fun deleteAlarms(alarms: List<IAlarm>) {
-        alarmDao.deleteAlarms(alarms.map(IAlarm::id))
+    override suspend fun deleteAlarms(alarmIds: List<Int>) {
+        alarmDao.deleteAlarms(alarmIds)
     }
 
     override suspend fun insertAlarm(eventId: String, timestamp: Long): Int = alarmDao
