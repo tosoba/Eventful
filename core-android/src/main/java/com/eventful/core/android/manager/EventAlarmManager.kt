@@ -6,7 +6,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import com.eventful.core.android.notification.AlarmNotifications
 import com.eventful.core.android.service.EventAlarmService
 import com.eventful.core.manager.IEventAlarmManager
 import javax.inject.Inject
@@ -20,9 +19,6 @@ class EventAlarmManager @Inject constructor(private val context: Context) : IEve
             if (intent == null || context == null) return
             val extras = intent.extras
             if (extras == null || !extras.containsKey(EXTRA_ID)) return
-            //TODO: show notification from service instead (rename it to EventAlarmService)
-            //customize notification with Event thumbnail, name, address + remaining time till eventStart
-            //for ex. Starts in:
             context.startService(EventAlarmService.intent(context, extras.getInt(EXTRA_ID)))
         }
 

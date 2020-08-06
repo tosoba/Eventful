@@ -12,7 +12,6 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
-import com.eventful.core.android.R
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -40,21 +39,20 @@ fun Context.themeColor(@AttrRes attrRes: Int): Int {
     return typedValue.data
 }
 
-suspend fun Context.loadBitmap(url: String): Bitmap = suspendCoroutine {
+suspend fun Context.loadBitmap(url: String): Bitmap? = suspendCoroutine {
     Glide.with(this)
         .asBitmap()
         .load(url)
-        .placeholder(R.drawable.event_placeholder)
         .listener(object : RequestListener<Bitmap> {
             override fun onLoadFailed(
                 e: GlideException?,
                 model: Any?,
                 target: Target<Bitmap>?,
                 isFirstResource: Boolean
-            ): Boolean = throw IllegalStateException()
+            ): Boolean = it.resume(null).let { false }
 
             override fun onResourceReady(
-                resource: Bitmap,
+                resource: Bitmap?,
                 model: Any?,
                 target: Target<Bitmap>?,
                 dataSource: DataSource?,

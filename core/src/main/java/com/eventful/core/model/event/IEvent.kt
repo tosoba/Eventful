@@ -20,12 +20,11 @@ interface IEvent {
 }
 
 val IEvent.startTimestamp: Long
-    get() {
-        val calendar = GregorianCalendar.getInstance()
-        calendar.time = requireNotNull(startDate)
+    get() = GregorianCalendar.getInstance().run {
+        time = requireNotNull(startDate)
         val startTime = requireNotNull(startTime)
         val splitTime = startTime.split(':')
-        calendar.set(Calendar.HOUR_OF_DAY, splitTime[0].toInt())
-        calendar.set(Calendar.MINUTE, splitTime[1].toInt())
-        return calendar.timeInMillis
+        set(Calendar.HOUR_OF_DAY, splitTime[0].toInt())
+        set(Calendar.MINUTE, splitTime[1].toInt())
+        return timeInMillis
     }

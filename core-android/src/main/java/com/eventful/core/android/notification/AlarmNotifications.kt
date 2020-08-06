@@ -29,21 +29,28 @@ object AlarmNotifications {
         }
     }
 
-    fun show(context: Context, alarmId: Int, event: IEvent, thumbnail: Bitmap) {
+    fun show(context: Context, alarmId: Int, event: IEvent, thumbnail: Bitmap?) {
+        val summaryText =
+            "Starts in: ${Period.seconds(((event.startTimestamp - System.currentTimeMillis()) / 1000L).toInt()).printedNormalized}"
         NotificationManagerCompat.from(context)
             .notify(
                 alarmId,
                 NotificationCompat.Builder(context, ID)
                     .setSmallIcon(R.drawable.alarms)
-                    .setLargeIcon(thumbnail)
                     .setContentTitle(event.name)
                     .setContentText(event.name)
                     .setStyle(
-                        NotificationCompat.BigPictureStyle()
-                            .bigPicture(thumbnail)
-                            .bigLargeIcon(thumbnail)
-                            .setBigContentTitle(event.name)
-                            .setSummaryText("Starts in: ${Period.seconds((event.startTimestamp - System.currentTimeMillis() / 1000L).toInt()).printedNormalized}")
+                        if (thumbnail != null) {
+                            NotificationCompat.BigPictureStyle()
+                                .bigPicture(thumbnail)
+                                .bigLargeIcon(thumbnail)
+                                .setBigContentTitle(event.name)
+                                .setSummaryText(summaryText)
+                        } else {
+                            NotificationCompat.BigTextStyle()
+                                .setBigContentTitle(event.name)
+                                .setSummaryText(summaryText)
+                        }
                     )
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                     .build()
