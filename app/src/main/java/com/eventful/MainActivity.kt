@@ -63,9 +63,6 @@ class MainActivity :
         intent?.eventExtra?.let(::showEvent)
     }
 
-    private val Intent.eventExtra: Event?
-        get() = extras?.getParcelable(AlarmNotifications.EVENT_EXTRA)
-
     private fun showEvent(event: Event) {
         navigationFragment?.currentTopFragment?.let { topFragment ->
             if (topFragment is EventNavigationController) {

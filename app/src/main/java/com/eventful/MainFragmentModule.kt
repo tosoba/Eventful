@@ -12,5 +12,9 @@ import kotlinx.coroutines.FlowPreview
 abstract class MainFragmentModule {
     @FragmentScoped
     @ContributesAndroidInjector
+    abstract fun mainNavigationFragment(): MainNavigationFragment
+
+    @FragmentScoped
+    @ContributesAndroidInjector
     abstract fun mainFragment(): MainFragment
 }
