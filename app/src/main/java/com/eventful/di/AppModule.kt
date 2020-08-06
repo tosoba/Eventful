@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import com.eventful.EventfulApp
 import com.eventful.MainActivity
+import com.eventful.core.android.di.name.MainActivityIntent
 import com.eventful.core.android.manager.EventAlarmManager
 import com.eventful.core.android.util.ext.isConnected
 import com.eventful.core.manager.IEventAlarmManager
@@ -53,6 +54,7 @@ abstract class AppModule {
             .build()
 
         @Provides
+        @MainActivityIntent
         fun mainActivityIntent(context: Context): Intent = Intent(context, MainActivity::class.java)
     }
 }

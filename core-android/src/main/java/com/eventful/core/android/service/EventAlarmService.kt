@@ -2,6 +2,7 @@ package com.eventful.core.android.service
 
 import android.content.Context
 import android.content.Intent
+import com.eventful.core.android.di.name.MainActivityIntent
 import com.eventful.core.android.notification.AlarmNotifications
 import com.eventful.core.android.util.ext.loadBitmap
 import com.eventful.core.usecase.alarm.DeleteAlarms
@@ -22,6 +23,7 @@ class EventAlarmService : DaggerIntentService(NAME) {
     lateinit var ioDispatcher: CoroutineDispatcher
 
     @Inject
+    @field:MainActivityIntent
     lateinit var notificationContentIntent: Intent
 
     override fun onHandleIntent(intent: Intent?) {

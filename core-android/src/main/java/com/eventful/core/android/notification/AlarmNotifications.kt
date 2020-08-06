@@ -61,7 +61,6 @@ object AlarmNotifications {
                         if (thumbnail != null) {
                             NotificationCompat.BigPictureStyle()
                                 .bigPicture(thumbnail)
-                                .bigLargeIcon(thumbnail)
                                 .setBigContentTitle(event.name)
                                 .setSummaryText(summaryText)
                         } else {
