@@ -9,6 +9,11 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 interface EventNavigationController {
     val viewPager: ViewPager
 
+    fun showEventDetails() {
+        viewPager.currentItem =
+            navigationItems[R.id.bottom_nav_event_details] ?: throw IllegalStateException()
+    }
+
     companion object {
         val navigationItems = mapOf(
             R.id.bottom_nav_event_details to 0,

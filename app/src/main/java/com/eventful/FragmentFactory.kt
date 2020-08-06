@@ -17,12 +17,12 @@ import kotlinx.coroutines.FlowPreview
 @ExperimentalCoroutinesApi
 object FragmentFactory :
     IMainChildFragmentNavDestinations,
-    IMainFragmentNavDestinations,
+    IMainNavDestinations,
     IEventChildFragmentsFactory {
 
     override fun eventFragment(event: Event): Fragment = EventFragment.new(event)
 
-    override val alarmsFragment: AlarmsFragment get() = AlarmsFragment.new(AlarmsMode.All)
+    override val alarmsFragment: Fragment get() = AlarmsFragment.new(AlarmsMode.All)
 
     override fun eventDetailsFragment(
         event: Event,

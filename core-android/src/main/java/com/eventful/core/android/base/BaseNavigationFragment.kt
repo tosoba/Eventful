@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.eventful.core.android.util.ext.hideBackNavArrow
 
 abstract class BaseNavigationFragment : Fragment() {
@@ -12,6 +13,9 @@ abstract class BaseNavigationFragment : Fragment() {
     protected abstract val initialFragment: Fragment
     protected abstract val navigationFragmentLayoutId: Int
     protected abstract val backStackNavigationContainerId: Int
+
+    val currentTopFragment: Fragment?
+        get() = childFragmentManager.findFragmentById(backStackNavigationContainerId)
 
     override fun onCreateView(
         inflater: LayoutInflater,

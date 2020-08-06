@@ -7,6 +7,7 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.eventful.core.android.base.DaggerViewModelActivity
 import com.eventful.core.android.controller.DrawerLayoutController
+import com.eventful.core.android.controller.EventNavigationController
 import com.eventful.core.android.model.event.Event
 import com.eventful.core.android.notification.AlarmNotifications
 import com.eventful.core.android.util.delegate.viewBinding
@@ -18,6 +19,7 @@ import com.markodevcic.peko.rationale.AlertDialogPermissionRationale
 import com.markodevcic.peko.requestPermissionsAsync
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
+import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 @FlowPreview
@@ -41,9 +43,12 @@ class MainActivity :
             true
         }
 
-    private val mainNavigationFragment: MainNavigationFragment? by lazy(LazyThreadSafetyMode.NONE) {
+    private val navigationFragment: MainNavigationFragment? by lazy(LazyThreadSafetyMode.NONE) {
         supportFragmentManager.findFragmentById(R.id.main_navigation_fragment) as? MainNavigationFragment
     }
+
+    @Inject
+    lateinit var navDestinations: IMainNavDestinations
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,21 +56,25 @@ class MainActivity :
         binding.mainDrawerNavView.setNavigationItemSelectedListener(drawerItemSelectedListener)
 
         requestPermission()
-
-        intent?.eventExtra?.let {
-
-        }
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        intent?.eventExtra?.let {
-
-        }
+        intent?.eventExtra?.let(::showEvent)
     }
 
     private val Intent.eventExtra: Event?
         get() = extras?.getParcelable(AlarmNotifications.EVENT_EXTRA)
+
+    private fun showEvent(event: Event) {
+        navigationFragment?.currentTopFragment?.let { topFragment ->
+            if (topFragment is EventNavigationController) {
+                topFragment.showEventDetails()
+            } else {
+                navigationFragment?.showFragment(navDestinations.eventFragment(event))
+            }
+        }
+    }
 
     override fun onDestroy() {
         if (isChangingConfigurations) supervisorJob.completeExceptionally(ActivityRotatingException())
@@ -76,7 +85,7 @@ class MainActivity :
     override fun onSupportNavigateUp(): Boolean = onBackPressed().let { true }
 
     override fun onBackPressed() {
-        if (mainNavigationFragment?.onBackPressed() == true) launch {
+        if (navigationFragment?.onBackPressed() == true) launch {
             viewModel.signal(MainSignal.PopMainBackStackSignal)
         } else {
             super.onBackPressed()

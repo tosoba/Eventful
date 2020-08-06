@@ -83,7 +83,7 @@ abstract class MainActivityModule {
         ): MainViewModel = mainActivity.savedStateViewModelFrom(factory)
 
         @Provides
-        fun mainFragmentNavDestinations(): IMainFragmentNavDestinations = FragmentFactory
+        fun mainFragmentNavDestinations(): IMainNavDestinations = FragmentFactory
 
         @Provides
         fun mainChildFragmentNavDestinations(): IMainChildFragmentNavDestinations = FragmentFactory

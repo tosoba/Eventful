@@ -56,7 +56,7 @@ class MainFragment : DaggerFragment(R.layout.fragment_main), MenuController, Sna
     internal lateinit var popBackStackSignalProvider: PopBackStackSignalProvider
 
     @Inject
-    internal lateinit var navDestinations: IMainFragmentNavDestinations
+    internal lateinit var navDestinations: IMainNavDestinations
 
     private var popBackStackSignalProviderJob: Job? = null
 
