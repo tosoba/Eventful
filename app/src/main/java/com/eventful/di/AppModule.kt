@@ -1,7 +1,9 @@
 package com.eventful.di
 
 import android.content.Context
+import android.content.Intent
 import com.eventful.EventfulApp
+import com.eventful.MainActivity
 import com.eventful.core.android.manager.EventAlarmManager
 import com.eventful.core.android.util.ext.isConnected
 import com.eventful.core.manager.IEventAlarmManager
@@ -49,5 +51,8 @@ abstract class AppModule {
             .addInterceptor(offlineCacheInterceptor { context.isConnected })
             .cache(Cache(context.cacheDir, 10 * 1000 * 1000))
             .build()
+
+        @Provides
+        fun mainActivityIntent(context: Context): Intent = Intent(context, MainActivity::class.java)
     }
 }

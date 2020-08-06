@@ -1,11 +1,14 @@
 package com.eventful
 
 import android.Manifest
+import android.content.Intent
 import android.os.Bundle
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.eventful.core.android.base.DaggerViewModelActivity
 import com.eventful.core.android.controller.DrawerLayoutController
+import com.eventful.core.android.model.event.Event
+import com.eventful.core.android.notification.AlarmNotifications
 import com.eventful.core.android.util.delegate.viewBinding
 import com.eventful.databinding.ActivityMainBinding
 import com.google.android.material.navigation.NavigationView
@@ -48,7 +51,21 @@ class MainActivity :
         binding.mainDrawerNavView.setNavigationItemSelectedListener(drawerItemSelectedListener)
 
         requestPermission()
+
+        intent?.eventExtra?.let {
+
+        }
     }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        intent?.eventExtra?.let {
+
+        }
+    }
+
+    private val Intent.eventExtra: Event?
+        get() = extras?.getParcelable(AlarmNotifications.EVENT_EXTRA)
 
     override fun onDestroy() {
         if (isChangingConfigurations) supervisorJob.completeExceptionally(ActivityRotatingException())

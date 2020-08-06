@@ -7,10 +7,7 @@ import com.eventful.core.android.util.ext.loadBitmap
 import com.eventful.core.usecase.alarm.DeleteAlarms
 import com.eventful.core.usecase.event.GetEventOfAlarm
 import dagger.android.DaggerIntentService
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import javax.inject.Inject
 
 class EventAlarmService : DaggerIntentService(NAME) {
@@ -24,17 +21,26 @@ class EventAlarmService : DaggerIntentService(NAME) {
     @Inject
     lateinit var ioDispatcher: CoroutineDispatcher
 
+    @Inject
+    lateinit var notificationContentIntent: Intent
+
     override fun onHandleIntent(intent: Intent?) {
         val extras = intent?.extras
         if (extras == null || !extras.containsKey(EXTRA_ID)) return
         val alarmId = extras.getInt(EXTRA_ID)
-        GlobalScope.launch {
-            val event = withContext(ioDispatcher) { getEventOfAlarm(alarmId) }
-            val thumbnail = withContext(ioDispatcher) {
-                applicationContext.loadBitmap(event.imageUrl)
+        GlobalScope.launch(ioDispatcher) {
+            val event = getEventOfAlarm(alarmId)
+            val thumbnail = applicationContext.loadBitmap(event.imageUrl)
+            withContext(Dispatchers.Main) {
+                AlarmNotifications.show(
+                    applicationContext,
+                    alarmId,
+                    event,
+                    thumbnail,
+                    notificationContentIntent
+                )
             }
-            AlarmNotifications.show(applicationContext, alarmId, event, thumbnail)
-            withContext(ioDispatcher) { deleteAlarm(listOf(alarmId)) }
+            deleteAlarm(listOf(alarmId))
         }
     }
 
