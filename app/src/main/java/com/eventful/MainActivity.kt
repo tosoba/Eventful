@@ -4,7 +4,9 @@ import android.Manifest
 import android.content.Intent
 import android.os.Bundle
 import androidx.core.view.GravityCompat
+import androidx.core.view.children
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.lifecycleScope
 import com.eventful.core.android.base.DaggerViewModelActivity
 import com.eventful.core.android.controller.DrawerLayoutController
 import com.eventful.core.android.controller.EventNavigationController
@@ -17,6 +19,9 @@ import com.markodevcic.peko.Peko
 import com.markodevcic.peko.rationale.AlertDialogPermissionRationale
 import com.markodevcic.peko.requestPermissionsAsync
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -34,10 +39,7 @@ class MainActivity :
 
     override val drawerLayout: DrawerLayout get() = binding.mainDrawerLayout
     private val drawerItemSelectedListener = NavigationView.OnNavigationItemSelectedListener {
-        when (it.itemId) {
-        }
-        binding.mainDrawerLayout.closeDrawer(GravityCompat.END)
-        true
+        binding.mainDrawerLayout.closeDrawer(GravityCompat.END).let { false }
     }
 
     private val navigationFragment: MainNavigationFragment? by lazy(LazyThreadSafetyMode.NONE) {
@@ -52,6 +54,30 @@ class MainActivity :
         setContentView(binding.root)
         binding.mainDrawerNavView.setNavigationItemSelectedListener(drawerItemSelectedListener)
 
+        viewModel.viewUpdates
+            .filterIsInstance<MainViewUpdate.DrawerMenu>()
+            .onEach { (alarms, events) ->
+                val drawerMenu = binding.mainDrawerNavView.menu
+                val items = drawerMenu.children.map { it.itemId to it }.toMap()
+                items[R.id.drawer_alarms]?.subMenu?.let { alarmsMenu ->
+                    alarmsMenu.clear()
+                    alarms.forEach { alarm ->
+                        alarmsMenu.add(alarm.event.name).setOnMenuItemClickListener {
+                            showEvent(alarm.event).let { false }
+                        }
+                    }
+                }
+                items[R.id.drawer_events]?.subMenu?.let { eventsMenu ->
+                    eventsMenu.clear()
+                    events.forEach { event ->
+                        eventsMenu.add(event.name).setOnMenuItemClickListener {
+                            showEvent(event).let { false }
+                        }
+                    }
+                }
+            }
+            .launchIn(lifecycleScope)
+
         requestPermission()
     }
 
@@ -62,11 +88,8 @@ class MainActivity :
 
     private fun showEvent(event: Event) {
         navigationFragment?.currentTopFragment?.let { topFragment ->
-            if (topFragment is EventNavigationController) {
-                topFragment.showEventDetails()
-            } else {
-                navigationFragment?.showFragment(navDestinations.eventFragment(event))
-            }
+            if (topFragment is EventNavigationController) topFragment.showEventDetails()
+            else navigationFragment?.showFragment(navDestinations.eventFragment(event))
         }
     }
 

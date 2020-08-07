@@ -27,9 +27,7 @@ class EventRepository @Inject constructor(
 ) : IEventRepository {
 
     override suspend fun getNearbyEvents(
-        lat: Double,
-        lon: Double,
-        offset: Int?
+        lat: Double, lon: Double, offset: Int?
     ): Resource<PagedResult<IEvent>> = ticketMasterApi.searchEventsAsync(
         radius = DEFAULT_RADIUS,
         radiusUnit = RadiusUnit.KM,
@@ -38,8 +36,7 @@ class EventRepository @Inject constructor(
     ).await().resource
 
     override suspend fun searchEvents(
-        searchText: String,
-        offset: Int?
+        searchText: String, offset: Int?
     ): Resource<PagedResult<IEvent>> = ticketMasterApi.searchEventsAsync(
         keyword = searchText,
         page = offset
@@ -71,6 +68,9 @@ class EventRepository @Inject constructor(
         .map { it != null }
 
     override suspend fun getEventOfAlarm(alarmId: Int): IEvent = eventDao.getEventByAlarmId(alarmId)
+
+    override fun getUpcomingEvents(limit: Int): Flow<List<IEvent>> = eventDao
+        .getUpcomingEventsFlow(limit)
 
     private val NetworkResponse<EventSearchResponse, TicketMasterErrorResponse>.resource: Resource<PagedResult<IEvent>>
         get() = when (this) {

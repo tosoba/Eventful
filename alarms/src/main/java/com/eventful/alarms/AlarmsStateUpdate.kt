@@ -20,7 +20,7 @@ sealed class AlarmsStateUpdate : StateUpdate<AlarmsState> {
     data class Alarms(val alarms: List<IAlarm>) : AlarmsStateUpdate() {
         override fun invoke(state: AlarmsState): AlarmsState = state.copy(
             items = DataList(
-                data = alarms.map { Selectable(Alarm(it)) },
+                data = alarms.map { Selectable(Alarm.from(it)) },
                 status = LoadedSuccessfully,
                 limitHit = state.items.data.size == alarms.size
             )

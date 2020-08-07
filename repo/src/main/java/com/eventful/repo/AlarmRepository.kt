@@ -24,6 +24,11 @@ class AlarmRepository @Inject constructor(
         .getEventAlarms(eventId)
         .asAlarmList
 
+    override fun getUpcomingAlarms(limit: Int): Flow<List<IAlarm>> = eventsDao
+        .getUpcomingAlarmsFlow(limit)
+        .asAlarmList
+        .map { alarms -> alarms.sortedBy { it.timestamp }.take(limit) }
+
     private val Flow<List<EventAlarmsEntity>>.asAlarmList: Flow<List<Alarm>>
         get() = map { eventAlarms ->
             eventAlarms.map { (event, alarms) -> alarms.map { Alarm(it.id, event, it.timestamp) } }

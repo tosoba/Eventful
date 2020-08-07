@@ -1,8 +1,12 @@
 package com.eventful
 
-import com.eventful.core.model.location.LocationResult
-import com.eventful.core.android.model.location.LocationStatus
 import com.eventful.core.android.base.StateUpdate
+import com.eventful.core.android.model.alarm.Alarm
+import com.eventful.core.android.model.event.Event
+import com.eventful.core.android.model.location.LocationStatus
+import com.eventful.core.model.alarm.IAlarm
+import com.eventful.core.model.event.IEvent
+import com.eventful.core.model.location.LocationResult
 import com.google.android.gms.maps.model.LatLng
 
 sealed class MainStateUpdate : StateUpdate<MainState> {
@@ -38,5 +42,17 @@ sealed class MainStateUpdate : StateUpdate<MainState> {
                 )
             )
         }
+    }
+
+    data class UpcomingEvents(private val events: List<IEvent>) : MainStateUpdate() {
+        override fun invoke(state: MainState): MainState = state.copy(
+            upcomingEvents = events.map { Event(it) }
+        )
+    }
+
+    data class UpcomingAlarms(private val alarms: List<IAlarm>) : MainStateUpdate() {
+        override fun invoke(state: MainState): MainState = state.copy(
+            upcomingAlarms = alarms.map(Alarm.Companion::from)
+        )
     }
 }

@@ -1,14 +1,16 @@
 package com.eventful
 
 import androidx.lifecycle.SavedStateHandle
+import com.eventful.core.android.base.FlowProcessor
+import com.eventful.core.android.model.location.LocationStatus
 import com.eventful.core.model.location.LocationResult
-import com.eventful.core.usecase.location.GetLocation
+import com.eventful.core.usecase.alarm.GetUpcomingAlarms
 import com.eventful.core.usecase.connection.IsConnectedFlow
+import com.eventful.core.usecase.event.GetUpcomingEventsFlow
+import com.eventful.core.usecase.location.GetLocation
 import com.eventful.core.usecase.location.IsLocationAvailableFlow
 import com.eventful.core.util.ext.flatMapFirst
 import com.eventful.core.util.ext.takeWhileInclusive
-import com.eventful.core.android.base.FlowProcessor
-import com.eventful.core.android.model.location.LocationStatus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -20,7 +22,9 @@ import javax.inject.Inject
 class MainFlowProcessor @Inject constructor(
     private val getLocation: GetLocation,
     private val isConnectedFlow: IsConnectedFlow,
-    private val isLocationAvailableFlow: IsLocationAvailableFlow
+    private val isLocationAvailableFlow: IsLocationAvailableFlow,
+    private val getUpcomingAlarms: GetUpcomingAlarms,
+    private val getUpcomingEvents: GetUpcomingEventsFlow
 ) : FlowProcessor<MainIntent, MainStateUpdate, MainState, MainSignal> {
 
     override fun updates(
@@ -35,7 +39,13 @@ class MainFlowProcessor @Inject constructor(
         isConnectedFlow()
             .distinctUntilChanged()
             .map { MainStateUpdate.Connection(it) },
-        locationAvailabilityUpdates(states)
+        locationAvailabilityUpdates(states),
+        getUpcomingAlarms(UPCOMING_ITEMS_LIMIT)
+            .distinctUntilChanged()
+            .map { alarms -> MainStateUpdate.UpcomingAlarms(alarms) },
+        getUpcomingEvents(UPCOMING_ITEMS_LIMIT)
+            .distinctUntilChanged()
+            .map { events -> MainStateUpdate.UpcomingEvents(events) }
     )
 
     override fun stateWillUpdate(
@@ -82,4 +92,8 @@ class MainFlowProcessor @Inject constructor(
             emit(MainStateUpdate.Location.Result(LocationResult.Loading))
             emit(MainStateUpdate.Location.Result(getLocation()))
         }
+
+    companion object {
+        private const val UPCOMING_ITEMS_LIMIT = 3
+    }
 }
