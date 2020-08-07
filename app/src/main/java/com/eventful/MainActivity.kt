@@ -9,7 +9,6 @@ import com.eventful.core.android.base.DaggerViewModelActivity
 import com.eventful.core.android.controller.DrawerLayoutController
 import com.eventful.core.android.controller.EventNavigationController
 import com.eventful.core.android.model.event.Event
-import com.eventful.core.android.notification.AlarmNotifications
 import com.eventful.core.android.util.delegate.viewBinding
 import com.eventful.databinding.ActivityMainBinding
 import com.google.android.material.navigation.NavigationView
@@ -17,7 +16,6 @@ import com.markodevcic.peko.ActivityRotatingException
 import com.markodevcic.peko.Peko
 import com.markodevcic.peko.rationale.AlertDialogPermissionRationale
 import com.markodevcic.peko.requestPermissionsAsync
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
@@ -34,14 +32,13 @@ class MainActivity :
 
     private val binding: ActivityMainBinding by viewBinding(ActivityMainBinding::inflate)
 
-    override val drawerLayout: DrawerLayout? get() = main_drawer_layout
-    private val drawerItemSelectedListener: NavigationView.OnNavigationItemSelectedListener =
-        NavigationView.OnNavigationItemSelectedListener { item ->
-            when (item.itemId) {
-            }
-            binding.mainDrawerLayout.closeDrawer(GravityCompat.END)
-            true
+    override val drawerLayout: DrawerLayout get() = binding.mainDrawerLayout
+    private val drawerItemSelectedListener = NavigationView.OnNavigationItemSelectedListener {
+        when (it.itemId) {
         }
+        binding.mainDrawerLayout.closeDrawer(GravityCompat.END)
+        true
+    }
 
     private val navigationFragment: MainNavigationFragment? by lazy(LazyThreadSafetyMode.NONE) {
         supportFragmentManager.findFragmentById(R.id.main_navigation_fragment) as? MainNavigationFragment
@@ -52,7 +49,7 @@ class MainActivity :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(binding.root)
         binding.mainDrawerNavView.setNavigationItemSelectedListener(drawerItemSelectedListener)
 
         requestPermission()

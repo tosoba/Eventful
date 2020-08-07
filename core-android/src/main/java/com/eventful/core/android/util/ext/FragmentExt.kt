@@ -9,7 +9,7 @@ import com.eventful.core.android.base.BaseNavigationFragment
 import com.eventful.core.android.controller.DrawerLayoutController
 import com.eventful.core.android.controller.MenuController
 import com.eventful.core.android.controller.SnackbarController
-import com.eventful.core.android.view.ActionBarDrawerToggleEnd
+import com.eventful.core.android.view.ActionBarDrawerToggleEndListener
 
 private val Fragment.appCompatActivity: AppCompatActivity?
     get() = activity as? AppCompatActivity
@@ -43,19 +43,16 @@ fun Fragment.setupToolbarWithDrawerToggle(
 ) {
     val activityRef = activity
     if (activityRef != null && activityRef is DrawerLayoutController) {
-        activityRef.drawerLayout?.let {
-            ActionBarDrawerToggleEnd(
-                activityRef,
-                it,
-                toolbar,
-                R.string.navigation_drawer_open,
-                R.string.navigation_drawer_close,
-                drawerToggleRes
-            ).run {
-                it.addDrawerListener(this)
-                syncState()
-            }
-        }
+        val toggleListener = ActionBarDrawerToggleEndListener(
+            activityRef,
+            activityRef.drawerLayout,
+            toolbar,
+            R.string.navigation_drawer_open,
+            R.string.navigation_drawer_close,
+            drawerToggleRes
+        )
+        activityRef.drawerLayout.addDrawerListener(toggleListener)
+        toggleListener.syncState()
     }
 }
 
