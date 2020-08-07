@@ -1,5 +1,6 @@
 package com.eventful.core.android.util.ext
 
+import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
@@ -36,7 +37,10 @@ fun Fragment.setupToolbar(toolbar: Toolbar) {
     appCompatActivity?.supportActionBar?.setDisplayShowTitleEnabled(false)
 }
 
-fun Fragment.setupToolbarWithDrawerToggle(toolbar: Toolbar) {
+fun Fragment.setupToolbarWithDrawerToggle(
+    toolbar: Toolbar,
+    @DrawableRes drawerToggleRes: Int? = null
+) {
     val activityRef = activity
     if (activityRef != null && activityRef is DrawerLayoutController) {
         activityRef.drawerLayout?.let {
@@ -45,7 +49,8 @@ fun Fragment.setupToolbarWithDrawerToggle(toolbar: Toolbar) {
                 it,
                 toolbar,
                 R.string.navigation_drawer_open,
-                R.string.navigation_drawer_close
+                R.string.navigation_drawer_close,
+                drawerToggleRes
             ).run {
                 it.addDrawerListener(this)
                 syncState()

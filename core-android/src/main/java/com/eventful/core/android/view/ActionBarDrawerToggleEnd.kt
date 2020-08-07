@@ -2,9 +2,11 @@ package com.eventful.core.android.view
 
 import android.app.Activity
 import android.view.View
+import androidx.annotation.DrawableRes
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.appcompat.widget.AppCompatImageButton
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import kotlin.math.max
@@ -15,7 +17,8 @@ class ActionBarDrawerToggleEnd(
     private val drawerLayout: DrawerLayout,
     toolbar: Toolbar,
     openDrawerContentDescRes: Int,
-    closeDrawerContentDescRes: Int
+    closeDrawerContentDescRes: Int,
+    @DrawableRes arrowDrawableRes: Int? = null
 ) : DrawerLayout.DrawerListener {
 
     private val arrowDrawable: DrawerArrowDrawable = DrawerArrowDrawable(toolbar.context)
@@ -30,7 +33,9 @@ class ActionBarDrawerToggleEnd(
     init {
         arrowDrawable.direction = DrawerArrowDrawable.ARROW_DIRECTION_END
         toolbar.addView(toggleButton, Toolbar.LayoutParams(GravityCompat.END))
-        toggleButton.setImageDrawable(arrowDrawable)
+        toggleButton.setImageDrawable(
+            arrowDrawableRes?.let { ContextCompat.getDrawable(activity, it) } ?: arrowDrawable
+        )
         toggleButton.setOnClickListener { toggle() }
     }
 

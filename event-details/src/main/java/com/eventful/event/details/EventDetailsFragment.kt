@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import com.airbnb.epoxy.AsyncEpoxyController
@@ -91,7 +92,7 @@ class EventDetailsFragment :
     ): View? = FragmentEventDetailsBinding.inflate(inflater, container, false).apply {
         event = this@EventDetailsFragment.event
         eventDetailsRecyclerView.setController(epoxyController)
-        setupToolbarWithDrawerToggle(eventDetailsToolbar)
+        setupToolbarWithDrawerToggle(eventDetailsToolbar, R.drawable.drawer_toggle_outline)
 
         eventFavFab.clicks()
             .onEach { viewModel.intent(EventDetailsIntent.ToggleFavourite) }
@@ -183,6 +184,10 @@ class EventDetailsFragment :
         event_details_toolbar?.let {
             setupToolbar(it)
             showBackNavArrow()
+            it.navigationIcon = ContextCompat.getDrawable(
+                requireContext(),
+                R.drawable.arrow_back_outline
+            )
         }
         statusBarColor?.let { activity?.statusBarColor = it }
 
