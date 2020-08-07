@@ -2,24 +2,30 @@ package com.eventful.event
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.os.bundleOf
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
+import com.eventful.core.android.base.DaggerViewModelFragment
+import com.eventful.core.android.base.HasArgs
 import com.eventful.core.android.controller.EventNavigationController
 import com.eventful.core.android.model.event.Event
 import com.eventful.core.android.util.delegate.FragmentArgument
 import com.eventful.core.android.util.delegate.viewBinding
 import com.eventful.core.android.view.titledFragmentsPagerAdapter
 import com.eventful.event.databinding.FragmentEventBinding
-import dagger.android.support.DaggerFragment
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class EventFragment : DaggerFragment(R.layout.fragment_event), EventNavigationController {
+class EventFragment :
+    DaggerViewModelFragment<EventViewModel>(R.layout.fragment_event),
+    EventNavigationController,
+    HasArgs {
 
     private var event: Event by FragmentArgument()
+    override val args: Bundle get() = bundleOf(EVENT_ARG_KEY to event)
 
     private val binding: FragmentEventBinding by viewBinding(FragmentEventBinding::bind)
     override val viewPager: ViewPager get() = binding.eventViewPager
@@ -57,6 +63,8 @@ class EventFragment : DaggerFragment(R.layout.fragment_event), EventNavigationCo
     }
 
     companion object {
+        const val EVENT_ARG_KEY = "event"
+
         fun new(event: Event): EventFragment = EventFragment().also {
             it.event = event
         }
