@@ -41,10 +41,7 @@ abstract class MainActivityModule {
             NearbyModule::class,
             SearchModule::class,
             FavouritesModule::class,
-            AlarmsModule::class,
             EventModule::class,
-            EventDetailsModule::class,
-            WeatherModule::class,
             MainFragmentModule::class
         ]
     )

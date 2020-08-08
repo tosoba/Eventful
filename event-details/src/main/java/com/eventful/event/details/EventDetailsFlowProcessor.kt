@@ -1,6 +1,7 @@
 package com.eventful.event.details
 
 import com.eventful.core.android.base.FlowProcessor
+import com.eventful.core.android.provider.CurrentEventProvider
 import com.eventful.core.usecase.event.DeleteEvent
 import com.eventful.core.usecase.event.IsEventSavedFlow
 import com.eventful.core.usecase.event.SaveEvent
@@ -17,7 +18,8 @@ import javax.inject.Inject
 class EventDetailsFlowProcessor @Inject constructor(
     private val isEventSavedFlow: IsEventSavedFlow,
     private val saveEvent: SaveEvent,
-    private val deleteEvent: DeleteEvent
+    private val deleteEvent: DeleteEvent,
+    private val currentEventProvider: CurrentEventProvider
 ) : FlowProcessor<EventDetailsIntent, EventDetailsStateUpdate, EventDetailsState, EventDetailsSignal> {
 
     override fun updates(

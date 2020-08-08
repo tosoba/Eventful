@@ -2,7 +2,7 @@ package com.eventful.event.details
 
 import androidx.lifecycle.ViewModel
 import com.eventful.core.android.base.savedStateViewModelFrom
-import com.eventful.core.android.di.scope.FragmentScoped
+import com.eventful.core.android.di.scope.ChildFragmentScoped
 import com.eventful.core.android.di.viewmodel.AssistedSavedStateViewModelFactory
 import com.eventful.core.android.di.viewmodel.InjectingSavedStateViewModelFactory
 import com.eventful.core.android.di.viewmodel.ViewModelKey
@@ -21,7 +21,7 @@ import kotlinx.coroutines.FlowPreview
 @Module(includes = [AssistedInject_EventDetailsModule::class])
 abstract class EventDetailsModule {
 
-    @FragmentScoped
+    @ChildFragmentScoped
     @ContributesAndroidInjector(modules = [EventDetailsViewModelModule::class])
     abstract fun eventDetailsFragment(): EventDetailsFragment
 

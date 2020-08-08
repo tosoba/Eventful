@@ -1,7 +1,8 @@
 package com.eventful.weather
 
-import com.eventful.core.usecase.weather.GetForecast
 import com.eventful.core.android.base.FlowProcessor
+import com.eventful.core.android.provider.CurrentEventProvider
+import com.eventful.core.usecase.weather.GetForecast
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -11,6 +12,7 @@ import javax.inject.Inject
 @FlowPreview
 class WeatherFlowProcessor @Inject constructor(
     private val getForecast: GetForecast,
+    private val currentEventProvider: CurrentEventProvider,
     private val ioDispatcher: CoroutineDispatcher
 ) : FlowProcessor<WeatherIntent, WeatherStateUpdate, WeatherState, Unit> {
 

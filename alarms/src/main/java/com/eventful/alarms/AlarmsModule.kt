@@ -2,13 +2,14 @@ package com.eventful.alarms
 
 import androidx.lifecycle.ViewModel
 import com.eventful.core.android.base.savedStateViewModelFrom
-import com.eventful.core.android.di.scope.FragmentScoped
+import com.eventful.core.android.di.scope.ChildFragmentScoped
 import com.eventful.core.android.di.viewmodel.AssistedSavedStateViewModelFactory
 import com.eventful.core.android.di.viewmodel.InjectingSavedStateViewModelFactory
 import com.eventful.core.android.di.viewmodel.ViewModelKey
+import com.eventful.core.android.provider.CurrentEventProvider
+import com.eventful.core.usecase.alarm.CreateAlarm
 import com.eventful.core.usecase.alarm.DeleteAlarms
 import com.eventful.core.usecase.alarm.GetAlarms
-import com.eventful.core.usecase.alarm.CreateAlarm
 import com.squareup.inject.assisted.dagger2.AssistedModule
 import dagger.Binds
 import dagger.Module
@@ -25,7 +26,7 @@ import kotlinx.coroutines.FlowPreview
 @Module(includes = [AssistedInject_AlarmsModule::class])
 abstract class AlarmsModule {
 
-    @FragmentScoped
+    @ChildFragmentScoped
     @ContributesAndroidInjector(modules = [AlarmsViewModelModule::class])
     abstract fun alarmsFragment(): AlarmsFragment
 
@@ -42,11 +43,13 @@ abstract class AlarmsModule {
             getAlarms: GetAlarms,
             deleteAlarms: DeleteAlarms,
             createAlarm: CreateAlarm,
+            currentEventProvider: CurrentEventProvider,
             ioDispatcher: CoroutineDispatcher
         ): AlarmsFlowProcessor = AlarmsFlowProcessor(
             getAlarms,
             deleteAlarms,
             createAlarm,
+            currentEventProvider,
             ioDispatcher
         )
     }

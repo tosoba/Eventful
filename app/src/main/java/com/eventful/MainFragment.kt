@@ -69,7 +69,7 @@ class MainFragment : DaggerFragment(R.layout.fragment_main), MenuController, Sna
 
             mainViewPager.adapter = mainViewPagerAdapter
             mainViewPager.addOnPageChangeListener(viewPagerSwipedListener)
-            mainViewPager.offscreenPageLimit = 2
+            mainViewPager.offscreenPageLimit = mainViewPagerAdapter.count - 1
 
             mainFab.setOnClickListener {
                 navigationFragment?.showFragment(navDestinations.alarmsFragment)

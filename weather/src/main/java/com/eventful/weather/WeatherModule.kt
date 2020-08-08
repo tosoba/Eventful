@@ -2,7 +2,7 @@ package com.eventful.weather
 
 import androidx.lifecycle.ViewModel
 import com.eventful.core.android.base.savedStateViewModelFrom
-import com.eventful.core.android.di.scope.FragmentScoped
+import com.eventful.core.android.di.scope.ChildFragmentScoped
 import com.eventful.core.android.di.viewmodel.AssistedSavedStateViewModelFactory
 import com.eventful.core.android.di.viewmodel.InjectingSavedStateViewModelFactory
 import com.eventful.core.android.di.viewmodel.ViewModelKey
@@ -21,7 +21,7 @@ import kotlinx.coroutines.FlowPreview
 @Module(includes = [AssistedInject_WeatherModule::class])
 abstract class WeatherModule {
 
-    @FragmentScoped
+    @ChildFragmentScoped
     @ContributesAndroidInjector(modules = [WeatherViewModelModule::class])
     abstract fun weatherFragment(): WeatherFragment
 
