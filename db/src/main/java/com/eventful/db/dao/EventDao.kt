@@ -17,12 +17,14 @@ interface EventDao {
     @Query("SELECT * FROM ${Tables.EVENT} WHERE id IN (:ids)")
     suspend fun getEvents(ids: List<String>): List<EventEntity>
 
+    @Transaction
     @Query("SELECT * FROM ${Tables.EVENT} WHERE start_date IS NOT NULL AND start_date > :timestampNow ORDER BY start_date LIMIT :limit")
     fun getUpcomingEventsFlow(
         limit: Int,
         timestampNow: Long = System.currentTimeMillis()
     ): Flow<List<FullEventEntity>>
 
+    @Transaction
     @Query("SELECT * FROM ${Tables.EVENT} WHERE id IN (SELECT event_id FROM ${Tables.ALARM} WHERE timestamp > :timestampNow ORDER BY timestamp LIMIT :limit)")
     fun getUpcomingAlarmsFlow(
         limit: Int,
