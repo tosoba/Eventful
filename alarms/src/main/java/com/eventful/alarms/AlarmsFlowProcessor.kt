@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.eventful.core.android.base.FlowProcessor
 import com.eventful.core.android.base.removedFromAlarmsMessage
 import com.eventful.core.android.model.alarm.Alarm
+import com.eventful.core.android.provider.CurrentEventProvider
 import com.eventful.core.usecase.alarm.CreateAlarm
 import com.eventful.core.usecase.alarm.DeleteAlarms
 import com.eventful.core.usecase.alarm.GetAlarms
@@ -16,8 +17,8 @@ class AlarmsFlowProcessor(
     private val getAlarms: GetAlarms,
     private val deleteAlarms: DeleteAlarms,
     private val createAlarm: CreateAlarm,
-    private val ioDispatcher: CoroutineDispatcher,
-    private val loadAlarmsOnStart: Boolean = true
+    private val currentEventProvider: CurrentEventProvider?,
+    private val ioDispatcher: CoroutineDispatcher
 ) : FlowProcessor<AlarmsIntent, AlarmsStateUpdate, AlarmsState, AlarmsSignal> {
 
     override fun updates(
@@ -28,11 +29,7 @@ class AlarmsFlowProcessor(
         intent: suspend (AlarmsIntent) -> Unit,
         signal: suspend (AlarmsSignal) -> Unit
     ): Flow<AlarmsStateUpdate> = intents
-        .run {
-            if (loadAlarmsOnStart) onStart { emit(AlarmsIntent.LoadAlarms) }
-            else this
-        }
-        .updates(coroutineScope, currentState, intent, signal)
+        .updates(coroutineScope, currentState, states, intent, signal)
 
     override fun stateWillUpdate(
         currentState: AlarmsState,
@@ -48,11 +45,16 @@ class AlarmsFlowProcessor(
     private fun Flow<AlarmsIntent>.updates(
         coroutineScope: CoroutineScope,
         currentState: () -> AlarmsState,
+        states: Flow<AlarmsState>,
         intent: suspend (AlarmsIntent) -> Unit,
         signal: suspend (AlarmsSignal) -> Unit
     ): Flow<AlarmsStateUpdate> = merge(
-        filterIsInstance<AlarmsIntent.LoadAlarms>()
-            .loadAlarmsUpdates(currentState),
+        currentEventProvider?.event?.map { AlarmsStateUpdate.NewEvent(it) } ?: emptyFlow(),
+        states.map { it.mode }
+            .distinctUntilChanged()
+            .flatMapLatest(::loadAlarmsUpdates),
+        filterIsInstance<AlarmsIntent.LoadMoreAlarms>()
+            .loadMoreAlarmsUpdates(currentState),
         filterIsInstance<AlarmsIntent.AlarmLongClicked>()
             .map { (alarm) -> AlarmsStateUpdate.ToggleAlarmSelection(alarm) },
         filterIsInstance<AlarmsIntent.ClearSelectionClicked>()
@@ -67,17 +69,16 @@ class AlarmsFlowProcessor(
             .map { (status) -> AlarmsStateUpdate.DialogStatus(status) }
     )
 
-    private fun Flow<AlarmsIntent.LoadAlarms>.loadAlarmsUpdates(
+    private fun Flow<AlarmsIntent.LoadMoreAlarms>.loadMoreAlarmsUpdates(
         currentState: () -> AlarmsState
     ): Flow<AlarmsStateUpdate> = filterNot { currentState().items.limitHit }
-        .flatMapLatest {
-            val eventId = currentState().mode.let { mode ->
-                if (mode is AlarmsMode.SingleEvent) mode.event.id else null
-            }
-            getAlarms(eventId)
-                .flowOn(ioDispatcher)
-                .map { alarms -> AlarmsStateUpdate.Alarms(alarms = alarms) }
-        }
+        .flatMapLatest { loadAlarmsUpdates(currentState().mode) }
+
+    private suspend fun loadAlarmsUpdates(mode: AlarmsMode): Flow<AlarmsStateUpdate> {
+        return getAlarms(if (mode is AlarmsMode.SingleEvent) mode.event.id else null)
+            .flowOn(ioDispatcher)
+            .map { alarms -> AlarmsStateUpdate.Alarms(alarms = alarms) }
+    }
 
     private fun Flow<AlarmsIntent.RemoveAlarmsClicked>.removeFromAlarmsUpdates(
         coroutineScope: CoroutineScope,

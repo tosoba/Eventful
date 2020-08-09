@@ -1,3 +1,5 @@
+include ':all-alarms'
+include ':event-alarms'
 include ':alarms',
         ':app',
         ':core',

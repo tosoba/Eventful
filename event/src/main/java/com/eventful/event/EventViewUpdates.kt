@@ -1,6 +1,6 @@
 package com.eventful.event
 
-import com.eventful.alarms.AlarmsEventValidator
+import com.eventful.event.alarms.AlarmsEventValidator
 import com.eventful.weather.WeatherEventValidator
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview

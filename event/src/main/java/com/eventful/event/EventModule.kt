@@ -1,13 +1,13 @@
 package com.eventful.event
 
 import androidx.lifecycle.ViewModel
-import com.eventful.alarms.AlarmsModule
 import com.eventful.core.android.base.savedStateViewModelFrom
 import com.eventful.core.android.di.scope.FragmentScoped
 import com.eventful.core.android.di.viewmodel.AssistedSavedStateViewModelFactory
 import com.eventful.core.android.di.viewmodel.InjectingSavedStateViewModelFactory
 import com.eventful.core.android.di.viewmodel.ViewModelKey
 import com.eventful.core.android.provider.CurrentEventProvider
+import com.eventful.event.alarms.EventAlarmsModule
 import com.eventful.event.details.EventDetailsModule
 import com.eventful.weather.WeatherModule
 import com.squareup.inject.assisted.dagger2.AssistedModule
@@ -29,7 +29,7 @@ abstract class EventModule {
     @ContributesAndroidInjector(
         modules = [
             EventViewModelModule::class,
-            AlarmsModule::class,
+            EventAlarmsModule::class,
             EventDetailsModule::class,
             WeatherModule::class
         ]

@@ -1,7 +1,7 @@
 package com.eventful
 
 import androidx.lifecycle.ViewModel
-import com.eventful.alarms.AlarmsModule
+import com.eventful.all.alarms.AllAlarmsModule
 import com.eventful.core.android.base.savedStateViewModelFrom
 import com.eventful.core.android.di.scope.ActivityScoped
 import com.eventful.core.android.di.viewmodel.AssistedSavedStateViewModelFactory
@@ -14,11 +14,9 @@ import com.eventful.core.android.provider.PopBackStackSignalProvider
 import com.eventful.core.android.service.EventAlarmService
 import com.eventful.event.EventModule
 import com.eventful.event.IEventChildFragmentsFactory
-import com.eventful.event.details.EventDetailsModule
 import com.eventful.favourites.FavouritesModule
 import com.eventful.nearby.NearbyModule
 import com.eventful.search.SearchModule
-import com.eventful.weather.WeatherModule
 import com.squareup.inject.assisted.dagger2.AssistedModule
 import dagger.Binds
 import dagger.Module
@@ -41,6 +39,7 @@ abstract class MainActivityModule {
             NearbyModule::class,
             SearchModule::class,
             FavouritesModule::class,
+            AllAlarmsModule::class,
             EventModule::class,
             MainFragmentModule::class
         ]

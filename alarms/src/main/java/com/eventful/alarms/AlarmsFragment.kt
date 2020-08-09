@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.annotation.CallSuper
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
@@ -37,13 +38,14 @@ import javax.inject.Inject
 
 @FlowPreview
 @ExperimentalCoroutinesApi
-class AlarmsFragment : DaggerViewModelFragment<AlarmsViewModel>(R.layout.fragment_alarms), HasArgs {
+abstract class AlarmsFragment<M : AlarmsMode, VM: AlarmsViewModel> :
+    DaggerViewModelFragment<VM>(R.layout.fragment_alarms),
+    HasArgs {
 
-    private var mode: AlarmsMode by FragmentArgument(AlarmsArgs.MODE.name)
-    private var bottomNavItemsToRemove: IntArray by FragmentArgument()
+    protected var mode: M by FragmentArgument(AlarmsArgs.MODE.name)
     override val args: Bundle get() = bundleOf(AlarmsArgs.MODE.name to mode)
 
-    private val binding: FragmentAlarmsBinding by viewBinding(FragmentAlarmsBinding::bind)
+    protected val binding: FragmentAlarmsBinding by viewBinding(FragmentAlarmsBinding::bind)
 
     @Inject
     internal lateinit var epoxyThreads: EpoxyThreads
@@ -58,7 +60,7 @@ class AlarmsFragment : DaggerViewModelFragment<AlarmsViewModel>(R.layout.fragmen
             epoxyThreads = epoxyThreads,
             mapToHoldsList = { this },
             emptyTextResource = { R.string.no_created_alarms },
-            loadMore = { lifecycleScope.launch { viewModel.intent(AlarmsIntent.LoadAlarms) } }
+            loadMore = { lifecycleScope.launch { viewModel.intent(AlarmsIntent.LoadMoreAlarms) } }
         ) { selectable ->
             selectable.listItem(
                 clicked = View.OnClickListener {
@@ -105,31 +107,9 @@ class AlarmsFragment : DaggerViewModelFragment<AlarmsViewModel>(R.layout.fragmen
 
     private var addEditAlarmDialog: AddEditAlarmDialog? = null
 
-    private var viewUpdatesJob: Job? = null
-
+    @CallSuper
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        when (val modeArg = mode) {
-            is AlarmsMode.All -> {
-                binding.alarmsFab.visibility = View.GONE
-                binding.alarmsBottomNavView.visibility = View.GONE
-            }
-            is AlarmsMode.SingleEvent -> {
-                bottomNavItemsToRemove.forEach(binding.alarmsBottomNavView.menu::removeItem)
-                binding.alarmsFab.setOnClickListener {
-                    lifecycleScope.launch {
-                        viewModel.intent(
-                            AlarmsIntent.UpdateDialogStatus(
-                                AddEditAlarmDialogStatus.WithMode.Shown(
-                                    AddEditAlarmDialogMode.Add(event = modeArg.event)
-                                )
-                            )
-                        )
-                    }
-                }
-            }
-        }
-
-        viewUpdatesJob = viewModel.viewUpdates
+        viewModel.viewUpdates
             .onEach {
                 Log.e(
                     "VIEW_UPDATE",
@@ -183,7 +163,6 @@ class AlarmsFragment : DaggerViewModelFragment<AlarmsViewModel>(R.layout.fragmen
     }
 
     override fun onDestroyView() {
-        viewUpdatesJob?.cancel()
         addEditAlarmDialog?.let {
             viewModel.viewModelScope.launch {
                 viewModel.intent(
@@ -225,14 +204,5 @@ class AlarmsFragment : DaggerViewModelFragment<AlarmsViewModel>(R.layout.fragmen
     override fun onPause() {
         resumedOnlyViewUpdatesJob?.cancel()
         super.onPause()
-    }
-
-    companion object {
-        fun new(
-            mode: AlarmsMode, bottomNavItemsToRemove: IntArray
-        ): AlarmsFragment = AlarmsFragment().also {
-            it.mode = mode
-            it.bottomNavItemsToRemove = bottomNavItemsToRemove
-        }
     }
 }

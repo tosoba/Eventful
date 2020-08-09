@@ -7,6 +7,7 @@ import com.eventful.core.android.base.StateUpdate
 import com.eventful.core.android.base.ToggleItemSelectionUpdate
 import com.eventful.core.android.controller.SnackbarState
 import com.eventful.core.android.model.alarm.Alarm
+import com.eventful.core.android.model.event.Event
 import com.eventful.core.model.Selectable
 import com.eventful.core.model.alarm.IAlarm
 import com.eventful.core.util.DataList
@@ -17,6 +18,16 @@ import kotlinx.coroutines.FlowPreview
 @ExperimentalCoroutinesApi
 @FlowPreview
 sealed class AlarmsStateUpdate : StateUpdate<AlarmsState> {
+    data class NewEvent(val event: Event) : AlarmsStateUpdate() {
+        override fun invoke(
+            state: AlarmsState
+        ): AlarmsState = if (state.mode !is AlarmsMode.SingleEvent) {
+            throw IllegalStateException()
+        } else {
+            state.copy(mode = state.mode.copy(event))
+        }
+    }
+
     data class Alarms(val alarms: List<IAlarm>) : AlarmsStateUpdate() {
         override fun invoke(state: AlarmsState): AlarmsState = state.copy(
             items = DataList(

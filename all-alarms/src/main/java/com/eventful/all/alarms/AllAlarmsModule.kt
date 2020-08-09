@@ -1,6 +1,7 @@
-package com.eventful.alarms
+package com.eventful.all.alarms
 
 import androidx.lifecycle.ViewModel
+import com.eventful.alarms.AlarmsFlowProcessor
 import com.eventful.core.android.base.savedStateViewModelFrom
 import com.eventful.core.android.di.scope.ChildFragmentScoped
 import com.eventful.core.android.di.viewmodel.AssistedSavedStateViewModelFactory
@@ -18,27 +19,29 @@ import dagger.multibindings.IntoMap
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import javax.inject.Named
 
 @ExperimentalCoroutinesApi
 @FlowPreview
 @AssistedModule
-@Module(includes = [AssistedInject_AlarmsModule::class])
-abstract class AlarmsModule {
+@Module(includes = [AssistedInject_AllAlarmsModule::class])
+abstract class AllAlarmsModule {
 
     @ChildFragmentScoped
-    @ContributesAndroidInjector(modules = [AlarmsViewModelModule::class])
-    abstract fun alarmsFragment(): AlarmsFragment
+    @ContributesAndroidInjector(modules = [AllAlarmsViewModelModule::class])
+    abstract fun allAlarmsFragment(): AllAlarmsFragment
 
     @Binds
     @IntoMap
-    @ViewModelKey(AlarmsViewModel::class)
-    abstract fun alarmsViewModelFactory(
-        factory: AlarmsViewModel.Factory
+    @ViewModelKey(AllAlarmsViewModel::class)
+    abstract fun allAlarmsViewModelFactory(
+        factory: AllAlarmsViewModel.Factory
     ): AssistedSavedStateViewModelFactory<out ViewModel>
 
     companion object {
         @Provides
-        fun alarmsFlowProcessor(
+        @Named("AllAlarmsViewModelProcessor")
+        fun allAlarmsFlowProcessor(
             getAlarms: GetAlarms,
             deleteAlarms: DeleteAlarms,
             createAlarm: CreateAlarm,
@@ -47,16 +50,17 @@ abstract class AlarmsModule {
             getAlarms,
             deleteAlarms,
             createAlarm,
+            null,
             ioDispatcher
         )
     }
 
     @Module
-    object AlarmsViewModelModule {
+    object AllAlarmsViewModelModule {
         @Provides
-        fun alarmsViewModel(
-            alarmsFragment: AlarmsFragment,
+        fun allAlarmsViewModel(
+            allAlarmsFragment: AllAlarmsFragment,
             factory: InjectingSavedStateViewModelFactory
-        ): AlarmsViewModel = alarmsFragment.savedStateViewModelFrom(factory)
+        ): AllAlarmsViewModel = allAlarmsFragment.savedStateViewModelFrom(factory)
     }
 }
