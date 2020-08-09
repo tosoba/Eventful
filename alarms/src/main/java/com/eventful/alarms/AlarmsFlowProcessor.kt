@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import com.eventful.core.android.base.FlowProcessor
 import com.eventful.core.android.base.removedFromAlarmsMessage
 import com.eventful.core.android.model.alarm.Alarm
-import com.eventful.core.android.provider.CurrentEventProvider
 import com.eventful.core.usecase.alarm.CreateAlarm
 import com.eventful.core.usecase.alarm.DeleteAlarms
 import com.eventful.core.usecase.alarm.GetAlarms
@@ -17,7 +16,6 @@ class AlarmsFlowProcessor(
     private val getAlarms: GetAlarms,
     private val deleteAlarms: DeleteAlarms,
     private val createAlarm: CreateAlarm,
-    private val currentEventProvider: CurrentEventProvider,
     private val ioDispatcher: CoroutineDispatcher,
     private val loadAlarmsOnStart: Boolean = true
 ) : FlowProcessor<AlarmsIntent, AlarmsStateUpdate, AlarmsState, AlarmsSignal> {

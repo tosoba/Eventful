@@ -20,7 +20,7 @@ data class AlarmsState(
 ) : SelectableItemsSnackbarState<AlarmsState, Alarm> {
 
     constructor(savedStateHandle: SavedStateHandle) : this(
-        mode = savedStateHandle[AlarmsFragment.MODE_ARG_KEY]!!,
+        mode = savedStateHandle[AlarmsArgs.MODE.name]!!,
         dialogStatus = savedStateHandle[KEY_DIALOG_STATUS] ?: AddEditAlarmDialogStatus.Hidden
     )
 

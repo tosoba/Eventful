@@ -29,7 +29,7 @@ abstract class BaseNavigationFragment : DaggerFragment() {
         if (savedInstanceState == null) showFragment(initialFragment, false)
     }
 
-    fun onBackPressed(): Boolean {
+    fun popBackStack(): Boolean {
         val backStackEntryCount = childFragmentManager.backStackEntryCount
         if (backStackEntryCount >= 1) {
             childFragmentManager.popBackStack()

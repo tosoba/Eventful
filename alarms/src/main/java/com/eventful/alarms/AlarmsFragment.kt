@@ -39,8 +39,9 @@ import javax.inject.Inject
 @ExperimentalCoroutinesApi
 class AlarmsFragment : DaggerViewModelFragment<AlarmsViewModel>(R.layout.fragment_alarms), HasArgs {
 
-    private var mode: AlarmsMode by FragmentArgument()
-    override val args: Bundle get() = bundleOf(MODE_ARG_KEY to mode)
+    private var mode: AlarmsMode by FragmentArgument(AlarmsArgs.MODE.name)
+    private var bottomNavItemsToRemove: IntArray by FragmentArgument()
+    override val args: Bundle get() = bundleOf(AlarmsArgs.MODE.name to mode)
 
     private val binding: FragmentAlarmsBinding by viewBinding(FragmentAlarmsBinding::bind)
 
@@ -112,15 +113,18 @@ class AlarmsFragment : DaggerViewModelFragment<AlarmsViewModel>(R.layout.fragmen
                 binding.alarmsFab.visibility = View.GONE
                 binding.alarmsBottomNavView.visibility = View.GONE
             }
-            is AlarmsMode.SingleEvent -> binding.alarmsFab.setOnClickListener {
-                lifecycleScope.launch {
-                    viewModel.intent(
-                        AlarmsIntent.UpdateDialogStatus(
-                            AddEditAlarmDialogStatus.WithMode.Shown(
-                                AddEditAlarmDialogMode.Add(event = modeArg.event)
+            is AlarmsMode.SingleEvent -> {
+                bottomNavItemsToRemove.forEach(binding.alarmsBottomNavView.menu::removeItem)
+                binding.alarmsFab.setOnClickListener {
+                    lifecycleScope.launch {
+                        viewModel.intent(
+                            AlarmsIntent.UpdateDialogStatus(
+                                AddEditAlarmDialogStatus.WithMode.Shown(
+                                    AddEditAlarmDialogMode.Add(event = modeArg.event)
+                                )
                             )
                         )
-                    )
+                    }
                 }
             }
         }
@@ -224,10 +228,11 @@ class AlarmsFragment : DaggerViewModelFragment<AlarmsViewModel>(R.layout.fragmen
     }
 
     companion object {
-        fun new(mode: AlarmsMode): AlarmsFragment = AlarmsFragment().also {
+        fun new(
+            mode: AlarmsMode, bottomNavItemsToRemove: IntArray
+        ): AlarmsFragment = AlarmsFragment().also {
             it.mode = mode
+            it.bottomNavItemsToRemove = bottomNavItemsToRemove
         }
-
-        const val MODE_ARG_KEY = "mode"
     }
 }

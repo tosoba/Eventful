@@ -7,6 +7,7 @@ import androidx.core.view.GravityCompat
 import androidx.core.view.children
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
+import com.eventful.core.android.base.BackPressedHandler
 import com.eventful.core.android.base.DaggerViewModelActivity
 import com.eventful.core.android.controller.DrawerLayoutController
 import com.eventful.core.android.controller.EventNavigationController
@@ -88,7 +89,7 @@ class MainActivity :
 
     private fun showEvent(event: Event) {
         navigationFragment?.currentTopFragment?.let { topFragment ->
-            if (topFragment is EventNavigationController) topFragment.showEventDetails()
+            if (topFragment is EventNavigationController) topFragment.showEventDetails(event)
             else navigationFragment?.showFragment(navDestinations.eventFragment(event))
         }
     }
@@ -102,10 +103,13 @@ class MainActivity :
     override fun onSupportNavigateUp(): Boolean = onBackPressed().let { true }
 
     override fun onBackPressed() {
-        if (navigationFragment?.onBackPressed() == true) launch {
-            viewModel.signal(MainSignal.PopMainBackStackSignal)
-        } else {
-            super.onBackPressed()
+        val topFragment = navigationFragment?.currentTopFragment
+        when {
+            topFragment is BackPressedHandler -> topFragment.onBackPressed()
+            navigationFragment?.popBackStack() == true -> launch {
+                viewModel.signal(MainSignal.PopMainBackStackSignal)
+            }
+            else -> super.onBackPressed()
         }
     }
 

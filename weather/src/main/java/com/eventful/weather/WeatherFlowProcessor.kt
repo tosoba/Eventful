@@ -1,5 +1,6 @@
 package com.eventful.weather
 
+import androidx.lifecycle.SavedStateHandle
 import com.eventful.core.android.base.FlowProcessor
 import com.eventful.core.android.provider.CurrentEventProvider
 import com.eventful.core.usecase.weather.GetForecast
@@ -16,6 +17,17 @@ class WeatherFlowProcessor @Inject constructor(
     private val ioDispatcher: CoroutineDispatcher
 ) : FlowProcessor<WeatherIntent, WeatherStateUpdate, WeatherState, Unit> {
 
+    override fun stateWillUpdate(
+        currentState: WeatherState,
+        nextState: WeatherState,
+        update: WeatherStateUpdate,
+        savedStateHandle: SavedStateHandle
+    ) {
+        if (update is WeatherStateUpdate.NewEvent) {
+            savedStateHandle[WeatherArgs.EVENT.name] = update.event
+        }
+    }
+
     override fun updates(
         coroutineScope: CoroutineScope,
         intents: Flow<WeatherIntent>,
@@ -24,14 +36,15 @@ class WeatherFlowProcessor @Inject constructor(
         intent: suspend (WeatherIntent) -> Unit,
         signal: suspend (Unit) -> Unit
     ): Flow<WeatherStateUpdate> = merge(
-        states.map { it.latLng }
-            .filterNotNull()
-            .take(1)
-            .flatMapLatest { weatherLoadingUpdates(it, coroutineScope, intent) },
+        currentEventProvider.event
+            .filter { WeatherEventValidator.isValid(it) }
+            .map { WeatherStateUpdate.NewEvent(it) },
+        states.map { (event, _, _) -> requireNotNull(event.venues?.firstOrNull()?.latLng) }
+            .distinctUntilChanged()
+            .flatMapLatest { latLng -> weatherLoadingUpdates(latLng, coroutineScope, intent) },
         intents.filterIsInstance<WeatherIntent.RetryLoadWeather>()
-            .map { currentState().latLng }
-            .filterNotNull()
-            .flatMapLatest { weatherLoadingUpdates(it, coroutineScope, intent) }
+            .map { requireNotNull(currentState().event.venues?.firstOrNull()?.latLng) }
+            .flatMapLatest { latLng -> weatherLoadingUpdates(latLng, coroutineScope, intent) }
     )
 
     private suspend fun weatherLoadingUpdates(

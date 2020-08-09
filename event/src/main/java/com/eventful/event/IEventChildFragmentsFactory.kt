@@ -9,7 +9,7 @@ import kotlinx.coroutines.FlowPreview
 @FlowPreview
 @ExperimentalCoroutinesApi
 interface IEventChildFragmentsFactory {
-    fun eventDetailsFragment(event: Event, removeAlarmItem: Boolean): Fragment
-    fun weatherFragment(latLng: LatLng?, locationName: String?, removeAlarmItem: Boolean): Fragment
-    fun eventAlarmsFragment(event: Event): Fragment
+    fun eventDetailsFragment(event: Event, bottomNavItemsToRemove: IntArray): Fragment
+    fun weatherFragment(event: Event, bottomNavItemsToRemove: IntArray): Fragment
+    fun eventAlarmsFragment(event: Event, bottomNavItemsToRemove: IntArray): Fragment
 }

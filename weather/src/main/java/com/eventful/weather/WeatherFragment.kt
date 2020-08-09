@@ -8,15 +8,13 @@ import com.eventful.core.android.base.DaggerViewModelFragment
 import com.eventful.core.android.base.HasArgs
 import com.eventful.core.android.controller.eventNavigationItemSelectedListener
 import com.eventful.core.android.loadingIndicator
-import com.eventful.core.android.unknownLocation
+import com.eventful.core.android.model.event.Event
 import com.eventful.core.android.util.delegate.FragmentArgument
-import com.eventful.core.android.util.delegate.NullableFragmentArgument
 import com.eventful.core.android.util.delegate.viewBinding
 import com.eventful.core.android.util.ext.*
 import com.eventful.core.android.view.epoxy.EpoxyThreads
 import com.eventful.core.android.view.epoxy.typedController
 import com.eventful.weather.databinding.FragmentWeatherBinding
-import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
@@ -30,10 +28,9 @@ class WeatherFragment :
     DaggerViewModelFragment<WeatherViewModel>(R.layout.fragment_weather),
     HasArgs {
 
-    private var latLng: LatLng? by NullableFragmentArgument()
-    private var locationName: String? by NullableFragmentArgument()
-    private var removeAlarmsItem: Boolean by FragmentArgument()
-    override val args: Bundle get() = bundleOf(LAT_LNG_ARG_KEY to latLng)
+    private var event: Event by FragmentArgument(WeatherArgs.EVENT.name)
+    private var bottomNavItemsToRemove: IntArray by FragmentArgument()
+    override val args: Bundle get() = bundleOf(WeatherArgs.EVENT.name to event)
 
     private val binding: FragmentWeatherBinding by viewBinding(FragmentWeatherBinding::bind)
 
@@ -52,7 +49,7 @@ class WeatherFragment :
                         TemperatureInLocationBindingModel_()
                             .id("temperature-in-location")
                             .temperature(currently.temperature)
-                            .locationName(locationName),
+                            .locationName(data.city),
                         WeatherSymbolInfoBindingModel_()
                             .id("weather-forecast-info")
                             .symbolResource(WeatherStatus.fromIcon(currently.icon).resource)
@@ -72,10 +69,6 @@ class WeatherFragment :
                             .description(currently.summary)
                     ).addTo(this)
                 }
-                is WeatherControllerData.UnknownLatLng -> unknownLocation {
-                    id("unknown-location-weather")
-                    text(getString(R.string.event_location_unknown))
-                }
             }
         }
     }
@@ -86,7 +79,7 @@ class WeatherFragment :
         with(binding.weatherBottomNavView) {
             setOnNavigationItemSelectedListener(eventNavigationItemSelectedListener)
             selectedItemId = R.id.bottom_nav_weather
-            if (removeAlarmsItem) menu.removeItem(R.id.bottom_nav_alarms)
+            bottomNavItemsToRemove.forEach(menu::removeItem)
         }
     }
 
@@ -104,14 +97,11 @@ class WeatherFragment :
         viewUpdatesJob = viewModel.viewUpdates
             .onEach { viewUpdate ->
                 when (viewUpdate) {
-                    is WeatherViewUpdate.UnknownLatLng -> epoxyController.setData(
-                        WeatherControllerData.UnknownLatLng
-                    )
                     is WeatherViewUpdate.LoadingForecast -> epoxyController.setData(
                         WeatherControllerData.LoadingForecast
                     )
                     is WeatherViewUpdate.ForecastLoaded -> epoxyController.setData(
-                        WeatherControllerData.ForecastLoaded(viewUpdate.forecast)
+                        WeatherControllerData.ForecastLoaded(viewUpdate.forecast, viewUpdate.city)
                     )
                     is WeatherViewUpdate.Snackbar -> snackbarController?.transitionToSnackbarState(
                         viewUpdate.state
@@ -128,15 +118,10 @@ class WeatherFragment :
 
     companion object {
         fun new(
-            latLng: LatLng?,
-            locationName: String?,
-            removeAlarmsItem: Boolean
+            event: Event, bottomNavItemsToRemove: IntArray
         ): WeatherFragment = WeatherFragment().also {
-            it.latLng = latLng
-            it.locationName = locationName
-            it.removeAlarmsItem = removeAlarmsItem
+            it.event = event
+            it.bottomNavItemsToRemove = bottomNavItemsToRemove
         }
-
-        const val LAT_LNG_ARG_KEY = "LAT_LNG_ARG_KEY"
     }
 }

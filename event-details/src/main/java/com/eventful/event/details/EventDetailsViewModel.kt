@@ -14,7 +14,7 @@ class EventDetailsViewModel @AssistedInject constructor(
     processor: EventDetailsFlowProcessor,
     @Assisted savedStateHandle: SavedStateHandle
 ) : FlowViewModel<EventDetailsIntent, EventDetailsStateUpdate, EventDetailsState, EventDetailsSignal>(
-    initialState = EventDetailsState(event = savedStateHandle[EventDetailsFragment.EVENT_ARG_KEY]!!),
+    initialState = EventDetailsState(event = savedStateHandle[EventDetailsArgs.EVENT.name]!!),
     processor = processor,
     savedStateHandle = savedStateHandle
 ) {

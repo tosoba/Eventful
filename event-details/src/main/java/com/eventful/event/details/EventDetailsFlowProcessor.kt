@@ -1,5 +1,6 @@
 package com.eventful.event.details
 
+import androidx.lifecycle.SavedStateHandle
 import com.eventful.core.android.base.FlowProcessor
 import com.eventful.core.android.provider.CurrentEventProvider
 import com.eventful.core.usecase.event.DeleteEvent
@@ -22,6 +23,17 @@ class EventDetailsFlowProcessor @Inject constructor(
     private val currentEventProvider: CurrentEventProvider
 ) : FlowProcessor<EventDetailsIntent, EventDetailsStateUpdate, EventDetailsState, EventDetailsSignal> {
 
+    override fun stateWillUpdate(
+        currentState: EventDetailsState,
+        nextState: EventDetailsState,
+        update: EventDetailsStateUpdate,
+        savedStateHandle: SavedStateHandle
+    ) {
+        if (update is EventDetailsStateUpdate.NewEvent) {
+            savedStateHandle[EventDetailsArgs.EVENT.name] = update.event
+        }
+    }
+
     override fun updates(
         coroutineScope: CoroutineScope,
         intents: Flow<EventDetailsIntent>,
@@ -30,6 +42,7 @@ class EventDetailsFlowProcessor @Inject constructor(
         intent: suspend (EventDetailsIntent) -> Unit,
         signal: suspend (EventDetailsSignal) -> Unit
     ): Flow<EventDetailsStateUpdate> = merge(
+        currentEventProvider.event.map { EventDetailsStateUpdate.NewEvent(it) },
         intents.filterIsInstance<EventDetailsIntent.ToggleFavourite>()
             .filter { currentState().isFavourite.data != null }
             .onEach {

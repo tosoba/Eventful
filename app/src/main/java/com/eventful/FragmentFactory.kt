@@ -9,7 +9,6 @@ import com.eventful.event.EventFragment
 import com.eventful.event.IEventChildFragmentsFactory
 import com.eventful.event.details.EventDetailsFragment
 import com.eventful.weather.WeatherFragment
-import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 
@@ -22,17 +21,18 @@ object FragmentFactory :
 
     override fun eventFragment(event: Event): Fragment = EventFragment.new(event)
 
-    override val alarmsFragment: Fragment get() = AlarmsFragment.new(AlarmsMode.All)
+    override val alarmsFragment: Fragment get() = AlarmsFragment.new(AlarmsMode.All, intArrayOf())
 
     override fun eventDetailsFragment(
-        event: Event,
-        removeAlarmItem: Boolean
-    ): EventDetailsFragment = EventDetailsFragment.new(event, removeAlarmItem)
+        event: Event, bottomNavItemsToRemove: IntArray
+    ): EventDetailsFragment = EventDetailsFragment.new(event, bottomNavItemsToRemove)
 
     override fun weatherFragment(
-        latLng: LatLng?, locationName: String?, removeAlarmItem: Boolean
-    ): WeatherFragment = WeatherFragment.new(latLng, locationName, removeAlarmItem)
+        event: Event, bottomNavItemsToRemove: IntArray
+    ): WeatherFragment = WeatherFragment.new(event, bottomNavItemsToRemove)
 
-    override fun eventAlarmsFragment(event: Event): AlarmsFragment = AlarmsFragment
-        .new(AlarmsMode.SingleEvent(event))
+    override fun eventAlarmsFragment(
+        event: Event, bottomNavItemsToRemove: IntArray
+    ): AlarmsFragment = AlarmsFragment
+        .new(AlarmsMode.SingleEvent(event), bottomNavItemsToRemove)
 }
