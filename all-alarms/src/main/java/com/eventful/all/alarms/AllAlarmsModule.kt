@@ -19,7 +19,6 @@ import dagger.multibindings.IntoMap
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import javax.inject.Named
 
 @ExperimentalCoroutinesApi
 @FlowPreview
@@ -40,7 +39,7 @@ abstract class AllAlarmsModule {
 
     companion object {
         @Provides
-        @Named("AllAlarmsViewModelProcessor")
+        @AllAlarmsViewModelProcessor
         fun allAlarmsFlowProcessor(
             getAlarms: GetAlarms,
             deleteAlarms: DeleteAlarms,

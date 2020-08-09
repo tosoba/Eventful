@@ -1,7 +1,8 @@
 package com.eventful.core.android.di.name
 
-import javax.inject.Named
+import javax.inject.Qualifier
 
-@kotlin.annotation.Retention(AnnotationRetention.RUNTIME)
-@Named("MainActivityIntent")
-annotation class MainActivityIntent
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class MainActivityIntent(val value: String = "MainActivityIntent")

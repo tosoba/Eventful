@@ -1,7 +1,8 @@
 package com.eventful.event.alarms
 
-import javax.inject.Named
+import javax.inject.Qualifier
 
-@kotlin.annotation.Retention(AnnotationRetention.RUNTIME)
-@Named("EventAlarmsViewModelProcessor")
-annotation class EventAlarmsViewModelProcessor
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class EventAlarmsViewModelProcessor(val value: String = "EventAlarmsViewModelProcessor")
