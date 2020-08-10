@@ -1,22 +1,22 @@
 package com.eventful.nearby
 
+import com.eventful.core.android.model.location.LocationState
+import com.eventful.core.android.model.location.LocationStatus
 import com.eventful.core.model.PagedResult
 import com.eventful.core.model.Resource
 import com.eventful.core.model.event.IEvent
-import com.eventful.core.usecase.event.GetPagedEventsFlow
+import com.eventful.core.usecase.event.GetPagedEvents
 import com.eventful.core.util.Failure
 import com.eventful.core.util.LoadedSuccessfully
 import com.eventful.core.util.PagedDataList
-import com.eventful.core.android.model.location.LocationState
-import com.eventful.core.android.model.location.LocationStatus
 import com.eventful.test.event
 import com.eventful.test.mockedList
 import com.eventful.test.relaxedMockedList
 import com.google.android.gms.maps.model.LatLng
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.flowOf
@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test
 internal class LocationStateProviderUpdatesTests : BaseNearbyFlowProcessorTests() {
 
     @Test
-    @DisplayName("When events status is Failed - should not call getPagedEventsFlow")
+    @DisplayName("When events status is Failed - should not call getPagedEvents")
     fun loadingFailedTest() = testScope.runBlockingTest {
         val initialState = NearbyState(
             items = PagedDataList(status = Failure(null))
@@ -39,10 +39,10 @@ internal class LocationStateProviderUpdatesTests : BaseNearbyFlowProcessorTests(
         val currentState = mockk<() -> NearbyState> {
             every { this@mockk() } returns initialState
         }
-        val getPagedEventsFlow = mockk<GetPagedEventsFlow>(relaxed = true)
+        val getPagedEvents = mockk<GetPagedEvents>(relaxed = true)
 
         flowProcessor(
-            getPagedEventsFlow = getPagedEventsFlow,
+            getPagedEvents = getPagedEvents,
             locationStateProvider = mockk {
                 every { locationStates } returns flowOf(
                     LocationState(LatLng(10.0, 10.0), LocationStatus.Found)
@@ -52,11 +52,11 @@ internal class LocationStateProviderUpdatesTests : BaseNearbyFlowProcessorTests(
             currentState = currentState
         ).launchIn(this)
 
-        verify(exactly = 0) { getPagedEventsFlow(initialState.items, any(), any()) }
+        coVerify(exactly = 0) { getPagedEvents(initialState.items, any(), any()) }
     }
 
     @Test
-    @DisplayName("When location status is not found - should not call getPagedEventsFlow")
+    @DisplayName("When location status is not found - should not call getPagedEvents")
     fun locationStatusNotFoundTest() = testScope.runBlockingTest {
         val initialState = NearbyState(
             items = PagedDataList(
@@ -67,10 +67,10 @@ internal class LocationStateProviderUpdatesTests : BaseNearbyFlowProcessorTests(
         val currentState = mockk<() -> NearbyState> {
             every { this@mockk() } returns initialState
         }
-        val getPagedEventsFlow = mockk<GetPagedEventsFlow>(relaxed = true)
+        val getPagedEvents = mockk<GetPagedEvents>(relaxed = true)
 
         flowProcessor(
-            getPagedEventsFlow = getPagedEventsFlow,
+            getPagedEvents = getPagedEvents,
             locationStateProvider = mockk {
                 every { locationStates } returns flowOf(
                     LocationState(LatLng(10.0, 10.0), LocationStatus.Loading)
@@ -80,13 +80,13 @@ internal class LocationStateProviderUpdatesTests : BaseNearbyFlowProcessorTests(
             currentState = currentState
         ).launchIn(this)
 
-        verify(exactly = 0) { getPagedEventsFlow(initialState.items, any(), any()) }
+        coVerify(exactly = 0) { getPagedEvents(initialState.items, any(), any()) }
     }
 
     @Test
     @DisplayName(
         """When connected and all loading conditions met 
-|- should call getPagedEventsFlow, signal EventsLoadingFinished, emit Events.Loading and Loaded updates"""
+|- should call getPagedEvents, signal EventsLoadingFinished, emit Events.Loading and Loaded updates"""
     )
     fun allConditionsMetTest() = testScope.runBlockingTest {
         val initialState = NearbyState(items = PagedDataList(status = LoadedSuccessfully))
@@ -96,15 +96,13 @@ internal class LocationStateProviderUpdatesTests : BaseNearbyFlowProcessorTests(
         val expectedResource = Resource.successWith(
             PagedResult<IEvent>(mockedList(10) { event(it) }, 1, 1)
         )
-        val getPagedEventsFlow = mockk<GetPagedEventsFlow> {
-            every { this@mockk(initialState.items, any(), any()) } returns flowOf(
-                expectedResource
-            )
+        val getPagedEvents = mockk<GetPagedEvents> {
+            coEvery { this@mockk(initialState.items, any(), any()) } returns expectedResource
         }
         val signal = mockk<Signal>(relaxed = true)
 
         val updates = flowProcessor(
-            getPagedEventsFlow = getPagedEventsFlow,
+            getPagedEvents = getPagedEvents,
             locationStateProvider = mockk {
                 every { locationStates } returns flowOf(
                     LocationState(LatLng(10.0, 10.0), LocationStatus.Found)
@@ -115,7 +113,7 @@ internal class LocationStateProviderUpdatesTests : BaseNearbyFlowProcessorTests(
             signal = signal::invoke
         ).toList()
 
-        verify(exactly = 1) { getPagedEventsFlow(initialState.items, any(), any()) }
+        coVerify(exactly = 1) { getPagedEvents(initialState.items, any(), any()) }
         coVerify(exactly = 1) { signal.invoke(NearbySignal.EventsLoadingFinished) }
         assert(updates.size == 2)
         val loadingUpdate = updates.first()
@@ -129,17 +127,17 @@ internal class LocationStateProviderUpdatesTests : BaseNearbyFlowProcessorTests(
     }
 
     @Test
-    @DisplayName("On more than one equal consecutive latLng - should call getPagedEventsFlow only once")
+    @DisplayName("On more than one equal consecutive latLng - should call getPagedEvents only once")
     fun latLngDistinctTest() = testScope.runBlockingTest {
         val initialState = NearbyState(items = PagedDataList(status = LoadedSuccessfully))
         val currentState = mockk<() -> NearbyState> {
             every { this@mockk() } returns initialState
         }
-        val getPagedEventsFlow = mockk<GetPagedEventsFlow>(relaxed = true)
+        val getPagedEvents = mockk<GetPagedEvents>(relaxed = true)
         val locationState = LocationState(LatLng(10.0, 10.0), LocationStatus.Found)
 
         flowProcessor(
-            getPagedEventsFlow = getPagedEventsFlow,
+            getPagedEvents = getPagedEvents,
             locationStateProvider = mockk {
                 every { locationStates } returns flowOf(locationState, locationState)
             }
@@ -147,6 +145,6 @@ internal class LocationStateProviderUpdatesTests : BaseNearbyFlowProcessorTests(
             currentState = currentState
         ).launchIn(this)
 
-        verify(exactly = 1) { getPagedEventsFlow(initialState.items, any(), any()) }
+        coVerify(exactly = 1) { getPagedEvents(initialState.items, any(), any()) }
     }
 }

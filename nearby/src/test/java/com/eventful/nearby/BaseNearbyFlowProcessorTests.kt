@@ -1,7 +1,7 @@
 package com.eventful.nearby
 
 import com.eventful.core.usecase.event.GetNearbyEvents
-import com.eventful.core.usecase.event.GetPagedEventsFlow
+import com.eventful.core.usecase.event.GetPagedEvents
 import com.eventful.core.usecase.event.SaveEvents
 import com.eventful.core.android.provider.ConnectedStateProvider
 import com.eventful.core.android.provider.LocationStateProvider
@@ -41,16 +41,14 @@ internal abstract class BaseNearbyFlowProcessorTests {
     protected fun flowProcessor(
         getNearbyEvents: GetNearbyEvents = mockk(relaxed = true),
         saveEvents: SaveEvents = mockk(relaxed = true),
-        getPagedEventsFlow: GetPagedEventsFlow = GetPagedEventsFlow(
-            testDispatcher
-        ),
+        getPagedEvents: GetPagedEvents = GetPagedEvents(testDispatcher),
         connectedStateProvider: ConnectedStateProvider = mockk(relaxed = true),
         locationStateProvider: LocationStateProvider = mockk(relaxed = true),
         ioDispatcher: CoroutineDispatcher = testDispatcher
     ): NearbyFlowProcessor = NearbyFlowProcessor(
         getNearbyEvents,
         saveEvents,
-        getPagedEventsFlow,
+        getPagedEvents,
         connectedStateProvider,
         locationStateProvider,
         ioDispatcher

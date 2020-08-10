@@ -6,7 +6,7 @@ import com.eventful.core.model.Resource
 import com.eventful.core.model.Selectable
 import com.eventful.core.model.event.IEvent
 import com.eventful.core.model.search.SearchSuggestion
-import com.eventful.core.usecase.event.GetPagedEventsFlow
+import com.eventful.core.usecase.event.GetPagedEvents
 import com.eventful.core.usecase.search.GetSearchSuggestions
 import com.eventful.core.usecase.search.SaveSearchSuggestion
 import com.eventful.test.event
@@ -72,21 +72,25 @@ internal class NewSearchTests : BaseSearchFlowProcessorTests() {
     )
 
     @Test
-    @DisplayName("When given more than 1 equal searches - should getSearchSuggestions and getPagedEventsFlow only once")
+    @DisplayName("When given more than 1 equal searches - should getSearchSuggestions and getPagedEvents only once")
     fun distinctNewSearchTest() = testScope.runBlockingTest {
         val searchText = "test"
         val currentState = mockk<() -> SearchState> {
             every { this@mockk() } returns SearchState()
         }
-        val getPagedEventsFlow = mockk<GetPagedEventsFlow> {
-            every { this@mockk<Selectable<Event>>(any(), any(), any()) } returns emptyFlow()
+        val getPagedEvents = mockk<GetPagedEvents> {
+            coEvery {
+                this@mockk<Selectable<Event>>(any(), any(), any())
+            } returns Resource.successWith(
+                PagedResult(emptyList(), 0, 0)
+            )
         }
         val getSearchSuggestions = mockk<GetSearchSuggestions> {
             coEvery { this@mockk(any()) } returns emptyList()
         }
 
         flowProcessor(
-            getPagedEventsFlow = getPagedEventsFlow,
+            getPagedEvents = getPagedEvents,
             getSearchSuggestions = getSearchSuggestions
         ).updates(
             intents = (1..2).map { SearchIntent.NewSearch(searchText, false) }.asFlow(),
@@ -94,7 +98,7 @@ internal class NewSearchTests : BaseSearchFlowProcessorTests() {
         ).launchIn(testScope)
 
         coVerify(exactly = 1) { getSearchSuggestions(searchText) }
-        coVerify(exactly = 1) { getPagedEventsFlow<Selectable<Event>>(any(), any(), any()) }
+        coVerify(exactly = 1) { getPagedEvents<Selectable<Event>>(any(), any(), any()) }
     }
 
     @Test
@@ -108,10 +112,8 @@ internal class NewSearchTests : BaseSearchFlowProcessorTests() {
         val expectedResource = Resource.successWith(
             PagedResult<IEvent>(mockedList(10) { event(it) }, 1, 1)
         )
-        val getPagedEventsFlow = mockk<GetPagedEventsFlow> {
-            every { this@mockk(initialState.items, any(), any()) } returns flowOf(
-                expectedResource
-            )
+        val getPagedEvents = mockk<GetPagedEvents> {
+            coEvery { this@mockk(initialState.items, any(), any()) } returns expectedResource
         }
         val expectedSuggestions = mockedList(10) {
             SearchSuggestion(it, "suggestion$it", 100L)
@@ -121,7 +123,7 @@ internal class NewSearchTests : BaseSearchFlowProcessorTests() {
         }
 
         val updates = flowProcessor(
-            getPagedEventsFlow = getPagedEventsFlow,
+            getPagedEvents = getPagedEvents,
             getSearchSuggestions = getSearchSuggestions
         ).updates(
             intents = flowOf(SearchIntent.NewSearch(searchText, true)),

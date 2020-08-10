@@ -3,7 +3,7 @@ package com.eventful.search
 import com.eventful.core.model.PagedResult
 import com.eventful.core.model.Resource
 import com.eventful.core.model.event.IEvent
-import com.eventful.core.usecase.event.GetPagedEventsFlow
+import com.eventful.core.usecase.event.GetPagedEvents
 import com.eventful.core.util.Loading
 import com.eventful.core.util.PagedDataList
 import com.eventful.core.android.model.event.Event
@@ -11,6 +11,7 @@ import com.eventful.core.model.Selectable
 import com.eventful.test.event
 import com.eventful.test.mockedList
 import com.eventful.test.relaxedMockedList
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -28,7 +29,7 @@ import org.junit.jupiter.api.Test
 internal class LoadMoreResultsTests : BaseSearchFlowProcessorTests() {
 
     @Test
-    @DisplayName("When events status is Loading - should not getPagedEventsFlow")
+    @DisplayName("When events status is Loading - should not getPagedEvents")
     fun shouldNotLoadMoreWhenLoadingTest() = testScope.runBlockingTest {
         val currentState = mockk<() -> SearchState> {
             every { this@mockk() } returns SearchState(
@@ -38,34 +39,34 @@ internal class LoadMoreResultsTests : BaseSearchFlowProcessorTests() {
                 )
             )
         }
-        val getPagedEventsFlow = mockk<GetPagedEventsFlow>(relaxed = true)
+        val getPagedEvents = mockk<GetPagedEvents>(relaxed = true)
 
-        flowProcessor(getPagedEventsFlow = getPagedEventsFlow)
+        flowProcessor(getPagedEvents = getPagedEvents)
             .updates(currentState = currentState, intents = flowOf(SearchIntent.LoadMoreResults))
             .launchIn(this)
 
-        coVerify(exactly = 0) { getPagedEventsFlow<Selectable<Event>>(any(), any(), any()) }
+        coVerify(exactly = 0) { getPagedEvents<Selectable<Event>>(any(), any(), any()) }
     }
 
     @Test
-    @DisplayName("When no events - should not getPagedEventsFlow")
+    @DisplayName("When no events - should not getPagedEvents")
     fun shouldNotLoadMoreWhenEventsEmptyTest() = testScope.runBlockingTest {
         val currentState = mockk<() -> SearchState> {
             every { this@mockk() } returns SearchState(
                 items = PagedDataList()
             )
         }
-        val getPagedEventsFlow = mockk<GetPagedEventsFlow>(relaxed = true)
+        val getPagedEvents = mockk<GetPagedEvents>(relaxed = true)
 
-        flowProcessor(getPagedEventsFlow = getPagedEventsFlow)
+        flowProcessor(getPagedEvents = getPagedEvents)
             .updates(currentState = currentState, intents = flowOf(SearchIntent.LoadMoreResults))
             .launchIn(this)
 
-        coVerify(exactly = 0) { getPagedEventsFlow<Selectable<Event>>(any(), any(), any()) }
+        coVerify(exactly = 0) { getPagedEvents<Selectable<Event>>(any(), any(), any()) }
     }
 
     @Test
-    @DisplayName("When all events were loaded - should not getPagedEventsFlow")
+    @DisplayName("When all events were loaded - should not getPagedEvents")
     fun shouldNotLoadMoreWhenAllEventsAreLoaded() = testScope.runBlockingTest {
         val currentState = mockk<() -> SearchState> {
             every { this@mockk() } returns SearchState(
@@ -77,13 +78,13 @@ internal class LoadMoreResultsTests : BaseSearchFlowProcessorTests() {
             )
         }
 
-        val getPagedEventsFlow = mockk<GetPagedEventsFlow>(relaxed = true)
+        val getPagedEvents = mockk<GetPagedEvents>(relaxed = true)
 
-        flowProcessor(getPagedEventsFlow = getPagedEventsFlow)
+        flowProcessor(getPagedEvents = getPagedEvents)
             .updates(currentState = currentState, intents = flowOf(SearchIntent.LoadMoreResults))
             .launchIn(this)
 
-        coVerify(exactly = 0) { getPagedEventsFlow<Selectable<Event>>(any(), any(), any()) }
+        coVerify(exactly = 0) { getPagedEvents<Selectable<Event>>(any(), any(), any()) }
     }
 
     @Test
@@ -100,20 +101,18 @@ internal class LoadMoreResultsTests : BaseSearchFlowProcessorTests() {
         val expectedResource = Resource.successWith(
             PagedResult<IEvent>(mockedList(10) { event(it) }, 1, 1)
         )
-        val getPagedEventsFlow = mockk<GetPagedEventsFlow> {
-            every { this@mockk<Selectable<Event>>(any(), any(), any()) } returns flowOf(
-                expectedResource
-            )
+        val getPagedEvents = mockk<GetPagedEvents> {
+            coEvery { this@mockk<Selectable<Event>>(any(), any(), any()) } returns expectedResource
         }
 
         val updates = flowProcessor(
-            getPagedEventsFlow = getPagedEventsFlow
+            getPagedEvents = getPagedEvents
         ).updates(
             intents = flowOf(SearchIntent.LoadMoreResults),
             currentState = currentState
         ).toList()
 
-        coVerify(exactly = 1) { getPagedEventsFlow(currentEvents, any(), any()) }
+        coVerify(exactly = 1) { getPagedEvents(currentEvents, any(), any()) }
         val loadingUpdate = updates.first()
         assert(
             loadingUpdate is SearchStateUpdate.Events.Loading

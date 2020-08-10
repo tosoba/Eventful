@@ -7,7 +7,7 @@ import com.eventful.core.android.model.location.LocationStatus
 import com.eventful.core.android.provider.ConnectedStateProvider
 import com.eventful.core.android.provider.LocationStateProvider
 import com.eventful.core.usecase.event.GetNearbyEvents
-import com.eventful.core.usecase.event.GetPagedEventsFlow
+import com.eventful.core.usecase.event.GetPagedEvents
 import com.eventful.core.usecase.event.SaveEvents
 import com.eventful.core.util.Loading
 import com.eventful.core.util.PagedDataList
@@ -22,7 +22,7 @@ import javax.inject.Inject
 class NearbyFlowProcessor @Inject constructor(
     private val getNearbyEvents: GetNearbyEvents,
     private val saveEvents: SaveEvents,
-    private val getPagedEventsFlow: GetPagedEventsFlow,
+    private val getPagedEvents: GetPagedEvents,
     private val connectedStateProvider: ConnectedStateProvider,
     private val locationStateProvider: LocationStateProvider,
     private val ioDispatcher: CoroutineDispatcher
@@ -122,15 +122,21 @@ class NearbyFlowProcessor @Inject constructor(
         newLocation: Boolean,
         currentState: () -> NearbyState,
         signal: suspend (NearbySignal) -> Unit
-    ): Flow<NearbyStateUpdate> = getPagedEventsFlow(
-        currentEvents = if (newLocation) PagedDataList() else currentState().items,
-        toEvent = { selectable -> selectable.item }
-    ) { offset ->
-        getNearbyEvents(latLng.latitude, latLng.longitude, offset = if (newLocation) 0 else offset)
-    }.map { resource ->
+    ): Flow<NearbyStateUpdate> = flow {
+        emit(NearbyStateUpdate.Events.Loading(newLocation))
+        val resource = getPagedEvents(
+            currentEvents = if (newLocation) PagedDataList() else currentState().items,
+            toEvent = { selectable -> selectable.item }
+        ) { offset ->
+            getNearbyEvents(
+                latLng.latitude,
+                latLng.longitude,
+                offset = if (newLocation) 0 else offset
+            )
+        }
         signal(NearbySignal.EventsLoadingFinished)
-        NearbyStateUpdate.Events.Loaded(resource, clearEventsIfSuccess = newLocation)
-    }.onStart<NearbyStateUpdate> { emit(NearbyStateUpdate.Events.Loading(newLocation)) }
+        emit(NearbyStateUpdate.Events.Loaded(resource, clearEventsIfSuccess = newLocation))
+    }
 
     private fun Flow<NearbyIntent.AddToFavouritesClicked>.addToFavouritesUpdates(
         coroutineScope: CoroutineScope,

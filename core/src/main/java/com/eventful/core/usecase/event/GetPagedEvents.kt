@@ -6,17 +6,15 @@ import com.eventful.core.model.event.IEvent
 import com.eventful.core.util.PagedDataList
 import com.eventful.core.util.ext.lowerCasedTrimmed
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class GetPagedEventsFlow @Inject constructor(private val dispatcher: CoroutineDispatcher) {
-    operator fun <MappableToEvent> invoke(
+class GetPagedEvents @Inject constructor(private val dispatcher: CoroutineDispatcher) {
+    suspend operator fun <MappableToEvent> invoke(
         currentEvents: PagedDataList<MappableToEvent>,
         toEvent: (MappableToEvent) -> IEvent,
         getEvents: suspend (Int) -> Resource<PagedResult<IEvent>>
-    ): Flow<Resource<PagedResult<IEvent>>> = flow {
+    ): Resource<PagedResult<IEvent>> {
         val currentEventNames = currentEvents.data.map(toEvent)
             .map { it.name.lowerCasedTrimmed }
             .toSet()
@@ -37,6 +35,6 @@ class GetPagedEventsFlow @Inject constructor(private val dispatcher: CoroutineDi
             resource.data.items.isEmpty() &&
             page < currentEvents.limit
         )
-        emit(resource)
+        return resource
     }
 }

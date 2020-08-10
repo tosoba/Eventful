@@ -1,6 +1,6 @@
 package com.eventful.search
 
-import com.eventful.core.usecase.event.GetPagedEventsFlow
+import com.eventful.core.usecase.event.GetPagedEvents
 import com.eventful.core.usecase.event.SaveEvents
 import com.eventful.core.usecase.event.SearchEvents
 import com.eventful.core.usecase.search.GetSearchSuggestions
@@ -41,9 +41,7 @@ internal abstract class BaseSearchFlowProcessorTests {
 
     protected fun flowProcessor(
         searchEvents: SearchEvents = mockk(relaxed = true),
-        getPagedEventsFlow: GetPagedEventsFlow = GetPagedEventsFlow(
-            testDispatcher
-        ),
+        getPagedEvents: GetPagedEvents = GetPagedEvents(testDispatcher),
         saveEvents: SaveEvents = mockk(relaxed = true),
         getSearchSuggestions: GetSearchSuggestions = mockk(relaxed = true),
         saveSearchSuggestion: SaveSearchSuggestion = mockk(relaxed = true),
@@ -51,7 +49,7 @@ internal abstract class BaseSearchFlowProcessorTests {
         ioDispatcher: CoroutineDispatcher = testDispatcher
     ): SearchFlowProcessor = SearchFlowProcessor(
         searchEvents,
-        getPagedEventsFlow,
+        getPagedEvents,
         saveEvents,
         getSearchSuggestions,
         saveSearchSuggestion,
