@@ -7,7 +7,6 @@ import androidx.core.view.GravityCompat
 import androidx.core.view.children
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
-import com.eventful.core.android.base.BackPressedHandler
 import com.eventful.core.android.base.DaggerViewModelActivity
 import com.eventful.core.android.controller.DrawerLayoutController
 import com.eventful.core.android.model.event.Event
@@ -20,6 +19,7 @@ import com.markodevcic.peko.rationale.AlertDialogPermissionRationale
 import com.markodevcic.peko.requestPermissionsAsync
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
@@ -78,6 +78,12 @@ class MainActivity :
             }
             .launchIn(lifecycleScope)
 
+        requireNotNull(navigationFragment)
+            .backStackSignals
+            .filterNot { it }
+            .onEach { super.onBackPressed() }
+            .launchIn(this)
+
         requestPermission()
     }
 
@@ -99,14 +105,7 @@ class MainActivity :
     override fun onSupportNavigateUp(): Boolean = onBackPressed().let { true }
 
     override fun onBackPressed() {
-        val topFragment = navigationFragment?.currentTopFragment
-        when {
-            topFragment is BackPressedHandler -> topFragment.onBackPressed()
-            navigationFragment?.popBackStack() == true -> launch {
-                viewModel.signal(MainSignal.PopMainBackStackSignal)
-            }
-            else -> super.onBackPressed()
-        }
+        navigationFragment?.handleBackPressedOrPopBackStack() ?: super.onBackPressed()
     }
 
     private fun requestPermission(): Job = launch {

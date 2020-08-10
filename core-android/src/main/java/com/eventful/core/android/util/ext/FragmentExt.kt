@@ -11,10 +11,14 @@ import com.eventful.core.android.controller.EventNavigationController
 import com.eventful.core.android.controller.MenuController
 import com.eventful.core.android.controller.SnackbarController
 import com.eventful.core.android.view.ActionBarDrawerToggleEndListener
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 
 private val Fragment.appCompatActivity: AppCompatActivity?
     get() = activity as? AppCompatActivity
 
+@FlowPreview
+@ExperimentalCoroutinesApi
 val Fragment.navigationFragment: BaseNavigationFragment?
     get() = findAncestorFragmentOfType()
 

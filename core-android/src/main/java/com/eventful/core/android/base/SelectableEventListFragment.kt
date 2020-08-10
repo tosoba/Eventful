@@ -10,13 +10,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.viewbinding.ViewBinding
 import com.airbnb.epoxy.EpoxyRecyclerView
 import com.airbnb.epoxy.TypedEpoxyController
-import com.eventful.core.model.Selectable
-import com.eventful.core.util.HoldsList
 import com.eventful.core.android.controller.ItemsSelectionActionModeController
 import com.eventful.core.android.controller.itemsSelectionActionModeController
 import com.eventful.core.android.model.event.Event
 import com.eventful.core.android.navigation.IMainChildFragmentNavDestinations
-import com.eventful.core.android.provider.PopBackStackSignalProvider
 import com.eventful.core.android.util.delegate.viewBinding
 import com.eventful.core.android.util.ext.navigationFragment
 import com.eventful.core.android.util.ext.saveScrollPosition
@@ -24,10 +21,13 @@ import com.eventful.core.android.util.ext.setControllerWithSavedState
 import com.eventful.core.android.view.epoxy.EpoxyThreads
 import com.eventful.core.android.view.epoxy.infiniteItemListController
 import com.eventful.core.android.view.epoxy.listItem
+import com.eventful.core.model.Selectable
+import com.eventful.core.util.HoldsList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -56,9 +56,6 @@ abstract class SelectableEventListFragment<
 
     @Inject
     internal lateinit var epoxyThreads: EpoxyThreads
-
-    @Inject
-    internal lateinit var popBackStackSignalProvider: PopBackStackSignalProvider
 
     protected val binding: VB by viewBinding(viewBindingFactory)
 
@@ -135,7 +132,8 @@ abstract class SelectableEventListFragment<
             .onEach(::onViewUpdate)
             .launchIn(lifecycleScope)
 
-        popBackStackSignalProviderJob = popBackStackSignalProvider.popBackStackSignals
+        popBackStackSignalProviderJob = requireNotNull(navigationFragment).backStackSignals
+            .filter { it }
             .onEach {
                 actionModeController.update(viewModel.state.items.data.count { it.selected })
             }

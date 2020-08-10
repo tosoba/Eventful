@@ -7,7 +7,6 @@ import android.view.View
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.PagerAdapter
 import com.eventful.core.android.controller.*
-import com.eventful.core.android.provider.PopBackStackSignalProvider
 import com.eventful.core.android.util.delegate.bottomNavItemSelectedViewPagerListener
 import com.eventful.core.android.util.delegate.viewBinding
 import com.eventful.core.android.util.delegate.viewPagerPageSelectedBottomNavListener
@@ -24,8 +23,8 @@ import com.google.common.collect.HashBiMap
 import dagger.android.support.DaggerFragment
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
@@ -53,12 +52,7 @@ class MainFragment : DaggerFragment(R.layout.fragment_main), MenuController, Sna
     private lateinit var snackbarStateChannel: SendChannel<SnackbarState>
 
     @Inject
-    internal lateinit var popBackStackSignalProvider: PopBackStackSignalProvider
-
-    @Inject
     internal lateinit var navDestinations: IMainNavDestinations
-
-    private var popBackStackSignalProviderJob: Job? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         with(binding) {
@@ -77,7 +71,8 @@ class MainFragment : DaggerFragment(R.layout.fragment_main), MenuController, Sna
 
             snackbarStateChannel = handleSnackbarState(mainFab)
 
-            popBackStackSignalProviderJob = popBackStackSignalProvider.popBackStackSignals
+            requireNotNull(navigationFragment).backStackSignals
+                .filter { it }
                 .onEach {
                     setupToolbar(mainToolbar)
                     activity?.statusBarColor = context?.themeColor(R.attr.colorPrimaryDark)
@@ -87,9 +82,8 @@ class MainFragment : DaggerFragment(R.layout.fragment_main), MenuController, Sna
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
         snackbarStateChannel.close()
-        popBackStackSignalProviderJob?.cancel()
+        super.onDestroyView()
     }
 
     override fun initializeMenu(menuRes: Int, inflater: MenuInflater, initialize: (Menu) -> Unit) {
