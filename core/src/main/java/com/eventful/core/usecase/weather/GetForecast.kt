@@ -7,7 +7,10 @@ import javax.inject.Inject
 
 class GetForecast @Inject constructor(private val repo: IWeatherRepository) {
     suspend operator fun invoke(
-        lat: Double,
-        lon: Double
-    ): Resource<Forecast> = repo.getForecast(lat, lon)
+        lat: Double, lon: Double, timestampMillis: Long?
+    ): Resource<Forecast> = if (timestampMillis != null) {
+        repo.getForecastTimed(lat, lon, timestampMillis / 1000)
+    } else {
+        repo.getForecast(lat, lon)
+    }
 }

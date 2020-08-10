@@ -2,8 +2,10 @@ package com.eventful.weather
 
 import androidx.lifecycle.SavedStateHandle
 import com.eventful.core.android.base.FlowProcessor
+import com.eventful.core.android.model.event.Event
 import com.eventful.core.android.provider.CurrentEventProvider
 import com.eventful.core.usecase.weather.GetForecast
+import com.eventful.core.util.Initial
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -41,26 +43,72 @@ class WeatherFlowProcessor @Inject constructor(
             .map { WeatherStateUpdate.NewEvent(it) },
         intents.filterIsInstance<WeatherIntent.TabSelected>()
             .map { WeatherStateUpdate.TabSelected(it.tab) },
-        states.map { (event, _, _) -> requireNotNull(event.venues?.firstOrNull()?.latLng) }
+        states.map { it.tab }
             .distinctUntilChanged()
-            .flatMapLatest { latLng -> weatherLoadingUpdates(latLng, coroutineScope, intent) },
+            .filter {
+                when (it) {
+                    WeatherTab.NOW -> currentState()
+                        .run { forecastNow.status !is Initial }
+                    WeatherTab.EVENT_TIME -> currentState()
+                        .run { forecastEventTime.status !is Initial }
+                }
+            }
+            .flatMapLatest { tab ->
+                currentState().event.let {
+                    weatherLoadingUpdates(
+                        timestampMillis(tab, it),
+                        false,
+                        it.venueLatLng,
+                        coroutineScope,
+                        intent
+                    )
+                }
+            },
+        states.map { (event) -> event.venueLatLng }
+            .distinctUntilChanged()
+            .flatMapLatest { latLng ->
+                weatherLoadingUpdates(
+                    currentState().run { timestampMillis(tab, event) },
+                    true,
+                    latLng,
+                    coroutineScope,
+                    intent
+                )
+            },
         intents.filterIsInstance<WeatherIntent.RetryLoadWeather>()
-            .map { requireNotNull(currentState().event.venues?.firstOrNull()?.latLng) }
-            .flatMapLatest { latLng -> weatherLoadingUpdates(latLng, coroutineScope, intent) }
+            .map { currentState().run { timestampMillis(tab, event) to event.venueLatLng } }
+            .flatMapLatest { (timestampMillis, latLng) ->
+                weatherLoadingUpdates(timestampMillis, false, latLng, coroutineScope, intent)
+            }
     )
 
+    private fun timestampMillis(tab: WeatherTab, event: Event): Long? = when (tab) {
+        WeatherTab.NOW -> null
+        WeatherTab.EVENT_TIME -> requireNotNull(event.startDate?.time)
+    }
+
+    private val Event.venueLatLng: LatLng get() = requireNotNull(venues?.firstOrNull()?.latLng)
+
     private suspend fun weatherLoadingUpdates(
+        timestampMillis: Long?,
+        newEvent: Boolean,
         latLng: LatLng,
         coroutineScope: CoroutineScope,
         intent: suspend (WeatherIntent) -> Unit
     ): Flow<WeatherStateUpdate> = flow<WeatherStateUpdate> {
         emit(WeatherStateUpdate.Weather.Loading)
         val resource = withContext(ioDispatcher) {
-            getForecast(lat = latLng.latitude, lon = latLng.longitude)
+            getForecast(
+                lat = latLng.latitude,
+                lon = latLng.longitude,
+                timestampMillis = timestampMillis
+            )
         }
         emit(
             WeatherStateUpdate.Weather.Loaded(
-                resource,
+                resource = resource,
+                tab = if (timestampMillis == null) WeatherTab.NOW else WeatherTab.EVENT_TIME,
+                newEvent = newEvent,
                 retry = { coroutineScope.launch { intent(WeatherIntent.RetryLoadWeather) } }
             )
         )

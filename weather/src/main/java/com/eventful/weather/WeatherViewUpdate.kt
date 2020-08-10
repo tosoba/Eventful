@@ -21,14 +21,17 @@ val WeatherViewModel.viewUpdates: Flow<WeatherViewUpdate>
         states.map { it.snackbarState }
             .distinctUntilChanged()
             .map { WeatherViewUpdate.Snackbar(it) },
-        states.map { it.forecast }
-            .filter { (_, status) -> status is Loading }
-            .map { WeatherViewUpdate.LoadingForecast },
-        states.filter { it.forecast.status is LoadedSuccessfully }
-            .map { (event, forecast) ->
-                WeatherViewUpdate.ForecastLoaded(
-                    requireNotNull(forecast.data),
-                    requireNotNull(event.venues?.firstOrNull()?.city)
-                )
-            }
+        states.filter {
+            (it.forecastNow.status is Loading && it.tab == WeatherTab.NOW)
+                    || (it.forecastEventTime.status is Loading && it.tab == WeatherTab.EVENT_TIME)
+        }.map { WeatherViewUpdate.LoadingForecast },
+        states.filter {
+            (it.forecastNow.status is LoadedSuccessfully && it.tab == WeatherTab.NOW)
+                    || (it.forecastEventTime.status is LoadedSuccessfully && it.tab == WeatherTab.EVENT_TIME)
+        }.map { (event, _, forecast) ->
+            WeatherViewUpdate.ForecastLoaded(
+                requireNotNull(forecast.data),
+                requireNotNull(event.venues?.firstOrNull()?.city)
+            )
+        }
     )
