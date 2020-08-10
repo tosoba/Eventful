@@ -17,9 +17,7 @@ class WeatherRepository @Inject constructor(private val api: DarkSkyApi) : IWeat
         .toResource()
 
     override suspend fun getForecastTimed(
-        lat: Double,
-        lon: Double,
-        secondsSinceEpoch: Long
+        lat: Double, lon: Double, secondsSinceEpoch: Long
     ): Resource<Forecast> = api
         .getForecastTimedAsync(lat, lon, secondsSinceEpoch)
         .await()

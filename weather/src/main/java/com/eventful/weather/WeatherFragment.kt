@@ -75,6 +75,10 @@ class WeatherFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setupToolbarWithDrawerToggle(binding.weatherToolbar)
+        with(binding.weatherTabLayout) {
+            addTab(newTab().setText("Now"))
+            addTab(newTab().setText("Event time"))
+        }
         binding.weatherRecyclerView.setController(epoxyController)
         with(binding.weatherBottomNavView) {
             setOnNavigationItemSelectedListener(eventNavigationItemSelectedListener)

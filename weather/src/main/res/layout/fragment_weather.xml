@@ -35,6 +35,13 @@
 
         </androidx.appcompat.widget.Toolbar>
 
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/weather_tab_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:tabGravity="fill"
+            app:tabMode="fixed" />
+
     </com.google.android.material.appbar.AppBarLayout>
 
     <com.airbnb.epoxy.EpoxyRecyclerView
