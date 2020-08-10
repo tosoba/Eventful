@@ -115,7 +115,7 @@ abstract class SelectableEventListFragment<
     }
 
     private var viewUpdatesJob: Job? = null
-    private var popBackStackSignalProviderJob: Job? = null
+    private var backStackSignalsJob: Job? = null
 
     @CallSuper
     override fun onResume() {
@@ -132,7 +132,7 @@ abstract class SelectableEventListFragment<
             .onEach(::onViewUpdate)
             .launchIn(lifecycleScope)
 
-        popBackStackSignalProviderJob = requireNotNull(navigationFragment).backStackSignals
+        backStackSignalsJob = requireNotNull(navigationFragment).backStackSignals
             .filter { it }
             .onEach {
                 actionModeController.update(viewModel.state.items.data.count { it.selected })
@@ -143,7 +143,7 @@ abstract class SelectableEventListFragment<
     @CallSuper
     override fun onPause() {
         viewUpdatesJob?.cancel()
-        popBackStackSignalProviderJob?.cancel()
+        backStackSignalsJob?.cancel()
         super.onPause()
     }
 

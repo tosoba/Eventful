@@ -10,7 +10,6 @@ import com.eventful.core.android.di.viewmodel.ViewModelKey
 import com.eventful.core.android.navigation.IMainChildFragmentNavDestinations
 import com.eventful.core.android.provider.ConnectedStateProvider
 import com.eventful.core.android.provider.LocationStateProvider
-import com.eventful.core.android.provider.PopBackStackSignalProvider
 import com.eventful.core.android.service.EventAlarmService
 import com.eventful.event.EventModule
 import com.eventful.event.IEventChildFragmentsFactory
@@ -64,9 +63,6 @@ abstract class MainActivityModule {
 
     @Binds
     abstract fun locationStateProvider(mainViewModel: MainViewModel): LocationStateProvider
-
-    @Binds
-    abstract fun popBackStackSignalProvider(mainViewModel: MainViewModel): PopBackStackSignalProvider
 
     @ContributesAndroidInjector
     abstract fun eventAlarmService(): EventAlarmService

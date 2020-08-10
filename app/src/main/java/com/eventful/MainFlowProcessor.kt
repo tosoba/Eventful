@@ -25,7 +25,7 @@ class MainFlowProcessor @Inject constructor(
     private val isLocationAvailableFlow: IsLocationAvailableFlow,
     private val getUpcomingAlarms: GetUpcomingAlarms,
     private val getUpcomingEvents: GetUpcomingEventsFlow
-) : FlowProcessor<MainIntent, MainStateUpdate, MainState, MainSignal> {
+) : FlowProcessor<MainIntent, MainStateUpdate, MainState, Unit> {
 
     override fun updates(
         coroutineScope: CoroutineScope,
@@ -33,7 +33,7 @@ class MainFlowProcessor @Inject constructor(
         currentState: () -> MainState,
         states: Flow<MainState>,
         intent: suspend (MainIntent) -> Unit,
-        signal: suspend (MainSignal) -> Unit
+        signal: suspend (Unit) -> Unit
     ): Flow<MainStateUpdate> = merge(
         intents.updates(currentState),
         isConnectedFlow()
