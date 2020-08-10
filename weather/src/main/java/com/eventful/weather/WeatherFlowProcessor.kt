@@ -39,6 +39,8 @@ class WeatherFlowProcessor @Inject constructor(
         currentEventProvider.event
             .filter { WeatherEventValidator.isValid(it) }
             .map { WeatherStateUpdate.NewEvent(it) },
+        intents.filterIsInstance<WeatherIntent.TabSelected>()
+            .map { WeatherStateUpdate.TabSelected(it.tab) },
         states.map { (event, _, _) -> requireNotNull(event.venues?.firstOrNull()?.latLng) }
             .distinctUntilChanged()
             .flatMapLatest { latLng -> weatherLoadingUpdates(latLng, coroutineScope, intent) },

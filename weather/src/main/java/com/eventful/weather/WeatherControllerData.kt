@@ -5,5 +5,4 @@ import com.eventful.core.model.weather.Forecast
 sealed class WeatherControllerData {
     object LoadingForecast : WeatherControllerData()
     data class ForecastLoaded(val forecast: Forecast, val city: String) : WeatherControllerData()
-    object UnknownLatLng : WeatherControllerData()
 }

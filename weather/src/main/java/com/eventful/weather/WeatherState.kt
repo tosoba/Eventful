@@ -7,6 +7,7 @@ import com.eventful.core.util.Data
 
 data class WeatherState(
     val event: Event,
+    val tab: WeatherTab = WeatherTab.NOW,
     val forecast: Data<Forecast?> = Data(null),
     val snackbarState: SnackbarState = SnackbarState.Hidden
 )

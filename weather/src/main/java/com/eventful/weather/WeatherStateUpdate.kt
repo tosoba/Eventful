@@ -13,6 +13,10 @@ sealed class WeatherStateUpdate : StateUpdate<WeatherState> {
         override fun invoke(state: WeatherState): WeatherState = state.copy(event = event)
     }
 
+    data class TabSelected(val tab: WeatherTab) : WeatherStateUpdate() {
+        override fun invoke(state: WeatherState): WeatherState = state.copy(tab = tab)
+    }
+
     sealed class Weather : WeatherStateUpdate() {
         object Loading : Weather() {
             override fun invoke(state: WeatherState): WeatherState = state.copy(

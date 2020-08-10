@@ -18,8 +18,12 @@ import com.eventful.weather.databinding.FragmentWeatherBinding
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import reactivecircus.flowbinding.material.TabLayoutSelectionEvent
+import reactivecircus.flowbinding.material.tabSelectionEvents
 import javax.inject.Inject
 
 @FlowPreview
@@ -76,8 +80,14 @@ class WeatherFragment :
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setupToolbarWithDrawerToggle(binding.weatherToolbar)
         with(binding.weatherTabLayout) {
-            addTab(newTab().setText("Now"))
-            addTab(newTab().setText("Event time"))
+            WeatherTab.values().forEach { newTab().text = it.label }
+            tabSelectionEvents()
+                .filterIsInstance<TabLayoutSelectionEvent.TabSelected>()
+                .drop(1)
+                .onEach {
+                    viewModel.intent(WeatherIntent.TabSelected(WeatherTab.values()[it.tab.position]))
+                }
+                .launchIn(lifecycleScope)
         }
         binding.weatherRecyclerView.setController(epoxyController)
         with(binding.weatherBottomNavView) {
