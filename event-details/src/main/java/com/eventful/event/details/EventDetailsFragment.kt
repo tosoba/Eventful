@@ -35,10 +35,8 @@ import com.eventful.core.android.wideButton
 import com.eventful.event.details.databinding.FragmentEventDetailsBinding
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.fragment_event_details.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -91,63 +89,15 @@ class EventDetailsFragment :
         }
     }
 
+    private lateinit var binding: FragmentEventDetailsBinding
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? = FragmentEventDetailsBinding.inflate(inflater, container, false).apply {
         setupToolbarWithDrawerToggle(eventDetailsToolbar, R.drawable.drawer_toggle_outline)
 
-        if (savedInstanceState == null) epoxyController.setData(this@EventDetailsFragment.event)
-        eventDetailsRecyclerView.setController(epoxyController)
-
         eventFavFab.clicks()
             .onEach { viewModel.intent(EventDetailsIntent.ToggleFavourite) }
-            .launchIn(lifecycleScope)
-
-        viewModel.viewUpdates
-            .run { if (savedInstanceState == null) drop(1) else this }
-            .onEach { update ->
-                when (update) {
-                    is EventDetailsViewUpdate.FloatingActionButtonDrawable -> eventFavFab.updateDrawable(
-                        update.isFavourite
-                    )
-                    is EventDetailsViewUpdate.NewEvent -> {
-                        event = update.event
-                        epoxyController.setData(update.event)
-                        Glide.with(expandedImage)
-                            .load(update.event.imageUrl)
-                            .apply(eventRequestOptions)
-                            .addListener(object : RequestListener<Drawable> {
-                                override fun onLoadFailed(
-                                    e: GlideException?,
-                                    model: Any?,
-                                    target: Target<Drawable>?,
-                                    isFirstResource: Boolean
-                                ): Boolean = false
-
-                                override fun onResourceReady(
-                                    resource: Drawable?,
-                                    model: Any?,
-                                    target: Target<Drawable>?,
-                                    dataSource: DataSource?,
-                                    isFirstResource: Boolean
-                                ): Boolean {
-                                    resource?.let { drawable ->
-                                        lifecycleScope.launch {
-                                            statusBarColor = withContext(Dispatchers.Default) {
-                                                drawable.bitmap.dominantColor
-                                            }.also {
-                                                statusBarColor = it
-                                                activity?.statusBarColor = it
-                                            }
-                                        }
-                                    }
-                                    return false
-                                }
-                            })
-                            .into(expandedImage)
-                    }
-                }
-            }
             .launchIn(lifecycleScope)
 
         snackbarStateChannel = handleSnackbarState(eventFavFab)
@@ -157,7 +107,60 @@ class EventDetailsFragment :
             selectedItemId = R.id.bottom_nav_event_details
             bottomNavItemsToRemove.forEach(menu::removeItem)
         }
+
+        binding = this
     }.root
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        with(binding) {
+            viewModel.viewUpdates
+                .onEach { update ->
+                    when (update) {
+                        is EventDetailsViewUpdate.FloatingActionButtonDrawable -> eventFavFab
+                            .updateDrawable(update.isFavourite)
+                        is EventDetailsViewUpdate.NewEvent -> {
+                            event = update.event
+                            epoxyController.setData(update.event)
+                            Glide.with(expandedImage)
+                                .load(update.event.imageUrl)
+                                .apply(eventRequestOptions)
+                                .addListener(object : RequestListener<Drawable> {
+                                    override fun onLoadFailed(
+                                        e: GlideException?,
+                                        model: Any?,
+                                        target: Target<Drawable>?,
+                                        isFirstResource: Boolean
+                                    ): Boolean = false
+
+                                    override fun onResourceReady(
+                                        resource: Drawable?,
+                                        model: Any?,
+                                        target: Target<Drawable>?,
+                                        dataSource: DataSource?,
+                                        isFirstResource: Boolean
+                                    ): Boolean {
+                                        resource?.let { drawable ->
+                                            lifecycleScope.launch {
+                                                statusBarColor = withContext(Dispatchers.Default) {
+                                                    drawable.bitmap.dominantColor
+                                                }.also {
+                                                    statusBarColor = it
+                                                    activity?.statusBarColor = it
+                                                }
+                                            }
+                                        }
+                                        return false
+                                    }
+                                })
+                                .into(expandedImage)
+                        }
+                    }
+                }
+                .launchIn(lifecycleScope)
+
+            eventDetailsRecyclerView.setController(epoxyController)
+        }
+    }
 
     override fun onDestroyView() {
         snackbarStateChannel.close()
@@ -173,7 +176,7 @@ class EventDetailsFragment :
     override fun onResume() {
         super.onResume()
 
-        event_details_toolbar?.let {
+        binding.eventDetailsToolbar.let {
             setupToolbar(it)
             showBackNavArrow()
             it.navigationIcon = ContextCompat.getDrawable(
@@ -183,7 +186,7 @@ class EventDetailsFragment :
         }
         statusBarColor?.let { activity?.statusBarColor = it }
 
-        event_details_bottom_nav_view.selectedItemId = R.id.bottom_nav_event_details
+        binding.eventDetailsBottomNavView.selectedItemId = R.id.bottom_nav_event_details
 
         snackbarStateUpdatesJob = viewModel.viewUpdates
             .filterIsInstance<EventDetailsViewUpdate.FavouriteStatusSnackbar>()
