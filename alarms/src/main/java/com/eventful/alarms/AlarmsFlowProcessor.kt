@@ -8,6 +8,7 @@ import com.eventful.core.android.provider.CurrentEventProvider
 import com.eventful.core.usecase.alarm.CreateAlarm
 import com.eventful.core.usecase.alarm.DeleteAlarms
 import com.eventful.core.usecase.alarm.GetAlarms
+import com.eventful.core.usecase.alarm.UpdateAlarm
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
@@ -17,6 +18,7 @@ class AlarmsFlowProcessor(
     private val getAlarms: GetAlarms,
     private val deleteAlarms: DeleteAlarms,
     private val createAlarm: CreateAlarm,
+    private val updateAlarm: UpdateAlarm,
     private val currentEventProvider: CurrentEventProvider?,
     private val ioDispatcher: CoroutineDispatcher
 ) : FlowProcessor<AlarmsIntent, AlarmsStateUpdate, AlarmsState, AlarmsSignal> {
@@ -65,6 +67,8 @@ class AlarmsFlowProcessor(
             .removeFromAlarmsUpdates(coroutineScope, currentState, intent, signal),
         filterIsInstance<AlarmsIntent.AddAlarm>()
             .addAlarmUpdates(signal),
+        filterIsInstance<AlarmsIntent.UpdateAlarm>()
+            .updateAlarmUpdates(signal),
         filterIsInstance<AlarmsIntent.UpdateDialogStatus>()
             .map { (status) -> AlarmsStateUpdate.DialogStatus(status) }
     )
@@ -102,6 +106,14 @@ class AlarmsFlowProcessor(
     ): Flow<AlarmsStateUpdate> = map { (event, timestamp) ->
         createAlarm(event.id, timestamp)
         signal(AlarmsSignal.AlarmAdded)
+        null
+    }.filterNotNull()
+
+    private fun Flow<AlarmsIntent.UpdateAlarm>.updateAlarmUpdates(
+        signal: suspend (AlarmsSignal) -> Unit
+    ): Flow<AlarmsStateUpdate> = map { (id, timestamp) ->
+        updateAlarm(id, timestamp)
+        signal(AlarmsSignal.AlarmUpdated)
         null
     }.filterNotNull()
 }

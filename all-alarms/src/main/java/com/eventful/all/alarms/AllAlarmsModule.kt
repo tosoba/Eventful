@@ -10,6 +10,7 @@ import com.eventful.core.android.di.viewmodel.ViewModelKey
 import com.eventful.core.usecase.alarm.CreateAlarm
 import com.eventful.core.usecase.alarm.DeleteAlarms
 import com.eventful.core.usecase.alarm.GetAlarms
+import com.eventful.core.usecase.alarm.UpdateAlarm
 import com.squareup.inject.assisted.dagger2.AssistedModule
 import dagger.Binds
 import dagger.Module
@@ -44,11 +45,13 @@ abstract class AllAlarmsModule {
             getAlarms: GetAlarms,
             deleteAlarms: DeleteAlarms,
             createAlarm: CreateAlarm,
+            updateAlarm: UpdateAlarm,
             ioDispatcher: CoroutineDispatcher
         ): AlarmsFlowProcessor = AlarmsFlowProcessor(
             getAlarms,
             deleteAlarms,
             createAlarm,
+            updateAlarm,
             null,
             ioDispatcher
         )

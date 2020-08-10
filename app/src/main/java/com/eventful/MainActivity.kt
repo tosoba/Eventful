@@ -10,7 +10,6 @@ import androidx.lifecycle.lifecycleScope
 import com.eventful.core.android.base.BackPressedHandler
 import com.eventful.core.android.base.DaggerViewModelActivity
 import com.eventful.core.android.controller.DrawerLayoutController
-import com.eventful.core.android.controller.EventNavigationController
 import com.eventful.core.android.model.event.Event
 import com.eventful.core.android.util.delegate.viewBinding
 import com.eventful.databinding.ActivityMainBinding
@@ -88,10 +87,7 @@ class MainActivity :
     }
 
     private fun showEvent(event: Event) {
-        navigationFragment?.currentTopFragment?.let { topFragment ->
-            if (topFragment is EventNavigationController) topFragment.showEventDetails(event)
-            else navigationFragment?.showFragment(navDestinations.eventFragment(event))
-        }
+        navigationFragment?.showEvent(event)
     }
 
     override fun onDestroy() {

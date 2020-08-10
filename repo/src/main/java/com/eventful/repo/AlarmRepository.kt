@@ -42,4 +42,8 @@ class AlarmRepository @Inject constructor(
     override suspend fun insertAlarm(eventId: String, timestamp: Long): Int = alarmDao
         .insertAlarm(AlarmEntity(eventId, timestamp))
         .toInt()
+
+    override suspend fun updateAlarm(id: Int, timestamp: Long) {
+        alarmDao.updateAlarm(id, timestamp)
+    }
 }

@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import com.eventful.core.android.R
 import com.eventful.core.android.base.BaseNavigationFragment
 import com.eventful.core.android.controller.DrawerLayoutController
+import com.eventful.core.android.controller.EventNavigationController
 import com.eventful.core.android.controller.MenuController
 import com.eventful.core.android.controller.SnackbarController
 import com.eventful.core.android.view.ActionBarDrawerToggleEndListener
@@ -21,6 +22,9 @@ val Fragment.snackbarController: SnackbarController?
     get() = findAncestorFragmentOfType()
 
 val Fragment.menuController: MenuController?
+    get() = findAncestorFragmentOfType()
+
+val Fragment.eventNavigationController: EventNavigationController?
     get() = findAncestorFragmentOfType()
 
 private inline fun <reified T> Fragment.findAncestorFragmentOfType(): T? {

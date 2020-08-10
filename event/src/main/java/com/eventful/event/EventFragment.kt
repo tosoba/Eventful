@@ -10,7 +10,7 @@ import androidx.viewpager.widget.ViewPager
 import com.eventful.core.android.base.BackPressedHandler
 import com.eventful.core.android.base.DaggerViewModelFragment
 import com.eventful.core.android.base.HasArgs
-import com.eventful.core.android.controller.EventNavigationController
+import com.eventful.core.android.controller.EventController
 import com.eventful.core.android.model.event.Event
 import com.eventful.core.android.util.delegate.FragmentArgument
 import com.eventful.core.android.util.delegate.viewBinding
@@ -28,7 +28,7 @@ import javax.inject.Inject
 @FlowPreview
 class EventFragment :
     DaggerViewModelFragment<EventViewModel>(R.layout.fragment_event),
-    EventNavigationController,
+    EventController,
     HasArgs,
     BackPressedHandler {
 
@@ -91,7 +91,7 @@ class EventFragment :
 
     override fun showEventDetails(event: Event) {
         viewPager.currentItem =
-            EventNavigationController.navigationItems[R.id.bottom_nav_event_details]
+            EventController.navigationItems[R.id.bottom_nav_event_details]
                 ?: throw IllegalStateException()
         lifecycleScope.launch { viewModel.intent(EventIntent.NewEvent(event)) }
     }

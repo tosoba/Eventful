@@ -12,6 +12,9 @@ interface AlarmDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAlarm(alarmEntity: AlarmEntity): Long
 
+    @Query("UPDATE ${Tables.ALARM} SET timestamp = :timestamp WHERE id = :id")
+    suspend fun updateAlarm(id: Int, timestamp: Long)
+
     @Query("DELETE FROM ${Tables.ALARM} WHERE id = :id")
     suspend fun deleteAlarm(id: Int)
 

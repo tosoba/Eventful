@@ -9,4 +9,5 @@ interface IAlarmRepository {
     fun getUpcomingAlarms(limit: Int): Flow<List<IAlarm>>
     suspend fun deleteAlarms(alarmIds: List<Int>)
     suspend fun insertAlarm(eventId: String, timestamp: Long): Int
+    suspend fun updateAlarm(id: Int, timestamp: Long)
 }

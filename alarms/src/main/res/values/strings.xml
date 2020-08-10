@@ -7,4 +7,5 @@
     <string name="invalid_alarm_timestamp">Unable to create alarm - chosen time has to be at least %1$s before event\'s start time.</string>
     <string name="alarm_time">%1$s:%2$s</string>
     <string name="alarm_date">%1$s.%2$s.%3$s</string>
+    <string name="show_event">Show event</string>
 </resources>

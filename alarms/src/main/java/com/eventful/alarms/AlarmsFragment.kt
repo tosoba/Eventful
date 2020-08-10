@@ -1,6 +1,5 @@
 package com.eventful.alarms
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
@@ -67,13 +66,6 @@ abstract class AlarmsFragment<M : AlarmsMode, VM : AlarmsViewModel> :
         ) { selectable ->
             selectable.listItem(
                 clicked = View.OnClickListener {
-                    //TODO: move this to popup menu
-//                    if (mode is AlarmsMode.All) {
-//                        actionModeController.finish(false)
-//                        navigationFragment?.showFragment(
-//                            fragmentFactory.eventFragment(selectable.item.event)
-//                        )
-//                    }
                     Toast.makeText(
                         context,
                         "Time left: ${selectable.item.formattedTimeLeft}",
@@ -90,6 +82,24 @@ abstract class AlarmsFragment<M : AlarmsMode, VM : AlarmsViewModel> :
                     PopupMenu(it.context, it).apply {
                         setOnMenuItemClickListener { item ->
                             when (item.itemId) {
+                                R.id.action_edit_alarm -> {
+                                    actionModeController.finish(false)
+                                    lifecycleScope.launch {
+                                        viewModel.intent(
+                                            AlarmsIntent.UpdateDialogStatus(
+                                                AddEditAlarmDialogStatus.WithMode.Shown(
+                                                    AddEditAlarmDialogMode.Edit(alarm = selectable.item)
+                                                )
+                                            )
+                                        )
+                                    }
+                                    true
+                                }
+                                R.id.action_show_event -> {
+                                    actionModeController.finish(false)
+                                    eventNavigationController?.showEvent(selectable.item.event)
+                                    true
+                                }
                                 else -> false
                             }
                         }
@@ -141,29 +151,19 @@ abstract class AlarmsFragment<M : AlarmsMode, VM : AlarmsViewModel> :
                         ) { timestamp ->
                             lifecycleScope.launch {
                                 viewModel.intent(
-                                    AlarmsIntent.AddAlarm(
-                                        event = when (update.mode) {
-                                            is AddEditAlarmDialogMode.Add -> update.mode.event
-                                            is AddEditAlarmDialogMode.Edit -> update.mode.alarm.event
-                                        },
-                                        timestamp = timestamp
-                                    )
+                                    when (update.mode) {
+                                        is AddEditAlarmDialogMode.Add -> AlarmsIntent.AddAlarm(
+                                            event = update.mode.event,
+                                            timestamp = timestamp
+                                        )
+                                        is AddEditAlarmDialogMode.Edit -> AlarmsIntent.UpdateAlarm(
+                                            id = update.mode.alarm.id,
+                                            timestamp = timestamp
+                                        )
+                                    }
                                 )
                             }
-                        }.apply {
-                            fun updateDialogStatusToHidden() {
-                                addEditAlarmDialog = null
-                                lifecycleScope.launch {
-                                    viewModel.intent(
-                                        AlarmsIntent.UpdateDialogStatus(
-                                            AddEditAlarmDialogStatus.Hidden
-                                        )
-                                    )
-                                }
-                            }
-                            setOnCancelListener { updateDialogStatusToHidden() }
-                            setOnDismissListener { updateDialogStatusToHidden() }
-                        }
+                        }.apply { addCancelDismissListeners() }
                     }
                 }
             }
@@ -175,6 +175,21 @@ abstract class AlarmsFragment<M : AlarmsMode, VM : AlarmsViewModel> :
         }
 
         binding.alarmsRecyclerView.setController(epoxyController)
+    }
+
+    private fun AddEditAlarmDialog.addCancelDismissListeners() {
+        fun updateDialogStatusToHidden() {
+            addEditAlarmDialog = null
+            lifecycleScope.launch {
+                viewModel.intent(
+                    AlarmsIntent.UpdateDialogStatus(
+                        AddEditAlarmDialogStatus.Hidden
+                    )
+                )
+            }
+        }
+        setOnCancelListener { updateDialogStatusToHidden() }
+        setOnDismissListener { updateDialogStatusToHidden() }
     }
 
     override fun onDestroyView() {
