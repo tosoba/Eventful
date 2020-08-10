@@ -100,6 +100,14 @@ abstract class AlarmsFragment<M : AlarmsMode, VM : AlarmsViewModel> :
                                     eventNavigationController?.showEvent(selectable.item.event)
                                     true
                                 }
+                                R.id.action_delete_alarm -> {
+                                    lifecycleScope.launch {
+                                        viewModel.intent(
+                                            AlarmsIntent.DeleteAlarm(selectable.item.id)
+                                        )
+                                    }
+                                    true
+                                }
                                 else -> false
                             }
                         }

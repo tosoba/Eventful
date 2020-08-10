@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
+        android:id="@+id/action_show_event"
+        android:title="@string/show_event" />
+
+    <item
         android:id="@+id/action_edit_alarm"
         android:title="@string/edit" />
 
     <item
-        android:id="@+id/action_show_event"
-        android:title="@string/show_event" />
+        android:id="@+id/action_delete_alarm"
+        android:title="@string/delete" />
 </menu>

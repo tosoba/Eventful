@@ -3,7 +3,6 @@ package com.eventful.alarms
 import androidx.lifecycle.SavedStateHandle
 import com.eventful.core.android.base.FlowProcessor
 import com.eventful.core.android.base.removedFromAlarmsMessage
-import com.eventful.core.android.model.alarm.Alarm
 import com.eventful.core.android.provider.CurrentEventProvider
 import com.eventful.core.usecase.alarm.CreateAlarm
 import com.eventful.core.usecase.alarm.DeleteAlarms
@@ -69,6 +68,8 @@ class AlarmsFlowProcessor(
             .addAlarmUpdates(signal),
         filterIsInstance<AlarmsIntent.UpdateAlarm>()
             .updateAlarmUpdates(signal),
+        filterIsInstance<AlarmsIntent.DeleteAlarm>()
+            .map { removeAlarms(listOf(it.id), coroutineScope, intent, signal) },
         filterIsInstance<AlarmsIntent.UpdateDialogStatus>()
             .map { (status) -> AlarmsStateUpdate.DialogStatus(status) }
     )
@@ -90,11 +91,24 @@ class AlarmsFlowProcessor(
         intent: suspend (AlarmsIntent) -> Unit,
         signal: suspend (AlarmsSignal) -> Unit
     ): Flow<AlarmsStateUpdate> = map {
-        val selectedAlarms = currentState().items.data.filter { it.selected }.map { it.item }
-        withContext(ioDispatcher) { deleteAlarms(selectedAlarms.map(Alarm::id)) }
+        removeAlarms(
+            currentState().items.data.filter { it.selected }.map { it.item.id },
+            coroutineScope,
+            intent,
+            signal
+        )
+    }
+
+    private suspend fun removeAlarms(
+        alarmIds: List<Int>,
+        coroutineScope: CoroutineScope,
+        intent: suspend (AlarmsIntent) -> Unit,
+        signal: suspend (AlarmsSignal) -> Unit
+    ): AlarmsStateUpdate {
+        withContext(ioDispatcher) { deleteAlarms(alarmIds) }
         signal(AlarmsSignal.AlarmsRemoved)
-        AlarmsStateUpdate.RemovedAlarms(
-            snackbarText = removedFromAlarmsMessage(alarmsCount = selectedAlarms.size),
+        return AlarmsStateUpdate.RemovedAlarms(
+            snackbarText = removedFromAlarmsMessage(alarmsCount = alarmIds.size),
             onSnackbarDismissed = {
                 coroutineScope.launch { intent(AlarmsIntent.HideSnackbar) }
             }
