@@ -163,7 +163,20 @@ abstract class AlarmsFragment<M : AlarmsMode, VM : AlarmsViewModel> :
                                     }
                                 )
                             }
-                        }.apply { addCancelDismissListeners() }
+                        }.apply {
+                            fun updateDialogStatusToHidden() {
+                                addEditAlarmDialog = null
+                                lifecycleScope.launch {
+                                    viewModel.intent(
+                                        AlarmsIntent.UpdateDialogStatus(
+                                            AddEditAlarmDialogStatus.Hidden
+                                        )
+                                    )
+                                }
+                            }
+                            setOnCancelListener { updateDialogStatusToHidden() }
+                            setOnDismissListener { updateDialogStatusToHidden() }
+                        }
                     }
                 }
             }
@@ -175,21 +188,6 @@ abstract class AlarmsFragment<M : AlarmsMode, VM : AlarmsViewModel> :
         }
 
         binding.alarmsRecyclerView.setController(epoxyController)
-    }
-
-    private fun AddEditAlarmDialog.addCancelDismissListeners() {
-        fun updateDialogStatusToHidden() {
-            addEditAlarmDialog = null
-            lifecycleScope.launch {
-                viewModel.intent(
-                    AlarmsIntent.UpdateDialogStatus(
-                        AddEditAlarmDialogStatus.Hidden
-                    )
-                )
-            }
-        }
-        setOnCancelListener { updateDialogStatusToHidden() }
-        setOnDismissListener { updateDialogStatusToHidden() }
     }
 
     override fun onDestroyView() {

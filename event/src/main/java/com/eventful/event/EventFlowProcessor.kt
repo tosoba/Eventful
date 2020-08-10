@@ -3,10 +3,7 @@ package com.eventful.event
 import com.eventful.core.android.base.FlowProcessor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
@@ -24,6 +21,7 @@ class EventFlowProcessor @Inject constructor() :
         intents.filterIsInstance<EventIntent.BackPressed>()
             .map { EventStateUpdate.DropLastEvent },
         intents.filterIsInstance<EventIntent.NewEvent>()
+            .filterNot { (event) -> currentState().events.lastOrNull() == event }
             .map { (event) -> EventStateUpdate.AddEvent(event) }
     )
 }
