@@ -59,17 +59,23 @@ class EventFragment :
     }
 
     private val EventViewUpdate.NewViewPager.fragments: Array<Pair<String, Fragment>>
-        get() = sequenceOf(
-            getString(R.string.details) to fragmentsFactory.eventDetailsFragment(
-                event, bottomNavItemsToRemove
-            ),
-            if (includeWeather) getString(R.string.weather) to fragmentsFactory.weatherFragment(
-                event, bottomNavItemsToRemove
-            ) else null,
-            if (includeAlarms) getString(R.string.alarms) to fragmentsFactory.eventAlarmsFragment(
-                event, bottomNavItemsToRemove
-            ) else null
-        ).filterNotNull().toList().toTypedArray()
+        get() = bottomNavItemsToRemove.let { itemsToRemove ->
+            sequenceOf(
+                getString(R.string.details) to fragmentsFactory.eventDetailsFragment(
+                    event, itemsToRemove
+                ),
+                if (includeWeather) {
+                    getString(R.string.weather) to fragmentsFactory.weatherFragment(
+                        event, itemsToRemove
+                    )
+                } else null,
+                if (includeAlarms) {
+                    getString(R.string.alarms) to fragmentsFactory.eventAlarmsFragment(
+                        event, itemsToRemove
+                    )
+                } else null
+            ).filterNotNull().toList().toTypedArray()
+        }
 
     private val EventViewUpdate.NewViewPager.bottomNavItemsToRemove: IntArray
         get() = when {

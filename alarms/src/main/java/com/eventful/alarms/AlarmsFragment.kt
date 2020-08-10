@@ -1,10 +1,13 @@
 package com.eventful.alarms
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.CallSuper
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
@@ -38,7 +41,7 @@ import javax.inject.Inject
 
 @FlowPreview
 @ExperimentalCoroutinesApi
-abstract class AlarmsFragment<M : AlarmsMode, VM: AlarmsViewModel> :
+abstract class AlarmsFragment<M : AlarmsMode, VM : AlarmsViewModel> :
     DaggerViewModelFragment<VM>(R.layout.fragment_alarms),
     HasArgs {
 
@@ -82,6 +85,18 @@ abstract class AlarmsFragment<M : AlarmsMode, VM: AlarmsViewModel> :
                         viewModel.intent(AlarmsIntent.AlarmLongClicked(selectable.item))
                     }
                     true
+                },
+                optionsButtonClicked = {
+                    PopupMenu(it.context, it).apply {
+                        setOnMenuItemClickListener { item ->
+                            when (item.itemId) {
+                                else -> false
+                            }
+                        }
+                        gravity = Gravity.RIGHT
+                        inflate(R.menu.alarm_item_options_menu)
+                        show()
+                    }
                 }
             )
         }
