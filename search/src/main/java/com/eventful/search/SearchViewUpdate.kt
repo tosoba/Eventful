@@ -1,10 +1,10 @@
 package com.eventful.search
 
 import android.database.MatrixCursor
-import com.eventful.core.util.PagedDataList
 import com.eventful.core.android.controller.SnackbarState
 import com.eventful.core.android.model.event.Event
 import com.eventful.core.model.Selectable
+import com.eventful.core.util.PagedDataList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
