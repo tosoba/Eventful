@@ -20,7 +20,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
             android:gravity="center"
-            app:layout_scrollFlags="noScroll"
+            app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"
             app:popupTheme="@style/AppTheme.PopupOverlay">
 
             <TextView
@@ -50,7 +50,8 @@
         android:layout_height="match_parent"
         android:fadeScrollbars="false"
         android:scrollbars="vertical"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/weather_bottom_nav_view"
@@ -58,6 +59,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:background="?android:attr/windowBackground"
+        app:layout_behavior="com.eventful.core.android.view.BottomNavLayoutBehavior"
         app:menu="@menu/event_bottom_nav_menu" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
