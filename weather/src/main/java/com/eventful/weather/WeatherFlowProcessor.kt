@@ -50,10 +50,10 @@ class WeatherFlowProcessor @Inject constructor(
                     .run {
                         when (tab) {
                             WeatherTab.NOW -> forecastNow
-                            WeatherTab.EVENT_TIME -> forecastNow
+                            WeatherTab.EVENT_TIME -> forecastEventTime
                         }
                     }
-                    .status !is Initial
+                    .status is Initial
             }
             .flatMapLatest { tab ->
                 currentState().event.let {
@@ -98,7 +98,8 @@ class WeatherFlowProcessor @Inject constructor(
         coroutineScope: CoroutineScope,
         intent: suspend (WeatherIntent) -> Unit
     ): Flow<WeatherStateUpdate> = flow<WeatherStateUpdate> {
-        emit(WeatherStateUpdate.Weather.Loading)
+        val tab = if (timestampMillis == null) WeatherTab.NOW else WeatherTab.EVENT_TIME
+        emit(WeatherStateUpdate.Weather.Loading(tab))
         val resource = withContext(ioDispatcher) {
             getForecast(
                 lat = latLng.latitude,
@@ -109,7 +110,7 @@ class WeatherFlowProcessor @Inject constructor(
         emit(
             WeatherStateUpdate.Weather.Loaded(
                 resource = resource,
-                tab = if (timestampMillis == null) WeatherTab.NOW else WeatherTab.EVENT_TIME,
+                tab = tab,
                 newEvent = newEvent,
                 retry = { coroutineScope.launch { intent(WeatherIntent.RetryLoadWeather) } }
             )

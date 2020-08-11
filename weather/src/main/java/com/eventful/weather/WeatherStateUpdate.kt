@@ -19,18 +19,25 @@ sealed class WeatherStateUpdate : StateUpdate<WeatherState> {
     }
 
     sealed class Weather : WeatherStateUpdate() {
-        object Loading : Weather() {
+        data class Loading(val tab: WeatherTab) : Weather() {
             override fun invoke(state: WeatherState): WeatherState = state.copy(
-                forecastNow = state.forecastNow.copyWithLoadingStatus,
+                forecastNow = when (tab) {
+                    WeatherTab.NOW -> state.forecastNow.copyWithLoadingStatus
+                    WeatherTab.EVENT_TIME -> state.forecastNow
+                },
+                forecastEventTime = when (tab) {
+                    WeatherTab.NOW -> state.forecastEventTime
+                    WeatherTab.EVENT_TIME -> state.forecastEventTime.copyWithLoadingStatus
+                },
                 snackbarState = SnackbarState.Shown("Loading weather...")
             )
         }
 
-        class Loaded(
-            private val resource: Resource<Forecast>,
-            private val tab: WeatherTab,
-            private val newEvent: Boolean,
-            private val retry: () -> Unit
+        data class Loaded(
+            val resource: Resource<Forecast>,
+            val tab: WeatherTab,
+            val newEvent: Boolean,
+            val retry: () -> Unit
         ) : Weather() {
             override fun invoke(state: WeatherState): WeatherState = when (resource) {
                 is Resource.Success -> when (tab) {

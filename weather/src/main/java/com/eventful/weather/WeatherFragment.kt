@@ -1,6 +1,7 @@
 package com.eventful.weather
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
@@ -18,7 +19,6 @@ import com.eventful.weather.databinding.FragmentWeatherBinding
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -53,7 +53,10 @@ class WeatherFragment :
                         TemperatureInLocationBindingModel_()
                             .id("temperature-in-location")
                             .temperature(currently.temperature)
-                            .locationName(data.city),
+                            .locationInfo(
+                                if (data.tab == WeatherTab.NOW) "Now in ${data.city}"
+                                else "In ${data.city} at event start"
+                            ),
                         WeatherSymbolInfoBindingModel_()
                             .id("weather-forecast-info")
                             .symbolResource(WeatherStatus.fromIcon(currently.icon).resource)
@@ -80,7 +83,7 @@ class WeatherFragment :
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setupToolbarWithDrawerToggle(binding.weatherToolbar)
         with(binding.weatherTabLayout) {
-            WeatherTab.values().forEach { newTab().text = it.label }
+            WeatherTab.values().forEach { addTab(newTab().setText(it.label)) }
             tabSelectionEvents()
                 .filterIsInstance<TabLayoutSelectionEvent.TabSelected>()
                 .onEach {
@@ -108,13 +111,21 @@ class WeatherFragment :
         binding.weatherBottomNavView.selectedItemId = R.id.bottom_nav_weather
 
         viewUpdatesJob = viewModel.viewUpdates
+            .onEach {
+                Log.e(
+                    "VIEW_UPDATE",
+                    "${javaClass.simpleName.replace("Fragment", "")}:${it}"
+                )
+            }
             .onEach { viewUpdate ->
                 when (viewUpdate) {
                     is WeatherViewUpdate.LoadingForecast -> epoxyController.setData(
                         WeatherControllerData.LoadingForecast
                     )
                     is WeatherViewUpdate.ForecastLoaded -> epoxyController.setData(
-                        WeatherControllerData.ForecastLoaded(viewUpdate.forecast, viewUpdate.city)
+                        WeatherControllerData.ForecastLoaded(
+                            viewUpdate.forecast, viewUpdate.city, viewUpdate.tab
+                        )
                     )
                     is WeatherViewUpdate.Snackbar -> snackbarController?.transitionToSnackbarState(
                         viewUpdate.state

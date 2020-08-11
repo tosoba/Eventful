@@ -10,7 +10,13 @@ import kotlinx.coroutines.flow.*
 
 sealed class WeatherViewUpdate {
     object LoadingForecast : WeatherViewUpdate()
-    data class ForecastLoaded(val forecast: Forecast, val city: String) : WeatherViewUpdate()
+
+    data class ForecastLoaded(
+        val forecast: Forecast,
+        val city: String,
+        val tab: WeatherTab
+    ) : WeatherViewUpdate()
+
     data class Snackbar(val state: SnackbarState) : WeatherViewUpdate()
 }
 
@@ -38,7 +44,8 @@ val WeatherViewModel.viewUpdates: Flow<WeatherViewUpdate>
                         WeatherTab.NOW -> requireNotNull(forecastNow.data)
                         WeatherTab.EVENT_TIME -> requireNotNull(forecastEventTime.data)
                     },
-                    requireNotNull(event.venues?.firstOrNull()?.city)
+                    requireNotNull(event.venues?.firstOrNull()?.city),
+                    tab
                 )
             }
     )

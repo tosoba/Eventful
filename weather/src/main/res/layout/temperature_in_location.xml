@@ -4,10 +4,8 @@
 
     <data>
 
-        <import type="android.view.View" />
-
         <variable
-            name="locationName"
+            name="locationInfo"
             type="java.lang.String" />
 
         <variable
@@ -37,11 +35,10 @@
             android:id="@+id/weather_location_name_txt"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@{String.format(`Now in %s`, locationName)}"
+            android:text="@{locationInfo}"
             android:textAlignment="center"
             android:textColor="@color/blueText"
             android:textSize="18sp"
-            android:visibility="@{locationName != null ? View.VISIBLE : View.GONE}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
