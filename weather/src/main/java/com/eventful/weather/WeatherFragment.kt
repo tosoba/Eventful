@@ -64,12 +64,12 @@ class WeatherFragment :
                             .id("weather-wind-info")
                             .symbolResource(R.drawable.wind_info)
                             .title("Wind")
-                            .info("${currently.windSpeed} km/h"),
+                            .info("${String.format("%.1f", currently.windSpeed)} km/h"),
                         WeatherSymbolInfoBindingModel_()
                             .id("weather-humidity-info")
                             .symbolResource(R.drawable.humidity)
                             .title("Humidity")
-                            .info("${currently.humidity * 100}%"),
+                            .info("${String.format("%.1f", currently.humidity * 100)}%"),
                         WeatherDescriptionBindingModel_()
                             .id("weather-description")
                             .description(currently.summary)

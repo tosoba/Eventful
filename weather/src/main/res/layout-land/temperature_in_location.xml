@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="locationInfo"
+            type="java.lang.String" />
+
+        <variable
+            name="temperature"
+            type="java.lang.Double" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/weather_temperature_txt"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@{String.format(`%.1f°`, temperature)}"
+            android:textAlignment="center"
+            android:textColor="@color/blueText"
+            android:textSize="90sp"
+            app:layout_constraintBottom_toTopOf="@id/weather_location_name_txt"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed" />
+
+        <TextView
+            android:id="@+id/weather_location_name_txt"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@{locationInfo}"
+            android:textAlignment="center"
+            android:textColor="@color/blueText"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/weather_temperature_txt" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
