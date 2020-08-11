@@ -58,9 +58,9 @@ class WeatherFlowProcessor @Inject constructor(
             .flatMapLatest { tab ->
                 currentState().event.let {
                     weatherLoadingUpdates(
+                        it.venueLatLng,
                         timestampMillis(tab, it),
                         false,
-                        it.venueLatLng,
                         coroutineScope,
                         intent
                     )
@@ -70,17 +70,17 @@ class WeatherFlowProcessor @Inject constructor(
             .distinctUntilChanged()
             .flatMapLatest { latLng ->
                 weatherLoadingUpdates(
+                    latLng,
                     currentState().run { timestampMillis(tab, event) },
                     true,
-                    latLng,
                     coroutineScope,
                     intent
                 )
             },
         intents.filterIsInstance<WeatherIntent.RetryLoadWeather>()
-            .map { currentState().run { timestampMillis(tab, event) to event.venueLatLng } }
-            .flatMapLatest { (timestampMillis, latLng) ->
-                weatherLoadingUpdates(timestampMillis, false, latLng, coroutineScope, intent)
+            .map { currentState().run { event.venueLatLng to timestampMillis(tab, event) } }
+            .flatMapLatest { (latLng, timestampMillis) ->
+                weatherLoadingUpdates(latLng, timestampMillis, false, coroutineScope, intent)
             }
     )
 
@@ -92,9 +92,9 @@ class WeatherFlowProcessor @Inject constructor(
     private val Event.venueLatLng: LatLng get() = requireNotNull(venues?.firstOrNull()?.latLng)
 
     private suspend fun weatherLoadingUpdates(
+        latLng: LatLng,
         timestampMillis: Long?,
         newEvent: Boolean,
-        latLng: LatLng,
         coroutineScope: CoroutineScope,
         intent: suspend (WeatherIntent) -> Unit
     ): Flow<WeatherStateUpdate> = flow<WeatherStateUpdate> {
