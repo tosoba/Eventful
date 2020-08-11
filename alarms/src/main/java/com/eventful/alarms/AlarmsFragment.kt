@@ -142,8 +142,7 @@ abstract class AlarmsFragment<M : AlarmsMode, VM : AlarmsViewModel> :
     @CallSuper
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         viewModel.viewUpdates
-            .logEach("VIEW_UPDATE", LogType.FRAGMENT)
-            .onEach { update ->
+            .onEachLogging("VIEW_UPDATE", LogType.FRAGMENT) { update ->
                 when (update) {
                     is AlarmsViewUpdate.Alarms -> epoxyController.setData(update.alarms)
                     is AlarmsViewUpdate.ShowDialog -> {

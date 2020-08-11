@@ -4,7 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.eventful.core.android.util.ext.LogType
-import com.eventful.core.android.util.ext.logEach
+import com.eventful.core.android.util.ext.onEachLogging
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.BroadcastChannel
@@ -42,13 +42,13 @@ abstract class FlowViewModel<Intent : Any, Update : StateUpdate<State>, State : 
                 intent = ::intent,
                 signal = _signals::send
             )
-            .logEach("STATE_UPDATE", LogType.VIEW_MODEL)
+            .onEachLogging("STATE_UPDATE", LogType.VIEW_MODEL)
             .scan(initialState) { currentState, update ->
                 val nextState = update(currentState)
                 processor.stateWillUpdate(currentState, nextState, update, savedStateHandle)
                 nextState
             }
-            .logEach("STATE", LogType.VIEW_MODEL)
+            .onEachLogging("STATE", LogType.VIEW_MODEL) { state = it }
             .launchIn(viewModelScope)
     }
 
