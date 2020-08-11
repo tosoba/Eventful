@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.eventful.core.android.base.FlowProcessor
 import com.eventful.core.android.model.event.Event
 import com.eventful.core.android.provider.CurrentEventProvider
+import com.eventful.core.model.event.startTimestamp
 import com.eventful.core.usecase.weather.GetForecast
 import com.eventful.core.util.Initial
 import com.google.android.gms.maps.model.LatLng
@@ -86,7 +87,7 @@ class WeatherFlowProcessor @Inject constructor(
 
     private fun timestampMillis(tab: WeatherTab, event: Event): Long? = when (tab) {
         WeatherTab.NOW -> null
-        WeatherTab.EVENT_TIME -> requireNotNull(event.startDate?.time)
+        WeatherTab.EVENT_TIME -> event.startTimestamp
     }
 
     private val Event.venueLatLng: LatLng get() = requireNotNull(venues?.firstOrNull()?.latLng)
