@@ -45,13 +45,15 @@ class WeatherFlowProcessor @Inject constructor(
             .map { WeatherStateUpdate.TabSelected(it.tab) },
         states.map { it.tab }
             .distinctUntilChanged()
-            .filter {
-                when (it) {
-                    WeatherTab.NOW -> currentState()
-                        .run { forecastNow.status !is Initial }
-                    WeatherTab.EVENT_TIME -> currentState()
-                        .run { forecastEventTime.status !is Initial }
-                }
+            .filter { tab ->
+                currentState()
+                    .run {
+                        when (tab) {
+                            WeatherTab.NOW -> forecastNow
+                            WeatherTab.EVENT_TIME -> forecastNow
+                        }
+                    }
+                    .status !is Initial
             }
             .flatMapLatest { tab ->
                 currentState().event.let {

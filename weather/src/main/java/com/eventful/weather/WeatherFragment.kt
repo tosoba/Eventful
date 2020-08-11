@@ -83,7 +83,6 @@ class WeatherFragment :
             WeatherTab.values().forEach { newTab().text = it.label }
             tabSelectionEvents()
                 .filterIsInstance<TabLayoutSelectionEvent.TabSelected>()
-                .drop(1)
                 .onEach {
                     viewModel.intent(WeatherIntent.TabSelected(WeatherTab.values()[it.tab.position]))
                 }
