@@ -1,7 +1,6 @@
 package com.eventful.core.android.base
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.annotation.CallSuper
 import androidx.annotation.LayoutRes
@@ -15,9 +14,7 @@ import com.eventful.core.android.controller.itemsSelectionActionModeController
 import com.eventful.core.android.model.event.Event
 import com.eventful.core.android.navigation.IMainChildFragmentNavDestinations
 import com.eventful.core.android.util.delegate.viewBinding
-import com.eventful.core.android.util.ext.navigationFragment
-import com.eventful.core.android.util.ext.saveScrollPosition
-import com.eventful.core.android.util.ext.setControllerWithSavedState
+import com.eventful.core.android.util.ext.*
 import com.eventful.core.android.view.epoxy.EpoxyThreads
 import com.eventful.core.android.view.epoxy.infiniteItemListController
 import com.eventful.core.android.view.epoxy.listItem
@@ -123,12 +120,7 @@ abstract class SelectableEventListFragment<
         activity?.invalidateOptionsMenu()
 
         viewUpdatesJob = viewModel.viewUpdates()
-            .onEach {
-                Log.e(
-                    "VIEW_UPDATE",
-                    "${javaClass.simpleName.replace("Fragment", "")}:${it}"
-                )
-            }
+            .logEach("VIEW_UPDATE", LogType.FRAGMENT)
             .onEach(::onViewUpdate)
             .launchIn(lifecycleScope)
 

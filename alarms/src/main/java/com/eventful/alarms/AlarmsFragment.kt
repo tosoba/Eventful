@@ -1,7 +1,6 @@
 package com.eventful.alarms
 
 import android.os.Bundle
-import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.widget.Toast
@@ -143,12 +142,7 @@ abstract class AlarmsFragment<M : AlarmsMode, VM : AlarmsViewModel> :
     @CallSuper
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         viewModel.viewUpdates
-            .onEach {
-                Log.e(
-                    "VIEW_UPDATE",
-                    "${javaClass.simpleName.replace("Fragment", "")}:${it}"
-                )
-            }
+            .logEach("VIEW_UPDATE", LogType.FRAGMENT)
             .onEach { update ->
                 when (update) {
                     is AlarmsViewUpdate.Alarms -> epoxyController.setData(update.alarms)

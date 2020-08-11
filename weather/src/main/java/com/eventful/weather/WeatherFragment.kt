@@ -1,7 +1,6 @@
 package com.eventful.weather
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
@@ -111,12 +110,7 @@ class WeatherFragment :
         binding.weatherBottomNavView.selectedItemId = R.id.bottom_nav_weather
 
         viewUpdatesJob = viewModel.viewUpdates
-            .onEach {
-                Log.e(
-                    "VIEW_UPDATE",
-                    "${javaClass.simpleName.replace("Fragment", "")}:${it}"
-                )
-            }
+            .logEach("VIEW_UPDATE", LogType.FRAGMENT)
             .onEach { viewUpdate ->
                 when (viewUpdate) {
                     is WeatherViewUpdate.LoadingForecast -> epoxyController.setData(
