@@ -110,7 +110,7 @@ class WeatherFragment :
         binding.weatherBottomNavView.selectedItemId = R.id.bottom_nav_weather
 
         viewUpdatesJob = viewModel.viewUpdates
-            .onEachLogging("VIEW_UPDATE", LogType.FRAGMENT) { viewUpdate ->
+            .onEachLogging("VIEW_UPDATE", getString(R.string.weather)) { viewUpdate ->
                 when (viewUpdate) {
                     is WeatherViewUpdate.LoadingForecast -> epoxyController.setData(
                         WeatherControllerData.LoadingForecast

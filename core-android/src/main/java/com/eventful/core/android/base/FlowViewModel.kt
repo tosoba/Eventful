@@ -42,13 +42,21 @@ abstract class FlowViewModel<Intent : Any, Update : StateUpdate<State>, State : 
                 intent = ::intent,
                 signal = _signals::send
             )
-            .onEachLogging("STATE_UPDATE", LogType.VIEW_MODEL)
+            .onEachLogging(
+                "STATE_UPDATE",
+                javaClass.simpleName.replace(LogType.VIEW_MODEL.suffix, "")
+            )
             .scan(initialState) { currentState, update ->
                 val nextState = update(currentState)
                 processor.stateWillUpdate(currentState, nextState, update, savedStateHandle)
                 nextState
             }
-            .onEachLogging("STATE", LogType.VIEW_MODEL) { state = it }
+            .onEachLogging(
+                "STATE",
+                javaClass.simpleName.replace(LogType.VIEW_MODEL.suffix, "")
+            ) {
+                state = it
+            }
             .launchIn(viewModelScope)
     }
 

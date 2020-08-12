@@ -120,7 +120,11 @@ abstract class SelectableEventListFragment<
         activity?.invalidateOptionsMenu()
 
         viewUpdatesJob = viewModel.viewUpdates()
-            .onEachLogging("VIEW_UPDATE", LogType.FRAGMENT, ::onViewUpdate)
+            .onEachLogging(
+                "VIEW_UPDATE",
+                javaClass.simpleName.replace(LogType.FRAGMENT.name, ""),
+                ::onViewUpdate
+            )
             .launchIn(lifecycleScope)
 
         backStackSignalsJob = requireNotNull(navigationFragment).backStackSignals
