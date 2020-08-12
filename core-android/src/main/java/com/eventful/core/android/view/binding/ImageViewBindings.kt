@@ -11,6 +11,7 @@ import com.eventful.core.android.model.event.Event
 val eventRequestOptions by lazy {
     RequestOptions()
         .placeholder(R.drawable.event_placeholder)
+        .error(R.drawable.event_placeholder)
         .centerCrop()
 }
 

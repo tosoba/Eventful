@@ -4,7 +4,7 @@ import com.eventful.ticketmaster.api.model.Classification
 import com.eventful.ticketmaster.api.model.Image
 
 val List<Image>.imageUrl: String
-    get() = find { it.width == 1136 }?.url ?: firstOrNull()?.url ?: "" // TODO: placeholder url
+    get() = find { it.width == 1136 }?.url ?: firstOrNull()?.url ?: ""
 
 val List<Classification>.kind: String?
     get() = firstOrNull()
