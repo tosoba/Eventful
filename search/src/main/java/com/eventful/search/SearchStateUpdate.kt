@@ -1,18 +1,18 @@
 package com.eventful.search
 
-import com.eventful.core.model.PagedResult
-import com.eventful.core.model.Resource
-import com.eventful.core.model.event.IEvent
-import com.eventful.core.model.search.SearchSuggestion
-import com.eventful.core.util.LoadedSuccessfully
-import com.eventful.core.util.PagedDataList
 import com.eventful.core.android.base.ClearSelectionUpdate
 import com.eventful.core.android.base.ItemSelectionConfirmedUpdate
 import com.eventful.core.android.base.StateUpdate
 import com.eventful.core.android.base.ToggleItemSelectionUpdate
 import com.eventful.core.android.controller.SnackbarState
 import com.eventful.core.android.model.event.Event
+import com.eventful.core.model.PagedResult
+import com.eventful.core.model.Resource
 import com.eventful.core.model.Selectable
+import com.eventful.core.model.event.IEvent
+import com.eventful.core.model.search.SearchSuggestion
+import com.eventful.core.util.LoadedSuccessfully
+import com.eventful.core.util.PagedDataList
 import com.haroldadmin.cnradapter.NetworkResponse
 
 sealed class SearchStateUpdate : StateUpdate<SearchState> {
@@ -68,9 +68,9 @@ sealed class SearchStateUpdate : StateUpdate<SearchState> {
                         items = items.copyWithFailureStatus(resource.error),
                         snackbarState = if (resource.error is NetworkResponse.ServerError<*>) {
                             if ((resource.error as NetworkResponse.ServerError<*>).code in 503..504) {
-                                SnackbarState.Shown("No connection")
+                                SnackbarState.Shown(R.string.no_connection)
                             } else {
-                                SnackbarState.Shown("Unknown network error.")
+                                SnackbarState.Shown(R.string.unknown_network_error)
                             }
                         } else snackbarState
                     )
@@ -79,7 +79,7 @@ sealed class SearchStateUpdate : StateUpdate<SearchState> {
         }
 
         data class AddedToFavourites(
-            override val snackbarText: String,
+            override val msgRes: SnackbarState.Shown.MsgRes,
             override val onSnackbarDismissed: () -> Unit
         ) : SearchStateUpdate(),
             ItemSelectionConfirmedUpdate<SearchState, Event>

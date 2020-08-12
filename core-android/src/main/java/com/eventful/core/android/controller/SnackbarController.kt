@@ -1,6 +1,7 @@
 package com.eventful.core.android.controller
 
 import android.view.View
+import androidx.annotation.StringRes
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.BaseTransientBottomBar
@@ -32,8 +33,21 @@ fun <T> T.handleSnackbarState(view: View): SendChannel<SnackbarState>
     suspend fun transitionTo(newState: SnackbarState) {
         snackbar?.dismiss()
         snackbar = when (newState) {
-            is SnackbarState.Shown -> Snackbar.make(view, newState.text, newState.length).apply {
-                newState.action?.let { setAction(it.msg, it.onClickListener) }
+            is SnackbarState.Shown -> Snackbar.make(
+                view,
+                if (newState.msg.args.isEmpty()) {
+                    view.context.getString(newState.msg.res)
+                } else {
+                    view.context.getString(newState.msg.res, newState.msg.args)
+                },
+                newState.length
+            ).apply {
+                newState.action?.let {
+                    setAction(
+                        view.context.getString(it.msgRes),
+                        it.onClickListener
+                    )
+                }
                 newState.onDismissed?.let { onDismissed ->
                     addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
                         override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
@@ -57,13 +71,41 @@ fun <T> T.handleSnackbarState(view: View): SendChannel<SnackbarState>
 
 sealed class SnackbarState {
     data class Shown(
-        val text: String,
+        val msg: MsgRes,
         @Snackbar.Duration val length: Int = Snackbar.LENGTH_INDEFINITE,
         val action: SnackbarAction? = null,
         val onDismissed: (() -> Unit)? = null
-    ) : SnackbarState()
+    ) : SnackbarState() {
+
+        constructor(
+            @StringRes res: Int,
+            @Snackbar.Duration length: Int = Snackbar.LENGTH_INDEFINITE,
+            action: SnackbarAction? = null,
+            onDismissed: (() -> Unit)? = null
+        ) : this(MsgRes(res), length, action, onDismissed)
+
+        data class MsgRes(@StringRes val res: Int, val args: Array<Any> = arrayOf()) {
+            override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (javaClass != other?.javaClass) return false
+
+                other as MsgRes
+
+                if (res != other.res) return false
+                if (!args.contentEquals(other.args)) return false
+
+                return true
+            }
+
+            override fun hashCode(): Int {
+                var result = res
+                result = 31 * result + args.contentHashCode()
+                return result
+            }
+        }
+    }
 
     object Hidden : SnackbarState()
 }
 
-class SnackbarAction(val msg: String, val onClickListener: View.OnClickListener)
+class SnackbarAction(@StringRes val msgRes: Int, val onClickListener: View.OnClickListener)

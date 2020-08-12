@@ -14,7 +14,6 @@ import com.eventful.core.model.Resource
 import com.eventful.core.model.Selectable
 import com.eventful.core.model.event.IEvent
 import com.eventful.core.util.LoadedSuccessfully
-import com.eventful.core.util.Loading
 import com.eventful.core.util.PagedDataList
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.snackbar.Snackbar
@@ -32,7 +31,7 @@ sealed class NearbyStateUpdate : StateUpdate<NearbyState> {
 
     object NoConnectionSnackbar : NearbyStateUpdate() {
         override fun invoke(state: NearbyState): NearbyState = NearbyState(
-            snackbarState = SnackbarState.Shown("No connection.")
+            snackbarState = SnackbarState.Shown(R.string.no_connection)
         )
     }
 
@@ -43,20 +42,20 @@ sealed class NearbyStateUpdate : StateUpdate<NearbyState> {
     ) : NearbyStateUpdate() {
         override fun invoke(state: NearbyState): NearbyState = when (status) {
             is LocationStatus.PermissionDenied -> state.copy(
-                snackbarState = SnackbarState.Shown("No location permission.")
+                snackbarState = SnackbarState.Shown(R.string.no_location_permission)
             )
             is LocationStatus.Disabled -> state.copy(
-                snackbarState = SnackbarState.Shown("Location disabled.")
+                snackbarState = SnackbarState.Shown(R.string.location_disabled)
             )
             is LocationStatus.Loading -> state.copy(
-                snackbarState = SnackbarState.Shown("Loading location...")
+                snackbarState = SnackbarState.Shown(R.string.retrieving_location)
             )
             is LocationStatus.Error -> state.copy(
                 snackbarState = SnackbarState.Shown(
-                    "Unable to load location.",
+                    R.string.unable_to_retrieve_location,
                     length = if (latLng == null) Snackbar.LENGTH_INDEFINITE else Snackbar.LENGTH_LONG,
                     action = SnackbarAction(
-                        "Retry",
+                        R.string.retry,
                         View.OnClickListener { reloadLocation() }
                     )
                 )
@@ -74,9 +73,11 @@ sealed class NearbyStateUpdate : StateUpdate<NearbyState> {
         data class Loading(val newLocation: Boolean) : Events() {
             override fun invoke(state: NearbyState): NearbyState = state.copy(
                 items = state.items.copyWithLoadingStatus,
-                snackbarState = if (newLocation && state.items.data.isNotEmpty())
-                    SnackbarState.Shown("Loading items in new location.")
-                else state.snackbarState
+                snackbarState = if (newLocation && state.items.data.isNotEmpty()) {
+                    SnackbarState.Shown(R.string.loading_events_in_new_location)
+                } else {
+                    state.snackbarState
+                }
             )
         }
 
@@ -104,9 +105,9 @@ sealed class NearbyStateUpdate : StateUpdate<NearbyState> {
                         items = items.copyWithFailureStatus(resource.error),
                         snackbarState = if (resource.error is NetworkResponse.ServerError<*>) {
                             if ((resource.error as NetworkResponse.ServerError<*>).code in 503..504) {
-                                SnackbarState.Shown("No connection.")
+                                SnackbarState.Shown(R.string.no_connection)
                             } else {
-                                SnackbarState.Shown("Unknown network error.")
+                                SnackbarState.Shown(R.string.unknown_network_error)
                             }
                         } else snackbarState
                     )
@@ -115,7 +116,7 @@ sealed class NearbyStateUpdate : StateUpdate<NearbyState> {
         }
 
         data class AddedToFavourites(
-            override val snackbarText: String,
+            override val msgRes: SnackbarState.Shown.MsgRes,
             override val onSnackbarDismissed: () -> Unit
         ) : NearbyStateUpdate(),
             ItemSelectionConfirmedUpdate<NearbyState, Event>

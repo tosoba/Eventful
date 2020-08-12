@@ -53,7 +53,7 @@ sealed class AlarmsStateUpdate : StateUpdate<AlarmsState> {
     }
 
     data class RemovedAlarms(
-        override val snackbarText: String,
+        override val msgRes: SnackbarState.Shown.MsgRes,
         override val onSnackbarDismissed: () -> Unit
     ) : AlarmsStateUpdate(),
         ItemSelectionConfirmedUpdate<AlarmsState, Alarm>

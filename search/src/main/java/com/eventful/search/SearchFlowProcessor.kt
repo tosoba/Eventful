@@ -2,7 +2,8 @@ package com.eventful.search
 
 import androidx.lifecycle.SavedStateHandle
 import com.eventful.core.android.base.FlowProcessor
-import com.eventful.core.android.base.addedToFavouritesMessage
+import com.eventful.core.android.base.addedToFavouritesMsgRes
+import com.eventful.core.android.controller.SnackbarState
 import com.eventful.core.android.provider.ConnectedStateProvider
 import com.eventful.core.usecase.event.GetPagedEvents
 import com.eventful.core.usecase.event.SaveEvents
@@ -154,8 +155,9 @@ class SearchFlowProcessor @Inject constructor(
         withContext(ioDispatcher) { saveEvents(selectedEvents) }
         signal(SearchSignal.FavouritesSaved)
         SearchStateUpdate.Events.AddedToFavourites(
-            snackbarText = addedToFavouritesMessage(
-                eventsCount = selectedEvents.size
+            msgRes = SnackbarState.Shown.MsgRes(
+                addedToFavouritesMsgRes(eventsCount = selectedEvents.size),
+                args = arrayOf(selectedEvents.size)
             ),
             onSnackbarDismissed = { coroutineScope.launch { intent(SearchIntent.HideSnackbar) } }
         )

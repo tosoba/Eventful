@@ -1,10 +1,11 @@
 package com.eventful.favourites
 
+import com.eventful.core.android.base.removedFromFavouritesMsgRes
+import com.eventful.core.android.controller.SnackbarState
+import com.eventful.core.model.Selectable
 import com.eventful.core.usecase.event.DeleteEvents
 import com.eventful.core.usecase.event.GetSavedEventsFlow
 import com.eventful.core.util.DataList
-import com.eventful.core.android.base.removedFromFavouritesMessage
-import com.eventful.core.model.Selectable
 import com.eventful.test.event
 import com.eventful.test.mockedList
 import io.mockk.coVerify
@@ -61,8 +62,9 @@ internal class OtherFavouritesFlowProcessorTests : BaseFavouritesFlowProcessorTe
         val update = updates.first()
         assert(
             update is FavouritesStateUpdate.RemovedFromFavourites
-                    && update.snackbarText == removedFromFavouritesMessage(
-                eventsCount = selectedEvents.size
+                    && update.msgRes == SnackbarState.Shown.MsgRes(
+                removedFromFavouritesMsgRes(eventsCount = selectedEvents.size),
+                args = arrayOf(selectedEvents.size)
             )
         )
     }

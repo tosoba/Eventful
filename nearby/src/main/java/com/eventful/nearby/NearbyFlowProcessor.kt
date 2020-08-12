@@ -1,7 +1,8 @@
 package com.eventful.nearby
 
 import com.eventful.core.android.base.FlowProcessor
-import com.eventful.core.android.base.addedToFavouritesMessage
+import com.eventful.core.android.base.addedToFavouritesMsgRes
+import com.eventful.core.android.controller.SnackbarState
 import com.eventful.core.android.model.location.LocationState
 import com.eventful.core.android.model.location.LocationStatus
 import com.eventful.core.android.provider.ConnectedStateProvider
@@ -148,7 +149,10 @@ class NearbyFlowProcessor @Inject constructor(
         withContext(ioDispatcher) { saveEvents(selectedEvents) }
         signal(NearbySignal.FavouritesSaved)
         NearbyStateUpdate.Events.AddedToFavourites(
-            snackbarText = addedToFavouritesMessage(eventsCount = selectedEvents.size),
+            msgRes = SnackbarState.Shown.MsgRes(
+                addedToFavouritesMsgRes(eventsCount = selectedEvents.size),
+                args = arrayOf(selectedEvents.size)
+            ),
             onSnackbarDismissed = { coroutineScope.launch { intent(NearbyIntent.HideSnackbar) } }
         )
     }

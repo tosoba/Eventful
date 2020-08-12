@@ -1,8 +1,5 @@
 package com.eventful.favourites
 
-import com.eventful.core.model.event.IEvent
-import com.eventful.core.util.DataList
-import com.eventful.core.util.LoadedSuccessfully
 import com.eventful.core.android.base.ClearSelectionUpdate
 import com.eventful.core.android.base.ItemSelectionConfirmedUpdate
 import com.eventful.core.android.base.StateUpdate
@@ -10,6 +7,9 @@ import com.eventful.core.android.base.ToggleItemSelectionUpdate
 import com.eventful.core.android.controller.SnackbarState
 import com.eventful.core.android.model.event.Event
 import com.eventful.core.model.Selectable
+import com.eventful.core.model.event.IEvent
+import com.eventful.core.util.DataList
+import com.eventful.core.util.LoadedSuccessfully
 
 sealed class FavouritesStateUpdate : StateUpdate<FavouritesState> {
     data class SearchText(val searchText: String) : FavouritesStateUpdate() {
@@ -46,7 +46,7 @@ sealed class FavouritesStateUpdate : StateUpdate<FavouritesState> {
     }
 
     data class RemovedFromFavourites(
-        override val snackbarText: String,
+        override val msgRes: SnackbarState.Shown.MsgRes,
         override val onSnackbarDismissed: () -> Unit
     ) : FavouritesStateUpdate(),
         ItemSelectionConfirmedUpdate<FavouritesState, Event>

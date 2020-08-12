@@ -1,4 +1,5 @@
 <resources>
-    <string name="event_location_unknown">Event\'s location is unknown.</string>
     <string name="weather">Weather</string>
+    <string name="unable_to_load_weather">Unable to load weather.</string>
+    <string name="loading_weather">Loading weather…</string>
 </resources>

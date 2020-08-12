@@ -4,6 +4,8 @@
 
     <string name="retrieving_location">Retrieving location…</string>
     <string name="no_connection">No connection.</string>
+    <string name="location_disabled">Location disabled.</string>
+    <string name="no_location_permission">No location permission.</string>
     <string name="unable_to_retrieve_location">Unable to retrieve location.</string>
     <string name="unknown_network_error">Unknown network error.</string>
 
@@ -22,4 +24,14 @@
     <string name="edit">Edit</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
+    <string name="retry">Retry</string>
+
+    <string name="alarm_created">Alarm created.</string>
+    <string name="alarms_removed">%1$s alarm was removed.</string>
+    <string name="alarm_removed">%1$s alarms were removed.</string>
+
+    <string name="event_added_to_favourites">%1$s event was added to favourites.</string>
+    <string name="events_added_to_favourites">%1$s events were added to favourites.</string>
+    <string name="event_removed_from_favourites">%1$s event was removed from favourites.</string>
+    <string name="events_removed_from_favourites">%1$s events were removed from favourites.</string>
 </resources>

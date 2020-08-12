@@ -2,7 +2,8 @@ package com.eventful.alarms
 
 import androidx.lifecycle.SavedStateHandle
 import com.eventful.core.android.base.FlowProcessor
-import com.eventful.core.android.base.removedFromAlarmsMessage
+import com.eventful.core.android.base.removedAlarmsMsgRes
+import com.eventful.core.android.controller.SnackbarState
 import com.eventful.core.android.provider.CurrentEventProvider
 import com.eventful.core.usecase.alarm.CreateAlarm
 import com.eventful.core.usecase.alarm.DeleteAlarms
@@ -108,7 +109,10 @@ class AlarmsFlowProcessor(
         withContext(ioDispatcher) { deleteAlarms(alarmIds) }
         signal(AlarmsSignal.AlarmsRemoved)
         return AlarmsStateUpdate.RemovedAlarms(
-            snackbarText = removedFromAlarmsMessage(alarmsCount = alarmIds.size),
+            msgRes = SnackbarState.Shown.MsgRes(
+                removedAlarmsMsgRes(alarmsCount = alarmIds.size),
+                arrayOf(alarmIds.size)
+            ),
             onSnackbarDismissed = {
                 coroutineScope.launch { intent(AlarmsIntent.HideSnackbar) }
             }

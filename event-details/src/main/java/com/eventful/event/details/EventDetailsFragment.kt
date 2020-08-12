@@ -193,8 +193,7 @@ class EventDetailsFragment :
             .onEach {
                 transitionToSnackbarState(
                     SnackbarState.Shown(
-                        text = if (it.isFavourite) getString(R.string.event_added)
-                        else getString(R.string.event_removed),
+                        res = if (it.isFavourite) R.string.event_added else R.string.event_removed,
                         length = Snackbar.LENGTH_SHORT
                     )
                 )

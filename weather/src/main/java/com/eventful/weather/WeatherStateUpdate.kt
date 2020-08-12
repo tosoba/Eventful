@@ -29,7 +29,7 @@ sealed class WeatherStateUpdate : StateUpdate<WeatherState> {
                     WeatherTab.NOW -> state.forecastEventTime
                     WeatherTab.EVENT_TIME -> state.forecastEventTime.copyWithLoadingStatus
                 },
-                snackbarState = SnackbarState.Shown("Loading weather...")
+                snackbarState = SnackbarState.Shown(R.string.loading_weather)
             )
         }
 
@@ -57,16 +57,16 @@ sealed class WeatherStateUpdate : StateUpdate<WeatherState> {
                         forecastNow = state.forecastNow.copyWithFailureStatus(resource.error),
                         forecastEventTime = if (newEvent) Data<Forecast?>(null) else state.forecastEventTime,
                         snackbarState = SnackbarState.Shown(
-                            "Unable to load weather.",
-                            action = SnackbarAction("Retry", View.OnClickListener { retry() })
+                            R.string.unable_to_load_weather,
+                            action = SnackbarAction(R.string.retry, View.OnClickListener { retry() })
                         )
                     )
                     WeatherTab.EVENT_TIME -> state.copy(
                         forecastNow = if (newEvent) Data<Forecast?>(null) else state.forecastNow,
                         forecastEventTime = state.forecastEventTime.copyWithFailureStatus(resource.error),
                         snackbarState = SnackbarState.Shown(
-                            "Unable to load weather.",
-                            action = SnackbarAction("Retry", View.OnClickListener { retry() })
+                            R.string.unable_to_load_weather,
+                            action = SnackbarAction(R.string.retry, View.OnClickListener { retry() })
                         )
                     )
                 }
