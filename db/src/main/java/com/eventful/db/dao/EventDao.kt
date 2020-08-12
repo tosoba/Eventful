@@ -133,5 +133,5 @@ interface EventDao {
     fun getAlarms(): Flow<List<EventAlarmsEntity>>
 
     @Query("SELECT * FROM ${Tables.EVENT} WHERE id = (SELECT event_id FROM ${Tables.ALARM} WHERE id = :alarmId)")
-    suspend fun getEventByAlarmId(alarmId: Int): FullEventEntity
+    suspend fun getEventByAlarmId(alarmId: Int): FullEventEntity?
 }

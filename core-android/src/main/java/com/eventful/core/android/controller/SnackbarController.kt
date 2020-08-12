@@ -38,7 +38,7 @@ fun <T> T.handleSnackbarState(view: View): SendChannel<SnackbarState>
                 if (newState.msg.args.isEmpty()) {
                     view.context.getString(newState.msg.res)
                 } else {
-                    view.context.getString(newState.msg.res, newState.msg.args)
+                    view.context.getString(newState.msg.res, *newState.msg.args)
                 },
                 newState.length
             ).apply {

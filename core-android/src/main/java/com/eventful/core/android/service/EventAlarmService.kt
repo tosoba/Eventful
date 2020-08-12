@@ -23,7 +23,7 @@ class EventAlarmService : DaggerIntentService(NAME) {
     lateinit var ioDispatcher: CoroutineDispatcher
 
     @Inject
-    @field:MainActivityIntent
+    @MainActivityIntent
     lateinit var notificationContentIntent: Intent
 
     override fun onHandleIntent(intent: Intent?) {
@@ -31,18 +31,19 @@ class EventAlarmService : DaggerIntentService(NAME) {
         if (extras == null || !extras.containsKey(EXTRA_ID)) return
         val alarmId = extras.getInt(EXTRA_ID)
         GlobalScope.launch(ioDispatcher) {
-            val event = getEventOfAlarm(alarmId)
-            val thumbnail = applicationContext.loadBitmap(event.imageUrl)
-            withContext(Dispatchers.Main) {
-                AlarmNotifications.show(
-                    applicationContext,
-                    alarmId,
-                    event,
-                    thumbnail,
-                    notificationContentIntent
-                )
+            getEventOfAlarm(alarmId)?.let {
+                val thumbnail = applicationContext.loadBitmap(it.imageUrl)
+                withContext(Dispatchers.Main) {
+                    AlarmNotifications.show(
+                        applicationContext,
+                        alarmId,
+                        it,
+                        thumbnail,
+                        notificationContentIntent
+                    )
+                }
+                deleteAlarm(listOf(alarmId), false)
             }
-            deleteAlarm(listOf(alarmId))
         }
     }
 

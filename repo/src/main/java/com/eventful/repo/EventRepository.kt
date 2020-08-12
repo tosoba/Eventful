@@ -67,7 +67,7 @@ class EventRepository @Inject constructor(
     override fun isEventSavedFlow(id: String): Flow<Boolean> = eventDao.getEventFlow(id)
         .map { it != null }
 
-    override suspend fun getEventOfAlarm(alarmId: Int): IEvent = eventDao.getEventByAlarmId(alarmId)
+    override suspend fun getEventOfAlarm(alarmId: Int): IEvent? = eventDao.getEventByAlarmId(alarmId)
 
     override fun getUpcomingEvents(limit: Int): Flow<List<IEvent>> = eventDao
         .getUpcomingEventsFlow(limit)

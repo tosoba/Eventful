@@ -8,9 +8,9 @@ class DeleteAlarms @Inject constructor(
     private val repo: IAlarmRepository,
     private val manager: IEventAlarmManager
 ) {
-    suspend operator fun invoke(alarmIds: List<Int>) {
+    suspend operator fun invoke(alarmIds: List<Int>, cancel: Boolean = true) {
         if (alarmIds.isEmpty()) throw IllegalArgumentException("List of alarms ids to delete is empty.")
         repo.deleteAlarms(alarmIds)
-        alarmIds.forEach(manager::cancel)
+        if (cancel) alarmIds.forEach(manager::cancel)
     }
 }
