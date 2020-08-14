@@ -8,4 +8,6 @@
     <string name="alarm_time">%1$s:%2$s</string>
     <string name="alarm_date">%1$s.%2$s.%3$s</string>
     <string name="show_event">Show event</string>
+    <string name="alarm_added">Alarm added.</string>
+    <string name="alarm_updated">Alarm updated.</string>
 </resources>

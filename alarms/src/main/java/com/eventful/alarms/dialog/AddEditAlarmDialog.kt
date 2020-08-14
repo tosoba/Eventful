@@ -52,7 +52,7 @@ fun Fragment.showAddEditAlarmDialog(
                 dismiss()
             }
 
-            alarmCancelBtn.setOnClickListener { dismiss() }
+            alarmCancelBtn.setOnClickListener { cancel() }
 
             time.observe({ lifecycle }) { (hour, minute) ->
                 alarmTimeTxt.text = getString(

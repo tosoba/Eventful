@@ -17,9 +17,7 @@ import com.eventful.alarms.dialog.AddEditAlarmDialogStatus
 import com.eventful.alarms.dialog.showAddEditAlarmDialog
 import com.eventful.core.android.base.DaggerViewModelFragment
 import com.eventful.core.android.base.HasArgs
-import com.eventful.core.android.controller.ItemsSelectionActionModeController
-import com.eventful.core.android.controller.eventNavigationItemSelectedListener
-import com.eventful.core.android.controller.itemsSelectionActionModeController
+import com.eventful.core.android.controller.*
 import com.eventful.core.android.model.alarm.Alarm
 import com.eventful.core.android.navigation.IMainChildFragmentNavDestinations
 import com.eventful.core.android.util.delegate.FragmentArgument
@@ -32,6 +30,7 @@ import com.eventful.core.util.HoldsList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -41,12 +40,15 @@ import javax.inject.Inject
 @ExperimentalCoroutinesApi
 abstract class AlarmsFragment<M : AlarmsMode, VM : AlarmsViewModel> :
     DaggerViewModelFragment<VM>(R.layout.fragment_alarms),
+    SnackbarController,
     HasArgs {
 
     protected var mode: M by FragmentArgument(AlarmsArgs.MODE.name)
     override val args: Bundle get() = bundleOf(AlarmsArgs.MODE.name to mode)
 
     protected val binding: FragmentAlarmsBinding by viewBinding(FragmentAlarmsBinding::bind)
+
+    private lateinit var snackbarStateChannel: SendChannel<SnackbarState>
 
     @Inject
     internal lateinit var epoxyThreads: EpoxyThreads
@@ -165,7 +167,7 @@ abstract class AlarmsFragment<M : AlarmsMode, VM : AlarmsViewModel> :
                                 )
                             }
                         }.apply {
-                            fun updateDialogStatusToHidden() {
+                            setOnCancelListener {
                                 addEditAlarmDialog = null
                                 lifecycleScope.launch {
                                     viewModel.intent(
@@ -175,8 +177,7 @@ abstract class AlarmsFragment<M : AlarmsMode, VM : AlarmsViewModel> :
                                     )
                                 }
                             }
-                            setOnCancelListener { updateDialogStatusToHidden() }
-                            setOnDismissListener { updateDialogStatusToHidden() }
+                            setOnDismissListener { addEditAlarmDialog = null }
                         }
                     }
                 }
@@ -186,12 +187,14 @@ abstract class AlarmsFragment<M : AlarmsMode, VM : AlarmsViewModel> :
         with(binding.alarmsBottomNavView) {
             selectedItemId = R.id.bottom_nav_alarms
             setOnNavigationItemSelectedListener(eventNavigationItemSelectedListener)
+            snackbarStateChannel = handleSnackbarState(this)
         }
 
         binding.alarmsRecyclerView.setController(epoxyController)
     }
 
     override fun onDestroyView() {
+        snackbarStateChannel.close()
         addEditAlarmDialog?.let {
             viewModel.viewModelScope.launch {
                 viewModel.intent(
@@ -202,6 +205,10 @@ abstract class AlarmsFragment<M : AlarmsMode, VM : AlarmsViewModel> :
             }
         }
         super.onDestroyView()
+    }
+
+    override fun transitionToSnackbarState(newState: SnackbarState) {
+        if (!snackbarStateChannel.isClosedForSend) snackbarStateChannel.offer(newState)
     }
 
     private var resumedOnlyViewUpdatesJob: Job? = null
@@ -218,9 +225,7 @@ abstract class AlarmsFragment<M : AlarmsMode, VM : AlarmsViewModel> :
         viewModel.resumedOnlyViewUpdates
             .onEach { update ->
                 when (update) {
-                    is AlarmsViewUpdate.Snackbar -> snackbarController?.transitionToSnackbarState(
-                        update.state
-                    )
+                    is AlarmsViewUpdate.Snackbar -> transitionToSnackbarState(update.state)
                     is AlarmsViewUpdate.UpdateActionMode -> actionModeController.update(
                         update.numberOfSelectedAlarms
                     )

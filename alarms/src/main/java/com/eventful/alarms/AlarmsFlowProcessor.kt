@@ -1,6 +1,7 @@
 package com.eventful.alarms
 
 import androidx.lifecycle.SavedStateHandle
+import com.eventful.alarms.dialog.AddEditAlarmDialogStatus
 import com.eventful.core.android.base.FlowProcessor
 import com.eventful.core.android.base.removedAlarmsMsgRes
 import com.eventful.core.android.controller.SnackbarState
@@ -66,9 +67,9 @@ class AlarmsFlowProcessor(
         filterIsInstance<AlarmsIntent.RemoveAlarmsClicked>()
             .removeFromAlarmsUpdates(coroutineScope, currentState, intent, signal),
         filterIsInstance<AlarmsIntent.AddAlarm>()
-            .addAlarmUpdates(signal),
+            .addAlarmUpdates(coroutineScope, intent),
         filterIsInstance<AlarmsIntent.UpdateAlarm>()
-            .updateAlarmUpdates(signal),
+            .updateAlarmUpdates(coroutineScope, intent),
         filterIsInstance<AlarmsIntent.DeleteAlarm>()
             .map { removeAlarms(listOf(it.id), coroutineScope, intent, signal) },
         filterIsInstance<AlarmsIntent.UpdateDialogStatus>()
@@ -107,31 +108,40 @@ class AlarmsFlowProcessor(
         signal: suspend (AlarmsSignal) -> Unit
     ): AlarmsStateUpdate {
         withContext(ioDispatcher) { deleteAlarms(alarmIds) }
-        signal(AlarmsSignal.AlarmsRemoved)
+        if (alarmIds.size > 1) signal(AlarmsSignal.AlarmsRemoved)
         return AlarmsStateUpdate.RemovedAlarms(
             msgRes = SnackbarState.Shown.MsgRes(
                 removedAlarmsMsgRes(alarmsCount = alarmIds.size),
                 arrayOf(alarmIds.size)
-            ),
-            onSnackbarDismissed = {
-                coroutineScope.launch { intent(AlarmsIntent.HideSnackbar) }
-            }
-        )
+            )
+        ) {
+            coroutineScope.launch { intent(AlarmsIntent.HideSnackbar) }
+        }
     }
 
     private fun Flow<AlarmsIntent.AddAlarm>.addAlarmUpdates(
-        signal: suspend (AlarmsSignal) -> Unit
-    ): Flow<AlarmsStateUpdate> = map { (event, timestamp) ->
-        createAlarm(event.id, timestamp)
-        signal(AlarmsSignal.AlarmAdded)
-        null
-    }.filterNotNull()
+        coroutineScope: CoroutineScope,
+        intent: suspend (AlarmsIntent) -> Unit
+    ): Flow<AlarmsStateUpdate> = flatMapLatest { (event, timestamp) ->
+        flow<AlarmsStateUpdate> {
+            emit(AlarmsStateUpdate.DialogStatus(AddEditAlarmDialogStatus.Hidden))
+            createAlarm(event.id, timestamp)
+            emit(AlarmsStateUpdate.AlarmAdded {
+                coroutineScope.launch { intent(AlarmsIntent.HideSnackbar) }
+            })
+        }
+    }
 
     private fun Flow<AlarmsIntent.UpdateAlarm>.updateAlarmUpdates(
-        signal: suspend (AlarmsSignal) -> Unit
-    ): Flow<AlarmsStateUpdate> = map { (id, timestamp) ->
-        updateAlarm(id, timestamp)
-        signal(AlarmsSignal.AlarmUpdated)
-        null
-    }.filterNotNull()
+        coroutineScope: CoroutineScope,
+        intent: suspend (AlarmsIntent) -> Unit
+    ): Flow<AlarmsStateUpdate> = flatMapLatest { (id, timestamp) ->
+        flow<AlarmsStateUpdate> {
+            emit(AlarmsStateUpdate.DialogStatus(AddEditAlarmDialogStatus.Hidden))
+            updateAlarm(id, timestamp)
+            emit(AlarmsStateUpdate.AlarmUpdated {
+                coroutineScope.launch { intent(AlarmsIntent.HideSnackbar) }
+            })
+        }
+    }
 }

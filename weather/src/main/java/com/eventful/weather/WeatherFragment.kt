@@ -6,7 +6,10 @@ import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import com.eventful.core.android.base.DaggerViewModelFragment
 import com.eventful.core.android.base.HasArgs
+import com.eventful.core.android.controller.SnackbarController
+import com.eventful.core.android.controller.SnackbarState
 import com.eventful.core.android.controller.eventNavigationItemSelectedListener
+import com.eventful.core.android.controller.handleSnackbarState
 import com.eventful.core.android.loadingIndicator
 import com.eventful.core.android.model.event.Event
 import com.eventful.core.android.util.delegate.FragmentArgument
@@ -18,6 +21,7 @@ import com.eventful.weather.databinding.FragmentWeatherBinding
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -29,6 +33,7 @@ import javax.inject.Inject
 @ExperimentalCoroutinesApi
 class WeatherFragment :
     DaggerViewModelFragment<WeatherViewModel>(R.layout.fragment_weather),
+    SnackbarController,
     HasArgs {
 
     private var event: Event by FragmentArgument(WeatherArgs.EVENT.name)
@@ -36,6 +41,8 @@ class WeatherFragment :
     override val args: Bundle get() = bundleOf(WeatherArgs.EVENT.name to event)
 
     private val binding: FragmentWeatherBinding by viewBinding(FragmentWeatherBinding::bind)
+
+    private lateinit var snackbarStateChannel: SendChannel<SnackbarState>
 
     @Inject
     internal lateinit var epoxyThreads: EpoxyThreads
@@ -96,6 +103,16 @@ class WeatherFragment :
             selectedItemId = R.id.bottom_nav_weather
             bottomNavItemsToRemove.forEach(menu::removeItem)
         }
+        snackbarStateChannel = handleSnackbarState(binding.weatherBottomNavView)
+    }
+
+    override fun onDestroyView() {
+        snackbarStateChannel.close()
+        super.onDestroyView()
+    }
+
+    override fun transitionToSnackbarState(newState: SnackbarState) {
+        if (!snackbarStateChannel.isClosedForSend) snackbarStateChannel.offer(newState)
     }
 
     private var viewUpdatesJob: Job? = null
@@ -120,9 +137,7 @@ class WeatherFragment :
                             viewUpdate.forecast, viewUpdate.city, viewUpdate.tab
                         )
                     )
-                    is WeatherViewUpdate.Snackbar -> snackbarController?.transitionToSnackbarState(
-                        viewUpdate.state
-                    )
+                    is WeatherViewUpdate.Snackbar -> transitionToSnackbarState(viewUpdate.state)
                 }
             }
             .launchIn(lifecycleScope)

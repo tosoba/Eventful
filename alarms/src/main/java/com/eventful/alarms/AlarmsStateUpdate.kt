@@ -12,6 +12,7 @@ import com.eventful.core.model.Selectable
 import com.eventful.core.model.alarm.IAlarm
 import com.eventful.core.util.DataList
 import com.eventful.core.util.LoadedSuccessfully
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 
@@ -50,6 +51,26 @@ sealed class AlarmsStateUpdate : StateUpdate<AlarmsState> {
     object HideSnackbar : AlarmsStateUpdate() {
         override fun invoke(state: AlarmsState): AlarmsState = state
             .copyWithSnackbarState(snackbarState = SnackbarState.Hidden)
+    }
+
+    data class AlarmAdded(val onSnackbarDismissed: () -> Unit) : AlarmsStateUpdate() {
+        override fun invoke(state: AlarmsState): AlarmsState = state.copy(
+            snackbarState = SnackbarState.Shown(
+                R.string.alarm_added,
+                Snackbar.LENGTH_SHORT,
+                onDismissed = onSnackbarDismissed
+            )
+        )
+    }
+
+    data class AlarmUpdated(val onSnackbarDismissed: () -> Unit) : AlarmsStateUpdate() {
+        override fun invoke(state: AlarmsState): AlarmsState = state.copy(
+            snackbarState = SnackbarState.Shown(
+                R.string.alarm_updated,
+                Snackbar.LENGTH_SHORT,
+                onDismissed = onSnackbarDismissed
+            )
+        )
     }
 
     data class RemovedAlarms(

@@ -90,11 +90,11 @@ class FavouritesFlowProcessor(
             msgRes = SnackbarState.Shown.MsgRes(
                 removedFromFavouritesMsgRes(eventsCount = selectedEvents.size),
                 args = arrayOf(selectedEvents.size)
-            ),
-            onSnackbarDismissed = {
-                coroutineScope.launch { intent(FavouritesIntent.HideSnackbar) }
-            }
-        )
+            )
+        ) {
+            coroutineScope.launch { intent(FavouritesIntent.HideSnackbar) }
+        }
+
     }
 
     companion object {
