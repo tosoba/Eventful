@@ -19,12 +19,13 @@
         android:layout_margin="@{margin != null ? margin : 0}">
 
         <TextView
-            android:id="@+id/event_price_text_view"
+            android:id="@+id/event_price_date_text_view"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:ellipsize="end"
+            android:maxLines="1"
             android:paddingBottom="5dp"
-            android:text="@{event.formattedPriceRange}"
+            android:text="@{String.format(`%s | %s`, event.formattedPriceRange, event.formattedStartDate)}"
             android:textAllCaps="true"
             android:textColor="@color/greentText"
             android:textSize="12sp"
@@ -49,7 +50,7 @@
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/event_price_text_view" />
+            app:layout_constraintTop_toBottomOf="@+id/event_price_date_text_view" />
 
         <TextView
             android:id="@+id/event_address_text_view"

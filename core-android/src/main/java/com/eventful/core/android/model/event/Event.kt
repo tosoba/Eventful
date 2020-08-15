@@ -53,6 +53,21 @@ data class Event(
     val formattedStartTime: String?
         get() = startTime?.substringBeforeLast(':')
 
+    val formattedStartDate: String
+        get() {
+            if (startDate == null) return "Unknown start date"
+            val calendar = GregorianCalendar.getInstance().apply { time = startDate }
+            return "${if (Date().before(startDate)) "Starts on " else "Happened on "} ${String.format(
+                "%02d", calendar.get(
+                    Calendar.DAY_OF_MONTH
+                )
+            )}.${String.format(
+                "%02d", calendar.get(Calendar.MONTH)
+            )}.${String.format(
+                "%02d", calendar.get(Calendar.YEAR)
+            )}"
+        }
+
     val startDateTimeSetInFuture: Boolean
         get() {
             if (startTime == null || startDate == null) return false
