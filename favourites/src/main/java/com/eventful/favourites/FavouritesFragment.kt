@@ -21,6 +21,8 @@ class FavouritesFragment :
         viewBindingFactory = FragmentFavouritesBinding::bind,
         epoxyRecyclerView = FragmentFavouritesBinding::favouriteEventsRecyclerView,
         mapToHoldsList = { events },
+        imageBackgroundResource = R.drawable.favourites_background,
+        initialDescriptionResource = R.string.favourites_initial_description,
         emptyTextResource = { state ->
             if (state.searchText.isNotBlank()) R.string.no_favourite_events_match_search_text
             else R.string.no_favourite_events_added_yet

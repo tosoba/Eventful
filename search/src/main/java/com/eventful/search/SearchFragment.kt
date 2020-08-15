@@ -30,6 +30,8 @@ class SearchFragment :
         viewBindingFactory = FragmentSearchBinding::bind,
         epoxyRecyclerView = FragmentSearchBinding::searchEventsRecyclerView,
         mapToHoldsList = { this },
+        imageBackgroundResource = R.drawable.search_background,
+        initialDescriptionResource = R.string.search_initial_description,
         emptyTextResource = { R.string.no_events_found },
         eventsSelectionMenuRes = R.menu.search_events_selection_menu,
         selectionConfirmedActionId = R.id.search_action_add_favourite,

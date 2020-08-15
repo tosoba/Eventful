@@ -1,3 +1,4 @@
 <resources>
     <string name="loading_events_in_new_location">Loading items in new location.</string>
+    <string name="nearby_initial_description">Nearby events will appear here. Make sure to enable to location to load them.</string>
 </resources>

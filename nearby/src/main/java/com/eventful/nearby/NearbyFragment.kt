@@ -5,12 +5,12 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
 import androidx.lifecycle.lifecycleScope
-import com.eventful.core.util.HoldsList
 import com.eventful.core.android.base.SelectableEventListFragment
 import com.eventful.core.android.model.event.Event
-import com.eventful.core.model.Selectable
 import com.eventful.core.android.util.ext.menuController
 import com.eventful.core.android.util.ext.snackbarController
+import com.eventful.core.model.Selectable
+import com.eventful.core.util.HoldsList
 import com.eventful.nearby.databinding.FragmentNearbyBinding
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -24,6 +24,8 @@ class NearbyFragment :
         viewBindingFactory = FragmentNearbyBinding::bind,
         epoxyRecyclerView = FragmentNearbyBinding::nearbyEventsRecyclerView,
         mapToHoldsList = { this },
+        imageBackgroundResource = R.drawable.nearby_background,
+        initialDescriptionResource = R.string.nearby_initial_description,
         emptyTextResource = { R.string.no_events_found },
         eventsSelectionMenuRes = R.menu.nearby_events_selection_menu,
         selectionConfirmedActionId = R.id.nearby_action_add_favourite,

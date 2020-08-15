@@ -63,6 +63,8 @@ abstract class AlarmsFragment<M : AlarmsMode, VM : AlarmsViewModel> :
             epoxyThreads = epoxyThreads,
             mapToHoldsList = { this },
             emptyTextResource = { R.string.no_created_alarms },
+            imageBackgroundResource = R.drawable.alarms_background,
+            initialDescriptionResource = if (mode is AlarmsMode.All) R.string.all_alarms else R.string.alarms_for_event,
             loadMore = { lifecycleScope.launch { viewModel.intent(AlarmsIntent.LoadMoreAlarms) } }
         ) { selectable ->
             selectable.listItem(

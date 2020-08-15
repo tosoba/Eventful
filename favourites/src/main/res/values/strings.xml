@@ -1,4 +1,5 @@
 <resources>
     <string name="no_favourite_events_added_yet">No favourite events added yet.</string>
     <string name="no_favourite_events_match_search_text">No favourite events match search input.</string>
+    <string name="favourites_initial_description">Favourite events will appear here.</string>
 </resources>

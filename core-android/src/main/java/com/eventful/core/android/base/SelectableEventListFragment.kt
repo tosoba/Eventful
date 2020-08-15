@@ -2,9 +2,7 @@ package com.eventful.core.android.base
 
 import android.os.Bundle
 import android.view.View
-import androidx.annotation.CallSuper
-import androidx.annotation.LayoutRes
-import androidx.annotation.MenuRes
+import androidx.annotation.*
 import androidx.lifecycle.lifecycleScope
 import androidx.viewbinding.ViewBinding
 import com.airbnb.epoxy.EpoxyRecyclerView
@@ -38,6 +36,8 @@ abstract class SelectableEventListFragment<
     viewBindingFactory: (View) -> VB,
     private val epoxyRecyclerView: VB.() -> EpoxyRecyclerView,
     private val mapToHoldsList: D.() -> HoldsList<Selectable<Event>>,
+    @DrawableRes private val imageBackgroundResource: Int,
+    @StringRes private val initialDescriptionResource: Int,
     private val emptyTextResource: ((D) -> Int)? = null,
     @MenuRes private val eventsSelectionMenuRes: Int,
     private val selectionConfirmedActionId: Int,
@@ -60,6 +60,8 @@ abstract class SelectableEventListFragment<
         infiniteItemListController(
             epoxyThreads = epoxyThreads,
             mapToHoldsList = mapToHoldsList,
+            imageBackgroundResource = imageBackgroundResource,
+            initialDescriptionResource = initialDescriptionResource,
             emptyTextResource = emptyTextResource,
             loadMore = { lifecycleScope.launch { viewModel.intent(loadMoreResultsIntent) } }
         ) { selectable ->
