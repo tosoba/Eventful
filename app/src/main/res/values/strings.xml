@@ -12,4 +12,5 @@
     <string name="no_location_permission_warning">Finding nearby events feature will not work without it.</string>
     <string name="search_hint">Search…</string>
     <string name="events">Events</string>
+    <string name="no_upcoming">No upcoming events/alarms</string>
 </resources>

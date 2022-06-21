@@ -4,6 +4,19 @@
     tools:showIn="navigation_view">
 
     <item
+        android:id="@+id/drawer_no_upcoming"
+        android:menuCategory="system"
+        android:title=""
+        android:visible="true">
+        <menu>
+            <item
+                android:enabled="false"
+                android:title="@string/no_upcoming" />
+        </menu>
+    </item>
+
+
+    <item
         android:id="@+id/drawer_alarms"
         android:title="@string/alarms">
         <menu />

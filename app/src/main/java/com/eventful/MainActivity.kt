@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.children
+import androidx.core.view.forEach
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
 import com.eventful.core.android.base.DaggerViewModelActivity
@@ -60,6 +61,18 @@ class MainActivity :
             .onEach { (alarms, events) ->
                 val drawerMenu = binding.mainDrawerNavView.menu
                 val items = drawerMenu.children.map { it.itemId to it }.toMap()
+                if (alarms.isEmpty() && events.isEmpty()) {
+                    items[R.id.drawer_no_upcoming]?.isVisible = true
+                    items[R.id.drawer_alarms]?.isVisible = false
+                    items[R.id.drawer_alarms]?.subMenu?.clear()
+                    items[R.id.drawer_events]?.isVisible = false
+                    items[R.id.drawer_events]?.subMenu?.clear()
+                    return@onEach
+                }
+
+                items[R.id.drawer_no_upcoming]?.isVisible = false
+
+                items[R.id.drawer_alarms]?.isVisible = true
                 items[R.id.drawer_alarms]?.subMenu?.let { alarmsMenu ->
                     alarmsMenu.clear()
                     alarms.forEach { alarm ->
@@ -68,6 +81,8 @@ class MainActivity :
                         }
                     }
                 }
+
+                items[R.id.drawer_events]?.isVisible = true
                 items[R.id.drawer_events]?.subMenu?.let { eventsMenu ->
                     eventsMenu.clear()
                     events.forEach { event ->
