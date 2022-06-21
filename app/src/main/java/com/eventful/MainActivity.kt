@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.os.Bundle
 import androidx.core.view.GravityCompat
+import androidx.core.view.ViewCompat
 import androidx.core.view.children
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
@@ -77,6 +78,20 @@ class MainActivity :
                 }
             }
             .launchIn(lifecycleScope)
+
+        val drawerHeaderView = binding.mainDrawerNavView.getHeaderView(0)
+        var drawerInsetsFixed = false
+        ViewCompat.setOnApplyWindowInsetsListener(drawerHeaderView) { view, insets ->
+            if (drawerInsetsFixed) return@setOnApplyWindowInsetsListener insets
+            drawerInsetsFixed = true
+            view.setPadding(
+                view.paddingLeft,
+                view.paddingTop + insets.systemWindowInsetTop,
+                view.paddingRight,
+                view.paddingBottom
+            )
+            insets
+        }
 
         requireNotNull(navigationFragment)
             .backStackSignals
