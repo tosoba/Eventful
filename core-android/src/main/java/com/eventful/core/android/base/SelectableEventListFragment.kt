@@ -31,7 +31,12 @@ import javax.inject.Inject
 @FlowPreview
 @ExperimentalCoroutinesApi
 abstract class SelectableEventListFragment<
-        VB : ViewBinding, D : Any, I : Any, S : SelectableItemsState<S, Event>, VM : FlowViewModel<I, *, S, *>, VU>(
+    VB : ViewBinding,
+    D : Any,
+    I : Any,
+    S : SelectableItemsState<S, Event>,
+    VM : FlowViewModel<I, *, S, *>,
+    VU>(
     @LayoutRes private val layoutRes: Int,
     viewBindingFactory: (View) -> VB,
     private val epoxyRecyclerView: VB.() -> EpoxyRecyclerView,
@@ -48,54 +53,54 @@ abstract class SelectableEventListFragment<
     private val viewUpdates: (VM).() -> Flow<VU>
 ) : DaggerViewModelFragment<VM>(layoutRes) {
 
-    @Inject
-    internal lateinit var navDestinations: IMainChildFragmentNavDestinations
+    @Inject internal lateinit var navDestinations: IMainChildFragmentNavDestinations
 
-    @Inject
-    internal lateinit var epoxyThreads: EpoxyThreads
+    @Inject internal lateinit var epoxyThreads: EpoxyThreads
 
     protected val binding: VB by viewBinding(viewBindingFactory)
 
-    protected val epoxyController: TypedEpoxyController<D> by lazy(LazyThreadSafetyMode.NONE) {
-        infiniteItemListController(
-            epoxyThreads = epoxyThreads,
-            mapToHoldsList = mapToHoldsList,
-            imageBackgroundResource = imageBackgroundResource,
-            initialDescriptionResource = initialDescriptionResource,
-            emptyTextResource = emptyTextResource,
-            loadMore = { lifecycleScope.launch { viewModel.intent(loadMoreResultsIntent) } }
-        ) { selectable ->
-            selectable.listItem(
-                clicked = View.OnClickListener {
-                    actionModeController.finish(false)
-                    navigationFragment?.showFragment(navDestinations.eventFragment(selectable.item))
-                },
-                longClicked = View.OnLongClickListener {
-                    lifecycleScope.launch {
-                        viewModel.intent(eventSelectedIntent(selectable.item))
-                    }
-                    true
-                }
-            )
-        }
-    }
-
-    protected val actionModeController: ItemsSelectionActionModeController by lazy(
-        LazyThreadSafetyMode.NONE
-    ) {
-        itemsSelectionActionModeController(
-            menuId = eventsSelectionMenuRes,
-            itemClickedCallbacks = mapOf(
-                selectionConfirmedActionId to {
-                    lifecycleScope.launch { viewModel.intent(selectionConfirmedIntent) }
-                    Unit
-                }
-            ),
-            onDestroyActionMode = {
-                lifecycleScope.launch { viewModel.intent(clearSelectionIntent) }.let { Unit }
+    protected val epoxyController: TypedEpoxyController<D> by
+        lazy(LazyThreadSafetyMode.NONE) {
+            infiniteItemListController(
+                epoxyThreads = epoxyThreads,
+                mapToHoldsList = mapToHoldsList,
+                imageBackgroundResource = imageBackgroundResource,
+                initialDescriptionResource = initialDescriptionResource,
+                emptyTextResource = emptyTextResource,
+                loadMore = { lifecycleScope.launch { viewModel.intent(loadMoreResultsIntent) } }) {
+                selectable ->
+                selectable.listItem(
+                    clicked =
+                        View.OnClickListener {
+                            actionModeController.finish(false)
+                            navigationFragment?.showFragment(
+                                navDestinations.eventFragment(selectable.item))
+                        },
+                    longClicked =
+                        View.OnLongClickListener {
+                            lifecycleScope.launch {
+                                viewModel.intent(eventSelectedIntent(selectable.item))
+                            }
+                            true
+                        })
             }
-        )
-    }
+        }
+
+    protected val actionModeController: ItemsSelectionActionModeController by
+        lazy(LazyThreadSafetyMode.NONE) {
+            itemsSelectionActionModeController(
+                menuId = eventsSelectionMenuRes,
+                itemClickedCallbacks =
+                    mapOf(
+                        selectionConfirmedActionId to
+                            {
+                                lifecycleScope.launch { viewModel.intent(selectionConfirmedIntent) }
+                                Unit
+                            }),
+                onDestroyActionMode = {
+                    lifecycleScope.launch { viewModel.intent(clearSelectionIntent) }.let { Unit }
+                })
+        }
 
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -121,20 +126,23 @@ abstract class SelectableEventListFragment<
         super.onResume()
         activity?.invalidateOptionsMenu()
 
-        viewUpdatesJob = viewModel.viewUpdates()
-            .onEachLogging(
-                "VIEW_UPDATE",
-                javaClass.simpleName.replace(LogType.FRAGMENT.name, ""),
-                ::onViewUpdate
-            )
-            .launchIn(lifecycleScope)
+        viewUpdatesJob =
+            viewModel
+                .viewUpdates()
+                .onEachLogging(
+                    "VIEW_UPDATE",
+                    javaClass.simpleName.replace(LogType.FRAGMENT.name, ""),
+                    ::onViewUpdate)
+                .launchIn(lifecycleScope)
 
-        backStackSignalsJob = requireNotNull(navigationFragment).backStackSignals
-            .filter { it }
-            .onEach {
-                actionModeController.update(viewModel.state.items.data.count { it.selected })
-            }
-            .launchIn(lifecycleScope)
+        backStackSignalsJob =
+            requireNotNull(navigationFragment)
+                .backStackSignals
+                .filter { it }
+                .onEach {
+                    actionModeController.update(viewModel.state.items.data.count { it.selected })
+                }
+                .launchIn(lifecycleScope)
     }
 
     @CallSuper

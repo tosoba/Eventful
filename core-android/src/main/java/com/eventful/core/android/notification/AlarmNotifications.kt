@@ -24,12 +24,12 @@ object AlarmNotifications {
 
     fun createChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.getSystemService(NotificationManager::class.java)
+            context
+                .getSystemService(NotificationManager::class.java)
                 ?.createNotificationChannel(
                     NotificationChannel(ID, NAME, NotificationManager.IMPORTANCE_DEFAULT).apply {
                         description = DESCRIPTION
-                    }
-                )
+                    })
         }
     }
 
@@ -54,9 +54,7 @@ object AlarmNotifications {
                             context,
                             0,
                             contentIntent.apply { putExtra(EVENT_EXTRA, Event(event)) },
-                            0
-                        )
-                    )
+                            0))
                     .setStyle(
                         if (thumbnail != null) {
                             NotificationCompat.BigPictureStyle()
@@ -67,10 +65,8 @@ object AlarmNotifications {
                             NotificationCompat.BigTextStyle()
                                 .setBigContentTitle(event.name)
                                 .setSummaryText(summaryText)
-                        }
-                    )
+                        })
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                    .build()
-            )
+                    .build())
     }
 }

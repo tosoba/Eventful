@@ -11,9 +11,9 @@ open class DaggerViewModelActivity<VM : ViewModel> : DaggerAppCompatActivity {
     constructor() : super()
     constructor(contentLayoutId: Int) : super(contentLayoutId)
 
-    @Inject
-    internal lateinit var viewModelProvider: Provider<VM>
-    protected val viewModel: VM get() = viewModelProvider.get()
+    @Inject internal lateinit var viewModelProvider: Provider<VM>
+    protected val viewModel: VM
+        get() = viewModelProvider.get()
 }
 
 inline fun <reified VM : ViewModel> DaggerViewModelActivity<VM>.savedStateViewModelFrom(

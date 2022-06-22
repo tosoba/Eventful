@@ -15,8 +15,7 @@ interface AlarmDao {
     @Query("UPDATE ${Tables.ALARM} SET timestamp = :timestamp WHERE id = :id")
     suspend fun updateAlarm(id: Int, timestamp: Long)
 
-    @Query("DELETE FROM ${Tables.ALARM} WHERE id = :id")
-    suspend fun deleteAlarm(id: Int)
+    @Query("DELETE FROM ${Tables.ALARM} WHERE id = :id") suspend fun deleteAlarm(id: Int)
 
     @Query("DELETE FROM ${Tables.ALARM} WHERE id IN (:ids)")
     suspend fun deleteAlarms(ids: List<Int>)

@@ -14,7 +14,7 @@ data class VenueEntity(
     override val lat: Double?,
     override val lng: Double?
 ) : IVenue {
-    constructor(other: IVenue) : this(
-        other.id, other.name, other.url, other.address, other.city, other.lat, other.lng
-    )
+    constructor(
+        other: IVenue
+    ) : this(other.id, other.name, other.url, other.address, other.city, other.lat, other.lng)
 }

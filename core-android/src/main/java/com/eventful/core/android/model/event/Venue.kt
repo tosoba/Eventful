@@ -15,15 +15,10 @@ data class Venue(
     override val lat: Double?,
     override val lng: Double?
 ) : IVenue, Parcelable {
-    constructor(other: IVenue) : this(
-        other.id,
-        other.name,
-        other.url,
-        other.address,
-        other.city,
-        other.lat,
-        other.lng
-    )
+    constructor(
+        other: IVenue
+    ) : this(other.id, other.name, other.url, other.address, other.city, other.lat, other.lng)
 
-    val latLng: LatLng? get() = if (lat != null && lng != null) LatLng(lat, lng) else null
+    val latLng: LatLng?
+        get() = if (lat != null && lng != null) LatLng(lat, lng) else null
 }

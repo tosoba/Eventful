@@ -25,33 +25,35 @@ sealed class AlarmsViewUpdate {
 @ExperimentalCoroutinesApi
 @FlowPreview
 val AlarmsViewModel.resumedOnlyViewUpdates: Flow<AlarmsViewUpdate>
-    get() = merge(
-        states.map { it.snackbarState }
-            .distinctUntilChanged()
-            .map { AlarmsViewUpdate.Snackbar(it) },
-        states.map { state -> state.items.data.count { it.selected } }
-            .distinctUntilChanged()
-            .map { AlarmsViewUpdate.UpdateActionMode(it) },
-        signals.filterIsInstance<AlarmsSignal.AlarmsRemoved>()
-            .map { AlarmsViewUpdate.FinishActionMode }
-    )
+    get() =
+        merge(
+            states
+                .map { it.snackbarState }
+                .distinctUntilChanged()
+                .map { AlarmsViewUpdate.Snackbar(it) },
+            states
+                .map { state -> state.items.data.count { it.selected } }
+                .distinctUntilChanged()
+                .map { AlarmsViewUpdate.UpdateActionMode(it) },
+            signals.filterIsInstance<AlarmsSignal.AlarmsRemoved>().map {
+                AlarmsViewUpdate.FinishActionMode
+            })
 
 @ExperimentalCoroutinesApi
 @FlowPreview
 val AlarmsViewModel.viewUpdates: Flow<AlarmsViewUpdate>
-    get() = merge(
-        states.map { it.items }
-            .distinctUntilChanged()
-            .map { AlarmsViewUpdate.Alarms(it) },
-        states.map { it.dialogStatus }
-            .filterIsInstance<AddEditAlarmDialogStatus.WithMode>()
-            .map {
-                AlarmsViewUpdate.ShowDialog(
-                    mode = it.mode,
-                    previousState = when (it) {
-                        is AddEditAlarmDialogStatus.WithMode.Shown -> null
-                        is AddEditAlarmDialogStatus.WithMode.ShownWithState -> it.state
-                    }
-                )
-            }
-    )
+    get() =
+        merge(
+            states.map { it.items }.distinctUntilChanged().map { AlarmsViewUpdate.Alarms(it) },
+            states
+                .map { it.dialogStatus }
+                .filterIsInstance<AddEditAlarmDialogStatus.WithMode>()
+                .map {
+                    AlarmsViewUpdate.ShowDialog(
+                        mode = it.mode,
+                        previousState =
+                            when (it) {
+                                is AddEditAlarmDialogStatus.WithMode.Shown -> null
+                                is AddEditAlarmDialogStatus.WithMode.ShownWithState -> it.state
+                            })
+                })

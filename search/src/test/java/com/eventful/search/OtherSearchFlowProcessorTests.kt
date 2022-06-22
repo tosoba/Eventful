@@ -23,76 +23,82 @@ import org.junit.jupiter.api.Test
 internal class OtherSearchFlowProcessorTests : BaseSearchFlowProcessorTests() {
 
     @Test
-    @DisplayName("On AddToFavouritesClicked  - should saveEvents, signal events were saved and emit AddedToFavourites")
-    fun addToFavouritesTest() = testScope.runBlockingTest {
-        val saveEvents = mockk<SaveEvents>(relaxed = true)
-        val selectableEvents = mockedList(20) { event(it) }
-            .mapIndexed { index, event -> Selectable(event, index % 2 == 0) }
-        val currentState = mockk<() -> SearchState> {
-            every { this@mockk() } returns SearchState(
-                items = PagedDataList(selectableEvents)
-            )
+    @DisplayName(
+        "On AddToFavouritesClicked  - should saveEvents, signal events were saved and emit AddedToFavourites")
+    fun addToFavouritesTest() =
+        testScope.runBlockingTest {
+            val saveEvents = mockk<SaveEvents>(relaxed = true)
+            val selectableEvents =
+                mockedList(20) { event(it) }
+                    .mapIndexed { index, event -> Selectable(event, index % 2 == 0) }
+            val currentState =
+                mockk<() -> SearchState> {
+                    every { this@mockk() } returns
+                        SearchState(items = PagedDataList(selectableEvents))
+                }
+
+            abstract class Signal {
+                abstract suspend operator fun invoke(signal: SearchSignal)
+            }
+
+            val signal = mockk<Signal>(relaxed = true)
+
+            val updates =
+                flowProcessor(saveEvents = saveEvents)
+                    .updates(
+                        intents = flowOf(SearchIntent.AddToFavouritesClicked),
+                        currentState = currentState,
+                        signal = signal::invoke)
+                    .toList()
+
+            val selectedEvents = selectableEvents.filter { it.selected }.map { it.item }
+            coVerify(exactly = 1) { saveEvents(selectedEvents) }
+            coVerify(exactly = 1) { signal(SearchSignal.FavouritesSaved) }
+            assert(updates.size == 1)
+            val update = updates.first()
+            assert(
+                update is SearchStateUpdate.Events.AddedToFavourites &&
+                    update.msgRes ==
+                        SnackbarState.Shown.MsgRes(
+                            addedToFavouritesMsgRes(eventsCount = selectedEvents.size),
+                            args = arrayOf(selectedEvents.size)))
         }
-
-        abstract class Signal {
-            abstract suspend operator fun invoke(signal: SearchSignal)
-        }
-
-        val signal = mockk<Signal>(relaxed = true)
-
-        val updates = flowProcessor(saveEvents = saveEvents)
-            .updates(
-                intents = flowOf(SearchIntent.AddToFavouritesClicked),
-                currentState = currentState,
-                signal = signal::invoke
-            )
-            .toList()
-
-        val selectedEvents = selectableEvents.filter { it.selected }.map { it.item }
-        coVerify(exactly = 1) { saveEvents(selectedEvents) }
-        coVerify(exactly = 1) { signal(SearchSignal.FavouritesSaved) }
-        assert(updates.size == 1)
-        val update = updates.first()
-        assert(
-            update is SearchStateUpdate.Events.AddedToFavourites
-                    && update.msgRes == SnackbarState.Shown.MsgRes(
-                addedToFavouritesMsgRes(eventsCount = selectedEvents.size),
-                args = arrayOf(selectedEvents.size)
-            )
-        )
-    }
 
     @Test
     @DisplayName("On EventLongClicked  - should emit Update.ToggleEventSelection")
-    fun eventLongClickedTest() = testScope.runBlockingTest {
-        val event = event()
-        val updates = flowProcessor()
-            .updates(intents = flowOf(SearchIntent.EventLongClicked(event)))
-            .toList()
+    fun eventLongClickedTest() =
+        testScope.runBlockingTest {
+            val event = event()
+            val updates =
+                flowProcessor()
+                    .updates(intents = flowOf(SearchIntent.EventLongClicked(event)))
+                    .toList()
 
-        assert(updates.size == 1)
-        assert(updates.first() == SearchStateUpdate.ToggleEventSelection(event))
-    }
+            assert(updates.size == 1)
+            assert(updates.first() == SearchStateUpdate.ToggleEventSelection(event))
+        }
 
     @Test
     @DisplayName("On ClearSelectionClicked - should emit Update.ClearSelection")
-    fun clearSelectionTest() = testScope.runBlockingTest {
-        val updates = flowProcessor()
-            .updates(intents = flowOf(SearchIntent.ClearSelectionClicked))
-            .toList()
+    fun clearSelectionTest() =
+        testScope.runBlockingTest {
+            val updates =
+                flowProcessor()
+                    .updates(intents = flowOf(SearchIntent.ClearSelectionClicked))
+                    .toList()
 
-        assert(updates.size == 1)
-        assert(updates.first() == SearchStateUpdate.ClearSelection)
-    }
+            assert(updates.size == 1)
+            assert(updates.first() == SearchStateUpdate.ClearSelection)
+        }
 
     @Test
     @DisplayName("On HideSnackbar - should emit Update.HideSnackbar")
-    fun hideSnackbarTest() = testScope.runBlockingTest {
-        val updates = flowProcessor()
-            .updates(intents = flowOf(SearchIntent.HideSnackbar))
-            .toList()
+    fun hideSnackbarTest() =
+        testScope.runBlockingTest {
+            val updates =
+                flowProcessor().updates(intents = flowOf(SearchIntent.HideSnackbar)).toList()
 
-        assert(updates.size == 1)
-        assert(updates.first() == SearchStateUpdate.HideSnackbar)
-    }
+            assert(updates.size == 1)
+            assert(updates.first() == SearchStateUpdate.HideSnackbar)
+        }
 }

@@ -16,7 +16,13 @@ import reactivecircus.flowbinding.appcompat.queryTextEvents
 @ExperimentalCoroutinesApi
 @FlowPreview
 class FavouritesFragment :
-    SelectableEventListFragment<FragmentFavouritesBinding, FavouriteEventsData, FavouritesIntent, FavouritesState, FavouritesViewModel, FavouritesViewUpdate>(
+    SelectableEventListFragment<
+        FragmentFavouritesBinding,
+        FavouriteEventsData,
+        FavouritesIntent,
+        FavouritesState,
+        FavouritesViewModel,
+        FavouritesViewUpdate>(
         layoutRes = R.layout.fragment_favourites,
         viewBindingFactory = FragmentFavouritesBinding::bind,
         epoxyRecyclerView = FragmentFavouritesBinding::favouriteEventsRecyclerView,
@@ -33,35 +39,34 @@ class FavouritesFragment :
         selectionConfirmedIntent = FavouritesIntent.RemoveFromFavouritesClicked,
         clearSelectionIntent = FavouritesIntent.ClearSelectionClicked,
         eventSelectedIntent = { FavouritesIntent.EventLongClicked(it) },
-        viewUpdates = FavouritesViewModel::viewUpdates
-    ) {
+        viewUpdates = FavouritesViewModel::viewUpdates) {
 
     override suspend fun onViewUpdate(viewUpdate: FavouritesViewUpdate) {
         when (viewUpdate) {
             is FavouritesViewUpdate.Events -> epoxyController.setData(viewUpdate.eventsData)
-            is FavouritesViewUpdate.Snackbar -> snackbarController?.transitionToSnackbarState(
-                viewUpdate.state
-            )
-            is FavouritesViewUpdate.UpdateActionMode -> actionModeController.update(
-                viewUpdate.numberOfSelectedEvents
-            )
+            is FavouritesViewUpdate.Snackbar ->
+                snackbarController?.transitionToSnackbarState(viewUpdate.state)
+            is FavouritesViewUpdate.UpdateActionMode ->
+                actionModeController.update(viewUpdate.numberOfSelectedEvents)
             is FavouritesViewUpdate.FinishActionMode -> actionModeController.finish(false)
         }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         menuController?.initializeMenu(R.menu.favourites_menu, inflater) {
-            (it.findItem(R.id.favourites_search_action)?.actionView as? SearchView)?.run(::initialize)
+            (it.findItem(R.id.favourites_search_action)?.actionView as? SearchView)?.run(
+                ::initialize)
         }
     }
 
-    private fun initialize(searchView: SearchView) = searchView.apply {
-        maxWidth = Integer.MAX_VALUE
-        queryTextEvents()
-            .debounce(500)
-            .map { it.queryText.toString().trim() }
-            .distinctUntilChanged()
-            .onEach { viewModel.intent(FavouritesIntent.NewSearch(it)) }
-            .launchIn(lifecycleScope)
-    }
+    private fun initialize(searchView: SearchView) =
+        searchView.apply {
+            maxWidth = Integer.MAX_VALUE
+            queryTextEvents()
+                .debounce(500)
+                .map { it.queryText.toString().trim() }
+                .distinctUntilChanged()
+                .onEach { viewModel.intent(FavouritesIntent.NewSearch(it)) }
+                .launchIn(lifecycleScope)
+        }
 }

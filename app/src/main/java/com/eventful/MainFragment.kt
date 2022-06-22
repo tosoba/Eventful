@@ -35,24 +35,25 @@ class MainFragment : DaggerFragment(R.layout.fragment_main), MenuController, Sna
 
     private val binding: FragmentMainBinding by viewBinding(FragmentMainBinding::bind)
 
-    private val bottomNavItemSelectedListener: BottomNavigationView.OnNavigationItemSelectedListener
-            by bottomNavItemSelectedViewPagerListener(navigationItems) { binding.mainViewPager }
+    private val bottomNavItemSelectedListener:
+        BottomNavigationView.OnNavigationItemSelectedListener by
+        bottomNavItemSelectedViewPagerListener(navigationItems) { binding.mainViewPager }
 
-    private val viewPagerSwipedListener: ViewPagerPageSelectedListener
-            by viewPagerPageSelectedBottomNavListener(navigationItems.inverse()) { binding.mainBottomNavView }
+    private val viewPagerSwipedListener: ViewPagerPageSelectedListener by
+        viewPagerPageSelectedBottomNavListener(navigationItems.inverse()) {
+            binding.mainBottomNavView
+        }
 
     private val mainViewPagerAdapter: PagerAdapter by titledFragmentsPagerAdapter {
         arrayOf(
             getString(R.string.nearby) to NearbyFragment(),
             getString(R.string.search) to SearchFragment(),
-            getString(R.string.favourites) to FavouritesFragment()
-        )
+            getString(R.string.favourites) to FavouritesFragment())
     }
 
     private lateinit var snackbarStateChannel: SendChannel<SnackbarState>
 
-    @Inject
-    internal lateinit var navDestinations: IMainNavDestinations
+    @Inject internal lateinit var navDestinations: IMainNavDestinations
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         with(binding) {
@@ -71,7 +72,8 @@ class MainFragment : DaggerFragment(R.layout.fragment_main), MenuController, Sna
 
             snackbarStateChannel = handleSnackbarState(mainFab)
 
-            requireNotNull(navigationFragment).backStackSignals
+            requireNotNull(navigationFragment)
+                .backStackSignals
                 .filter { it }
                 .onEach {
                     setupToolbar(mainToolbar)
@@ -99,10 +101,11 @@ class MainFragment : DaggerFragment(R.layout.fragment_main), MenuController, Sna
     }
 
     companion object {
-        private val navigationItems: BiMap<Int, Int> = HashBiMap.create<Int, Int>().apply {
-            put(R.id.bottom_nav_nearby, 0)
-            put(R.id.bottom_nav_search, 1)
-            put(R.id.bottom_nav_favourites, 2)
-        }
+        private val navigationItems: BiMap<Int, Int> =
+            HashBiMap.create<Int, Int>().apply {
+                put(R.id.bottom_nav_nearby, 0)
+                put(R.id.bottom_nav_search, 1)
+                put(R.id.bottom_nav_favourites, 2)
+            }
     }
 }

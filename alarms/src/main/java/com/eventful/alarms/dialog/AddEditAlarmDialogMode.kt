@@ -7,50 +7,51 @@ import kotlinx.android.parcel.Parcelize
 import java.util.*
 
 sealed class AddEditAlarmDialogMode : Parcelable {
-    @Parcelize
-    data class Add(val event: Event) : AddEditAlarmDialogMode()
+    @Parcelize data class Add(val event: Event) : AddEditAlarmDialogMode()
 
-    @Parcelize
-    data class Edit(val alarm: Alarm) : AddEditAlarmDialogMode()
+    @Parcelize data class Edit(val alarm: Alarm) : AddEditAlarmDialogMode()
 
     val hour: Int
-        get() = when (this) {
-            is Add -> {
-                val startTime = requireNotNull(event.startTime)
-                val splitTime = startTime.split(':')
-                splitTime[0].toInt()
-            }
-            is Edit -> {
-                val calendar = GregorianCalendar.getInstance()
-                calendar.time = Date(alarm.timestamp)
-                calendar[Calendar.HOUR_OF_DAY]
-            }
-        }
-
-    val minute: Int
-        get() = when (this) {
-            is Add -> {
-                val startTime = requireNotNull(event.startTime)
-                val splitTime = startTime.split(':')
-                splitTime[1].toInt()
-            }
-            is Edit -> {
-                val calendar = GregorianCalendar.getInstance()
-                calendar.time = Date(alarm.timestamp)
-                calendar[Calendar.MINUTE]
-            }
-        }
-
-    val startDateCalendar: Calendar
-        get() = GregorianCalendar.getInstance().apply {
-            when (this@AddEditAlarmDialogMode) {
+        get() =
+            when (this) {
                 is Add -> {
-                    time = requireNotNull(event.startDate)
-                    add(Calendar.DATE, -1)
+                    val startTime = requireNotNull(event.startTime)
+                    val splitTime = startTime.split(':')
+                    splitTime[0].toInt()
                 }
                 is Edit -> {
-                    time = Date(alarm.timestamp)
+                    val calendar = GregorianCalendar.getInstance()
+                    calendar.time = Date(alarm.timestamp)
+                    calendar[Calendar.HOUR_OF_DAY]
                 }
             }
-        }
+
+    val minute: Int
+        get() =
+            when (this) {
+                is Add -> {
+                    val startTime = requireNotNull(event.startTime)
+                    val splitTime = startTime.split(':')
+                    splitTime[1].toInt()
+                }
+                is Edit -> {
+                    val calendar = GregorianCalendar.getInstance()
+                    calendar.time = Date(alarm.timestamp)
+                    calendar[Calendar.MINUTE]
+                }
+            }
+
+    val startDateCalendar: Calendar
+        get() =
+            GregorianCalendar.getInstance().apply {
+                when (this@AddEditAlarmDialogMode) {
+                    is Add -> {
+                        time = requireNotNull(event.startDate)
+                        add(Calendar.DATE, -1)
+                    }
+                    is Edit -> {
+                        time = Date(alarm.timestamp)
+                    }
+                }
+            }
 }

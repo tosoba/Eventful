@@ -8,11 +8,11 @@ class WeatherEpoxyModelGroup(
     windInfo: WeatherSymbolInfoBindingModel_,
     humidityInfo: WeatherSymbolInfoBindingModel_,
     description: WeatherDescriptionBindingModel_
-) : EpoxyModelGroup(
-    R.layout.weather_group,
-    temperatureInLocation,
-    forecastInfo,
-    windInfo,
-    humidityInfo,
-    description
-)
+) :
+    EpoxyModelGroup(
+        R.layout.weather_group,
+        temperatureInLocation,
+        forecastInfo,
+        windInfo,
+        humidityInfo,
+        description)

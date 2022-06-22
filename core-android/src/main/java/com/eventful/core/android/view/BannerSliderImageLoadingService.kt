@@ -13,7 +13,16 @@ object BannerSliderImageLoadingService : ImageLoadingService {
         Glide.with(imageView).load(resource).into(imageView)
     }
 
-    override fun loadImage(url: String, placeHolder: Int, errorDrawable: Int, imageView: ImageView) {
-        Glide.with(imageView).load(url).placeholder(placeHolder).error(errorDrawable).into(imageView)
+    override fun loadImage(
+        url: String,
+        placeHolder: Int,
+        errorDrawable: Int,
+        imageView: ImageView
+    ) {
+        Glide.with(imageView)
+            .load(url)
+            .placeholder(placeHolder)
+            .error(errorDrawable)
+            .into(imageView)
     }
 }

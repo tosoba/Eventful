@@ -15,23 +15,23 @@ import kotlinx.coroutines.FlowPreview
 @FlowPreview
 @ExperimentalCoroutinesApi
 object FragmentFactory :
-    IMainChildFragmentNavDestinations,
-    IMainNavDestinations,
-    IEventChildFragmentsFactory {
+    IMainChildFragmentNavDestinations, IMainNavDestinations, IEventChildFragmentsFactory {
 
     override fun eventFragment(event: Event): Fragment = EventFragment.new(event)
 
-    override val alarmsFragment: Fragment get() = AllAlarmsFragment.new
+    override val alarmsFragment: Fragment
+        get() = AllAlarmsFragment.new
 
     override fun eventDetailsFragment(
-        event: Event, bottomNavItemsToRemove: IntArray
+        event: Event,
+        bottomNavItemsToRemove: IntArray
     ): EventDetailsFragment = EventDetailsFragment.new(event, bottomNavItemsToRemove)
 
-    override fun weatherFragment(
-        event: Event, bottomNavItemsToRemove: IntArray
-    ): WeatherFragment = WeatherFragment.new(event, bottomNavItemsToRemove)
+    override fun weatherFragment(event: Event, bottomNavItemsToRemove: IntArray): WeatherFragment =
+        WeatherFragment.new(event, bottomNavItemsToRemove)
 
     override fun eventAlarmsFragment(
-        event: Event, bottomNavItemsToRemove: IntArray
+        event: Event,
+        bottomNavItemsToRemove: IntArray
     ): EventAlarmsFragment = EventAlarmsFragment.new(event, bottomNavItemsToRemove)
 }

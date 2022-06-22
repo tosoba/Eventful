@@ -11,9 +11,10 @@ import javax.inject.Singleton
 object DarkSkyApiModule {
     @Provides
     @Singleton
-    fun darkSkyApi(client: OkHttpClient): DarkSkyApi = retrofitWith(
-        client = client,
-        url = DarkSkyApi.BASE_URL,
-        callAdapters = listOf(CoroutinesNetworkResponseAdapterFactory())
-    ).create(DarkSkyApi::class.java)
+    fun darkSkyApi(client: OkHttpClient): DarkSkyApi =
+        retrofitWith(
+                client = client,
+                url = DarkSkyApi.BASE_URL,
+                callAdapters = listOf(CoroutinesNetworkResponseAdapterFactory()))
+            .create(DarkSkyApi::class.java)
 }

@@ -9,8 +9,9 @@ import com.airbnb.epoxy.EpoxyRecyclerView
 private const val KEY_SAVED_SCROLL_POSITION = "KEY_SAVED_SCROLL_POSITION"
 
 fun RecyclerView.saveScrollPosition(outState: Bundle) {
-    layoutManager?.onSaveInstanceState()
-        ?.let { outState.putParcelable(KEY_SAVED_SCROLL_POSITION, it) }
+    layoutManager?.onSaveInstanceState()?.let {
+        outState.putParcelable(KEY_SAVED_SCROLL_POSITION, it)
+    }
 }
 
 private fun RecyclerView.restoreScrollPosition(
@@ -18,12 +19,13 @@ private fun RecyclerView.restoreScrollPosition(
     epoxyController: EpoxyController
 ) {
     var interceptor: EpoxyController.Interceptor? = null
-    interceptor = EpoxyController.Interceptor {
-        savedInstanceState.getParcelable<Parcelable>(KEY_SAVED_SCROLL_POSITION)?.let {
-            layoutManager?.onRestoreInstanceState(it)
+    interceptor =
+        EpoxyController.Interceptor {
+            savedInstanceState.getParcelable<Parcelable>(KEY_SAVED_SCROLL_POSITION)?.let {
+                layoutManager?.onRestoreInstanceState(it)
+            }
+            epoxyController.removeInterceptor(interceptor!!)
         }
-        epoxyController.removeInterceptor(interceptor!!)
-    }
     epoxyController.addInterceptor(interceptor)
 }
 

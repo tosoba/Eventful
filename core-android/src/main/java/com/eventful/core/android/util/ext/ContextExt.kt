@@ -16,10 +16,12 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 val Context.isLocationAvailable: Boolean
-    get() = getSystemService(this, LocationManager::class.java)?.run {
-        isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+    get() =
+        getSystemService(this, LocationManager::class.java)?.run {
+            isProviderEnabled(LocationManager.GPS_PROVIDER) ||
                 isProviderEnabled(LocationManager.NETWORK_PROVIDER)
-    } ?: false
+        }
+            ?: false
 
 val Context.isConnected: Boolean
     get() {
@@ -43,21 +45,22 @@ suspend fun Context.loadBitmap(url: String): Bitmap? = suspendCoroutine {
     Glide.with(this)
         .asBitmap()
         .load(url)
-        .listener(object : RequestListener<Bitmap> {
-            override fun onLoadFailed(
-                e: GlideException?,
-                model: Any?,
-                target: Target<Bitmap>?,
-                isFirstResource: Boolean
-            ): Boolean = it.resume(null).let { false }
+        .listener(
+            object : RequestListener<Bitmap> {
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<Bitmap>?,
+                    isFirstResource: Boolean
+                ): Boolean = it.resume(null).let { false }
 
-            override fun onResourceReady(
-                resource: Bitmap?,
-                model: Any?,
-                target: Target<Bitmap>?,
-                dataSource: DataSource?,
-                isFirstResource: Boolean
-            ): Boolean = it.resume(resource).let { false }
-        })
+                override fun onResourceReady(
+                    resource: Bitmap?,
+                    model: Any?,
+                    target: Target<Bitmap>?,
+                    dataSource: DataSource?,
+                    isFirstResource: Boolean
+                ): Boolean = it.resume(resource).let { false }
+            })
         .submit()
 }

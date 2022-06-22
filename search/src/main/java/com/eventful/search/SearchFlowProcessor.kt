@@ -18,7 +18,9 @@ import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class SearchFlowProcessor @Inject constructor(
+class SearchFlowProcessor
+@Inject
+constructor(
     private val searchEvents: SearchEvents,
     private val getPagedEvents: GetPagedEvents,
     private val saveEvents: SaveEvents,
@@ -46,104 +48,99 @@ class SearchFlowProcessor @Inject constructor(
         states: Flow<SearchState>,
         intent: suspend (SearchIntent) -> Unit,
         signal: suspend (SearchSignal) -> Unit
-    ): Flow<SearchStateUpdate> = merge(
-        intents
-            .run {
-                val initialSearchText = currentState().searchText
-                if (initialSearchText.isNotEmpty()) onStart {
-                    emit(SearchIntent.NewSearch(initialSearchText, false))
+    ): Flow<SearchStateUpdate> =
+        merge(
+            intents
+                .run {
+                    val initialSearchText = currentState().searchText
+                    if (initialSearchText.isNotEmpty())
+                        onStart { emit(SearchIntent.NewSearch(initialSearchText, false)) }
+                    else this
                 }
-                else this
-            }
-            .updates(coroutineScope, currentState, intent, signal),
-        connectedStateProvider.updates(currentState)
-    )
+                .updates(coroutineScope, currentState, intent, signal),
+            connectedStateProvider.updates(currentState))
 
     private fun Flow<SearchIntent>.updates(
         coroutineScope: CoroutineScope,
         currentState: () -> SearchState,
         intent: suspend (SearchIntent) -> Unit,
         signal: suspend (SearchSignal) -> Unit
-    ): Flow<SearchStateUpdate> = merge(
-        filterIsInstance<SearchIntent.NewSearch>()
-            .newSearchUpdates(currentState),
-        filterIsInstance<SearchIntent.LoadMoreResults>()
-            .loadMoreResultsUpdates(currentState),
-        filterIsInstance<SearchIntent.ClearSelectionClicked>()
-            .map { SearchStateUpdate.ClearSelection },
-        filterIsInstance<SearchIntent.EventLongClicked>()
-            .map { SearchStateUpdate.ToggleEventSelection(it.event) },
-        filterIsInstance<SearchIntent.HideSnackbar>()
-            .map { SearchStateUpdate.HideSnackbar },
-        filterIsInstance<SearchIntent.AddToFavouritesClicked>()
-            .addToFavouritesUpdates(coroutineScope, currentState, intent, signal)
-    )
+    ): Flow<SearchStateUpdate> =
+        merge(
+            filterIsInstance<SearchIntent.NewSearch>().newSearchUpdates(currentState),
+            filterIsInstance<SearchIntent.LoadMoreResults>().loadMoreResultsUpdates(currentState),
+            filterIsInstance<SearchIntent.ClearSelectionClicked>().map {
+                SearchStateUpdate.ClearSelection
+            },
+            filterIsInstance<SearchIntent.EventLongClicked>().map {
+                SearchStateUpdate.ToggleEventSelection(it.event)
+            },
+            filterIsInstance<SearchIntent.HideSnackbar>().map { SearchStateUpdate.HideSnackbar },
+            filterIsInstance<SearchIntent.AddToFavouritesClicked>()
+                .addToFavouritesUpdates(coroutineScope, currentState, intent, signal))
 
     private fun ConnectedStateProvider.updates(
         currentState: () -> SearchState
-    ): Flow<SearchStateUpdate> = connectedStates.filter { connected ->
-        connected && currentState().items.run { loadingFailed && data.isEmpty() }
-    }.flatMapFirst {
-        searchEventsUpdates(
-            newSearch = true,
-            startWithLoading = false,
-            currentState = currentState
-        )
-    }
+    ): Flow<SearchStateUpdate> =
+        connectedStates
+            .filter { connected ->
+                connected && currentState().items.run { loadingFailed && data.isEmpty() }
+            }
+            .flatMapFirst {
+                searchEventsUpdates(
+                    newSearch = true, startWithLoading = false, currentState = currentState)
+            }
 
     private fun Flow<SearchIntent.NewSearch>.newSearchUpdates(
         currentState: () -> SearchState
-    ): Flow<SearchStateUpdate> = onEach { (text, shouldSave) ->
-        if (shouldSave) saveSearchSuggestion(text)
-    }.distinctUntilChangedBy {
-        it.text
-    }.flatMapLatest { (text) ->
-        flow {
-            emit(SearchStateUpdate.Events.Loading(searchText = text))
-            val suggestions = withContext(ioDispatcher) { getSearchSuggestions(text) }
-            emit(SearchStateUpdate.Suggestions(suggestions))
-        }.onCompletion {
-            emitAll(
-                searchEventsUpdates(
-                    newSearch = true,
-                    startWithLoading = false,
-                    currentState = currentState
-                )
-            )
-        }
-    }
+    ): Flow<SearchStateUpdate> =
+        onEach { (text, shouldSave) -> if (shouldSave) saveSearchSuggestion(text) }
+            .distinctUntilChangedBy { it.text }
+            .flatMapLatest { (text) ->
+                flow {
+                        emit(SearchStateUpdate.Events.Loading(searchText = text))
+                        val suggestions = withContext(ioDispatcher) { getSearchSuggestions(text) }
+                        emit(SearchStateUpdate.Suggestions(suggestions))
+                    }
+                    .onCompletion {
+                        emitAll(
+                            searchEventsUpdates(
+                                newSearch = true,
+                                startWithLoading = false,
+                                currentState = currentState))
+                    }
+            }
 
     private fun Flow<SearchIntent.LoadMoreResults>.loadMoreResultsUpdates(
         currentState: () -> SearchState
-    ): Flow<SearchStateUpdate> = filterNot {
-        currentState().items.run { status is Loading || !canLoadMore || data.isEmpty() }
-    }.flatMapFirst {
-        searchEventsUpdates(
-            newSearch = false,
-            startWithLoading = true,
-            currentState = currentState
-        )
-    }
+    ): Flow<SearchStateUpdate> =
+        filterNot {
+                currentState().items.run { status is Loading || !canLoadMore || data.isEmpty() }
+            }
+            .flatMapFirst {
+                searchEventsUpdates(
+                    newSearch = false, startWithLoading = true, currentState = currentState)
+            }
 
     private fun searchEventsUpdates(
         newSearch: Boolean,
         startWithLoading: Boolean,
         currentState: () -> SearchState
-    ): Flow<SearchStateUpdate> = currentState().let { startState ->
-        flow {
-            if (startWithLoading) emit(SearchStateUpdate.Events.Loading())
-            val it = getPagedEvents(
-                currentEvents = startState.items,
-                toEvent = { selectable -> selectable.item }
-            ) { offset ->
-                searchEvents(
-                    searchText = startState.searchText,
-                    offset = if (newSearch) null else offset
-                )
+    ): Flow<SearchStateUpdate> =
+        currentState().let { startState ->
+            flow {
+                if (startWithLoading) emit(SearchStateUpdate.Events.Loading())
+                val it =
+                    getPagedEvents(
+                        currentEvents = startState.items,
+                        toEvent = { selectable -> selectable.item }) { offset ->
+                        searchEvents(
+                            searchText = startState.searchText,
+                            offset = if (newSearch) null else offset)
+                    }
+                emit(SearchStateUpdate.Events.Loaded(it, newSearch))
             }
-            emit(SearchStateUpdate.Events.Loaded(it, newSearch))
         }
-    }
 
     private fun Flow<SearchIntent.AddToFavouritesClicked>.addToFavouritesUpdates(
         coroutineScope: CoroutineScope,
@@ -155,11 +152,10 @@ class SearchFlowProcessor @Inject constructor(
         withContext(ioDispatcher) { saveEvents(selectedEvents) }
         signal(SearchSignal.FavouritesSaved)
         SearchStateUpdate.Events.AddedToFavourites(
-            msgRes = SnackbarState.Shown.MsgRes(
-                addedToFavouritesMsgRes(eventsCount = selectedEvents.size),
-                args = arrayOf(selectedEvents.size)
-            ),
-            onSnackbarDismissed = { coroutineScope.launch { intent(SearchIntent.HideSnackbar) } }
-        )
+            msgRes =
+                SnackbarState.Shown.MsgRes(
+                    addedToFavouritesMsgRes(eventsCount = selectedEvents.size),
+                    args = arrayOf(selectedEvents.size)),
+            onSnackbarDismissed = { coroutineScope.launch { intent(SearchIntent.HideSnackbar) } })
     }
 }

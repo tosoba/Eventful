@@ -29,122 +29,112 @@ internal class NewSearchTests : BaseSearchFlowProcessorTests() {
 
     @Test
     @DisplayName("When new search is confirmed - should saveSearchSuggestion")
-    fun newSearchShouldSaveTest() = testScope.runBlockingTest {
-        val saveSearchSuggestion = mockk<SaveSearchSuggestion>(relaxed = true)
-        val searchText = "test"
+    fun newSearchShouldSaveTest() =
+        testScope.runBlockingTest {
+            val saveSearchSuggestion = mockk<SaveSearchSuggestion>(relaxed = true)
+            val searchText = "test"
 
-        flowProcessorForShouldSaveTest(saveSearchSuggestion = saveSearchSuggestion)
-            .updates(
-                intents = flowOf(SearchIntent.NewSearch(searchText, true))
-            )
-            .launchIn(testScope)
+            flowProcessorForShouldSaveTest(saveSearchSuggestion = saveSearchSuggestion)
+                .updates(intents = flowOf(SearchIntent.NewSearch(searchText, true)))
+                .launchIn(testScope)
 
-        coVerify(exactly = 1) { saveSearchSuggestion(searchText) }
-    }
+            coVerify(exactly = 1) { saveSearchSuggestion(searchText) }
+        }
 
     @Test
     @DisplayName("When new search is not confirmed - should not saveSearchSuggestion")
-    fun newSearchShouldNotSaveTest() = testScope.runBlockingTest {
-        val saveSearchSuggestion = mockk<SaveSearchSuggestion>(relaxed = true)
-        val searchText = "test"
+    fun newSearchShouldNotSaveTest() =
+        testScope.runBlockingTest {
+            val saveSearchSuggestion = mockk<SaveSearchSuggestion>(relaxed = true)
+            val searchText = "test"
 
-        flowProcessorForShouldSaveTest(saveSearchSuggestion = saveSearchSuggestion)
-            .updates(
-                intents = flowOf(SearchIntent.NewSearch(searchText, false))
-            )
-            .launchIn(testScope)
+            flowProcessorForShouldSaveTest(saveSearchSuggestion = saveSearchSuggestion)
+                .updates(intents = flowOf(SearchIntent.NewSearch(searchText, false)))
+                .launchIn(testScope)
 
-        coVerify(exactly = 0) { saveSearchSuggestion(searchText) }
-    }
+            coVerify(exactly = 0) { saveSearchSuggestion(searchText) }
+        }
 
-    private fun flowProcessorForShouldSaveTest(
-        saveSearchSuggestion: SaveSearchSuggestion
-    ) = flowProcessor(
-        searchEvents = mockk {
-            coEvery { this@mockk(any(), any()) } returns Resource.successWith(
-                PagedResult(relaxedMockedList<IEvent>(20), 1, 1)
-            )
-        },
-        getSearchSuggestions = mockk {
-            coEvery { this@mockk(any()) } returns emptyList<SearchSuggestion>()
-        },
-        saveSearchSuggestion = saveSearchSuggestion
-    )
+    private fun flowProcessorForShouldSaveTest(saveSearchSuggestion: SaveSearchSuggestion) =
+        flowProcessor(
+            searchEvents =
+                mockk {
+                    coEvery { this@mockk(any(), any()) } returns
+                        Resource.successWith(PagedResult(relaxedMockedList<IEvent>(20), 1, 1))
+                },
+            getSearchSuggestions =
+                mockk { coEvery { this@mockk(any()) } returns emptyList<SearchSuggestion>() },
+            saveSearchSuggestion = saveSearchSuggestion)
 
     @Test
-    @DisplayName("When given more than 1 equal searches - should getSearchSuggestions and getPagedEvents only once")
-    fun distinctNewSearchTest() = testScope.runBlockingTest {
-        val searchText = "test"
-        val currentState = mockk<() -> SearchState> {
-            every { this@mockk() } returns SearchState()
-        }
-        val getPagedEvents = mockk<GetPagedEvents> {
-            coEvery {
-                this@mockk<Selectable<Event>>(any(), any(), any())
-            } returns Resource.successWith(
-                PagedResult(emptyList(), 0, 0)
-            )
-        }
-        val getSearchSuggestions = mockk<GetSearchSuggestions> {
-            coEvery { this@mockk(any()) } returns emptyList()
-        }
+    @DisplayName(
+        "When given more than 1 equal searches - should getSearchSuggestions and getPagedEvents only once")
+    fun distinctNewSearchTest() =
+        testScope.runBlockingTest {
+            val searchText = "test"
+            val currentState =
+                mockk<() -> SearchState> { every { this@mockk() } returns SearchState() }
+            val getPagedEvents =
+                mockk<GetPagedEvents> {
+                    coEvery { this@mockk<Selectable<Event>>(any(), any(), any()) } returns
+                        Resource.successWith(PagedResult(emptyList(), 0, 0))
+                }
+            val getSearchSuggestions =
+                mockk<GetSearchSuggestions> { coEvery { this@mockk(any()) } returns emptyList() }
 
-        flowProcessor(
-            getPagedEvents = getPagedEvents,
-            getSearchSuggestions = getSearchSuggestions
-        ).updates(
-            intents = (1..2).map { SearchIntent.NewSearch(searchText, false) }.asFlow(),
-            currentState = currentState
-        ).launchIn(testScope)
+            flowProcessor(
+                    getPagedEvents = getPagedEvents, getSearchSuggestions = getSearchSuggestions)
+                .updates(
+                    intents = (1..2).map { SearchIntent.NewSearch(searchText, false) }.asFlow(),
+                    currentState = currentState)
+                .launchIn(testScope)
 
-        coVerify(exactly = 1) { getSearchSuggestions(searchText) }
-        coVerify(exactly = 1) { getPagedEvents<Selectable<Event>>(any(), any(), any()) }
-    }
+            coVerify(exactly = 1) { getSearchSuggestions(searchText) }
+            coVerify(exactly = 1) { getPagedEvents<Selectable<Event>>(any(), any(), any()) }
+        }
 
     @Test
     @DisplayName("On new search - should emit loading, suggestions and events loaded updates")
-    fun newSearchUpdatesTest() = testScope.runBlockingTest {
-        val searchText = "test"
-        val initialState = SearchState()
-        val currentState = mockk<() -> SearchState> {
-            every { this@mockk() } returns initialState
-        }
-        val expectedResource = Resource.successWith(
-            PagedResult<IEvent>(mockedList(10) { event(it) }, 1, 1)
-        )
-        val getPagedEvents = mockk<GetPagedEvents> {
-            coEvery { this@mockk(initialState.items, any(), any()) } returns expectedResource
-        }
-        val expectedSuggestions = mockedList(10) {
-            SearchSuggestion(it, "suggestion$it", 100L)
-        }
-        val getSearchSuggestions = mockk<GetSearchSuggestions> {
-            coEvery { this@mockk(any()) } returns expectedSuggestions
-        }
+    fun newSearchUpdatesTest() =
+        testScope.runBlockingTest {
+            val searchText = "test"
+            val initialState = SearchState()
+            val currentState =
+                mockk<() -> SearchState> { every { this@mockk() } returns initialState }
+            val expectedResource =
+                Resource.successWith(PagedResult<IEvent>(mockedList(10) { event(it) }, 1, 1))
+            val getPagedEvents =
+                mockk<GetPagedEvents> {
+                    coEvery { this@mockk(initialState.items, any(), any()) } returns
+                        expectedResource
+                }
+            val expectedSuggestions = mockedList(10) { SearchSuggestion(it, "suggestion$it", 100L) }
+            val getSearchSuggestions =
+                mockk<GetSearchSuggestions> {
+                    coEvery { this@mockk(any()) } returns expectedSuggestions
+                }
 
-        val updates = flowProcessor(
-            getPagedEvents = getPagedEvents,
-            getSearchSuggestions = getSearchSuggestions
-        ).updates(
-            intents = flowOf(SearchIntent.NewSearch(searchText, true)),
-            currentState = currentState
-        ).toList()
+            val updates =
+                flowProcessor(
+                        getPagedEvents = getPagedEvents,
+                        getSearchSuggestions = getSearchSuggestions)
+                    .updates(
+                        intents = flowOf(SearchIntent.NewSearch(searchText, true)),
+                        currentState = currentState)
+                    .toList()
 
-        val loadingUpdate = updates.first()
-        assert(
-            loadingUpdate is SearchStateUpdate.Events.Loading
-                    && loadingUpdate.searchText == searchText
-        )
-        val suggestionsUpdate = updates[1]
-        assert(
-            suggestionsUpdate is SearchStateUpdate.Suggestions
-                    && suggestionsUpdate.suggestions == expectedSuggestions
-        )
-        val eventsUpdate = updates.last()
-        assert(
-            eventsUpdate is SearchStateUpdate.Events.Loaded
-                    && eventsUpdate.resource == expectedResource
-                    && eventsUpdate.newSearch
-        )
-    }
+            val loadingUpdate = updates.first()
+            assert(
+                loadingUpdate is SearchStateUpdate.Events.Loading &&
+                    loadingUpdate.searchText == searchText)
+            val suggestionsUpdate = updates[1]
+            assert(
+                suggestionsUpdate is SearchStateUpdate.Suggestions &&
+                    suggestionsUpdate.suggestions == expectedSuggestions)
+            val eventsUpdate = updates.last()
+            assert(
+                eventsUpdate is SearchStateUpdate.Events.Loaded &&
+                    eventsUpdate.resource == expectedResource &&
+                    eventsUpdate.newSearch)
+        }
 }

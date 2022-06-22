@@ -10,10 +10,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 
 sealed class EventViewUpdate {
-    data class NewViewPager(
-        val includeWeather: Boolean,
-        val includeAlarms: Boolean
-    ) : EventViewUpdate()
+    data class NewViewPager(val includeWeather: Boolean, val includeAlarms: Boolean) :
+        EventViewUpdate()
 
     object Pop : EventViewUpdate()
 }
@@ -21,15 +19,14 @@ sealed class EventViewUpdate {
 @FlowPreview
 @ExperimentalCoroutinesApi
 val EventViewModel.viewUpdates: Flow<EventViewUpdate>
-    get() = merge(
-        states.filter { it.events.isEmpty() }
-            .map { EventViewUpdate.Pop },
-        states.filter { it.events.isNotEmpty() }
-            .map { (events) ->
-                val currentEvent = events.last()
-                EventViewUpdate.NewViewPager(
-                    includeWeather = WeatherEventValidator.isValid(currentEvent),
-                    includeAlarms = AlarmsEventValidator.isValid(currentEvent)
-                )
-            }
-    )
+    get() =
+        merge(
+            states.filter { it.events.isEmpty() }.map { EventViewUpdate.Pop },
+            states
+                .filter { it.events.isNotEmpty() }
+                .map { (events) ->
+                    val currentEvent = events.last()
+                    EventViewUpdate.NewViewPager(
+                        includeWeather = WeatherEventValidator.isValid(currentEvent),
+                        includeAlarms = AlarmsEventValidator.isValid(currentEvent))
+                })

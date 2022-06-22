@@ -11,15 +11,13 @@ import javax.inject.Singleton
 @Singleton
 class WeatherRepository @Inject constructor(private val api: DarkSkyApi) : IWeatherRepository {
 
-    override suspend fun getForecast(lat: Double, lon: Double): Resource<Forecast> = api
-        .getForecastAsync(lat, lon)
-        .await()
-        .toResource()
+    override suspend fun getForecast(lat: Double, lon: Double): Resource<Forecast> =
+        api.getForecastAsync(lat, lon).await().toResource()
 
     override suspend fun getForecastTimed(
-        lat: Double, lon: Double, secondsSinceEpoch: Long
-    ): Resource<Forecast> = api
-        .getForecastTimedAsync(lat, lon, secondsSinceEpoch)
-        .await()
-        .toResource()
+        lat: Double,
+        lon: Double,
+        secondsSinceEpoch: Long
+    ): Resource<Forecast> =
+        api.getForecastTimedAsync(lat, lon, secondsSinceEpoch).await().toResource()
 }

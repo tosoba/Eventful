@@ -11,11 +11,8 @@ import kotlinx.coroutines.flow.*
 sealed class WeatherViewUpdate {
     object LoadingForecast : WeatherViewUpdate()
 
-    data class ForecastLoaded(
-        val forecast: Forecast,
-        val city: String,
-        val tab: WeatherTab
-    ) : WeatherViewUpdate()
+    data class ForecastLoaded(val forecast: Forecast, val city: String, val tab: WeatherTab) :
+        WeatherViewUpdate()
 
     data class Snackbar(val state: SnackbarState) : WeatherViewUpdate()
 }
@@ -23,29 +20,30 @@ sealed class WeatherViewUpdate {
 @ExperimentalCoroutinesApi
 @FlowPreview
 val WeatherViewModel.viewUpdates: Flow<WeatherViewUpdate>
-    get() = merge(
-        states.map { it.snackbarState }
-            .distinctUntilChanged()
-            .map { WeatherViewUpdate.Snackbar(it) },
-        states
-            .filter { (_, tab, forecastNow, forecastEventTime) ->
-                (forecastNow.status is Loading && tab == WeatherTab.NOW)
-                        || (forecastEventTime.status is Loading && tab == WeatherTab.EVENT_TIME)
-            }
-            .map { WeatherViewUpdate.LoadingForecast },
-        states
-            .filter { (_, tab, forecastNow, forecastEventTime) ->
-                (forecastNow.status is LoadedSuccessfully && tab == WeatherTab.NOW)
-                        || (forecastEventTime.status is LoadedSuccessfully && tab == WeatherTab.EVENT_TIME)
-            }
-            .map { (event, tab, forecastNow, forecastEventTime) ->
-                WeatherViewUpdate.ForecastLoaded(
-                    when (tab) {
-                        WeatherTab.NOW -> requireNotNull(forecastNow.data)
-                        WeatherTab.EVENT_TIME -> requireNotNull(forecastEventTime.data)
-                    },
-                    requireNotNull(event.venues?.firstOrNull()?.city),
-                    tab
-                )
-            }
-    )
+    get() =
+        merge(
+            states
+                .map { it.snackbarState }
+                .distinctUntilChanged()
+                .map { WeatherViewUpdate.Snackbar(it) },
+            states
+                .filter { (_, tab, forecastNow, forecastEventTime) ->
+                    (forecastNow.status is Loading && tab == WeatherTab.NOW) ||
+                        (forecastEventTime.status is Loading && tab == WeatherTab.EVENT_TIME)
+                }
+                .map { WeatherViewUpdate.LoadingForecast },
+            states
+                .filter { (_, tab, forecastNow, forecastEventTime) ->
+                    (forecastNow.status is LoadedSuccessfully && tab == WeatherTab.NOW) ||
+                        (forecastEventTime.status is LoadedSuccessfully &&
+                            tab == WeatherTab.EVENT_TIME)
+                }
+                .map { (event, tab, forecastNow, forecastEventTime) ->
+                    WeatherViewUpdate.ForecastLoaded(
+                        when (tab) {
+                            WeatherTab.NOW -> requireNotNull(forecastNow.data)
+                            WeatherTab.EVENT_TIME -> requireNotNull(forecastEventTime.data)
+                        },
+                        requireNotNull(event.venues?.firstOrNull()?.city),
+                        tab)
+                })

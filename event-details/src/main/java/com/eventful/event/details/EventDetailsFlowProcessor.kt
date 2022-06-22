@@ -16,12 +16,16 @@ import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class EventDetailsFlowProcessor @Inject constructor(
+class EventDetailsFlowProcessor
+@Inject
+constructor(
     private val isEventSavedFlow: IsEventSavedFlow,
     private val saveEvent: SaveEvent,
     private val deleteEvent: DeleteEvent,
     private val currentEventProvider: CurrentEventProvider
-) : FlowProcessor<EventDetailsIntent, EventDetailsStateUpdate, EventDetailsState, EventDetailsSignal> {
+) :
+    FlowProcessor<
+        EventDetailsIntent, EventDetailsStateUpdate, EventDetailsState, EventDetailsSignal> {
 
     override fun stateWillUpdate(
         currentState: EventDetailsState,
@@ -41,26 +45,27 @@ class EventDetailsFlowProcessor @Inject constructor(
         states: Flow<EventDetailsState>,
         intent: suspend (EventDetailsIntent) -> Unit,
         signal: suspend (EventDetailsSignal) -> Unit
-    ): Flow<EventDetailsStateUpdate> = merge(
-        currentEventProvider.event.map { EventDetailsStateUpdate.NewEvent(it) },
-        intents.filterIsInstance<EventDetailsIntent.ToggleFavourite>()
-            .filter { currentState().isFavourite.data != null }
-            .onEach {
-                coroutineScope.launch {
-                    currentState().run {
-                        if (isFavourite.data!!) deleteEvent(event)
-                        else saveEvent(event)
+    ): Flow<EventDetailsStateUpdate> =
+        merge(
+            currentEventProvider.event.map { EventDetailsStateUpdate.NewEvent(it) },
+            intents
+                .filterIsInstance<EventDetailsIntent.ToggleFavourite>()
+                .filter { currentState().isFavourite.data != null }
+                .onEach {
+                    coroutineScope.launch {
+                        currentState().run {
+                            if (isFavourite.data!!) deleteEvent(event) else saveEvent(event)
+                        }
                     }
                 }
-            }
-            .map { EventDetailsStateUpdate.FavouriteStatus.Loading },
-        states.map { it.event.id }
-            .distinctUntilChanged()
-            .flatMapLatest { isEventSavedFlow(it) }
-            .map {
-                if (currentState().isFavourite.status !is Initial)
-                    signal(EventDetailsSignal.FavouriteStateToggled(it))
-                EventDetailsStateUpdate.FavouriteStatus.Loaded(favourite = it)
-            }
-    )
+                .map { EventDetailsStateUpdate.FavouriteStatus.Loading },
+            states
+                .map { it.event.id }
+                .distinctUntilChanged()
+                .flatMapLatest { isEventSavedFlow(it) }
+                .map {
+                    if (currentState().isFavourite.status !is Initial)
+                        signal(EventDetailsSignal.FavouriteStateToggled(it))
+                    EventDetailsStateUpdate.FavouriteStatus.Loaded(favourite = it)
+                })
 }

@@ -47,14 +47,9 @@ abstract class AllAlarmsModule {
             createAlarm: CreateAlarm,
             updateAlarm: UpdateAlarm,
             ioDispatcher: CoroutineDispatcher
-        ): AlarmsFlowProcessor = AlarmsFlowProcessor(
-            getAlarms,
-            deleteAlarms,
-            createAlarm,
-            updateAlarm,
-            null,
-            ioDispatcher
-        )
+        ): AlarmsFlowProcessor =
+            AlarmsFlowProcessor(
+                getAlarms, deleteAlarms, createAlarm, updateAlarm, null, ioDispatcher)
     }
 
     @Module

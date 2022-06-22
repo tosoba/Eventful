@@ -4,8 +4,7 @@ import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 sealed class AddEditAlarmDialogStatus : Parcelable {
-    @Parcelize
-    object Hidden : AddEditAlarmDialogStatus()
+    @Parcelize object Hidden : AddEditAlarmDialogStatus()
 
     sealed class WithMode : AddEditAlarmDialogStatus() {
         abstract val mode: AddEditAlarmDialogMode
@@ -16,7 +15,6 @@ sealed class AddEditAlarmDialogStatus : Parcelable {
             val state: AddEditAlarmDialogState
         ) : WithMode()
 
-        @Parcelize
-        data class Shown(override val mode: AddEditAlarmDialogMode) : WithMode()
+        @Parcelize data class Shown(override val mode: AddEditAlarmDialogMode) : WithMode()
     }
 }

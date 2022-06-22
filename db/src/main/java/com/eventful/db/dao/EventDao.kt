@@ -18,21 +18,22 @@ interface EventDao {
     suspend fun getEvents(ids: List<String>): List<EventEntity>
 
     @Transaction
-    @Query("SELECT * FROM ${Tables.EVENT} WHERE start_date IS NOT NULL AND start_date > :timestampNow ORDER BY start_date LIMIT :limit")
+    @Query(
+        "SELECT * FROM ${Tables.EVENT} WHERE start_date IS NOT NULL AND start_date > :timestampNow ORDER BY start_date LIMIT :limit")
     fun getUpcomingEventsFlow(
         limit: Int,
         timestampNow: Long = System.currentTimeMillis()
     ): Flow<List<FullEventEntity>>
 
     @Transaction
-    @Query("SELECT * FROM ${Tables.EVENT} WHERE id IN (SELECT event_id FROM ${Tables.ALARM} WHERE timestamp > :timestampNow ORDER BY timestamp LIMIT :limit)")
+    @Query(
+        "SELECT * FROM ${Tables.EVENT} WHERE id IN (SELECT event_id FROM ${Tables.ALARM} WHERE timestamp > :timestampNow ORDER BY timestamp LIMIT :limit)")
     fun getUpcomingAlarmsFlow(
         limit: Int,
         timestampNow: Long = System.currentTimeMillis()
     ): Flow<List<EventAlarmsEntity>>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertEvent(event: EventEntity)
+    @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertEvent(event: EventEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertEvents(events: List<EventEntity>)
@@ -63,15 +64,13 @@ interface EventDao {
             event.venues?.let { eventVenues ->
                 venues.addAll(eventVenues.map { VenueEntity(it) })
                 eventVenueJoinEntities.addAll(
-                    eventVenues.map { EventVenueJoinEntity(event.id, it.id) }
-                )
+                    eventVenues.map { EventVenueJoinEntity(event.id, it.id) })
             }
 
             event.attractions?.let { eventAttractions ->
                 attractions.addAll(eventAttractions.map { AttractionEntity(it) })
                 eventAttractionJoinEntities.addAll(
-                    eventAttractions.map { EventAttractionJoinEntity(event.id, it.id) }
-                )
+                    eventAttractions.map { EventAttractionJoinEntity(event.id, it.id) })
             }
         }
 
@@ -87,20 +86,20 @@ interface EventDao {
     }
 
     @Transaction
-    suspend fun insertEvent(event: IEvent): Boolean = if (getEvent(event.id) == null) {
-        insertEvent(EventEntity(event))
-        event.venues?.let { venues ->
-            insertVenues(venues.map { VenueEntity(it) })
-            joinEventsVenues(venues.map { EventVenueJoinEntity(event.id, it.id) })
-        }
-        event.attractions?.let { attractions ->
-            insertAttractions(attractions.map { AttractionEntity(it) })
-            joinEventsAttractions(
-                attractions.map { EventAttractionJoinEntity(event.id, it.id) }
-            )
-        }
-        true
-    } else false
+    suspend fun insertEvent(event: IEvent): Boolean =
+        if (getEvent(event.id) == null) {
+            insertEvent(EventEntity(event))
+            event.venues?.let { venues ->
+                insertVenues(venues.map { VenueEntity(it) })
+                joinEventsVenues(venues.map { EventVenueJoinEntity(event.id, it.id) })
+            }
+            event.attractions?.let { attractions ->
+                insertAttractions(attractions.map { AttractionEntity(it) })
+                joinEventsAttractions(
+                    attractions.map { EventAttractionJoinEntity(event.id, it.id) })
+            }
+            true
+        } else false
 
     @Transaction
     @Query("SELECT * FROM ${Tables.EVENT} ORDER BY date_saved DESC LIMIT :limit")
@@ -118,8 +117,7 @@ interface EventDao {
     @Query("SELECT * FROM ${Tables.ATTRACTION} WHERE id IN (:ids)")
     fun getAttractions(ids: List<String>): List<AttractionEntity>
 
-    @Query("DELETE FROM ${Tables.EVENT} WHERE id = :id")
-    suspend fun deleteEvent(id: String)
+    @Query("DELETE FROM ${Tables.EVENT} WHERE id = :id") suspend fun deleteEvent(id: String)
 
     @Query("DELETE FROM ${Tables.EVENT} WHERE id IN (:ids)")
     suspend fun deleteEvents(ids: List<String>)
@@ -132,6 +130,7 @@ interface EventDao {
     @Query("SELECT * FROM ${Tables.EVENT}")
     fun getAlarms(): Flow<List<EventAlarmsEntity>>
 
-    @Query("SELECT * FROM ${Tables.EVENT} WHERE id = (SELECT event_id FROM ${Tables.ALARM} WHERE id = :alarmId)")
+    @Query(
+        "SELECT * FROM ${Tables.EVENT} WHERE id = (SELECT event_id FROM ${Tables.ALARM} WHERE id = :alarmId)")
     suspend fun getEventByAlarmId(alarmId: Int): FullEventEntity?
 }

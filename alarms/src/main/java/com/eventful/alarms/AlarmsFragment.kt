@@ -39,107 +39,104 @@ import javax.inject.Inject
 @FlowPreview
 @ExperimentalCoroutinesApi
 abstract class AlarmsFragment<M : AlarmsMode, VM : AlarmsViewModel> :
-    DaggerViewModelFragment<VM>(R.layout.fragment_alarms),
-    SnackbarController,
-    HasArgs {
+    DaggerViewModelFragment<VM>(R.layout.fragment_alarms), SnackbarController, HasArgs {
 
     protected var mode: M by FragmentArgument(AlarmsArgs.MODE.name)
-    override val args: Bundle get() = bundleOf(AlarmsArgs.MODE.name to mode)
+    override val args: Bundle
+        get() = bundleOf(AlarmsArgs.MODE.name to mode)
 
     protected val binding: FragmentAlarmsBinding by viewBinding(FragmentAlarmsBinding::bind)
 
     private lateinit var snackbarStateChannel: SendChannel<SnackbarState>
 
-    @Inject
-    internal lateinit var epoxyThreads: EpoxyThreads
+    @Inject internal lateinit var epoxyThreads: EpoxyThreads
 
-    @Inject
-    internal lateinit var fragmentFactory: IMainChildFragmentNavDestinations
+    @Inject internal lateinit var fragmentFactory: IMainChildFragmentNavDestinations
 
-    private val epoxyController: TypedEpoxyController<HoldsList<Selectable<Alarm>>> by lazy(
-        LazyThreadSafetyMode.NONE
-    ) {
-        infiniteItemListController<HoldsList<Selectable<Alarm>>, Selectable<Alarm>>(
-            epoxyThreads = epoxyThreads,
-            mapToHoldsList = { this },
-            emptyTextResource = { R.string.no_created_alarms },
-            imageBackgroundResource = R.drawable.alarms_background,
-            initialDescriptionResource = if (mode is AlarmsMode.All) R.string.all_alarms else R.string.alarms_for_event,
-            loadMore = { lifecycleScope.launch { viewModel.intent(AlarmsIntent.LoadMoreAlarms) } }
-        ) { selectable ->
-            selectable.listItem(
-                clicked = View.OnClickListener {
-                    Toast.makeText(
-                        context,
-                        "Time left: ${selectable.item.formattedTimeLeft}",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                },
-                longClicked = View.OnLongClickListener {
-                    lifecycleScope.launch {
-                        viewModel.intent(AlarmsIntent.AlarmLongClicked(selectable.item))
-                    }
-                    true
-                },
-                optionsButtonClicked = {
-                    PopupMenu(it.context, it).apply {
-                        setOnMenuItemClickListener { item ->
-                            when (item.itemId) {
-                                R.id.action_edit_alarm -> {
-                                    actionModeController.finish(false)
-                                    lifecycleScope.launch {
-                                        viewModel.intent(
-                                            AlarmsIntent.UpdateDialogStatus(
-                                                AddEditAlarmDialogStatus.WithMode.Shown(
-                                                    AddEditAlarmDialogMode.Edit(alarm = selectable.item)
-                                                )
-                                            )
-                                        )
-                                    }
-                                    true
-                                }
-                                R.id.action_show_event -> {
-                                    actionModeController.finish(false)
-                                    eventNavigationController?.showEvent(selectable.item.event)
-                                    true
-                                }
-                                R.id.action_delete_alarm -> {
-                                    lifecycleScope.launch {
-                                        viewModel.intent(
-                                            AlarmsIntent.DeleteAlarm(selectable.item.id)
-                                        )
-                                    }
-                                    true
-                                }
-                                else -> false
+    private val epoxyController: TypedEpoxyController<HoldsList<Selectable<Alarm>>> by
+        lazy(LazyThreadSafetyMode.NONE) {
+            infiniteItemListController<HoldsList<Selectable<Alarm>>, Selectable<Alarm>>(
+                epoxyThreads = epoxyThreads,
+                mapToHoldsList = { this },
+                emptyTextResource = { R.string.no_created_alarms },
+                imageBackgroundResource = R.drawable.alarms_background,
+                initialDescriptionResource =
+                    if (mode is AlarmsMode.All) R.string.all_alarms else R.string.alarms_for_event,
+                loadMore = {
+                    lifecycleScope.launch { viewModel.intent(AlarmsIntent.LoadMoreAlarms) }
+                }) { selectable ->
+                selectable.listItem(
+                    clicked =
+                        View.OnClickListener {
+                            Toast.makeText(
+                                    context,
+                                    "Time left: ${selectable.item.formattedTimeLeft}",
+                                    Toast.LENGTH_SHORT)
+                                .show()
+                        },
+                    longClicked =
+                        View.OnLongClickListener {
+                            lifecycleScope.launch {
+                                viewModel.intent(AlarmsIntent.AlarmLongClicked(selectable.item))
                             }
+                            true
+                        },
+                    optionsButtonClicked = {
+                        PopupMenu(it.context, it).apply {
+                            setOnMenuItemClickListener { item ->
+                                when (item.itemId) {
+                                    R.id.action_edit_alarm -> {
+                                        actionModeController.finish(false)
+                                        lifecycleScope.launch {
+                                            viewModel.intent(
+                                                AlarmsIntent.UpdateDialogStatus(
+                                                    AddEditAlarmDialogStatus.WithMode.Shown(
+                                                        AddEditAlarmDialogMode.Edit(
+                                                            alarm = selectable.item))))
+                                        }
+                                        true
+                                    }
+                                    R.id.action_show_event -> {
+                                        actionModeController.finish(false)
+                                        eventNavigationController?.showEvent(selectable.item.event)
+                                        true
+                                    }
+                                    R.id.action_delete_alarm -> {
+                                        lifecycleScope.launch {
+                                            viewModel.intent(
+                                                AlarmsIntent.DeleteAlarm(selectable.item.id))
+                                        }
+                                        true
+                                    }
+                                    else -> false
+                                }
+                            }
+                            gravity = Gravity.RIGHT
+                            inflate(R.menu.alarm_item_options_menu)
+                            show()
                         }
-                        gravity = Gravity.RIGHT
-                        inflate(R.menu.alarm_item_options_menu)
-                        show()
-                    }
-                }
-            )
-        }
-    }
-
-    private val actionModeController: ItemsSelectionActionModeController by lazy(
-        LazyThreadSafetyMode.NONE
-    ) {
-        itemsSelectionActionModeController(
-            menuId = R.menu.alarms_selection_menu,
-            itemClickedCallbacks = mapOf(
-                R.id.action_remove_alarms to {
-                    lifecycleScope.launch { viewModel.intent(AlarmsIntent.RemoveAlarmsClicked) }
-                    Unit
-                }
-            ),
-            onDestroyActionMode = {
-                lifecycleScope.launch { viewModel.intent(AlarmsIntent.ClearSelectionClicked) }
-                Unit
+                    })
             }
-        )
-    }
+        }
+
+    private val actionModeController: ItemsSelectionActionModeController by
+        lazy(LazyThreadSafetyMode.NONE) {
+            itemsSelectionActionModeController(
+                menuId = R.menu.alarms_selection_menu,
+                itemClickedCallbacks =
+                    mapOf(
+                        R.id.action_remove_alarms to
+                            {
+                                lifecycleScope.launch {
+                                    viewModel.intent(AlarmsIntent.RemoveAlarmsClicked)
+                                }
+                                Unit
+                            }),
+                onDestroyActionMode = {
+                    lifecycleScope.launch { viewModel.intent(AlarmsIntent.ClearSelectionClicked) }
+                    Unit
+                })
+        }
 
     private var addEditAlarmDialog: AddEditAlarmDialog? = null
 
@@ -150,37 +147,35 @@ abstract class AlarmsFragment<M : AlarmsMode, VM : AlarmsViewModel> :
                 when (update) {
                     is AlarmsViewUpdate.Alarms -> epoxyController.setData(update.alarms)
                     is AlarmsViewUpdate.ShowDialog -> {
-                        addEditAlarmDialog = showAddEditAlarmDialog(
-                            mode = update.mode,
-                            initialState = update.previousState
-                        ) { timestamp ->
-                            lifecycleScope.launch {
-                                viewModel.intent(
-                                    when (update.mode) {
-                                        is AddEditAlarmDialogMode.Add -> AlarmsIntent.AddAlarm(
-                                            event = update.mode.event,
-                                            timestamp = timestamp
-                                        )
-                                        is AddEditAlarmDialogMode.Edit -> AlarmsIntent.UpdateAlarm(
-                                            id = update.mode.alarm.id,
-                                            timestamp = timestamp
-                                        )
+                        addEditAlarmDialog =
+                            showAddEditAlarmDialog(
+                                    mode = update.mode, initialState = update.previousState) {
+                                    timestamp ->
+                                    lifecycleScope.launch {
+                                        viewModel.intent(
+                                            when (update.mode) {
+                                                is AddEditAlarmDialogMode.Add ->
+                                                    AlarmsIntent.AddAlarm(
+                                                        event = update.mode.event,
+                                                        timestamp = timestamp)
+                                                is AddEditAlarmDialogMode.Edit ->
+                                                    AlarmsIntent.UpdateAlarm(
+                                                        id = update.mode.alarm.id,
+                                                        timestamp = timestamp)
+                                            })
                                     }
-                                )
-                            }
-                        }.apply {
-                            setOnCancelListener {
-                                addEditAlarmDialog = null
-                                lifecycleScope.launch {
-                                    viewModel.intent(
-                                        AlarmsIntent.UpdateDialogStatus(
-                                            AddEditAlarmDialogStatus.Hidden
-                                        )
-                                    )
                                 }
-                            }
-                            setOnDismissListener { addEditAlarmDialog = null }
-                        }
+                                .apply {
+                                    setOnCancelListener {
+                                        addEditAlarmDialog = null
+                                        lifecycleScope.launch {
+                                            viewModel.intent(
+                                                AlarmsIntent.UpdateDialogStatus(
+                                                    AddEditAlarmDialogStatus.Hidden))
+                                        }
+                                    }
+                                    setOnDismissListener { addEditAlarmDialog = null }
+                                }
                     }
                 }
             }
@@ -201,9 +196,8 @@ abstract class AlarmsFragment<M : AlarmsMode, VM : AlarmsViewModel> :
             viewModel.viewModelScope.launch {
                 viewModel.intent(
                     AlarmsIntent.UpdateDialogStatus(
-                        status = AddEditAlarmDialogStatus.WithMode.ShownWithState(it.mode, it.state)
-                    )
-                )
+                        status =
+                            AddEditAlarmDialogStatus.WithMode.ShownWithState(it.mode, it.state)))
             }
         }
         super.onDestroyView()
@@ -228,9 +222,8 @@ abstract class AlarmsFragment<M : AlarmsMode, VM : AlarmsViewModel> :
             .onEach { update ->
                 when (update) {
                     is AlarmsViewUpdate.Snackbar -> transitionToSnackbarState(update.state)
-                    is AlarmsViewUpdate.UpdateActionMode -> actionModeController.update(
-                        update.numberOfSelectedAlarms
-                    )
+                    is AlarmsViewUpdate.UpdateActionMode ->
+                        actionModeController.update(update.numberOfSelectedAlarms)
                     is AlarmsViewUpdate.FinishActionMode -> actionModeController.finish(false)
                 }
             }

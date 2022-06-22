@@ -22,46 +22,50 @@ interface SnackbarController {
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-fun <T> T.handleSnackbarState(view: View): SendChannel<SnackbarState>
-        where T : SnackbarController, T : LifecycleOwner {
-    val snackbarStateChannel: BroadcastChannel<SnackbarState> = BroadcastChannel(
-        capacity = Channel.CONFLATED
-    )
+fun <T> T.handleSnackbarState(view: View): SendChannel<SnackbarState> where
+T : SnackbarController,
+T : LifecycleOwner {
+    val snackbarStateChannel: BroadcastChannel<SnackbarState> =
+        BroadcastChannel(capacity = Channel.CONFLATED)
 
     var snackbar: Snackbar? = null
 
     suspend fun transitionTo(newState: SnackbarState) {
         snackbar?.dismiss()
-        snackbar = when (newState) {
-            is SnackbarState.Shown -> Snackbar.make(
-                view,
-                if (newState.msg.args.isEmpty()) {
-                    view.context.getString(newState.msg.res)
-                } else {
-                    view.context.getString(newState.msg.res, *newState.msg.args)
-                },
-                newState.length
-            ).apply {
-                newState.action?.let {
-                    setAction(
-                        view.context.getString(it.msgRes),
-                        it.onClickListener
-                    )
-                }
-                newState.onDismissed?.let { onDismissed ->
-                    addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
-                        override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                            onDismissed()
+        snackbar =
+            when (newState) {
+                is SnackbarState.Shown ->
+                    Snackbar.make(
+                            view,
+                            if (newState.msg.args.isEmpty()) {
+                                view.context.getString(newState.msg.res)
+                            } else {
+                                view.context.getString(newState.msg.res, *newState.msg.args)
+                            },
+                            newState.length)
+                        .apply {
+                            newState.action?.let {
+                                setAction(view.context.getString(it.msgRes), it.onClickListener)
+                            }
+                            newState.onDismissed?.let { onDismissed ->
+                                addCallback(
+                                    object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                                        override fun onDismissed(
+                                            transientBottomBar: Snackbar?,
+                                            event: Int
+                                        ) {
+                                            onDismissed()
+                                        }
+                                    })
+                            }
+                            show()
                         }
-                    })
-                }
-                show()
+                is SnackbarState.Hidden -> null
             }
-            is SnackbarState.Hidden -> null
-        }
     }
 
-    snackbarStateChannel.asFlow()
+    snackbarStateChannel
+        .asFlow()
         .distinctUntilChanged()
         .onEach(::transitionTo)
         .launchIn(lifecycleScope)

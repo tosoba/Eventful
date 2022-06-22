@@ -27,17 +27,15 @@ abstract class EventModule {
 
     @FragmentScoped
     @ContributesAndroidInjector(
-        modules = [
-            EventViewModelModule::class,
-            EventAlarmsModule::class,
-            EventDetailsModule::class,
-            WeatherModule::class
-        ]
-    )
+        modules =
+            [
+                EventViewModelModule::class,
+                EventAlarmsModule::class,
+                EventDetailsModule::class,
+                WeatherModule::class])
     abstract fun eventFragment(): EventFragment
 
-    @Binds
-    abstract fun currentEventProvider(eventViewModel: EventViewModel): CurrentEventProvider
+    @Binds abstract fun currentEventProvider(eventViewModel: EventViewModel): CurrentEventProvider
 
     @Binds
     @IntoMap

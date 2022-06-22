@@ -8,11 +8,13 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 inline fun bottomNavItemSelectedViewPagerListener(
     navigationItems: Map<Int, Int>,
     crossinline viewPager: () -> ViewPager
-): Lazy<BottomNavigationView.OnNavigationItemSelectedListener> = lazy(LazyThreadSafetyMode.NONE) {
-    BottomNavigationView.OnNavigationItemSelectedListener { item ->
-        navigationItems[item.itemId]?.let {
-            viewPager().currentItem = it
-            true
-        } ?: false
+): Lazy<BottomNavigationView.OnNavigationItemSelectedListener> =
+    lazy(LazyThreadSafetyMode.NONE) {
+        BottomNavigationView.OnNavigationItemSelectedListener { item ->
+            navigationItems[item.itemId]?.let {
+                viewPager().currentItem = it
+                true
+            }
+                ?: false
+        }
     }
-}

@@ -14,7 +14,5 @@ abstract class MainFragmentModule {
     @ContributesAndroidInjector
     abstract fun mainNavigationFragment(): MainNavigationFragment
 
-    @FragmentScoped
-    @ContributesAndroidInjector
-    abstract fun mainFragment(): MainFragment
+    @FragmentScoped @ContributesAndroidInjector abstract fun mainFragment(): MainFragment
 }

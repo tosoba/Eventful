@@ -11,11 +11,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 @Parcelize
-data class Alarm(
-    override val id: Int,
-    override val event: Event,
-    override val timestamp: Long
-) : IAlarm, Parcelable {
+data class Alarm(override val id: Int, override val event: Event, override val timestamp: Long) :
+    IAlarm, Parcelable {
     constructor(other: IAlarm) : this(other.id, Event(other.event), other.timestamp)
     constructor(id: Int, event: IEvent, timestamp: Long) : this(id, Event(event), timestamp)
 

@@ -43,10 +43,10 @@ abstract class BaseNavigationFragment : DaggerFragment() {
         super.onDestroy()
     }
 
-    private val backStackSignalsChannel: BroadcastChannel<Boolean> = BroadcastChannel(
-        capacity = Channel.CONFLATED
-    )
-    val backStackSignals: Flow<Boolean> get() = backStackSignalsChannel.asFlow()
+    private val backStackSignalsChannel: BroadcastChannel<Boolean> =
+        BroadcastChannel(capacity = Channel.CONFLATED)
+    val backStackSignals: Flow<Boolean>
+        get() = backStackSignalsChannel.asFlow()
 
     fun handleBackPressedOrPopBackStack() {
         currentTopFragment?.castTo<BackPressedHandler>()?.onBackPressed() ?: popBackStack()
@@ -69,8 +69,7 @@ abstract class BaseNavigationFragment : DaggerFragment() {
                 android.R.anim.fade_in,
                 android.R.anim.fade_out,
                 android.R.anim.fade_in,
-                android.R.anim.fade_out
-            )
+                android.R.anim.fade_out)
             add(backStackNavigationContainerId, fragment)
             if (addToBackStack) addToBackStack(null)
             commit()

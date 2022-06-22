@@ -12,4 +12,5 @@ var Activity.statusBarColor: Int?
             window.statusBarColor = value
         }
     }
-    get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) window?.statusBarColor else null
+    get() =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) window?.statusBarColor else null

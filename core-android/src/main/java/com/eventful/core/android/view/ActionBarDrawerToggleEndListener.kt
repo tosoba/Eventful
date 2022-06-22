@@ -22,11 +22,9 @@ class ActionBarDrawerToggleEndListener(
 ) : DrawerLayout.DrawerListener {
 
     private val arrowDrawable: DrawerArrowDrawable = DrawerArrowDrawable(toolbar.context)
-    private val toggleButton: AppCompatImageButton = AppCompatImageButton(
-        toolbar.context,
-        null,
-        androidx.appcompat.R.attr.toolbarNavigationButtonStyle
-    )
+    private val toggleButton: AppCompatImageButton =
+        AppCompatImageButton(
+            toolbar.context, null, androidx.appcompat.R.attr.toolbarNavigationButtonStyle)
     private val openDrawerContentDesc: String = activity.getString(openDrawerContentDescRes)
     private val closeDrawerContentDesc: String = activity.getString(closeDrawerContentDescRes)
 
@@ -34,8 +32,7 @@ class ActionBarDrawerToggleEndListener(
         arrowDrawable.direction = DrawerArrowDrawable.ARROW_DIRECTION_END
         toolbar.addView(toggleButton, Toolbar.LayoutParams(GravityCompat.END))
         toggleButton.setImageDrawable(
-            arrowDrawableRes?.let { ContextCompat.getDrawable(activity, it) } ?: arrowDrawable
-        )
+            arrowDrawableRes?.let { ContextCompat.getDrawable(activity, it) } ?: arrowDrawable)
         toggleButton.setOnClickListener { toggle() }
     }
 

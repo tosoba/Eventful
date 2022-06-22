@@ -23,14 +23,13 @@ class EventAlarmManager @Inject constructor(private val context: Context) : IEve
         }
 
         companion object {
-            fun intent(
-                context: Context, alarmId: Int
-            ): Intent = Intent(context, Receiver::class.java).apply { putExtra(EXTRA_ID, alarmId) }
+            fun intent(context: Context, alarmId: Int): Intent =
+                Intent(context, Receiver::class.java).apply { putExtra(EXTRA_ID, alarmId) }
         }
     }
 
-    private val manager: AlarmManager = context
-        .getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    private val manager: AlarmManager =
+        context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
     override fun create(id: Int, timestamp: Long) {
         create(pendingIntent(id), timestamp)
@@ -46,16 +45,15 @@ class EventAlarmManager @Inject constructor(private val context: Context) : IEve
         create(intent, timestamp)
     }
 
-    private fun pendingIntent(id: Int): PendingIntent = PendingIntent.getBroadcast(
-        context, id, Receiver.intent(context, id), 0
-    )
+    private fun pendingIntent(id: Int): PendingIntent =
+        PendingIntent.getBroadcast(context, id, Receiver.intent(context, id), 0)
 
     private fun create(pendingIntent: PendingIntent, timestamp: Long) {
         when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> manager
-                .setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timestamp, pendingIntent)
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT -> manager
-                .setExact(AlarmManager.RTC_WAKEUP, timestamp, pendingIntent)
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ->
+                manager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timestamp, pendingIntent)
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT ->
+                manager.setExact(AlarmManager.RTC_WAKEUP, timestamp, pendingIntent)
             else -> manager.set(AlarmManager.RTC_WAKEUP, timestamp, pendingIntent)
         }
     }

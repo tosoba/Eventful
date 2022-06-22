@@ -5,5 +5,4 @@ import kotlinx.coroutines.FlowPreview
 
 @FlowPreview
 @ExperimentalCoroutinesApi
-internal class ConnectedStateProviderSnackbarUpdatesTests : BaseNearbyFlowProcessorTests() {
-}
+internal class ConnectedStateProviderSnackbarUpdatesTests : BaseNearbyFlowProcessorTests()

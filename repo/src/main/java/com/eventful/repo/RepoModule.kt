@@ -11,15 +11,11 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 @ExperimentalCoroutinesApi
 @Module
 abstract class RepoModule {
-    @Binds
-    abstract fun alarmRepository(repo: AlarmRepository): IAlarmRepository
+    @Binds abstract fun alarmRepository(repo: AlarmRepository): IAlarmRepository
 
-    @Binds
-    abstract fun appRepository(repo: AppRepository): IAppRepository
+    @Binds abstract fun appRepository(repo: AppRepository): IAppRepository
 
-    @Binds
-    abstract fun eventRepository(repo: EventRepository): IEventRepository
+    @Binds abstract fun eventRepository(repo: EventRepository): IEventRepository
 
-    @Binds
-    abstract fun weatherRepository(repo: WeatherRepository): IWeatherRepository
+    @Binds abstract fun weatherRepository(repo: WeatherRepository): IWeatherRepository
 }

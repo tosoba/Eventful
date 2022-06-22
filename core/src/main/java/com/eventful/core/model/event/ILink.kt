@@ -5,9 +5,12 @@ interface ILink {
     val type: LinkType
 
     companion object {
-        fun with(url: String, type: LinkType) = object : ILink {
-            override val url: String get() = url
-            override val type: LinkType get() = type
-        }
+        fun with(url: String, type: LinkType) =
+            object : ILink {
+                override val url: String
+                    get() = url
+                override val type: LinkType
+                    get() = type
+            }
     }
 }

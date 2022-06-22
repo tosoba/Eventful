@@ -15,26 +15,27 @@ class GetPagedEvents @Inject constructor(private val dispatcher: CoroutineDispat
         toEvent: (MappableToEvent) -> IEvent,
         getEvents: suspend (Int) -> Resource<PagedResult<IEvent>>
     ): Resource<PagedResult<IEvent>> {
-        val currentEventNames = currentEvents.data.map(toEvent)
-            .map { it.name.lowerCasedTrimmed }
-            .toSet()
+        val currentEventNames =
+            currentEvents.data.map(toEvent).map { it.name.lowerCasedTrimmed }.toSet()
         var page = currentEvents.offset
         var resource: Resource<PagedResult<IEvent>>
         do {
-            resource = withContext(dispatcher) { getEvents(page++) }
-                .map { result ->
-                    PagedResult(
-                        items = result.items
-                            .filterNot { currentEventNames.contains(it.name.lowerCasedTrimmed) }
-                            .distinctBy { it.name.lowerCasedTrimmed },
-                        currentPage = result.currentPage,
-                        totalPages = result.totalPages
-                    )
-                }
+            resource =
+                withContext(dispatcher) { getEvents(page++) }
+                    .map { result ->
+                        PagedResult(
+                            items =
+                                result.items
+                                    .filterNot {
+                                        currentEventNames.contains(it.name.lowerCasedTrimmed)
+                                    }
+                                    .distinctBy { it.name.lowerCasedTrimmed },
+                            currentPage = result.currentPage,
+                            totalPages = result.totalPages)
+                    }
         } while (resource is Resource.Success<PagedResult<IEvent>> &&
             resource.data.items.isEmpty() &&
-            page < currentEvents.limit
-        )
+            page < currentEvents.limit)
         return resource
     }
 }

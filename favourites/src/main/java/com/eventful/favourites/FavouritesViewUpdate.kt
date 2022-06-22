@@ -15,16 +15,20 @@ sealed class FavouritesViewUpdate {
 @ExperimentalCoroutinesApi
 @FlowPreview
 val FavouritesViewModel.viewUpdates: Flow<FavouritesViewUpdate>
-    get() = merge(
-        states.map { FavouriteEventsData(it.searchText, it.items) }
-            .distinctUntilChanged()
-            .map { FavouritesViewUpdate.Events(it) },
-        states.map { it.snackbarState }
-            .distinctUntilChanged()
-            .map { FavouritesViewUpdate.Snackbar(it) },
-        states.map { state -> state.items.data.count { it.selected } }
-            .distinctUntilChanged()
-            .map { FavouritesViewUpdate.UpdateActionMode(it) },
-        signals.filterIsInstance<FavouritesSignal.FavouritesRemoved>()
-            .map { FavouritesViewUpdate.FinishActionMode }
-    )
+    get() =
+        merge(
+            states
+                .map { FavouriteEventsData(it.searchText, it.items) }
+                .distinctUntilChanged()
+                .map { FavouritesViewUpdate.Events(it) },
+            states
+                .map { it.snackbarState }
+                .distinctUntilChanged()
+                .map { FavouritesViewUpdate.Snackbar(it) },
+            states
+                .map { state -> state.items.data.count { it.selected } }
+                .distinctUntilChanged()
+                .map { FavouritesViewUpdate.UpdateActionMode(it) },
+            signals.filterIsInstance<FavouritesSignal.FavouritesRemoved>().map {
+                FavouritesViewUpdate.FinishActionMode
+            })

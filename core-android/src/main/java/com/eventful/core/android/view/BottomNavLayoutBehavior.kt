@@ -14,7 +14,11 @@ import kotlin.math.min
 class BottomNavLayoutBehavior(context: Context, attrs: AttributeSet) :
     CoordinatorLayout.Behavior<BottomNavigationView>(context, attrs) {
 
-    override fun layoutDependsOn(parent: CoordinatorLayout, child: BottomNavigationView, dependency: View): Boolean {
+    override fun layoutDependsOn(
+        parent: CoordinatorLayout,
+        child: BottomNavigationView,
+        dependency: View
+    ): Boolean {
         if (dependency is Snackbar.SnackbarLayout) {
             this.updateSnackbar(child, (dependency as Snackbar.SnackbarLayout?)!!)
         }
@@ -43,10 +47,15 @@ class BottomNavLayoutBehavior(context: Context, attrs: AttributeSet) :
         child.translationY = max(0.0f, min(child.height.toFloat(), child.translationY + dy))
     }
 
-    private fun updateSnackbar(child: BottomNavigationView, snackbarLayout: Snackbar.SnackbarLayout) {
+    private fun updateSnackbar(
+        child: BottomNavigationView,
+        snackbarLayout: Snackbar.SnackbarLayout
+    ) {
         if (snackbarLayout.layoutParams is CoordinatorLayout.LayoutParams) {
-            val layoutParams = snackbarLayout.layoutParams
-                ?: throw RuntimeException("null cannot be cast to non-null type android.support.design.widget.CoordinatorLayout.LayoutParams")
+            val layoutParams =
+                snackbarLayout.layoutParams
+                    ?: throw RuntimeException(
+                        "null cannot be cast to non-null type android.support.design.widget.CoordinatorLayout.LayoutParams")
 
             val params = layoutParams as CoordinatorLayout.LayoutParams
             params.anchorId = child.id

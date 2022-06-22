@@ -8,8 +8,7 @@ import com.eventful.db.entity.SearchSuggestionEntity
 interface SearchSuggestionDao {
     @Query(
         """SELECT * FROM ${Tables.SEARCH_SUGGESTION} 
-        WHERE search_text LIKE :searchText ORDER BY timestamp_ms DESC LIMIT 10"""
-    )
+        WHERE search_text LIKE :searchText ORDER BY timestamp_ms DESC LIMIT 10""")
     suspend fun getSearchSuggestions(searchText: String): List<SearchSuggestionEntity>
 
     @Query("SELECT * FROM ${Tables.SEARCH_SUGGESTION} WHERE search_text = :searchText LIMIT 1")

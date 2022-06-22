@@ -25,12 +25,13 @@ class FavouritesFlowProcessor(
         states: Flow<FavouritesState>,
         intent: suspend (FavouritesIntent) -> Unit,
         signal: suspend (FavouritesSignal) -> Unit
-    ): Flow<FavouritesStateUpdate> = intents
-        .run {
-            if (loadFavouritesOnStart) onStart { emit(FavouritesIntent.LoadFavourites) }
-            else this
-        }
-        .updates(coroutineScope, currentState, states, intent, signal)
+    ): Flow<FavouritesStateUpdate> =
+        intents
+            .run {
+                if (loadFavouritesOnStart) onStart { emit(FavouritesIntent.LoadFavourites) }
+                else this
+            }
+            .updates(coroutineScope, currentState, states, intent, signal)
 
     private fun Flow<FavouritesIntent>.updates(
         coroutineScope: CoroutineScope,
@@ -38,44 +39,52 @@ class FavouritesFlowProcessor(
         states: Flow<FavouritesState>,
         intent: suspend (FavouritesIntent) -> Unit,
         signal: suspend (FavouritesSignal) -> Unit
-    ): Flow<FavouritesStateUpdate> = merge(
-        filterIsInstance<FavouritesIntent.NewSearch>()
-            .map { (searchText) -> FavouritesStateUpdate.SearchText(searchText) },
-        filterIsInstance<FavouritesIntent.LoadFavourites>()
-            .loadFavouritesUpdates(currentState, states),
-        filterIsInstance<FavouritesIntent.EventLongClicked>()
-            .map { (event) -> FavouritesStateUpdate.ToggleEventSelection(event) },
-        filterIsInstance<FavouritesIntent.ClearSelectionClicked>()
-            .map { FavouritesStateUpdate.ClearSelection },
-        filterIsInstance<FavouritesIntent.HideSnackbar>()
-            .map { FavouritesStateUpdate.HideSnackbar },
-        filterIsInstance<FavouritesIntent.RemoveFromFavouritesClicked>()
-            .removeFromFavouritesUpdates(coroutineScope, currentState, intent, signal)
-    )
+    ): Flow<FavouritesStateUpdate> =
+        merge(
+            filterIsInstance<FavouritesIntent.NewSearch>().map { (searchText) ->
+                FavouritesStateUpdate.SearchText(searchText)
+            },
+            filterIsInstance<FavouritesIntent.LoadFavourites>()
+                .loadFavouritesUpdates(currentState, states),
+            filterIsInstance<FavouritesIntent.EventLongClicked>().map { (event) ->
+                FavouritesStateUpdate.ToggleEventSelection(event)
+            },
+            filterIsInstance<FavouritesIntent.ClearSelectionClicked>().map {
+                FavouritesStateUpdate.ClearSelection
+            },
+            filterIsInstance<FavouritesIntent.HideSnackbar>().map {
+                FavouritesStateUpdate.HideSnackbar
+            },
+            filterIsInstance<FavouritesIntent.RemoveFromFavouritesClicked>()
+                .removeFromFavouritesUpdates(coroutineScope, currentState, intent, signal))
 
     private fun Flow<FavouritesIntent.LoadFavourites>.loadFavouritesUpdates(
         currentState: () -> FavouritesState,
         states: Flow<FavouritesState>
-    ): Flow<FavouritesStateUpdate> = filterNot { currentState().items.limitHit }
-        .flatMapLatest {
-            states.map { it.searchText }
-                .onStart { emit(currentState().searchText) }
-                .distinctUntilChanged()
-        }
-        .flatMapLatest { searchText ->
-            getSavedEventsFlow(currentState().limit + limitIncrement)
-                .flowOn(ioDispatcher)
-                .map { events ->
-                    FavouritesStateUpdate.Events(
-                        events = events.run {
-                            if (searchText.isBlank()) this
-                            else filter {
-                                it.name.lowerCasedTrimmed.contains(searchText.lowerCasedTrimmed)
-                            }
-                        }
-                    )
-                }
-        }
+    ): Flow<FavouritesStateUpdate> =
+        filterNot { currentState().items.limitHit }
+            .flatMapLatest {
+                states
+                    .map { it.searchText }
+                    .onStart { emit(currentState().searchText) }
+                    .distinctUntilChanged()
+            }
+            .flatMapLatest { searchText ->
+                getSavedEventsFlow(currentState().limit + limitIncrement)
+                    .flowOn(ioDispatcher)
+                    .map { events ->
+                        FavouritesStateUpdate.Events(
+                            events =
+                                events.run {
+                                    if (searchText.isBlank()) this
+                                    else
+                                        filter {
+                                            it.name.lowerCasedTrimmed.contains(
+                                                searchText.lowerCasedTrimmed)
+                                        }
+                                })
+                    }
+            }
 
     private fun Flow<FavouritesIntent.RemoveFromFavouritesClicked>.removeFromFavouritesUpdates(
         coroutineScope: CoroutineScope,
@@ -87,14 +96,12 @@ class FavouritesFlowProcessor(
         withContext(ioDispatcher) { deleteEvents(selectedEvents) }
         signal(FavouritesSignal.FavouritesRemoved)
         FavouritesStateUpdate.RemovedFromFavourites(
-            msgRes = SnackbarState.Shown.MsgRes(
-                removedFromFavouritesMsgRes(eventsCount = selectedEvents.size),
-                args = arrayOf(selectedEvents.size)
-            )
-        ) {
+            msgRes =
+                SnackbarState.Shown.MsgRes(
+                    removedFromFavouritesMsgRes(eventsCount = selectedEvents.size),
+                    args = arrayOf(selectedEvents.size))) {
             coroutineScope.launch { intent(FavouritesIntent.HideSnackbar) }
         }
-
     }
 
     companion object {

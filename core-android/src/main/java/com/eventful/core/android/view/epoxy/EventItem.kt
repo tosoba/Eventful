@@ -4,12 +4,12 @@ import android.view.View
 import com.airbnb.epoxy.CarouselModel_
 import com.airbnb.epoxy.EpoxyModelGroup
 import com.airbnb.epoxy.ModelGroupHolder
-import com.eventful.core.model.Selectable
 import com.eventful.core.android.EventInfoBindingModel_
 import com.eventful.core.android.EventThumbnailBindingModel_
 import com.eventful.core.android.R
 import com.eventful.core.android.SelectableBackgroundBindingModel_
 import com.eventful.core.android.model.event.Event
+import com.eventful.core.model.Selectable
 
 class SelectableEventItem(
     private val clicked: View.OnClickListener,
@@ -32,14 +32,11 @@ class SelectableEventItem(
 fun Selectable<Event>.listItem(
     clicked: View.OnClickListener,
     longClicked: View.OnLongClickListener
-) = SelectableEventItem(
-    clicked,
-    longClicked,
-    SelectableBackgroundBindingModel_().id("${item.id}eb")
-        .selected(selected),
-    EventThumbnailBindingModel_().id("${item.id}t")
-        .event(item),
-    EventInfoBindingModel_().id("${item.id}i")
-        .event(item),
-    item.kindsCarousel
-)
+) =
+    SelectableEventItem(
+        clicked,
+        longClicked,
+        SelectableBackgroundBindingModel_().id("${item.id}eb").selected(selected),
+        EventThumbnailBindingModel_().id("${item.id}t").event(item),
+        EventInfoBindingModel_().id("${item.id}i").event(item),
+        item.kindsCarousel)

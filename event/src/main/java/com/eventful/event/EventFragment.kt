@@ -33,61 +33,62 @@ class EventFragment :
     BackPressedHandler {
 
     private var event: Event by FragmentArgument(EventArgs.EVENT.name)
-    override val args: Bundle get() = bundleOf(EventArgs.EVENT.name to event)
+    override val args: Bundle
+        get() = bundleOf(EventArgs.EVENT.name to event)
 
     private val binding: FragmentEventBinding by viewBinding(FragmentEventBinding::bind)
-    override val viewPager: ViewPager get() = binding.eventViewPager
+    override val viewPager: ViewPager
+        get() = binding.eventViewPager
 
-    @Inject
-    internal lateinit var fragmentsFactory: IEventChildFragmentsFactory
+    @Inject internal lateinit var fragmentsFactory: IEventChildFragmentsFactory
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         viewModel.viewUpdates
             .onEach { update ->
                 when (update) {
                     is EventViewUpdate.Pop -> navigationFragment?.popBackStack()
-                    is EventViewUpdate.NewViewPager -> with(binding.eventViewPager) {
-                        val eventViewPagerAdapter: PagerAdapter by titledFragmentsPagerAdapter {
-                            update.fragments
+                    is EventViewUpdate.NewViewPager ->
+                        with(binding.eventViewPager) {
+                            val eventViewPagerAdapter: PagerAdapter by titledFragmentsPagerAdapter {
+                                update.fragments
+                            }
+                            adapter = eventViewPagerAdapter
+                            offscreenPageLimit = eventViewPagerAdapter.count - 1
                         }
-                        adapter = eventViewPagerAdapter
-                        offscreenPageLimit = eventViewPagerAdapter.count - 1
-                    }
                 }
             }
             .launchIn(lifecycleScope)
     }
 
     private val EventViewUpdate.NewViewPager.fragments: Array<Pair<String, Fragment>>
-        get() = bottomNavItemsToRemove.let { itemsToRemove ->
-            sequenceOf(
-                getString(R.string.details) to fragmentsFactory.eventDetailsFragment(
-                    event, itemsToRemove
-                ),
-                if (includeWeather) {
-                    getString(R.string.weather) to fragmentsFactory.weatherFragment(
-                        event, itemsToRemove
-                    )
-                } else null,
-                if (includeAlarms) {
-                    getString(R.string.alarms) to fragmentsFactory.eventAlarmsFragment(
-                        event, itemsToRemove
-                    )
-                } else null
-            ).filterNotNull().toList().toTypedArray()
-        }
+        get() =
+            bottomNavItemsToRemove.let { itemsToRemove ->
+                sequenceOf(
+                        getString(R.string.details) to
+                            fragmentsFactory.eventDetailsFragment(event, itemsToRemove),
+                        if (includeWeather) {
+                            getString(R.string.weather) to
+                                fragmentsFactory.weatherFragment(event, itemsToRemove)
+                        } else null,
+                        if (includeAlarms) {
+                            getString(R.string.alarms) to
+                                fragmentsFactory.eventAlarmsFragment(event, itemsToRemove)
+                        } else null)
+                    .filterNotNull()
+                    .toList()
+                    .toTypedArray()
+            }
 
     private val EventViewUpdate.NewViewPager.bottomNavItemsToRemove: IntArray
-        get() = when {
-            !includeWeather && !includeAlarms -> intArrayOf(
-                R.id.bottom_nav_weather,
-                R.id.bottom_nav_alarms
-            )
-            !includeWeather && includeAlarms -> intArrayOf(R.id.bottom_nav_weather)
-            includeWeather && !includeAlarms -> intArrayOf(R.id.bottom_nav_alarms)
-            includeWeather && includeAlarms -> intArrayOf()
-            else -> throw IllegalArgumentException()
-        }
+        get() =
+            when {
+                !includeWeather && !includeAlarms ->
+                    intArrayOf(R.id.bottom_nav_weather, R.id.bottom_nav_alarms)
+                !includeWeather && includeAlarms -> intArrayOf(R.id.bottom_nav_weather)
+                includeWeather && !includeAlarms -> intArrayOf(R.id.bottom_nav_alarms)
+                includeWeather && includeAlarms -> intArrayOf()
+                else -> throw IllegalArgumentException()
+            }
 
     override fun showEventDetails(event: Event) {
         viewPager.currentItem =
@@ -101,8 +102,6 @@ class EventFragment :
     }
 
     companion object {
-        fun new(event: Event): EventFragment = EventFragment().also {
-            it.event = event
-        }
+        fun new(event: Event): EventFragment = EventFragment().also { it.event = event }
     }
 }

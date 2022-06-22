@@ -34,97 +34,89 @@ internal class LocationStateProviderUpdatesTests : BaseNearbyFlowProcessorTests(
 
     @Test
     @DisplayName("When events status is Failed - should not call getPagedEvents")
-    fun loadingFailedTest() = testScope.runBlockingTest {
-        val initialState = NearbyState(
-            items = PagedDataList(status = Failure(null))
-        )
-        val currentState = mockk<() -> NearbyState> {
-            every { this@mockk() } returns initialState
+    fun loadingFailedTest() =
+        testScope.runBlockingTest {
+            val initialState = NearbyState(items = PagedDataList(status = Failure(null)))
+            val currentState =
+                mockk<() -> NearbyState> { every { this@mockk() } returns initialState }
+            val getPagedEvents = mockk<GetPagedEvents>(relaxed = true)
+
+            flowProcessor(
+                    getPagedEvents = getPagedEvents,
+                    locationStateProvider =
+                        mockk {
+                            every { locationStates } returns
+                                flowOf(LocationState(LatLng(10.0, 10.0), LocationStatus.Found))
+                        })
+                .updates(currentState = currentState)
+                .launchIn(this)
+
+            coVerify(exactly = 0) { getPagedEvents(initialState.items, any(), any()) }
         }
-        val getPagedEvents = mockk<GetPagedEvents>(relaxed = true)
-
-        flowProcessor(
-            getPagedEvents = getPagedEvents,
-            locationStateProvider = mockk {
-                every { locationStates } returns flowOf(
-                    LocationState(LatLng(10.0, 10.0), LocationStatus.Found)
-                )
-            }
-        ).updates(
-            currentState = currentState
-        ).launchIn(this)
-
-        coVerify(exactly = 0) { getPagedEvents(initialState.items, any(), any()) }
-    }
 
     @Test
     @DisplayName("When location status is not found - should not call getPagedEvents")
-    fun locationStatusNotFoundTest() = testScope.runBlockingTest {
-        val initialState = NearbyState(
-            items = PagedDataList(
-                status = LoadedSuccessfully,
-                data = relaxedMockedList(10)
-            )
-        )
-        val currentState = mockk<() -> NearbyState> {
-            every { this@mockk() } returns initialState
+    fun locationStatusNotFoundTest() =
+        testScope.runBlockingTest {
+            val initialState =
+                NearbyState(
+                    items =
+                        PagedDataList(status = LoadedSuccessfully, data = relaxedMockedList(10)))
+            val currentState =
+                mockk<() -> NearbyState> { every { this@mockk() } returns initialState }
+            val getPagedEvents = mockk<GetPagedEvents>(relaxed = true)
+
+            flowProcessor(
+                    getPagedEvents = getPagedEvents,
+                    locationStateProvider =
+                        mockk {
+                            every { locationStates } returns
+                                flowOf(LocationState(LatLng(10.0, 10.0), LocationStatus.Loading))
+                        })
+                .updates(currentState = currentState)
+                .launchIn(this)
+
+            coVerify(exactly = 0) { getPagedEvents(initialState.items, any(), any()) }
         }
-        val getPagedEvents = mockk<GetPagedEvents>(relaxed = true)
-
-        flowProcessor(
-            getPagedEvents = getPagedEvents,
-            locationStateProvider = mockk {
-                every { locationStates } returns flowOf(
-                    LocationState(LatLng(10.0, 10.0), LocationStatus.Loading)
-                )
-            }
-        ).updates(
-            currentState = currentState
-        ).launchIn(this)
-
-        coVerify(exactly = 0) { getPagedEvents(initialState.items, any(), any()) }
-    }
 
     @Test
     @DisplayName(
         """When connected and all loading conditions met 
-|- should call getPagedEvents, signal EventsLoadingFinished, emit Events.Loading and Loaded updates"""
-    )
-    fun allConditionsMetTest() = testScope.runBlockingTest {
-        val initialState = NearbyState(items = PagedDataList(status = LoadedSuccessfully))
-        val currentState = mockk<() -> NearbyState> {
-            every { this@mockk() } returns initialState
-        }
-        val expectedResource = Resource.successWith(
-            PagedResult<IEvent>(mockedList(10) { event(it) }, 1, 1)
-        )
-        val getPagedEvents = mockk<GetPagedEvents> {
-            coEvery { this@mockk<Selectable<Event>>(any(), any(), any()) } returns expectedResource
-        }
-        val signal = mockk<Signal>(relaxed = true)
+|- should call getPagedEvents, signal EventsLoadingFinished, emit Events.Loading and Loaded updates""")
+    fun allConditionsMetTest() =
+        testScope.runBlockingTest {
+            val initialState = NearbyState(items = PagedDataList(status = LoadedSuccessfully))
+            val currentState =
+                mockk<() -> NearbyState> { every { this@mockk() } returns initialState }
+            val expectedResource =
+                Resource.successWith(PagedResult<IEvent>(mockedList(10) { event(it) }, 1, 1))
+            val getPagedEvents =
+                mockk<GetPagedEvents> {
+                    coEvery { this@mockk<Selectable<Event>>(any(), any(), any()) } returns
+                        expectedResource
+                }
+            val signal = mockk<Signal>(relaxed = true)
 
-        val updates = flowProcessor(
-            getPagedEvents = getPagedEvents,
-            locationStateProvider = mockk {
-                every { locationStates } returns flowOf(
-                    LocationState(LatLng(10.0, 10.0), LocationStatus.Found)
-                )
-            }
-        ).updates(
-            currentState = currentState,
-            signal = signal::invoke
-        ).toList()
+            val updates =
+                flowProcessor(
+                        getPagedEvents = getPagedEvents,
+                        locationStateProvider =
+                            mockk {
+                                every { locationStates } returns
+                                    flowOf(LocationState(LatLng(10.0, 10.0), LocationStatus.Found))
+                            })
+                    .updates(currentState = currentState, signal = signal::invoke)
+                    .toList()
 
-        coVerify(exactly = 1) { getPagedEvents<Selectable<Event>>(any(), any(), any()) }
-        coVerify(exactly = 1) { signal.invoke(NearbySignal.EventsLoadingFinished) }
-        assert(updates.size == 2)
-        val loadingUpdate = updates.first()
-        assert(loadingUpdate is NearbyStateUpdate.Events.Loading && loadingUpdate.newLocation)
-        val loadedUpdate = updates.last()
-        assert(
-            loadedUpdate is NearbyStateUpdate.Events.Loaded
-                    && loadedUpdate.resource == expectedResource
-                    && loadedUpdate.clearEventsIfSuccess
-        )
-    }
+            coVerify(exactly = 1) { getPagedEvents<Selectable<Event>>(any(), any(), any()) }
+            coVerify(exactly = 1) { signal.invoke(NearbySignal.EventsLoadingFinished) }
+            assert(updates.size == 2)
+            val loadingUpdate = updates.first()
+            assert(loadingUpdate is NearbyStateUpdate.Events.Loading && loadingUpdate.newLocation)
+            val loadedUpdate = updates.last()
+            assert(
+                loadedUpdate is NearbyStateUpdate.Events.Loaded &&
+                    loadedUpdate.resource == expectedResource &&
+                    loadedUpdate.clearEventsIfSuccess)
+        }
 }

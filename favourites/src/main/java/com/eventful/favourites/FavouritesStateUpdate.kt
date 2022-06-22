@@ -13,41 +13,35 @@ import com.eventful.core.util.LoadedSuccessfully
 
 sealed class FavouritesStateUpdate : StateUpdate<FavouritesState> {
     data class SearchText(val searchText: String) : FavouritesStateUpdate() {
-        override fun invoke(state: FavouritesState): FavouritesState = state.copy(
-            searchText = searchText
-        )
+        override fun invoke(state: FavouritesState): FavouritesState =
+            state.copy(searchText = searchText)
     }
 
-    data class ToggleEventSelection(
-        override val item: Event
-    ) : FavouritesStateUpdate(),
-        ToggleItemSelectionUpdate<FavouritesState, Event, String> {
+    data class ToggleEventSelection(override val item: Event) :
+        FavouritesStateUpdate(), ToggleItemSelectionUpdate<FavouritesState, Event, String> {
         override fun Event.id(): String = id
     }
 
-    object ClearSelection :
-        FavouritesStateUpdate(),
-        ClearSelectionUpdate<FavouritesState, Event>
+    object ClearSelection : FavouritesStateUpdate(), ClearSelectionUpdate<FavouritesState, Event>
 
     object HideSnackbar : FavouritesStateUpdate() {
-        override fun invoke(state: FavouritesState): FavouritesState = state
-            .copyWithSnackbarState(snackbarState = SnackbarState.Hidden)
+        override fun invoke(state: FavouritesState): FavouritesState =
+            state.copyWithSnackbarState(snackbarState = SnackbarState.Hidden)
     }
 
     data class Events(val events: List<IEvent>) : FavouritesStateUpdate() {
-        override fun invoke(state: FavouritesState): FavouritesState = state.copy(
-            items = DataList(
-                data = events.map { Selectable(Event(it)) },
-                status = LoadedSuccessfully,
-                limitHit = state.items.data.size == events.size
-            ),
-            limit = events.size
-        )
+        override fun invoke(state: FavouritesState): FavouritesState =
+            state.copy(
+                items =
+                    DataList(
+                        data = events.map { Selectable(Event(it)) },
+                        status = LoadedSuccessfully,
+                        limitHit = state.items.data.size == events.size),
+                limit = events.size)
     }
 
     data class RemovedFromFavourites(
         override val msgRes: SnackbarState.Shown.MsgRes,
         override val onSnackbarDismissed: () -> Unit
-    ) : FavouritesStateUpdate(),
-        ItemSelectionConfirmedUpdate<FavouritesState, Event>
+    ) : FavouritesStateUpdate(), ItemSelectionConfirmedUpdate<FavouritesState, Event>
 }

@@ -1,13 +1,13 @@
 package com.eventful.favourites
 
 import androidx.lifecycle.ViewModel
-import com.eventful.core.usecase.event.DeleteEvents
-import com.eventful.core.usecase.event.GetSavedEventsFlow
 import com.eventful.core.android.base.savedStateViewModelFrom
 import com.eventful.core.android.di.scope.FragmentScoped
 import com.eventful.core.android.di.viewmodel.AssistedSavedStateViewModelFactory
 import com.eventful.core.android.di.viewmodel.InjectingSavedStateViewModelFactory
 import com.eventful.core.android.di.viewmodel.ViewModelKey
+import com.eventful.core.usecase.event.DeleteEvents
+import com.eventful.core.usecase.event.GetSavedEventsFlow
 import com.squareup.inject.assisted.dagger2.AssistedModule
 import dagger.Binds
 import dagger.Module
@@ -41,11 +41,8 @@ abstract class FavouritesModule {
             getSavedEventsFlow: GetSavedEventsFlow,
             deleteEvents: DeleteEvents,
             ioDispatcher: CoroutineDispatcher
-        ): FavouritesFlowProcessor = FavouritesFlowProcessor(
-            getSavedEventsFlow,
-            deleteEvents,
-            ioDispatcher
-        )
+        ): FavouritesFlowProcessor =
+            FavouritesFlowProcessor(getSavedEventsFlow, deleteEvents, ioDispatcher)
     }
 
     @Module

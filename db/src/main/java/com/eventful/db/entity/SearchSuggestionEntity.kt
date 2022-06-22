@@ -10,6 +10,5 @@ data class SearchSuggestionEntity(
     @ColumnInfo(name = "search_text") val searchText: String,
     @ColumnInfo(name = "timestamp_ms") val timestampMs: Long
 ) {
-    @PrimaryKey(autoGenerate = true)
-    var id: Int = 0
+    @PrimaryKey(autoGenerate = true) var id: Int = 0
 }

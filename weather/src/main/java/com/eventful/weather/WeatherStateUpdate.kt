@@ -20,17 +20,19 @@ sealed class WeatherStateUpdate : StateUpdate<WeatherState> {
 
     sealed class Weather : WeatherStateUpdate() {
         data class Loading(val tab: WeatherTab) : Weather() {
-            override fun invoke(state: WeatherState): WeatherState = state.copy(
-                forecastNow = when (tab) {
-                    WeatherTab.NOW -> state.forecastNow.copyWithLoadingStatus
-                    WeatherTab.EVENT_TIME -> state.forecastNow
-                },
-                forecastEventTime = when (tab) {
-                    WeatherTab.NOW -> state.forecastEventTime
-                    WeatherTab.EVENT_TIME -> state.forecastEventTime.copyWithLoadingStatus
-                },
-                snackbarState = SnackbarState.Shown(R.string.loading_weather)
-            )
+            override fun invoke(state: WeatherState): WeatherState =
+                state.copy(
+                    forecastNow =
+                        when (tab) {
+                            WeatherTab.NOW -> state.forecastNow.copyWithLoadingStatus
+                            WeatherTab.EVENT_TIME -> state.forecastNow
+                        },
+                    forecastEventTime =
+                        when (tab) {
+                            WeatherTab.NOW -> state.forecastEventTime
+                            WeatherTab.EVENT_TIME -> state.forecastEventTime.copyWithLoadingStatus
+                        },
+                    snackbarState = SnackbarState.Shown(R.string.loading_weather))
         }
 
         data class Loaded(
@@ -39,38 +41,57 @@ sealed class WeatherStateUpdate : StateUpdate<WeatherState> {
             val newEvent: Boolean,
             val retry: () -> Unit
         ) : Weather() {
-            override fun invoke(state: WeatherState): WeatherState = when (resource) {
-                is Resource.Success -> when (tab) {
-                    WeatherTab.NOW -> state.copy(
-                        forecastNow = state.forecastNow.copyWithNewValue(resource.data),
-                        forecastEventTime = if (newEvent) Data<Forecast?>(null) else state.forecastEventTime,
-                        snackbarState = SnackbarState.Hidden
-                    )
-                    WeatherTab.EVENT_TIME -> state.copy(
-                        forecastNow = if (newEvent) Data<Forecast?>(null) else state.forecastNow,
-                        forecastEventTime = state.forecastEventTime.copyWithNewValue(resource.data),
-                        snackbarState = SnackbarState.Hidden
-                    )
+            override fun invoke(state: WeatherState): WeatherState =
+                when (resource) {
+                    is Resource.Success ->
+                        when (tab) {
+                            WeatherTab.NOW ->
+                                state.copy(
+                                    forecastNow = state.forecastNow.copyWithNewValue(resource.data),
+                                    forecastEventTime =
+                                        if (newEvent) Data<Forecast?>(null)
+                                        else state.forecastEventTime,
+                                    snackbarState = SnackbarState.Hidden)
+                            WeatherTab.EVENT_TIME ->
+                                state.copy(
+                                    forecastNow =
+                                        if (newEvent) Data<Forecast?>(null) else state.forecastNow,
+                                    forecastEventTime =
+                                        state.forecastEventTime.copyWithNewValue(resource.data),
+                                    snackbarState = SnackbarState.Hidden)
+                        }
+                    is Resource.Error<Forecast> ->
+                        when (tab) {
+                            WeatherTab.NOW ->
+                                state.copy(
+                                    forecastNow =
+                                        state.forecastNow.copyWithFailureStatus(resource.error),
+                                    forecastEventTime =
+                                        if (newEvent) Data<Forecast?>(null)
+                                        else state.forecastEventTime,
+                                    snackbarState =
+                                        SnackbarState.Shown(
+                                            R.string.unable_to_load_weather,
+                                            action =
+                                                SnackbarAction(
+                                                    R.string.retry,
+                                                    View.OnClickListener { retry() })))
+                            WeatherTab.EVENT_TIME ->
+                                state.copy(
+                                    forecastNow =
+                                        if (newEvent) Data<Forecast?>(null) else state.forecastNow,
+                                    forecastEventTime =
+                                        state.forecastEventTime.copyWithFailureStatus(
+                                            resource.error),
+                                    snackbarState =
+                                        SnackbarState.Shown(
+                                            R.string.unable_to_load_weather,
+                                            action =
+                                                SnackbarAction(
+                                                    R.string.retry,
+                                                    View.OnClickListener { retry() })))
+                        }
                 }
-                is Resource.Error<Forecast> -> when (tab) {
-                    WeatherTab.NOW -> state.copy(
-                        forecastNow = state.forecastNow.copyWithFailureStatus(resource.error),
-                        forecastEventTime = if (newEvent) Data<Forecast?>(null) else state.forecastEventTime,
-                        snackbarState = SnackbarState.Shown(
-                            R.string.unable_to_load_weather,
-                            action = SnackbarAction(R.string.retry, View.OnClickListener { retry() })
-                        )
-                    )
-                    WeatherTab.EVENT_TIME -> state.copy(
-                        forecastNow = if (newEvent) Data<Forecast?>(null) else state.forecastNow,
-                        forecastEventTime = state.forecastEventTime.copyWithFailureStatus(resource.error),
-                        snackbarState = SnackbarState.Shown(
-                            R.string.unable_to_load_weather,
-                            action = SnackbarAction(R.string.retry, View.OnClickListener { retry() })
-                        )
-                    )
-                }
-            }
         }
     }
 }

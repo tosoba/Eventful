@@ -7,14 +7,16 @@ val List<Image>.imageUrl: String
     get() = find { it.width == 1136 }?.url ?: firstOrNull()?.url ?: ""
 
 val List<Classification>.kind: String?
-    get() = firstOrNull()
-        ?.run {
+    get() =
+        firstOrNull()?.run {
             if (segment == null) null
-            else "${segment.name} ${genre?.name ?: ""}${subGenre?.name?.let { "| $it" } ?: ""}".trim()
+            else
+                "${segment.name} ${genre?.name ?: ""}${subGenre?.name?.let { "| $it" } ?: ""}".trim()
         }
 
 val List<Classification>.kinds: List<String>
-    get() = map { listOf(it.genre?.name, it.segment?.name, it.subGenre?.name) }
-        .flatten()
-        .filterNotNull()
-        .distinctBy(String::toLowerCase)
+    get() =
+        map { listOf(it.genre?.name, it.segment?.name, it.subGenre?.name) }
+            .flatten()
+            .filterNotNull()
+            .distinctBy(String::toLowerCase)

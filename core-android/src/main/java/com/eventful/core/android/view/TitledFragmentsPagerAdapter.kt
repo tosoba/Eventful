@@ -12,12 +12,13 @@ class TitledFragmentsPagerAdapter(
     override fun getCount(): Int = titledFragments.size
     override fun getPageTitle(position: Int): CharSequence? = titledFragments[position].first
 
-    inline fun <reified F> containsFragmentOfType(): Boolean = titledFragments
-        .any { it.second is F }
+    inline fun <reified F> containsFragmentOfType(): Boolean =
+        titledFragments.any { it.second is F }
 }
 
 inline fun Fragment.titledFragmentsPagerAdapter(
     crossinline titledFragments: () -> Array<out Pair<String, Fragment>>
-): Lazy<TitledFragmentsPagerAdapter> = lazy(LazyThreadSafetyMode.NONE) {
-    TitledFragmentsPagerAdapter(childFragmentManager, titledFragments())
-}
+): Lazy<TitledFragmentsPagerAdapter> =
+    lazy(LazyThreadSafetyMode.NONE) {
+        TitledFragmentsPagerAdapter(childFragmentManager, titledFragments())
+    }

@@ -28,6 +28,8 @@ fun Bundle.putAny(key: String, value: Any) {
         is Binder -> BundleCompat.putBinder(this, key, value)
         is Parcelable -> putParcelable(key, value)
         is Serializable -> putSerializable(key, value)
-        else -> throw IllegalStateException("Type ${value.javaClass.canonicalName} for key: $key is not supported")
+        else ->
+            throw IllegalStateException(
+                "Type ${value.javaClass.canonicalName} for key: $key is not supported")
     }
 }

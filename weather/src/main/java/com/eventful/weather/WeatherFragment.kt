@@ -38,53 +38,52 @@ class WeatherFragment :
 
     private var event: Event by FragmentArgument(WeatherArgs.EVENT.name)
     private var bottomNavItemsToRemove: IntArray by FragmentArgument()
-    override val args: Bundle get() = bundleOf(WeatherArgs.EVENT.name to event)
+    override val args: Bundle
+        get() = bundleOf(WeatherArgs.EVENT.name to event)
 
     private val binding: FragmentWeatherBinding by viewBinding(FragmentWeatherBinding::bind)
 
     private lateinit var snackbarStateChannel: SendChannel<SnackbarState>
 
-    @Inject
-    internal lateinit var epoxyThreads: EpoxyThreads
+    @Inject internal lateinit var epoxyThreads: EpoxyThreads
 
-    private val epoxyController by lazy(LazyThreadSafetyMode.NONE) {
-        typedController<WeatherControllerData>(epoxyThreads) { data ->
-            when (data) {
-                is WeatherControllerData.LoadingForecast -> loadingIndicator {
-                    id("loading-indicator-weather")
-                }
-                is WeatherControllerData.ForecastLoaded -> {
-                    val currently = data.forecast.currently
-                    WeatherEpoxyModelGroup(
-                        TemperatureInLocationBindingModel_()
-                            .id("temperature-in-location")
-                            .temperature(currently.temperature)
-                            .locationInfo(
-                                if (data.tab == WeatherTab.NOW) "Now in ${data.city}"
-                                else "In ${data.city} at event start"
-                            ),
-                        WeatherSymbolInfoBindingModel_()
-                            .id("weather-forecast-info")
-                            .symbolResource(WeatherStatus.fromIcon(currently.icon).resource)
-                            .title("Forecast"),
-                        WeatherSymbolInfoBindingModel_()
-                            .id("weather-wind-info")
-                            .symbolResource(R.drawable.wind_info)
-                            .title("Wind")
-                            .info("${String.format("%.1f", currently.windSpeed)} km/h"),
-                        WeatherSymbolInfoBindingModel_()
-                            .id("weather-humidity-info")
-                            .symbolResource(R.drawable.humidity)
-                            .title("Humidity")
-                            .info("${String.format("%.1f", currently.humidity * 100)}%"),
-                        WeatherDescriptionBindingModel_()
-                            .id("weather-description")
-                            .description(currently.summary)
-                    ).addTo(this)
+    private val epoxyController by
+        lazy(LazyThreadSafetyMode.NONE) {
+            typedController<WeatherControllerData>(epoxyThreads) { data ->
+                when (data) {
+                    is WeatherControllerData.LoadingForecast ->
+                        loadingIndicator { id("loading-indicator-weather") }
+                    is WeatherControllerData.ForecastLoaded -> {
+                        val currently = data.forecast.currently
+                        WeatherEpoxyModelGroup(
+                                TemperatureInLocationBindingModel_()
+                                    .id("temperature-in-location")
+                                    .temperature(currently.temperature)
+                                    .locationInfo(
+                                        if (data.tab == WeatherTab.NOW) "Now in ${data.city}"
+                                        else "In ${data.city} at event start"),
+                                WeatherSymbolInfoBindingModel_()
+                                    .id("weather-forecast-info")
+                                    .symbolResource(WeatherStatus.fromIcon(currently.icon).resource)
+                                    .title("Forecast"),
+                                WeatherSymbolInfoBindingModel_()
+                                    .id("weather-wind-info")
+                                    .symbolResource(R.drawable.wind_info)
+                                    .title("Wind")
+                                    .info("${String.format("%.1f", currently.windSpeed)} km/h"),
+                                WeatherSymbolInfoBindingModel_()
+                                    .id("weather-humidity-info")
+                                    .symbolResource(R.drawable.humidity)
+                                    .title("Humidity")
+                                    .info("${String.format("%.1f", currently.humidity * 100)}%"),
+                                WeatherDescriptionBindingModel_()
+                                    .id("weather-description")
+                                    .description(currently.summary))
+                            .addTo(this)
+                    }
                 }
             }
         }
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setupToolbarWithDrawerToggle(binding.weatherToolbar)
@@ -93,7 +92,8 @@ class WeatherFragment :
             tabSelectionEvents()
                 .filterIsInstance<TabLayoutSelectionEvent.TabSelected>()
                 .onEach {
-                    viewModel.intent(WeatherIntent.TabSelected(WeatherTab.values()[it.tab.position]))
+                    viewModel.intent(
+                        WeatherIntent.TabSelected(WeatherTab.values()[it.tab.position]))
                 }
                 .launchIn(lifecycleScope)
         }
@@ -126,21 +126,20 @@ class WeatherFragment :
 
         binding.weatherBottomNavView.selectedItemId = R.id.bottom_nav_weather
 
-        viewUpdatesJob = viewModel.viewUpdates
-            .onEachLogging("VIEW_UPDATE", getString(R.string.weather)) { viewUpdate ->
-                when (viewUpdate) {
-                    is WeatherViewUpdate.LoadingForecast -> epoxyController.setData(
-                        WeatherControllerData.LoadingForecast
-                    )
-                    is WeatherViewUpdate.ForecastLoaded -> epoxyController.setData(
-                        WeatherControllerData.ForecastLoaded(
-                            viewUpdate.forecast, viewUpdate.city, viewUpdate.tab
-                        )
-                    )
-                    is WeatherViewUpdate.Snackbar -> transitionToSnackbarState(viewUpdate.state)
+        viewUpdatesJob =
+            viewModel.viewUpdates
+                .onEachLogging("VIEW_UPDATE", getString(R.string.weather)) { viewUpdate ->
+                    when (viewUpdate) {
+                        is WeatherViewUpdate.LoadingForecast ->
+                            epoxyController.setData(WeatherControllerData.LoadingForecast)
+                        is WeatherViewUpdate.ForecastLoaded ->
+                            epoxyController.setData(
+                                WeatherControllerData.ForecastLoaded(
+                                    viewUpdate.forecast, viewUpdate.city, viewUpdate.tab))
+                        is WeatherViewUpdate.Snackbar -> transitionToSnackbarState(viewUpdate.state)
+                    }
                 }
-            }
-            .launchIn(lifecycleScope)
+                .launchIn(lifecycleScope)
     }
 
     override fun onPause() {
@@ -149,11 +148,10 @@ class WeatherFragment :
     }
 
     companion object {
-        fun new(
-            event: Event, bottomNavItemsToRemove: IntArray
-        ): WeatherFragment = WeatherFragment().also {
-            it.event = event
-            it.bottomNavItemsToRemove = bottomNavItemsToRemove
-        }
+        fun new(event: Event, bottomNavItemsToRemove: IntArray): WeatherFragment =
+            WeatherFragment().also {
+                it.event = event
+                it.bottomNavItemsToRemove = bottomNavItemsToRemove
+            }
     }
 }

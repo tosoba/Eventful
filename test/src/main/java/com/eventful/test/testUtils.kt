@@ -8,28 +8,28 @@ import io.mockk.mockkStatic
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineScope
 
-inline fun <reified T : Any> relaxedMockedList(size: Int): List<T> = (1..size)
-    .map { mockk<T>(relaxed = true) }
+inline fun <reified T : Any> relaxedMockedList(size: Int): List<T> =
+    (1..size).map { mockk<T>(relaxed = true) }
 
-inline fun <reified T : Any> mockedList(size: Int, builder: (Int) -> T): List<T> = (1..size)
-    .map(builder)
+inline fun <reified T : Any> mockedList(size: Int, builder: (Int) -> T): List<T> =
+    (1..size).map(builder)
 
-fun event(index: Int = 0): Event = Event(
-    index.toString(),
-    "name$index",
-    "url$index",
-    "imageUrl$index",
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    emptyList(),
-    null,
-    null,
-    null
-)
+fun event(index: Int = 0): Event =
+    Event(
+        index.toString(),
+        "name$index",
+        "url$index",
+        "imageUrl$index",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        emptyList(),
+        null,
+        null,
+        null)
 
 @ExperimentalCoroutinesApi
 inline fun <T> TestCoroutineScope.onPausedDispatcher(block: () -> T): T {

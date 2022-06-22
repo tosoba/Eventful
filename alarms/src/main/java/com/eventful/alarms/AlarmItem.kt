@@ -20,8 +20,9 @@ class SelectableAlarmItem(
     override fun bind(holder: ModelGroupHolder) {
         super.bind(holder)
         with(holder.rootView) {
-            findViewById<AppCompatImageButton>(R.id.alarm_item_options_btn)
-                .setOnClickListener { optionsButtonClicked(this) }
+            findViewById<AppCompatImageButton>(R.id.alarm_item_options_btn).setOnClickListener {
+                optionsButtonClicked(this)
+            }
             setOnClickListener(clicked)
             setOnLongClickListener(longClicked)
         }
@@ -32,14 +33,11 @@ fun Selectable<Alarm>.listItem(
     clicked: View.OnClickListener,
     longClicked: View.OnLongClickListener,
     optionsButtonClicked: (View) -> Unit
-) = SelectableAlarmItem(
-    clicked,
-    longClicked,
-    optionsButtonClicked,
-    SelectableBackgroundBindingModel_().id("${item.id}ab")
-        .selected(selected),
-    AlarmInfoBindingModel_().id("${item.id}i")
-        .alarm(item),
-    AlarmDateTimeBindingModel_().id("${item.id}dt")
-        .alarm(item)
-)
+) =
+    SelectableAlarmItem(
+        clicked,
+        longClicked,
+        optionsButtonClicked,
+        SelectableBackgroundBindingModel_().id("${item.id}ab").selected(selected),
+        AlarmInfoBindingModel_().id("${item.id}i").alarm(item),
+        AlarmDateTimeBindingModel_().id("${item.id}dt").alarm(item))

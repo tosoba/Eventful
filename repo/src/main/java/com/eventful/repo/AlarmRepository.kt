@@ -13,25 +13,25 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AlarmRepository @Inject constructor(
-    private val alarmDao: AlarmDao,
-    private val eventsDao: EventDao
-) : IAlarmRepository {
+class AlarmRepository
+@Inject
+constructor(private val alarmDao: AlarmDao, private val eventsDao: EventDao) : IAlarmRepository {
 
-    override val alarms: Flow<List<IAlarm>> get() = eventsDao.getAlarms().asAlarmList
+    override val alarms: Flow<List<IAlarm>>
+        get() = eventsDao.getAlarms().asAlarmList
 
-    override fun getAlarmsForEvent(eventId: String): Flow<List<IAlarm>> = eventsDao
-        .getEventAlarms(eventId)
-        .asAlarmList
+    override fun getAlarmsForEvent(eventId: String): Flow<List<IAlarm>> =
+        eventsDao.getEventAlarms(eventId).asAlarmList
 
-    override fun getUpcomingAlarms(limit: Int): Flow<List<IAlarm>> = eventsDao
-        .getUpcomingAlarmsFlow(limit)
-        .asAlarmList
-        .map { alarms -> alarms.sortedBy { it.timestamp }.take(limit) }
+    override fun getUpcomingAlarms(limit: Int): Flow<List<IAlarm>> =
+        eventsDao.getUpcomingAlarmsFlow(limit).asAlarmList.map { alarms ->
+            alarms.sortedBy { it.timestamp }.take(limit)
+        }
 
     private val Flow<List<EventAlarmsEntity>>.asAlarmList: Flow<List<Alarm>>
         get() = map { eventAlarms ->
-            eventAlarms.map { (event, alarms) -> alarms.map { Alarm(it.id, event, it.timestamp) } }
+            eventAlarms
+                .map { (event, alarms) -> alarms.map { Alarm(it.id, event, it.timestamp) } }
                 .flatten()
         }
 
@@ -39,9 +39,8 @@ class AlarmRepository @Inject constructor(
         alarmDao.deleteAlarms(alarmIds)
     }
 
-    override suspend fun insertAlarm(eventId: String, timestamp: Long): Int = alarmDao
-        .insertAlarm(AlarmEntity(eventId, timestamp))
-        .toInt()
+    override suspend fun insertAlarm(eventId: String, timestamp: Long): Int =
+        alarmDao.insertAlarm(AlarmEntity(eventId, timestamp)).toInt()
 
     override suspend fun updateAlarm(id: Int, timestamp: Long) {
         alarmDao.updateAlarm(id, timestamp)

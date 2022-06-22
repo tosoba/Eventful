@@ -19,7 +19,13 @@ import kotlinx.coroutines.launch
 @FlowPreview
 @ExperimentalCoroutinesApi
 class NearbyFragment :
-    SelectableEventListFragment<FragmentNearbyBinding, HoldsList<Selectable<Event>>, NearbyIntent, NearbyState, NearbyViewModel, NearbyViewUpdate>(
+    SelectableEventListFragment<
+        FragmentNearbyBinding,
+        HoldsList<Selectable<Event>>,
+        NearbyIntent,
+        NearbyState,
+        NearbyViewModel,
+        NearbyViewUpdate>(
         layoutRes = R.layout.fragment_nearby,
         viewBindingFactory = FragmentNearbyBinding::bind,
         epoxyRecyclerView = FragmentNearbyBinding::nearbyEventsRecyclerView,
@@ -33,8 +39,7 @@ class NearbyFragment :
         selectionConfirmedIntent = NearbyIntent.AddToFavouritesClicked,
         clearSelectionIntent = NearbyIntent.ClearSelectionClicked,
         eventSelectedIntent = { NearbyIntent.EventLongClicked(it) },
-        viewUpdates = NearbyViewModel::viewUpdates
-    ) {
+        viewUpdates = NearbyViewModel::viewUpdates) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -49,12 +54,10 @@ class NearbyFragment :
                 epoxyController.setData(viewUpdate.events)
                 binding.nearbySwipeRefreshLayout.isEnabled = viewUpdate.events.data.isNotEmpty()
             }
-            is NearbyViewUpdate.Snackbar -> snackbarController?.transitionToSnackbarState(
-                viewUpdate.state
-            )
-            is NearbyViewUpdate.UpdateActionMode -> actionModeController.update(
-                viewUpdate.numberOfSelectedEvents
-            )
+            is NearbyViewUpdate.Snackbar ->
+                snackbarController?.transitionToSnackbarState(viewUpdate.state)
+            is NearbyViewUpdate.UpdateActionMode ->
+                actionModeController.update(viewUpdate.numberOfSelectedEvents)
             is NearbyViewUpdate.FinishActionMode -> actionModeController.finish(false)
             is NearbyViewUpdate.StopRefreshingIfInProgress -> {
                 binding.nearbySwipeRefreshLayout.isRefreshing = false

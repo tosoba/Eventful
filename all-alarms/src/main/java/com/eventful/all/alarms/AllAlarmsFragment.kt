@@ -18,6 +18,7 @@ class AllAlarmsFragment : AlarmsFragment<AlarmsMode.All, AllAlarmsViewModel>() {
     }
 
     companion object {
-        val new: AllAlarmsFragment get() = AllAlarmsFragment().also { it.mode = AlarmsMode.All }
+        val new: AllAlarmsFragment
+            get() = AllAlarmsFragment().also { it.mode = AlarmsMode.All }
     }
 }

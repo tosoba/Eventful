@@ -20,29 +20,30 @@ sealed class SearchViewUpdate {
 @ExperimentalCoroutinesApi
 @FlowPreview
 val SearchViewModel.viewUpdates: Flow<SearchViewUpdate>
-    get() = merge(
-        states.map { it.items }
-            .distinctUntilChanged()
-            .map { SearchViewUpdate.Events(it) },
-        states.map { it.snackbarState }
-            .distinctUntilChanged()
-            .map { SearchViewUpdate.Snackbar(it) },
-        states.map { state -> state.items.data.count { it.selected } }
-            .distinctUntilChanged()
-            .map { SearchViewUpdate.UpdateActionMode(it) },
-        states.map { it.searchSuggestions to it.searchText }
-            .filter { (suggestions, _) -> suggestions.isNotEmpty() }
-            .distinctUntilChanged()
-            .map { (suggestions, searchText) ->
-                SearchViewUpdate.SwapCursor(
-                    MatrixCursor(SearchSuggestionsAdapter.COLUMN_NAMES)
-                        .apply {
-                            suggestions.filter { searchText != it.searchText }
+    get() =
+        merge(
+            states.map { it.items }.distinctUntilChanged().map { SearchViewUpdate.Events(it) },
+            states
+                .map { it.snackbarState }
+                .distinctUntilChanged()
+                .map { SearchViewUpdate.Snackbar(it) },
+            states
+                .map { state -> state.items.data.count { it.selected } }
+                .distinctUntilChanged()
+                .map { SearchViewUpdate.UpdateActionMode(it) },
+            states
+                .map { it.searchSuggestions to it.searchText }
+                .filter { (suggestions, _) -> suggestions.isNotEmpty() }
+                .distinctUntilChanged()
+                .map { (suggestions, searchText) ->
+                    SearchViewUpdate.SwapCursor(
+                        MatrixCursor(SearchSuggestionsAdapter.COLUMN_NAMES).apply {
+                            suggestions
+                                .filter { searchText != it.searchText }
                                 .distinctBy { it.searchText }
                                 .forEach { addRow(arrayOf(it.id, it.searchText, it.timestampMs)) }
-                        }
-                )
-            },
-        signals.filterIsInstance<SearchSignal.FavouritesSaved>()
-            .map { SearchViewUpdate.FinishActionMode }
-    )
+                        })
+                },
+            signals.filterIsInstance<SearchSignal.FavouritesSaved>().map {
+                SearchViewUpdate.FinishActionMode
+            })

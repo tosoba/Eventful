@@ -22,71 +22,77 @@ import org.junit.jupiter.api.Test
 @ExperimentalCoroutinesApi
 internal class OtherNearbyFlowProcessorTests : BaseNearbyFlowProcessorTests() {
     @Test
-    @DisplayName("On AddToFavouritesClicked  - should saveEvents, signal events were saved and emit AddedToFavourites")
-    fun addToFavouritesTest() = testScope.runBlockingTest {
-        val saveEvents = mockk<SaveEvents>(relaxed = true)
-        val selectableEvents = mockedList(20) { event(it) }
-            .mapIndexed { index, event -> Selectable(event, index % 2 == 0) }
-        val currentState = mockk<() -> NearbyState> {
-            every { this@mockk() } returns NearbyState(
-                items = PagedDataList(selectableEvents)
-            )
+    @DisplayName(
+        "On AddToFavouritesClicked  - should saveEvents, signal events were saved and emit AddedToFavourites")
+    fun addToFavouritesTest() =
+        testScope.runBlockingTest {
+            val saveEvents = mockk<SaveEvents>(relaxed = true)
+            val selectableEvents =
+                mockedList(20) { event(it) }
+                    .mapIndexed { index, event -> Selectable(event, index % 2 == 0) }
+            val currentState =
+                mockk<() -> NearbyState> {
+                    every { this@mockk() } returns
+                        NearbyState(items = PagedDataList(selectableEvents))
+                }
+            val signal = mockk<Signal>(relaxed = true)
+
+            val updates =
+                flowProcessor(saveEvents = saveEvents)
+                    .updates(
+                        intents = flowOf(NearbyIntent.AddToFavouritesClicked),
+                        currentState = currentState,
+                        signal = signal::invoke)
+                    .toList()
+
+            val selectedEvents = selectableEvents.filter { it.selected }.map { it.item }
+            coVerify(exactly = 1) { saveEvents(selectedEvents) }
+            coVerify(exactly = 1) { signal(NearbySignal.FavouritesSaved) }
+            assert(updates.size == 1)
+            val update = updates.first()
+            assert(
+                update is NearbyStateUpdate.Events.AddedToFavourites &&
+                    update.msgRes ==
+                        SnackbarState.Shown.MsgRes(
+                            addedToFavouritesMsgRes(eventsCount = selectedEvents.size),
+                            args = arrayOf(selectedEvents.size)))
         }
-        val signal = mockk<Signal>(relaxed = true)
-
-        val updates = flowProcessor(saveEvents = saveEvents)
-            .updates(
-                intents = flowOf(NearbyIntent.AddToFavouritesClicked),
-                currentState = currentState,
-                signal = signal::invoke
-            )
-            .toList()
-
-        val selectedEvents = selectableEvents.filter { it.selected }.map { it.item }
-        coVerify(exactly = 1) { saveEvents(selectedEvents) }
-        coVerify(exactly = 1) { signal(NearbySignal.FavouritesSaved) }
-        assert(updates.size == 1)
-        val update = updates.first()
-        assert(
-            update is NearbyStateUpdate.Events.AddedToFavourites
-                    && update.msgRes == SnackbarState.Shown.MsgRes(
-                addedToFavouritesMsgRes(eventsCount = selectedEvents.size),
-                args = arrayOf(selectedEvents.size)
-            )
-        )
-    }
 
     @Test
     @DisplayName("On EventLongClicked  - should emit Update.ToggleEventSelection")
-    fun eventLongClickedTest() = testScope.runBlockingTest {
-        val event = event()
-        val updates = flowProcessor()
-            .updates(intents = flowOf(NearbyIntent.EventLongClicked(event)))
-            .toList()
+    fun eventLongClickedTest() =
+        testScope.runBlockingTest {
+            val event = event()
+            val updates =
+                flowProcessor()
+                    .updates(intents = flowOf(NearbyIntent.EventLongClicked(event)))
+                    .toList()
 
-        assert(updates.size == 1)
-        assert(updates.first() == NearbyStateUpdate.ToggleEventSelection(event))
-    }
+            assert(updates.size == 1)
+            assert(updates.first() == NearbyStateUpdate.ToggleEventSelection(event))
+        }
 
     @Test
     @DisplayName("On ClearSelectionClicked - should emit Update.ClearSelection")
-    fun clearSelectionTest() = testScope.runBlockingTest {
-        val updates = flowProcessor()
-            .updates(intents = flowOf(NearbyIntent.ClearSelectionClicked))
-            .toList()
+    fun clearSelectionTest() =
+        testScope.runBlockingTest {
+            val updates =
+                flowProcessor()
+                    .updates(intents = flowOf(NearbyIntent.ClearSelectionClicked))
+                    .toList()
 
-        assert(updates.size == 1)
-        assert(updates.first() == NearbyStateUpdate.ClearSelection)
-    }
+            assert(updates.size == 1)
+            assert(updates.first() == NearbyStateUpdate.ClearSelection)
+        }
 
     @Test
     @DisplayName("On HideSnackbar - should emit Update.HideSnackbar")
-    fun hideSnackbarTest() = testScope.runBlockingTest {
-        val updates = flowProcessor()
-            .updates(intents = flowOf(NearbyIntent.HideSnackbar))
-            .toList()
+    fun hideSnackbarTest() =
+        testScope.runBlockingTest {
+            val updates =
+                flowProcessor().updates(intents = flowOf(NearbyIntent.HideSnackbar)).toList()
 
-        assert(updates.size == 1)
-        assert(updates.first() == NearbyStateUpdate.HideSnackbar)
-    }
+            assert(updates.size == 1)
+            assert(updates.first() == NearbyStateUpdate.HideSnackbar)
+        }
 }

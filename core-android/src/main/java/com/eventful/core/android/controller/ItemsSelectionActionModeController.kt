@@ -20,55 +20,59 @@ fun Fragment.itemsSelectionActionModeController(
 ): ItemsSelectionActionModeController {
     var destroyOnFinish = true
     var actionMode: ActionMode? = null
-    val callback = object : ActionMode.Callback {
-        override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-            itemClickedCallbacks[item.itemId]?.invoke()
-            return false
-        }
-
-        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-            mode.menuInflater.inflate(menuId, menu)
-            return true
-        }
-
-        override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
-            itemClickedCallbacks.keys.forEach {
-                menu.findItem(it)?.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+    val callback =
+        object : ActionMode.Callback {
+            override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+                itemClickedCallbacks[item.itemId]?.invoke()
+                return false
             }
-            return true
-        }
 
-        override fun onDestroyActionMode(mode: ActionMode?) {
-            if (destroyOnFinish) onDestroyActionMode()
-            actionMode = null
-            destroyOnFinish = true
-        }
-    }
-    val controller = object : ItemsSelectionActionModeController {
-        override fun update(numberOfSelectedItems: Int) {
-            if (actionMode == null && numberOfSelectedItems > 0) {
-                actionMode = activity?.startActionMode(callback)?.apply {
-                    title = "$numberOfSelectedItems selected"
+            override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+                mode.menuInflater.inflate(menuId, menu)
+                return true
+            }
+
+            override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
+                itemClickedCallbacks.keys.forEach {
+                    menu.findItem(it)?.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
                 }
-            } else if (actionMode != null) {
-                if (numberOfSelectedItems > 0)
-                    actionMode?.title = "$numberOfSelectedItems selected"
-                else finish(false)
+                return true
+            }
+
+            override fun onDestroyActionMode(mode: ActionMode?) {
+                if (destroyOnFinish) onDestroyActionMode()
+                actionMode = null
+                destroyOnFinish = true
+            }
+        }
+    val controller =
+        object : ItemsSelectionActionModeController {
+            override fun update(numberOfSelectedItems: Int) {
+                if (actionMode == null && numberOfSelectedItems > 0) {
+                    actionMode =
+                        activity?.startActionMode(callback)?.apply {
+                            title = "$numberOfSelectedItems selected"
+                        }
+                } else if (actionMode != null) {
+                    if (numberOfSelectedItems > 0)
+                        actionMode?.title = "$numberOfSelectedItems selected"
+                    else finish(false)
+                }
+            }
+
+            override fun finish(destroy: Boolean) {
+                destroyOnFinish = destroy
+                actionMode?.finish()
+                actionMode = null
             }
         }
 
-        override fun finish(destroy: Boolean) {
-            destroyOnFinish = destroy
-            actionMode?.finish()
-            actionMode = null
+    lifecycle +=
+        object : DefaultLifecycleObserver {
+            override fun onPause(owner: LifecycleOwner) {
+                controller.finish(false)
+            }
         }
-    }
-
-    lifecycle += object : DefaultLifecycleObserver {
-        override fun onPause(owner: LifecycleOwner) {
-            controller.finish(false)
-        }
-    }
 
     return controller
 }

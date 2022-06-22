@@ -28,98 +28,103 @@ internal class OtherFavouritesFlowProcessorTests : BaseFavouritesFlowProcessorTe
     @Test
     @DisplayName(
         """On RemoveFromFavouritesClicked 
-|- should delete selected events, signal FavouritesRemoved and show removedFromFavouritesMessage"""
-    )
-    fun removeFromFavouritesTest() = testScope.runBlockingTest {
-        val deleteEvents = mockk<DeleteEvents>(relaxed = true)
-        val selectableEvents = mockedList(20) { event(it) }
-            .mapIndexed { index, event -> Selectable(event, index % 2 == 0) }
-        val currentState = mockk<() -> FavouritesState> {
-            every { this@mockk() } returns FavouritesState(
-                items = DataList(selectableEvents)
-            )
+|- should delete selected events, signal FavouritesRemoved and show removedFromFavouritesMessage""")
+    fun removeFromFavouritesTest() =
+        testScope.runBlockingTest {
+            val deleteEvents = mockk<DeleteEvents>(relaxed = true)
+            val selectableEvents =
+                mockedList(20) { event(it) }
+                    .mapIndexed { index, event -> Selectable(event, index % 2 == 0) }
+            val currentState =
+                mockk<() -> FavouritesState> {
+                    every { this@mockk() } returns
+                        FavouritesState(items = DataList(selectableEvents))
+                }
+
+            abstract class Signal {
+                abstract suspend operator fun invoke(signal: FavouritesSignal)
+            }
+
+            val signal = mockk<Signal>(relaxed = true)
+
+            val updates =
+                flowProcessor(deleteEvents = deleteEvents)
+                    .updates(
+                        intents = flowOf(FavouritesIntent.RemoveFromFavouritesClicked),
+                        currentState = currentState,
+                        signal = signal::invoke)
+                    .toList()
+
+            val selectedEvents = selectableEvents.filter { it.selected }.map { it.item }
+            verify(exactly = 1) { currentState() }
+            coVerify(exactly = 1) { deleteEvents(selectedEvents) }
+            coVerify(exactly = 1) { signal(FavouritesSignal.FavouritesRemoved) }
+            assert(updates.size == 1)
+            val update = updates.first()
+            assert(
+                update is FavouritesStateUpdate.RemovedFromFavourites &&
+                    update.msgRes ==
+                        SnackbarState.Shown.MsgRes(
+                            removedFromFavouritesMsgRes(eventsCount = selectedEvents.size),
+                            args = arrayOf(selectedEvents.size)))
         }
-
-        abstract class Signal {
-            abstract suspend operator fun invoke(signal: FavouritesSignal)
-        }
-
-        val signal = mockk<Signal>(relaxed = true)
-
-        val updates = flowProcessor(deleteEvents = deleteEvents)
-            .updates(
-                intents = flowOf(FavouritesIntent.RemoveFromFavouritesClicked),
-                currentState = currentState,
-                signal = signal::invoke
-            )
-            .toList()
-
-        val selectedEvents = selectableEvents.filter { it.selected }.map { it.item }
-        verify(exactly = 1) { currentState() }
-        coVerify(exactly = 1) { deleteEvents(selectedEvents) }
-        coVerify(exactly = 1) { signal(FavouritesSignal.FavouritesRemoved) }
-        assert(updates.size == 1)
-        val update = updates.first()
-        assert(
-            update is FavouritesStateUpdate.RemovedFromFavourites
-                    && update.msgRes == SnackbarState.Shown.MsgRes(
-                removedFromFavouritesMsgRes(eventsCount = selectedEvents.size),
-                args = arrayOf(selectedEvents.size)
-            )
-        )
-    }
 
     @Test
     @DisplayName("On LoadFavourites when limit was hit - should not call getSavedEventsFlow")
-    fun loadFavouritesLimitHitTest() = testScope.runBlockingTest {
-        val getSavedEventsFlow = mockk<GetSavedEventsFlow>(relaxed = true)
-        val currentState = mockk<() -> FavouritesState> {
-            every { this@mockk() } returns FavouritesState(items = DataList(limitHit = true))
+    fun loadFavouritesLimitHitTest() =
+        testScope.runBlockingTest {
+            val getSavedEventsFlow = mockk<GetSavedEventsFlow>(relaxed = true)
+            val currentState =
+                mockk<() -> FavouritesState> {
+                    every { this@mockk() } returns
+                        FavouritesState(items = DataList(limitHit = true))
+                }
+
+            flowProcessor(getSavedEventsFlow = getSavedEventsFlow)
+                .updates(
+                    intents = flowOf(FavouritesIntent.LoadFavourites), currentState = currentState)
+                .launchIn(testScope)
+
+            verify(exactly = 1) { currentState() }
+            verify(exactly = 0) { getSavedEventsFlow(any()) }
         }
-
-        flowProcessor(getSavedEventsFlow = getSavedEventsFlow)
-            .updates(
-                intents = flowOf(FavouritesIntent.LoadFavourites),
-                currentState = currentState
-            )
-            .launchIn(testScope)
-
-        verify(exactly = 1) { currentState() }
-        verify(exactly = 0) { getSavedEventsFlow(any()) }
-    }
 
     @Test
     @DisplayName("On EventLongClicked  - should emit Update.ToggleEventSelection")
-    fun eventLongClickedTest() = testScope.runBlockingTest {
-        val event = event()
+    fun eventLongClickedTest() =
+        testScope.runBlockingTest {
+            val event = event()
 
-        val updates = flowProcessor()
-            .updates(intents = flowOf(FavouritesIntent.EventLongClicked(event)))
-            .toList()
+            val updates =
+                flowProcessor()
+                    .updates(intents = flowOf(FavouritesIntent.EventLongClicked(event)))
+                    .toList()
 
-        assert(updates.size == 1)
-        assert(updates.first() == FavouritesStateUpdate.ToggleEventSelection(event))
-    }
+            assert(updates.size == 1)
+            assert(updates.first() == FavouritesStateUpdate.ToggleEventSelection(event))
+        }
 
     @Test
     @DisplayName("On ClearSelectionClicked - should emit Update.ClearSelection")
-    fun clearSelectionTest() = testScope.runBlockingTest {
-        val updates = flowProcessor()
-            .updates(intents = flowOf(FavouritesIntent.ClearSelectionClicked))
-            .toList()
+    fun clearSelectionTest() =
+        testScope.runBlockingTest {
+            val updates =
+                flowProcessor()
+                    .updates(intents = flowOf(FavouritesIntent.ClearSelectionClicked))
+                    .toList()
 
-        assert(updates.size == 1)
-        assert(updates.first() == FavouritesStateUpdate.ClearSelection)
-    }
+            assert(updates.size == 1)
+            assert(updates.first() == FavouritesStateUpdate.ClearSelection)
+        }
 
     @Test
     @DisplayName("On HideSnackbar - should emit Update.HideSnackbar")
-    fun hideSnackbarTest() = testScope.runBlockingTest {
-        val updates = flowProcessor()
-            .updates(intents = flowOf(FavouritesIntent.HideSnackbar))
-            .toList()
+    fun hideSnackbarTest() =
+        testScope.runBlockingTest {
+            val updates =
+                flowProcessor().updates(intents = flowOf(FavouritesIntent.HideSnackbar)).toList()
 
-        assert(updates.size == 1)
-        assert(updates.first() == FavouritesStateUpdate.HideSnackbar)
-    }
+            assert(updates.size == 1)
+            assert(updates.first() == FavouritesStateUpdate.HideSnackbar)
+        }
 }

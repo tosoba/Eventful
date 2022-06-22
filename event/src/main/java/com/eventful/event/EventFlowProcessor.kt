@@ -17,11 +17,13 @@ class EventFlowProcessor @Inject constructor() :
         states: Flow<EventState>,
         intent: suspend (EventIntent) -> Unit,
         signal: suspend (Unit) -> Unit
-    ): Flow<EventStateUpdate> = merge(
-        intents.filterIsInstance<EventIntent.BackPressed>()
-            .map { EventStateUpdate.DropLastEvent },
-        intents.filterIsInstance<EventIntent.NewEvent>()
-            .filterNot { (event) -> currentState().events.lastOrNull() == event }
-            .map { (event) -> EventStateUpdate.AddEvent(event) }
-    )
+    ): Flow<EventStateUpdate> =
+        merge(
+            intents.filterIsInstance<EventIntent.BackPressed>().map {
+                EventStateUpdate.DropLastEvent
+            },
+            intents
+                .filterIsInstance<EventIntent.NewEvent>()
+                .filterNot { (event) -> currentState().events.lastOrNull() == event }
+                .map { (event) -> EventStateUpdate.AddEvent(event) })
 }

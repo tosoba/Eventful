@@ -9,10 +9,7 @@ fun <T> Flow<T>.onEachLogging(
     msgPrefix: String,
     action: (suspend (T) -> Unit)? = null
 ): Flow<T> = onEach {
-    Log.e(
-        tag,
-        "$msgPrefix:$it"
-    )
+    Log.e(tag, "$msgPrefix:$it")
     action?.invoke(it)
 }
 

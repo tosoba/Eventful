@@ -11,7 +11,9 @@ import kotlinx.coroutines.FlowPreview
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class EventAlarmsViewModel @AssistedInject constructor(
+class EventAlarmsViewModel
+@AssistedInject
+constructor(
     @EventAlarmsViewModelProcessor processor: AlarmsFlowProcessor,
     @Assisted savedStateHandle: SavedStateHandle
 ) : AlarmsViewModel(processor = processor, savedStateHandle = savedStateHandle) {

@@ -10,14 +10,13 @@ import kotlinx.coroutines.FlowPreview
 
 @FlowPreview
 @ExperimentalCoroutinesApi
-class FavouritesViewModel @AssistedInject constructor(
-    processor: FavouritesFlowProcessor,
-    @Assisted savedStateHandle: SavedStateHandle
-) : FlowViewModel<FavouritesIntent, FavouritesStateUpdate, FavouritesState, FavouritesSignal>(
-    initialState = savedStateHandle["initialState"] ?: FavouritesState(),
-    processor = processor,
-    savedStateHandle = savedStateHandle
-) {
+class FavouritesViewModel
+@AssistedInject
+constructor(processor: FavouritesFlowProcessor, @Assisted savedStateHandle: SavedStateHandle) :
+    FlowViewModel<FavouritesIntent, FavouritesStateUpdate, FavouritesState, FavouritesSignal>(
+        initialState = savedStateHandle["initialState"] ?: FavouritesState(),
+        processor = processor,
+        savedStateHandle = savedStateHandle) {
     @AssistedInject.Factory
     interface Factory : AssistedSavedStateViewModelFactory<FavouritesViewModel> {
         override fun create(savedStateHandle: SavedStateHandle): FavouritesViewModel

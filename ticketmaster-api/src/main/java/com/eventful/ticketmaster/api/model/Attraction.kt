@@ -13,7 +13,10 @@ data class Attraction(
     override val url: String?,
     val externalLinks: ExternalLinks?
 ) : IAttraction {
-    override val links: List<ILink> get() = externalLinks?.links ?: emptyList()
-    override val imageUrl: String? get() = images?.imageUrl
-    override val kind: String? get() = classifications?.kind
+    override val links: List<ILink>
+        get() = externalLinks?.links ?: emptyList()
+    override val imageUrl: String?
+        get() = images?.imageUrl
+    override val kind: String?
+        get() = classifications?.kind
 }

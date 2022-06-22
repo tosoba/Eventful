@@ -11,9 +11,10 @@ import javax.inject.Singleton
 object TicketMasterApiModule {
     @Provides
     @Singleton
-    fun ticketMasterApi(client: OkHttpClient): TicketMasterApi = retrofitWith(
-        client = client,
-        url = TicketMasterApi.BASE_URL,
-        callAdapters = listOf(CoroutinesNetworkResponseAdapterFactory())
-    ).create(TicketMasterApi::class.java)
+    fun ticketMasterApi(client: OkHttpClient): TicketMasterApi =
+        retrofitWith(
+                client = client,
+                url = TicketMasterApi.BASE_URL,
+                callAdapters = listOf(CoroutinesNetworkResponseAdapterFactory()))
+            .create(TicketMasterApi::class.java)
 }

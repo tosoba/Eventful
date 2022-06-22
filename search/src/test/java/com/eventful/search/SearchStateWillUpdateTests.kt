@@ -16,37 +16,39 @@ internal class SearchStateWillUpdateTests : BaseSearchFlowProcessorTests() {
     private fun SearchFlowProcessor.stateWillUpdate(
         update: SearchStateUpdate,
         savedStateHandle: SavedStateHandle
-    ) = stateWillUpdate(
-        currentState = SearchState(),
-        nextState = SearchState(),
-        update = update,
-        savedStateHandle = savedStateHandle
-    )
+    ) =
+        stateWillUpdate(
+            currentState = SearchState(),
+            nextState = SearchState(),
+            update = update,
+            savedStateHandle = savedStateHandle)
 
     @Test
     @DisplayName("On Events.Loading update with null searchText - should not save searchText")
-    fun nullSearchTextTest() = testScope.runBlockingTest {
-        val savedStateHandle = mockk<SavedStateHandle>(relaxed = true)
+    fun nullSearchTextTest() =
+        testScope.runBlockingTest {
+            val savedStateHandle = mockk<SavedStateHandle>(relaxed = true)
 
-        flowProcessor().stateWillUpdate(
-            update = SearchStateUpdate.Events.Loading(null),
-            savedStateHandle = savedStateHandle
-        )
+            flowProcessor()
+                .stateWillUpdate(
+                    update = SearchStateUpdate.Events.Loading(null),
+                    savedStateHandle = savedStateHandle)
 
-        verify(exactly = 0) { savedStateHandle.set<String>(SearchState.KEY_SEARCH_TEXT, any()) }
-    }
+            verify(exactly = 0) { savedStateHandle.set<String>(SearchState.KEY_SEARCH_TEXT, any()) }
+        }
 
     @Test
     @DisplayName("On Events.Loading update with non null searchText - should save searchText")
-    fun allConditionsMetTest() = testScope.runBlockingTest {
-        val searchText = "test"
-        val savedStateHandle = mockk<SavedStateHandle>(relaxed = true)
+    fun allConditionsMetTest() =
+        testScope.runBlockingTest {
+            val searchText = "test"
+            val savedStateHandle = mockk<SavedStateHandle>(relaxed = true)
 
-        flowProcessor().stateWillUpdate(
-            update = SearchStateUpdate.Events.Loading(searchText),
-            savedStateHandle = savedStateHandle
-        )
+            flowProcessor()
+                .stateWillUpdate(
+                    update = SearchStateUpdate.Events.Loading(searchText),
+                    savedStateHandle = savedStateHandle)
 
-        verify(exactly = 1) { savedStateHandle[SearchState.KEY_SEARCH_TEXT] = searchText }
-    }
+            verify(exactly = 1) { savedStateHandle[SearchState.KEY_SEARCH_TEXT] = searchText }
+        }
 }

@@ -10,14 +10,13 @@ import kotlinx.coroutines.FlowPreview
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class WeatherViewModel @AssistedInject constructor(
-    processor: WeatherFlowProcessor,
-    @Assisted savedStateHandle: SavedStateHandle
-) : FlowViewModel<WeatherIntent, WeatherStateUpdate, WeatherState, Unit>(
-    initialState = WeatherState(event = savedStateHandle[WeatherArgs.EVENT.name]!!),
-    processor = processor,
-    savedStateHandle = savedStateHandle
-) {
+class WeatherViewModel
+@AssistedInject
+constructor(processor: WeatherFlowProcessor, @Assisted savedStateHandle: SavedStateHandle) :
+    FlowViewModel<WeatherIntent, WeatherStateUpdate, WeatherState, Unit>(
+        initialState = WeatherState(event = savedStateHandle[WeatherArgs.EVENT.name]!!),
+        processor = processor,
+        savedStateHandle = savedStateHandle) {
     @AssistedInject.Factory
     interface Factory : AssistedSavedStateViewModelFactory<WeatherViewModel> {
         override fun create(savedStateHandle: SavedStateHandle): WeatherViewModel

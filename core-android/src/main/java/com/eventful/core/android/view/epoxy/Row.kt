@@ -6,19 +6,15 @@ import com.airbnb.epoxy.EpoxyModelGroup
 import com.airbnb.epoxy.ModelGroupHolder
 import com.eventful.core.android.R
 
-class Row(
-    models: Collection<EpoxyModel<*>>,
-    private val clicked: View.OnClickListener? = null
-) : EpoxyModelGroup(R.layout.row, models) {
+class Row(models: Collection<EpoxyModel<*>>, private val clicked: View.OnClickListener? = null) :
+    EpoxyModelGroup(R.layout.row, models) {
 
     constructor(
         clicked: View.OnClickListener? = null,
         vararg models: EpoxyModel<*>
     ) : this(models.toList(), clicked)
 
-    constructor(
-        vararg models: EpoxyModel<*>
-    ) : this(models.toList(), null)
+    constructor(vararg models: EpoxyModel<*>) : this(models.toList(), null)
 
     override fun bind(holder: ModelGroupHolder) {
         super.bind(holder)

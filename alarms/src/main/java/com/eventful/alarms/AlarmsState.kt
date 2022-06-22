@@ -19,10 +19,11 @@ data class AlarmsState(
     val snackbarState: SnackbarState = SnackbarState.Hidden
 ) : SelectableItemsSnackbarState<AlarmsState, Alarm> {
 
-    constructor(savedStateHandle: SavedStateHandle) : this(
+    constructor(
+        savedStateHandle: SavedStateHandle
+    ) : this(
         mode = savedStateHandle[AlarmsArgs.MODE.name]!!,
-        dialogStatus = savedStateHandle[KEY_DIALOG_STATUS] ?: AddEditAlarmDialogStatus.Hidden
-    )
+        dialogStatus = savedStateHandle[KEY_DIALOG_STATUS] ?: AddEditAlarmDialogStatus.Hidden)
 
     override fun copyWithTransformedItems(
         transform: (Selectable<Alarm>) -> Selectable<Alarm>
@@ -31,14 +32,10 @@ data class AlarmsState(
     override fun copyWithSnackbarStateAndTransformedItems(
         snackbarState: SnackbarState,
         transform: (Selectable<Alarm>) -> Selectable<Alarm>
-    ): AlarmsState = copy(
-        items = items.transformItems(transform),
-        snackbarState = snackbarState
-    )
+    ): AlarmsState = copy(items = items.transformItems(transform), snackbarState = snackbarState)
 
-    override fun copyWithSnackbarState(snackbarState: SnackbarState): AlarmsState = copy(
-        snackbarState = snackbarState
-    )
+    override fun copyWithSnackbarState(snackbarState: SnackbarState): AlarmsState =
+        copy(snackbarState = snackbarState)
 
     companion object {
         const val KEY_DIALOG_STATUS = "key_dialog_status"

@@ -7,22 +7,18 @@ import com.eventful.core.util.LoadedSuccessfully
 
 sealed class EventDetailsStateUpdate : StateUpdate<EventDetailsState> {
     data class NewEvent(val event: Event) : EventDetailsStateUpdate() {
-        override fun invoke(state: EventDetailsState): EventDetailsState = state.copy(
-            event = event
-        )
+        override fun invoke(state: EventDetailsState): EventDetailsState = state.copy(event = event)
     }
 
     sealed class FavouriteStatus : EventDetailsStateUpdate() {
         object Loading : FavouriteStatus() {
-            override fun invoke(state: EventDetailsState): EventDetailsState = state.copy(
-                isFavourite = state.isFavourite.copyWithLoadingStatus
-            )
+            override fun invoke(state: EventDetailsState): EventDetailsState =
+                state.copy(isFavourite = state.isFavourite.copyWithLoadingStatus)
         }
 
         class Loaded(private val favourite: Boolean) : FavouriteStatus() {
-            override fun invoke(state: EventDetailsState): EventDetailsState = state.copy(
-                isFavourite = Data(favourite, LoadedSuccessfully)
-            )
+            override fun invoke(state: EventDetailsState): EventDetailsState =
+                state.copy(isFavourite = Data(favourite, LoadedSuccessfully))
         }
     }
 }

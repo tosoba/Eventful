@@ -17,21 +17,21 @@ import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-class MainViewModel @AssistedInject constructor(
-    processor: MainFlowProcessor,
-    @Assisted savedStateHandle: SavedStateHandle
-) :
+class MainViewModel
+@AssistedInject
+constructor(processor: MainFlowProcessor, @Assisted savedStateHandle: SavedStateHandle) :
     FlowViewModel<MainIntent, MainStateUpdate, MainState, Unit>(
         initialState = MainState(savedStateHandle),
         processor = processor,
-        savedStateHandle = savedStateHandle
-    ),
+        savedStateHandle = savedStateHandle),
     ConnectedStateProvider,
     LocationStateProvider {
 
-    override val connectedStates: Flow<Boolean> get() = states.map { it.connected }
+    override val connectedStates: Flow<Boolean>
+        get() = states.map { it.connected }
 
-    override val locationStates: Flow<LocationState> get() = states.map { it.locationState }
+    override val locationStates: Flow<LocationState>
+        get() = states.map { it.locationState }
     override fun reloadLocation() {
         viewModelScope.launch { intent(MainIntent.ReloadLocation) }
     }

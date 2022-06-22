@@ -8,14 +8,14 @@ import java.util.*
 
 class LinkConverter {
     @TypeConverter
-    fun stringToLinkList(data: String?): List<LinkEntity> = if (data == null) {
-        Collections.emptyList()
-    } else {
-        Gson().fromJson(data, object : TypeToken<List<LinkEntity>>() {}.type)
-    }
+    fun stringToLinkList(data: String?): List<LinkEntity> =
+        if (data == null) {
+            Collections.emptyList()
+        } else {
+            Gson().fromJson(data, object : TypeToken<List<LinkEntity>>() {}.type)
+        }
 
     @TypeConverter
-    fun linkListToString(
-        links: List<LinkEntity>?
-    ): String? = if (links == null || links.isEmpty()) null else Gson().toJson(links)
+    fun linkListToString(links: List<LinkEntity>?): String? =
+        if (links == null || links.isEmpty()) null else Gson().toJson(links)
 }

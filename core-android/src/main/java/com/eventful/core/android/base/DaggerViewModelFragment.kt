@@ -12,9 +12,9 @@ open class DaggerViewModelFragment<VM : ViewModel> : DaggerFragment {
     constructor() : super()
     constructor(contentLayoutId: Int) : super(contentLayoutId)
 
-    @Inject
-    internal lateinit var viewModelProvider: Provider<VM>
-    protected val viewModel: VM get() = viewModelProvider.get()
+    @Inject internal lateinit var viewModelProvider: Provider<VM>
+    protected val viewModel: VM
+        get() = viewModelProvider.get()
 }
 
 inline fun <reified VM : ViewModel> DaggerViewModelFragment<VM>.savedStateViewModelFrom(

@@ -24,8 +24,7 @@ internal abstract class BaseFavouritesFlowProcessorTests {
     private val testDispatcher = TestCoroutineDispatcher()
     protected val testScope = TestCoroutineScope(testDispatcher)
 
-    @get:Rule
-    val instantTaskExecutorRule: InstantTaskExecutorRule = InstantTaskExecutorRule()
+    @get:Rule val instantTaskExecutorRule: InstantTaskExecutorRule = InstantTaskExecutorRule()
 
     @Before
     fun setup() {
@@ -43,12 +42,9 @@ internal abstract class BaseFavouritesFlowProcessorTests {
         deleteEvents: DeleteEvents = mockk(relaxed = true),
         ioDispatcher: CoroutineDispatcher = testDispatcher,
         loadFavouritesOnStart: Boolean = false
-    ): FavouritesFlowProcessor = FavouritesFlowProcessor(
-        getSavedEventsFlow,
-        deleteEvents,
-        ioDispatcher,
-        loadFavouritesOnStart
-    )
+    ): FavouritesFlowProcessor =
+        FavouritesFlowProcessor(
+            getSavedEventsFlow, deleteEvents, ioDispatcher, loadFavouritesOnStart)
 
     protected fun FavouritesFlowProcessor.updates(
         intents: Flow<FavouritesIntent> = mockk(relaxed = true),

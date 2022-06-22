@@ -7,17 +7,15 @@ import com.eventful.core.android.EventKindBindingModel_
 import com.eventful.core.android.model.event.Event
 
 open class NestedScrollingCarouselModel : CarouselModel_() {
-    override fun buildView(parent: ViewGroup): Carousel = super.buildView(parent).apply {
-        isNestedScrollingEnabled = false
-    }
+    override fun buildView(parent: ViewGroup): Carousel =
+        super.buildView(parent).apply { isNestedScrollingEnabled = false }
 }
 
 val Event.kindsCarousel: CarouselModel_
-    get() = NestedScrollingCarouselModel()
-        .id("${id}c")
-        .models(
-            kinds.mapIndexed { index: Int, kind: String ->
-                EventKindBindingModel_().id("${id}k$index")
-                    .kind(kind)
-            }
-        )
+    get() =
+        NestedScrollingCarouselModel()
+            .id("${id}c")
+            .models(
+                kinds.mapIndexed { index: Int, kind: String ->
+                    EventKindBindingModel_().id("${id}k$index").kind(kind)
+                })

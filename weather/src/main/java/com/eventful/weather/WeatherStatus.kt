@@ -16,7 +16,7 @@ enum class WeatherStatus(@DrawableRes val resource: Int, val icon: String) {
     UNKNOWN(R.drawable.unknown, "unknown");
 
     companion object {
-        fun fromIcon(icon: String): WeatherStatus = values()
-            .find { it.icon.equals(icon, true) } ?: UNKNOWN
+        fun fromIcon(icon: String): WeatherStatus =
+            values().find { it.icon.equals(icon, true) } ?: UNKNOWN
     }
 }

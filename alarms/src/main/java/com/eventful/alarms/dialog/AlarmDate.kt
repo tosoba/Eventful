@@ -6,9 +6,7 @@ import java.util.*
 
 @Parcelize
 data class AlarmDate(val year: Int, val month: Int, val day: Int) : Parcelable {
-    constructor(calendar: Calendar) : this(
-        calendar[Calendar.YEAR],
-        calendar[Calendar.MONTH],
-        calendar[Calendar.DAY_OF_MONTH]
-    )
+    constructor(
+        calendar: Calendar
+    ) : this(calendar[Calendar.YEAR], calendar[Calendar.MONTH], calendar[Calendar.DAY_OF_MONTH])
 }

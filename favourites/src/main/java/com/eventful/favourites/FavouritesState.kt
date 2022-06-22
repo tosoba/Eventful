@@ -1,10 +1,10 @@
 package com.eventful.favourites
 
-import com.eventful.core.util.DataList
+import com.eventful.core.android.base.SelectableItemsSnackbarState
 import com.eventful.core.android.controller.SnackbarState
 import com.eventful.core.android.model.event.Event
 import com.eventful.core.model.Selectable
-import com.eventful.core.android.base.SelectableItemsSnackbarState
+import com.eventful.core.util.DataList
 
 data class FavouritesState(
     val searchText: String = "",
@@ -20,12 +20,9 @@ data class FavouritesState(
     override fun copyWithSnackbarStateAndTransformedItems(
         snackbarState: SnackbarState,
         transform: (Selectable<Event>) -> Selectable<Event>
-    ): FavouritesState = copy(
-        items = items.transformItems(transform),
-        snackbarState = snackbarState
-    )
+    ): FavouritesState =
+        copy(items = items.transformItems(transform), snackbarState = snackbarState)
 
-    override fun copyWithSnackbarState(snackbarState: SnackbarState): FavouritesState = copy(
-        snackbarState = snackbarState
-    )
+    override fun copyWithSnackbarState(snackbarState: SnackbarState): FavouritesState =
+        copy(snackbarState = snackbarState)
 }

@@ -16,16 +16,17 @@ import javax.inject.Inject
 class MainNavigationFragment : BaseNavigationFragment(), EventNavigationController {
     override val navigationFragmentLayoutId: Int = R.layout.fragment_main_navigation
     override val backStackNavigationContainerId: Int = R.id.main_navigation_container_layout
-    override val initialFragment: Fragment get() = MainFragment()
+    override val initialFragment: Fragment
+        get() = MainFragment()
 
-    @Inject
-    lateinit var navDestinations: IMainNavDestinations
+    @Inject lateinit var navDestinations: IMainNavDestinations
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (savedInstanceState == null) activity?.intent?.eventExtra?.let { event ->
-            showFragment(navDestinations.eventFragment(event))
-        }
+        if (savedInstanceState == null)
+            activity?.intent?.eventExtra?.let { event ->
+                showFragment(navDestinations.eventFragment(event))
+            }
     }
 
     override fun showEvent(event: Event) {

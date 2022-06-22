@@ -16,20 +16,15 @@ import kotlinx.coroutines.flow.map
 
 @FlowPreview
 @ExperimentalCoroutinesApi
-class EventViewModel @AssistedInject constructor(
-    @Assisted savedStateHandle: SavedStateHandle,
-    processor: EventFlowProcessor
-) :
+class EventViewModel
+@AssistedInject
+constructor(@Assisted savedStateHandle: SavedStateHandle, processor: EventFlowProcessor) :
     FlowViewModel<EventIntent, EventStateUpdate, EventState, Unit>(
-        EventState(savedStateHandle.get<Event>(EventArgs.EVENT.name)!!),
-        processor
-    ),
+        EventState(savedStateHandle.get<Event>(EventArgs.EVENT.name)!!), processor),
     CurrentEventProvider {
 
     override val event: Flow<Event>
-        get() = states.map { it.events.lastOrNull() }
-            .filterNotNull()
-            .distinctUntilChanged()
+        get() = states.map { it.events.lastOrNull() }.filterNotNull().distinctUntilChanged()
 
     @AssistedInject.Factory
     interface Factory : AssistedSavedStateViewModelFactory<EventViewModel> {

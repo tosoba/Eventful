@@ -31,8 +31,8 @@ class AlarmsFlowProcessor(
         states: Flow<AlarmsState>,
         intent: suspend (AlarmsIntent) -> Unit,
         signal: suspend (AlarmsSignal) -> Unit
-    ): Flow<AlarmsStateUpdate> = intents
-        .updates(coroutineScope, currentState, states, intent, signal)
+    ): Flow<AlarmsStateUpdate> =
+        intents.updates(coroutineScope, currentState, states, intent, signal)
 
     override fun stateWillUpdate(
         currentState: AlarmsState,
@@ -51,35 +51,34 @@ class AlarmsFlowProcessor(
         states: Flow<AlarmsState>,
         intent: suspend (AlarmsIntent) -> Unit,
         signal: suspend (AlarmsSignal) -> Unit
-    ): Flow<AlarmsStateUpdate> = merge(
-        currentEventProvider?.event?.map { AlarmsStateUpdate.NewEvent(it) } ?: emptyFlow(),
-        states.map { it.mode }
-            .distinctUntilChanged()
-            .flatMapLatest(::loadAlarmsUpdates),
-        filterIsInstance<AlarmsIntent.LoadMoreAlarms>()
-            .loadMoreAlarmsUpdates(currentState),
-        filterIsInstance<AlarmsIntent.AlarmLongClicked>()
-            .map { (alarm) -> AlarmsStateUpdate.ToggleAlarmSelection(alarm) },
-        filterIsInstance<AlarmsIntent.ClearSelectionClicked>()
-            .map { AlarmsStateUpdate.ClearSelection },
-        filterIsInstance<AlarmsIntent.HideSnackbar>()
-            .map { AlarmsStateUpdate.HideSnackbar },
-        filterIsInstance<AlarmsIntent.RemoveAlarmsClicked>()
-            .removeFromAlarmsUpdates(coroutineScope, currentState, intent, signal),
-        filterIsInstance<AlarmsIntent.AddAlarm>()
-            .addAlarmUpdates(coroutineScope, intent),
-        filterIsInstance<AlarmsIntent.UpdateAlarm>()
-            .updateAlarmUpdates(coroutineScope, intent),
-        filterIsInstance<AlarmsIntent.DeleteAlarm>()
-            .map { removeAlarms(listOf(it.id), coroutineScope, intent, signal) },
-        filterIsInstance<AlarmsIntent.UpdateDialogStatus>()
-            .map { (status) -> AlarmsStateUpdate.DialogStatus(status) }
-    )
+    ): Flow<AlarmsStateUpdate> =
+        merge(
+            currentEventProvider?.event?.map { AlarmsStateUpdate.NewEvent(it) } ?: emptyFlow(),
+            states.map { it.mode }.distinctUntilChanged().flatMapLatest(::loadAlarmsUpdates),
+            filterIsInstance<AlarmsIntent.LoadMoreAlarms>().loadMoreAlarmsUpdates(currentState),
+            filterIsInstance<AlarmsIntent.AlarmLongClicked>().map { (alarm) ->
+                AlarmsStateUpdate.ToggleAlarmSelection(alarm)
+            },
+            filterIsInstance<AlarmsIntent.ClearSelectionClicked>().map {
+                AlarmsStateUpdate.ClearSelection
+            },
+            filterIsInstance<AlarmsIntent.HideSnackbar>().map { AlarmsStateUpdate.HideSnackbar },
+            filterIsInstance<AlarmsIntent.RemoveAlarmsClicked>()
+                .removeFromAlarmsUpdates(coroutineScope, currentState, intent, signal),
+            filterIsInstance<AlarmsIntent.AddAlarm>().addAlarmUpdates(coroutineScope, intent),
+            filterIsInstance<AlarmsIntent.UpdateAlarm>().updateAlarmUpdates(coroutineScope, intent),
+            filterIsInstance<AlarmsIntent.DeleteAlarm>().map {
+                removeAlarms(listOf(it.id), coroutineScope, intent, signal)
+            },
+            filterIsInstance<AlarmsIntent.UpdateDialogStatus>().map { (status) ->
+                AlarmsStateUpdate.DialogStatus(status)
+            })
 
     private fun Flow<AlarmsIntent.LoadMoreAlarms>.loadMoreAlarmsUpdates(
         currentState: () -> AlarmsState
-    ): Flow<AlarmsStateUpdate> = filterNot { currentState().items.limitHit }
-        .flatMapLatest { loadAlarmsUpdates(currentState().mode) }
+    ): Flow<AlarmsStateUpdate> =
+        filterNot { currentState().items.limitHit }
+            .flatMapLatest { loadAlarmsUpdates(currentState().mode) }
 
     private suspend fun loadAlarmsUpdates(mode: AlarmsMode): Flow<AlarmsStateUpdate> {
         return getAlarms(if (mode is AlarmsMode.SingleEvent) mode.event.id else null)
@@ -97,8 +96,7 @@ class AlarmsFlowProcessor(
             currentState().items.data.filter { it.selected }.map { it.item.id },
             coroutineScope,
             intent,
-            signal
-        )
+            signal)
     }
 
     private suspend fun removeAlarms(
@@ -110,11 +108,9 @@ class AlarmsFlowProcessor(
         withContext(ioDispatcher) { deleteAlarms(alarmIds) }
         if (alarmIds.size > 1) signal(AlarmsSignal.AlarmsRemoved)
         return AlarmsStateUpdate.RemovedAlarms(
-            msgRes = SnackbarState.Shown.MsgRes(
-                removedAlarmsMsgRes(alarmsCount = alarmIds.size),
-                arrayOf(alarmIds.size)
-            )
-        ) {
+            msgRes =
+                SnackbarState.Shown.MsgRes(
+                    removedAlarmsMsgRes(alarmsCount = alarmIds.size), arrayOf(alarmIds.size))) {
             coroutineScope.launch { intent(AlarmsIntent.HideSnackbar) }
         }
     }
@@ -123,12 +119,13 @@ class AlarmsFlowProcessor(
         coroutineScope: CoroutineScope,
         intent: suspend (AlarmsIntent) -> Unit
     ): Flow<AlarmsStateUpdate> = flatMapLatest { (event, timestamp) ->
-        flow<AlarmsStateUpdate> {
+        flow {
             emit(AlarmsStateUpdate.DialogStatus(AddEditAlarmDialogStatus.Hidden))
             createAlarm(event.id, timestamp)
-            emit(AlarmsStateUpdate.AlarmAdded {
-                coroutineScope.launch { intent(AlarmsIntent.HideSnackbar) }
-            })
+            emit(
+                AlarmsStateUpdate.AlarmAdded {
+                    coroutineScope.launch { intent(AlarmsIntent.HideSnackbar) }
+                })
         }
     }
 
@@ -136,12 +133,13 @@ class AlarmsFlowProcessor(
         coroutineScope: CoroutineScope,
         intent: suspend (AlarmsIntent) -> Unit
     ): Flow<AlarmsStateUpdate> = flatMapLatest { (id, timestamp) ->
-        flow<AlarmsStateUpdate> {
+        flow {
             emit(AlarmsStateUpdate.DialogStatus(AddEditAlarmDialogStatus.Hidden))
             updateAlarm(id, timestamp)
-            emit(AlarmsStateUpdate.AlarmUpdated {
-                coroutineScope.launch { intent(AlarmsIntent.HideSnackbar) }
-            })
+            emit(
+                AlarmsStateUpdate.AlarmUpdated {
+                    coroutineScope.launch { intent(AlarmsIntent.HideSnackbar) }
+                })
         }
     }
 }

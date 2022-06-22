@@ -9,25 +9,22 @@ import com.eventful.db.Tables
 @Entity(
     tableName = Tables.EVENT_ATTRACTION_JOIN,
     primaryKeys = ["event_id", "attraction_id"],
-    foreignKeys = [
-        ForeignKey(
-            entity = EventEntity::class,
-            childColumns = ["event_id"],
-            parentColumns = ["id"],
-            onDelete = ForeignKey.CASCADE
-        ),
-        ForeignKey(
-            entity = AttractionEntity::class,
-            childColumns = ["attraction_id"],
-            parentColumns = ["id"],
-            onDelete = ForeignKey.CASCADE
-        )
-    ],
-    indices = [
-        Index(value = ["event_id"], name = "event_attraction_join_event_id_idx"),
-        Index(value = ["attraction_id"], name = "event_attraction_join_attraction_id_idx")
-    ]
-)
+    foreignKeys =
+        [
+            ForeignKey(
+                entity = EventEntity::class,
+                childColumns = ["event_id"],
+                parentColumns = ["id"],
+                onDelete = ForeignKey.CASCADE),
+            ForeignKey(
+                entity = AttractionEntity::class,
+                childColumns = ["attraction_id"],
+                parentColumns = ["id"],
+                onDelete = ForeignKey.CASCADE)],
+    indices =
+        [
+            Index(value = ["event_id"], name = "event_attraction_join_event_id_idx"),
+            Index(value = ["attraction_id"], name = "event_attraction_join_attraction_id_idx")])
 data class EventAttractionJoinEntity(
     @ColumnInfo(name = "event_id") val eventId: String,
     @ColumnInfo(name = "attraction_id") val attractionId: String

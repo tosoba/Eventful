@@ -5,4 +5,5 @@ import androidx.lifecycle.LifecycleObserver
 
 operator fun Lifecycle.plusAssign(observer: LifecycleObserver) = addObserver(observer)
 
-operator fun Lifecycle.plusAssign(observers: Collection<LifecycleObserver>) = observers.forEach { addObserver(it) }
+operator fun Lifecycle.plusAssign(observers: Collection<LifecycleObserver>) =
+    observers.forEach { addObserver(it) }

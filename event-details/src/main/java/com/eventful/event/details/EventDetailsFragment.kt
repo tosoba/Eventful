@@ -46,112 +46,120 @@ import javax.inject.Inject
 @ExperimentalCoroutinesApi
 @FlowPreview
 class EventDetailsFragment :
-    DaggerViewModelFragment<EventDetailsViewModel>(),
-    SnackbarController,
-    HasArgs {
+    DaggerViewModelFragment<EventDetailsViewModel>(), SnackbarController, HasArgs {
 
     private var event: Event by FragmentArgument(EventDetailsArgs.EVENT.name)
     private var bottomNavItemsToRemove: IntArray by FragmentArgument()
-    override val args: Bundle get() = bundleOf(EventDetailsArgs.EVENT.name to event)
+    override val args: Bundle
+        get() = bundleOf(EventDetailsArgs.EVENT.name to event)
 
     private var statusBarColor: Int? = null
 
     private lateinit var snackbarStateChannel: SendChannel<SnackbarState>
 
-    @Inject
-    internal lateinit var epoxyThreads: EpoxyThreads
+    @Inject internal lateinit var epoxyThreads: EpoxyThreads
 
-    private val epoxyController: TypedEpoxyController<Event> by lazy(LazyThreadSafetyMode.NONE) {
-        typedController<Event>(epoxyThreads) { event ->
-            val marginValue = requireContext().toPx(15f).toInt()
-            eventInfo {
-                id("${event.id}i")
-                event(event)
-                margin(marginValue)
-            }
-            event.kindsCarousel.addTo(this)
-            description {
-                id("${event.id}d")
-                text(event.info ?: "No details available")
-                margin(marginValue)
-            }
-            wideButton {
-                id("${event.id}url")
-                text(getString(R.string.go_to_website))
-                margin(marginValue)
-                clicked { _ ->
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(event.url))
-                    if (intent.resolveActivity(requireActivity().packageManager) != null) {
-                        startActivity(intent)
+    private val epoxyController: TypedEpoxyController<Event> by
+        lazy(LazyThreadSafetyMode.NONE) {
+            typedController<Event>(epoxyThreads) { event ->
+                val marginValue = requireContext().toPx(15f).toInt()
+                eventInfo {
+                    id("${event.id}i")
+                    event(event)
+                    margin(marginValue)
+                }
+                event.kindsCarousel.addTo(this)
+                description {
+                    id("${event.id}d")
+                    text(event.info ?: "No details available")
+                    margin(marginValue)
+                }
+                wideButton {
+                    id("${event.id}url")
+                    text(getString(R.string.go_to_website))
+                    margin(marginValue)
+                    clicked { _ ->
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(event.url))
+                        if (intent.resolveActivity(requireActivity().packageManager) != null) {
+                            startActivity(intent)
+                        }
                     }
                 }
             }
         }
-    }
 
     private lateinit var binding: FragmentEventDetailsBinding
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View? = FragmentEventDetailsBinding.inflate(inflater, container, false).apply {
-        setupToolbarWithDrawerToggle(eventDetailsToolbar, R.drawable.drawer_toggle_outline)
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? =
+        FragmentEventDetailsBinding.inflate(inflater, container, false)
+            .apply {
+                setupToolbarWithDrawerToggle(eventDetailsToolbar, R.drawable.drawer_toggle_outline)
 
-        eventFavFab.clicks()
-            .onEach { viewModel.intent(EventDetailsIntent.ToggleFavourite) }
-            .launchIn(lifecycleScope)
+                eventFavFab
+                    .clicks()
+                    .onEach { viewModel.intent(EventDetailsIntent.ToggleFavourite) }
+                    .launchIn(lifecycleScope)
 
-        snackbarStateChannel = handleSnackbarState(eventFavFab)
+                snackbarStateChannel = handleSnackbarState(eventFavFab)
 
-        with(eventDetailsBottomNavView) {
-            setOnNavigationItemSelectedListener(eventNavigationItemSelectedListener)
-            selectedItemId = R.id.bottom_nav_event_details
-            bottomNavItemsToRemove.forEach(menu::removeItem)
-        }
+                with(eventDetailsBottomNavView) {
+                    setOnNavigationItemSelectedListener(eventNavigationItemSelectedListener)
+                    selectedItemId = R.id.bottom_nav_event_details
+                    bottomNavItemsToRemove.forEach(menu::removeItem)
+                }
 
-        binding = this
-    }.root
+                binding = this
+            }
+            .root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         with(binding) {
             viewModel.viewUpdates
                 .onEach { update ->
                     when (update) {
-                        is EventDetailsViewUpdate.FloatingActionButtonDrawable -> eventFavFab
-                            .updateDrawable(update.isFavourite)
+                        is EventDetailsViewUpdate.FloatingActionButtonDrawable ->
+                            eventFavFab.updateDrawable(update.isFavourite)
                         is EventDetailsViewUpdate.NewEvent -> {
                             event = update.event
                             epoxyController.setData(update.event)
                             Glide.with(expandedImage)
                                 .load(update.event.imageUrl)
                                 .apply(eventRequestOptions)
-                                .addListener(object : RequestListener<Drawable> {
-                                    override fun onLoadFailed(
-                                        e: GlideException?,
-                                        model: Any?,
-                                        target: Target<Drawable>?,
-                                        isFirstResource: Boolean
-                                    ): Boolean = false
+                                .addListener(
+                                    object : RequestListener<Drawable> {
+                                        override fun onLoadFailed(
+                                            e: GlideException?,
+                                            model: Any?,
+                                            target: Target<Drawable>?,
+                                            isFirstResource: Boolean
+                                        ): Boolean = false
 
-                                    override fun onResourceReady(
-                                        resource: Drawable?,
-                                        model: Any?,
-                                        target: Target<Drawable>?,
-                                        dataSource: DataSource?,
-                                        isFirstResource: Boolean
-                                    ): Boolean {
-                                        resource?.let { drawable ->
-                                            lifecycleScope.launch {
-                                                statusBarColor = withContext(Dispatchers.Default) {
-                                                    drawable.bitmap.dominantColor
-                                                }.also {
-                                                    statusBarColor = it
-                                                    activity?.statusBarColor = it
+                                        override fun onResourceReady(
+                                            resource: Drawable?,
+                                            model: Any?,
+                                            target: Target<Drawable>?,
+                                            dataSource: DataSource?,
+                                            isFirstResource: Boolean
+                                        ): Boolean {
+                                            resource?.let { drawable ->
+                                                lifecycleScope.launch {
+                                                    statusBarColor =
+                                                        withContext(Dispatchers.Default) {
+                                                                drawable.bitmap.dominantColor
+                                                            }
+                                                            .also {
+                                                                statusBarColor = it
+                                                                activity?.statusBarColor = it
+                                                            }
                                                 }
                                             }
+                                            return false
                                         }
-                                        return false
-                                    }
-                                })
+                                    })
                                 .into(expandedImage)
                         }
                     }
@@ -179,26 +187,25 @@ class EventDetailsFragment :
         binding.eventDetailsToolbar.let {
             setupToolbar(it)
             showBackNavArrow()
-            it.navigationIcon = ContextCompat.getDrawable(
-                requireContext(),
-                R.drawable.arrow_back_outline
-            )
+            it.navigationIcon =
+                ContextCompat.getDrawable(requireContext(), R.drawable.arrow_back_outline)
         }
         statusBarColor?.let { activity?.statusBarColor = it }
 
         binding.eventDetailsBottomNavView.selectedItemId = R.id.bottom_nav_event_details
 
-        snackbarStateUpdatesJob = viewModel.viewUpdates
-            .filterIsInstance<EventDetailsViewUpdate.FavouriteStatusSnackbar>()
-            .onEach {
-                transitionToSnackbarState(
-                    SnackbarState.Shown(
-                        res = if (it.isFavourite) R.string.event_added else R.string.event_removed,
-                        length = Snackbar.LENGTH_SHORT
-                    )
-                )
-            }
-            .launchIn(lifecycleScope)
+        snackbarStateUpdatesJob =
+            viewModel.viewUpdates
+                .filterIsInstance<EventDetailsViewUpdate.FavouriteStatusSnackbar>()
+                .onEach {
+                    transitionToSnackbarState(
+                        SnackbarState.Shown(
+                            res =
+                                if (it.isFavourite) R.string.event_added
+                                else R.string.event_removed,
+                            length = Snackbar.LENGTH_SHORT))
+                }
+                .launchIn(lifecycleScope)
     }
 
     override fun onPause() {
@@ -211,11 +218,10 @@ class EventDetailsFragment :
     }
 
     companion object {
-        fun new(
-            event: Event, bottomNavItemsToRemove: IntArray
-        ): EventDetailsFragment = EventDetailsFragment().also {
-            it.event = event
-            it.bottomNavItemsToRemove = bottomNavItemsToRemove
-        }
+        fun new(event: Event, bottomNavItemsToRemove: IntArray): EventDetailsFragment =
+            EventDetailsFragment().also {
+                it.event = event
+                it.bottomNavItemsToRemove = bottomNavItemsToRemove
+            }
     }
 }

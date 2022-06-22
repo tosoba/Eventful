@@ -13,12 +13,8 @@ data class Attraction(
     override val imageUrl: String?,
     override val kind: String?
 ) : IAttraction, Parcelable {
-    constructor(other: IAttraction) : this(
-        other.id,
-        other.name,
-        other.url,
-        other.links?.map { Link(it) },
-        other.imageUrl,
-        other.kind
-    )
+    constructor(
+        other: IAttraction
+    ) : this(
+        other.id, other.name, other.url, other.links?.map { Link(it) }, other.imageUrl, other.kind)
 }

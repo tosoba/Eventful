@@ -51,14 +51,14 @@ fun Fragment.setupToolbarWithDrawerToggle(
 ) {
     val activityRef = activity
     if (activityRef != null && activityRef is DrawerLayoutController) {
-        val toggleListener = ActionBarDrawerToggleEndListener(
-            activityRef,
-            activityRef.drawerLayout,
-            toolbar,
-            R.string.navigation_drawer_open,
-            R.string.navigation_drawer_close,
-            drawerToggleRes
-        )
+        val toggleListener =
+            ActionBarDrawerToggleEndListener(
+                activityRef,
+                activityRef.drawerLayout,
+                toolbar,
+                R.string.navigation_drawer_open,
+                R.string.navigation_drawer_close,
+                drawerToggleRes)
         activityRef.drawerLayout.addDrawerListener(toggleListener)
         toggleListener.syncState()
     }

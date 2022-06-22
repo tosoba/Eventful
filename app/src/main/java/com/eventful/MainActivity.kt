@@ -6,7 +6,6 @@ import android.os.Bundle
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.children
-import androidx.core.view.forEach
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
 import com.eventful.core.android.base.DaggerViewModelActivity
@@ -19,37 +18,39 @@ import com.markodevcic.peko.ActivityRotatingException
 import com.markodevcic.peko.Peko
 import com.markodevcic.peko.rationale.AlertDialogPermissionRationale
 import com.markodevcic.peko.requestPermissionsAsync
+import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
 
 @FlowPreview
 @ExperimentalCoroutinesApi
 class MainActivity :
-    DaggerViewModelActivity<MainViewModel>(),
-    DrawerLayoutController,
-    CoroutineScope {
+    DaggerViewModelActivity<MainViewModel>(), DrawerLayoutController, CoroutineScope {
 
     private val supervisorJob: CompletableDeferred<Any> = CompletableDeferred()
-    override val coroutineContext: CoroutineContext get() = Dispatchers.Main + supervisorJob
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + supervisorJob
 
     private val binding: ActivityMainBinding by viewBinding(ActivityMainBinding::inflate)
 
-    override val drawerLayout: DrawerLayout get() = binding.mainDrawerLayout
-    private val drawerItemSelectedListener = NavigationView.OnNavigationItemSelectedListener {
-        binding.mainDrawerLayout.closeDrawer(GravityCompat.END).let { false }
-    }
+    override val drawerLayout: DrawerLayout
+        get() = binding.mainDrawerLayout
+    private val drawerItemSelectedListener =
+        NavigationView.OnNavigationItemSelectedListener {
+            binding.mainDrawerLayout.closeDrawer(GravityCompat.END).let { false }
+        }
 
-    private val navigationFragment: MainNavigationFragment? by lazy(LazyThreadSafetyMode.NONE) {
-        supportFragmentManager.findFragmentById(R.id.main_navigation_fragment) as? MainNavigationFragment
-    }
+    private val navigationFragment: MainNavigationFragment? by
+        lazy(LazyThreadSafetyMode.NONE) {
+            supportFragmentManager.findFragmentById(R.id.main_navigation_fragment)
+                as? MainNavigationFragment
+        }
 
-    @Inject
-    lateinit var navDestinations: IMainNavDestinations
+    @Inject lateinit var navDestinations: IMainNavDestinations
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,31 +64,38 @@ class MainActivity :
                 val items = drawerMenu.children.map { it.itemId to it }.toMap()
                 if (alarms.isEmpty() && events.isEmpty()) {
                     items[R.id.drawer_no_upcoming]?.isVisible = true
-                    items[R.id.drawer_alarms]?.isVisible = false
-                    items[R.id.drawer_alarms]?.subMenu?.clear()
-                    items[R.id.drawer_events]?.isVisible = false
-                    items[R.id.drawer_events]?.subMenu?.clear()
+                    items[R.id.drawer_alarms]?.apply {
+                        isVisible = false
+                        subMenu?.clear()
+                    }
+                    items[R.id.drawer_events]?.apply {
+                        isVisible = false
+                        subMenu?.clear()
+                    }
                     return@onEach
                 }
 
                 items[R.id.drawer_no_upcoming]?.isVisible = false
 
-                items[R.id.drawer_alarms]?.isVisible = true
-                items[R.id.drawer_alarms]?.subMenu?.let { alarmsMenu ->
-                    alarmsMenu.clear()
-                    alarms.forEach { alarm ->
-                        alarmsMenu.add(alarm.event.name).setOnMenuItemClickListener {
-                            showEvent(alarm.event).let { false }
+                items[R.id.drawer_alarms]?.apply {
+                    isVisible = true
+                    subMenu?.let { alarmsMenu ->
+                        alarmsMenu.clear()
+                        alarms.forEach { alarm ->
+                            alarmsMenu.add(alarm.event.name).setOnMenuItemClickListener {
+                                showEvent(alarm.event).let { false }
+                            }
                         }
                     }
                 }
-
-                items[R.id.drawer_events]?.isVisible = true
-                items[R.id.drawer_events]?.subMenu?.let { eventsMenu ->
-                    eventsMenu.clear()
-                    events.forEach { event ->
-                        eventsMenu.add(event.name).setOnMenuItemClickListener {
-                            showEvent(event).let { false }
+                items[R.id.drawer_events]?.apply {
+                    isVisible = true
+                    subMenu?.let { eventsMenu ->
+                        eventsMenu.clear()
+                        events.forEach { event ->
+                            eventsMenu.add(event.name).setOnMenuItemClickListener {
+                                showEvent(event).let { false }
+                            }
                         }
                     }
                 }
@@ -103,8 +111,7 @@ class MainActivity :
                 view.paddingLeft,
                 view.paddingTop + insets.systemWindowInsetTop,
                 view.paddingRight,
-                view.paddingBottom
-            )
+                view.paddingBottom)
             insets
         }
 
@@ -127,8 +134,11 @@ class MainActivity :
     }
 
     override fun onDestroy() {
-        if (isChangingConfigurations) supervisorJob.completeExceptionally(ActivityRotatingException())
-        else supervisorJob.cancel()
+        if (isChangingConfigurations) {
+            supervisorJob.completeExceptionally(ActivityRotatingException())
+        } else {
+            supervisorJob.cancel()
+        }
         super.onDestroy()
     }
 
@@ -139,18 +149,23 @@ class MainActivity :
     }
 
     private fun requestPermission(): Job = launch {
-        val (grantedPermissions) = if (Peko.isRequestInProgress()) {
-            Peko.resumeRequest()
-        } else requestPermissionsAsync(
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            rationale = AlertDialogPermissionRationale(this@MainActivity) {
-                setTitle(getString(R.string.location_permission_needed))
-                setMessage(getString(R.string.no_location_permission_warning))
+        val (grantedPermissions) =
+            if (Peko.isRequestInProgress()) {
+                Peko.resumeRequest()
+            } else {
+                requestPermissionsAsync(
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    rationale =
+                        AlertDialogPermissionRationale(this@MainActivity) {
+                            setTitle(getString(R.string.location_permission_needed))
+                            setMessage(getString(R.string.no_location_permission_warning))
+                        })
             }
-        )
         viewModel.intent(
-            if (Manifest.permission.ACCESS_COARSE_LOCATION in grantedPermissions) MainIntent.LoadLocation
-            else MainIntent.PermissionDenied
-        )
+            if (Manifest.permission.ACCESS_COARSE_LOCATION in grantedPermissions) {
+                MainIntent.LoadLocation
+            } else {
+                MainIntent.PermissionDenied
+            })
     }
 }

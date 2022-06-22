@@ -1,7 +1,7 @@
 package com.eventful.nearby
 
-import com.eventful.core.util.PagedDataList
 import com.eventful.core.android.provider.LocationStateProvider
+import com.eventful.core.util.PagedDataList
 import com.eventful.test.relaxedMockedList
 import io.mockk.every
 import io.mockk.mockk
@@ -20,35 +20,35 @@ internal class ReloadLocationTests : BaseNearbyFlowProcessorTests() {
 
     @Test
     @DisplayName("When no events - should not call reloadLocation")
-    fun reloadLocationWhenEventsEmptyTest() = testScope.runBlockingTest {
-        val locationStateProvider = mockk<LocationStateProvider>(relaxed = true)
+    fun reloadLocationWhenEventsEmptyTest() =
+        testScope.runBlockingTest {
+            val locationStateProvider = mockk<LocationStateProvider>(relaxed = true)
 
-        flowProcessor(locationStateProvider = locationStateProvider)
-            .updates(
-                intents = flowOf(NearbyIntent.ReloadLocation),
-                currentState = mockk { every { this@mockk() } returns NearbyState() }
-            )
-            .launchIn(this)
+            flowProcessor(locationStateProvider = locationStateProvider)
+                .updates(
+                    intents = flowOf(NearbyIntent.ReloadLocation),
+                    currentState = mockk { every { this@mockk() } returns NearbyState() })
+                .launchIn(this)
 
-        verify(exactly = 0) { locationStateProvider.reloadLocation() }
-    }
+            verify(exactly = 0) { locationStateProvider.reloadLocation() }
+        }
 
     @Test
     @DisplayName("When events are loaded - should call reloadLocation")
-    fun reloadLocationWhenEventsLoadedTest() = testScope.runBlockingTest {
-        val locationStateProvider = mockk<LocationStateProvider>(relaxed = true)
+    fun reloadLocationWhenEventsLoadedTest() =
+        testScope.runBlockingTest {
+            val locationStateProvider = mockk<LocationStateProvider>(relaxed = true)
 
-        flowProcessor(locationStateProvider = locationStateProvider)
-            .updates(
-                intents = flowOf(NearbyIntent.ReloadLocation),
-                currentState = mockk {
-                    every { this@mockk() } returns NearbyState(
-                        items = PagedDataList(data = relaxedMockedList(10))
-                    )
-                }
-            )
-            .launchIn(this)
+            flowProcessor(locationStateProvider = locationStateProvider)
+                .updates(
+                    intents = flowOf(NearbyIntent.ReloadLocation),
+                    currentState =
+                        mockk {
+                            every { this@mockk() } returns
+                                NearbyState(items = PagedDataList(data = relaxedMockedList(10)))
+                        })
+                .launchIn(this)
 
-        verify(exactly = 1) { locationStateProvider.reloadLocation() }
-    }
+            verify(exactly = 1) { locationStateProvider.reloadLocation() }
+        }
 }

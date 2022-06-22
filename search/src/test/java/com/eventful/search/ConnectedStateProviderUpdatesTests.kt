@@ -25,22 +25,19 @@ internal class ConnectedStateProviderUpdatesTests : BaseSearchFlowProcessorTests
     @Test
     @DisplayName("When not connected - should not call getPagedEvents")
     fun notConnectedTest() {
-        val currentState = mockk<() -> SearchState> {
-            every { this@mockk() } returns SearchState(
-                items = PagedDataList(status = Failure(null))
-            )
-        }
-        val connectedStateProvider = mockk<ConnectedStateProvider> {
-            every { connectedStates } returns flowOf(false)
-        }
+        val currentState =
+            mockk<() -> SearchState> {
+                every { this@mockk() } returns
+                    SearchState(items = PagedDataList(status = Failure(null)))
+            }
+        val connectedStateProvider =
+            mockk<ConnectedStateProvider> { every { connectedStates } returns flowOf(false) }
         val getPagedEvents = mockk<GetPagedEvents>(relaxed = true)
 
         flowProcessor(
-            getPagedEvents = getPagedEvents,
-            connectedStateProvider = connectedStateProvider
-        ).updates(
-            currentState = currentState
-        ).launchIn(testScope)
+                getPagedEvents = getPagedEvents, connectedStateProvider = connectedStateProvider)
+            .updates(currentState = currentState)
+            .launchIn(testScope)
 
         coVerify(exactly = 0) { getPagedEvents<Selectable<Event>>(any(), any(), any()) }
     }
@@ -48,22 +45,19 @@ internal class ConnectedStateProviderUpdatesTests : BaseSearchFlowProcessorTests
     @Test
     @DisplayName("When events status is not Failed - should not call getPagedEvents")
     fun loadingNotFailedTest() {
-        val currentState = mockk<() -> SearchState> {
-            every { this@mockk() } returns SearchState(
-                items = PagedDataList(status = LoadedSuccessfully)
-            )
-        }
-        val connectedStateProvider = mockk<ConnectedStateProvider> {
-            every { connectedStates } returns flowOf(true)
-        }
+        val currentState =
+            mockk<() -> SearchState> {
+                every { this@mockk() } returns
+                    SearchState(items = PagedDataList(status = LoadedSuccessfully))
+            }
+        val connectedStateProvider =
+            mockk<ConnectedStateProvider> { every { connectedStates } returns flowOf(true) }
         val getPagedEvents = mockk<GetPagedEvents>(relaxed = true)
 
         flowProcessor(
-            getPagedEvents = getPagedEvents,
-            connectedStateProvider = connectedStateProvider
-        ).updates(
-            currentState = currentState
-        ).launchIn(testScope)
+                getPagedEvents = getPagedEvents, connectedStateProvider = connectedStateProvider)
+            .updates(currentState = currentState)
+            .launchIn(testScope)
 
         coVerify(exactly = 0) { getPagedEvents<Selectable<Event>>(any(), any(), any()) }
     }
@@ -71,26 +65,21 @@ internal class ConnectedStateProviderUpdatesTests : BaseSearchFlowProcessorTests
     @Test
     @DisplayName("When events list is not empty - should not call getPagedEvents")
     fun eventsNotEmptyTest() {
-        val currentState = mockk<() -> SearchState> {
-            every { this@mockk() } returns SearchState(
-                items = PagedDataList(
-                    status = LoadedSuccessfully, data = relaxedMockedList(
-                        1
-                    )
-                )
-            )
-        }
-        val connectedStateProvider = mockk<ConnectedStateProvider> {
-            every { connectedStates } returns flowOf(true)
-        }
+        val currentState =
+            mockk<() -> SearchState> {
+                every { this@mockk() } returns
+                    SearchState(
+                        items =
+                            PagedDataList(status = LoadedSuccessfully, data = relaxedMockedList(1)))
+            }
+        val connectedStateProvider =
+            mockk<ConnectedStateProvider> { every { connectedStates } returns flowOf(true) }
         val getPagedEvents = mockk<GetPagedEvents>(relaxed = true)
 
         flowProcessor(
-            getPagedEvents = getPagedEvents,
-            connectedStateProvider = connectedStateProvider
-        ).updates(
-            currentState = currentState
-        ).launchIn(testScope)
+                getPagedEvents = getPagedEvents, connectedStateProvider = connectedStateProvider)
+            .updates(currentState = currentState)
+            .launchIn(testScope)
 
         coVerify(exactly = 0) { getPagedEvents<Selectable<Event>>(any(), any(), any()) }
     }
@@ -98,28 +87,23 @@ internal class ConnectedStateProviderUpdatesTests : BaseSearchFlowProcessorTests
     @Test
     @DisplayName("When connected and all loading conditions met - should call getPagedEvents")
     fun allConditionsMetTest() {
-        val currentState = mockk<() -> SearchState> {
-            every { this@mockk() } returns SearchState(
-                items = PagedDataList(status = Failure(null))
-            )
-        }
-        val connectedStateProvider = mockk<ConnectedStateProvider> {
-            every { connectedStates } returns flowOf(true)
-        }
-        val getPagedEvents = mockk<GetPagedEvents> {
-            coEvery {
-                this@mockk<Selectable<Event>>(any(), any(), any())
-            } returns Resource.successWith(
-                PagedResult(emptyList(), 0, 0)
-            )
-        }
+        val currentState =
+            mockk<() -> SearchState> {
+                every { this@mockk() } returns
+                    SearchState(items = PagedDataList(status = Failure(null)))
+            }
+        val connectedStateProvider =
+            mockk<ConnectedStateProvider> { every { connectedStates } returns flowOf(true) }
+        val getPagedEvents =
+            mockk<GetPagedEvents> {
+                coEvery { this@mockk<Selectable<Event>>(any(), any(), any()) } returns
+                    Resource.successWith(PagedResult(emptyList(), 0, 0))
+            }
 
         flowProcessor(
-            getPagedEvents = getPagedEvents,
-            connectedStateProvider = connectedStateProvider
-        ).updates(
-            currentState = currentState
-        ).launchIn(testScope)
+                getPagedEvents = getPagedEvents, connectedStateProvider = connectedStateProvider)
+            .updates(currentState = currentState)
+            .launchIn(testScope)
 
         coVerify(exactly = 1) { getPagedEvents<Selectable<Event>>(any(), any(), any()) }
     }

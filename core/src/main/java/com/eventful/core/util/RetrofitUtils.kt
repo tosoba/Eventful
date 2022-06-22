@@ -12,18 +12,18 @@ fun retrofitWith(
     client: OkHttpClient,
     converterFactory: Converter.Factory = GsonConverterFactory.create(),
     callAdapters: List<CallAdapter.Factory>? = null
-): Retrofit = Retrofit.Builder()
-    .client(client)
-    .addConverterFactory(converterFactory)
-    .apply {
-        callAdapters?.forEach { addCallAdapterFactory(it) }
-    }
-    .baseUrl(url)
-    .build()
+): Retrofit =
+    Retrofit.Builder()
+        .client(client)
+        .addConverterFactory(converterFactory)
+        .apply { callAdapters?.forEach { addCallAdapterFactory(it) } }
+        .baseUrl(url)
+        .build()
 
 fun onlineCacheInterceptor(maxAge: Long = 60 * 5): Interceptor = Interceptor { chain ->
     val response = chain.proceed(chain.request())
-    response.newBuilder()
+    response
+        .newBuilder()
         .header("Cache-Control", "public, max-age=$maxAge")
         .removeHeader("Pragma")
         .build()
@@ -33,12 +33,14 @@ fun offlineCacheInterceptor(
     maxStale: Long = 60 * 60 * 24 * 7,
     isConnected: () -> Boolean
 ): Interceptor = Interceptor { chain ->
-    val request = chain.request().run {
-        if (!isConnected()) newBuilder()
-            .header("Cache-Control", "public, only-if-cached, max-stale=$maxStale")
-            .removeHeader("Pragma")
-            .build()
-        else this
-    }
+    val request =
+        chain.request().run {
+            if (!isConnected())
+                newBuilder()
+                    .header("Cache-Control", "public, only-if-cached, max-stale=$maxStale")
+                    .removeHeader("Pragma")
+                    .build()
+            else this
+        }
     chain.proceed(request)
 }

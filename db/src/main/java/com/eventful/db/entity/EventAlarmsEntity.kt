@@ -5,10 +5,5 @@ import androidx.room.Relation
 
 data class EventAlarmsEntity(
     @Embedded val event: FullEventEntity,
-
-    @Relation(
-        parentColumn = "id",
-        entityColumn = "event_id"
-    )
-    val alarms: List<AlarmEntity>
+    @Relation(parentColumn = "id", entityColumn = "event_id") val alarms: List<AlarmEntity>
 )

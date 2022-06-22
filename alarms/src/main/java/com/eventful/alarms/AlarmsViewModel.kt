@@ -7,11 +7,9 @@ import kotlinx.coroutines.FlowPreview
 
 @ExperimentalCoroutinesApi
 @FlowPreview
-abstract class AlarmsViewModel constructor(
-    processor: AlarmsFlowProcessor,
-    savedStateHandle: SavedStateHandle
-) : FlowViewModel<AlarmsIntent, AlarmsStateUpdate, AlarmsState, AlarmsSignal>(
-    initialState = AlarmsState(savedStateHandle),
-    processor = processor,
-    savedStateHandle = savedStateHandle
-)
+abstract class AlarmsViewModel
+constructor(processor: AlarmsFlowProcessor, savedStateHandle: SavedStateHandle) :
+    FlowViewModel<AlarmsIntent, AlarmsStateUpdate, AlarmsState, AlarmsSignal>(
+        initialState = AlarmsState(savedStateHandle),
+        processor = processor,
+        savedStateHandle = savedStateHandle)

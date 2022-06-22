@@ -12,17 +12,19 @@ fun Flickr.loadPhotosUrlsForLocation(
     numberOfPhotos: Int,
     size: PhotoSize
 ): List<String> {
-    fun searchParametersWith(accuracy: Int, searchText: String? = null) = SearchParameters().apply {
-        latitude = latLng.latitude.toString()
-        longitude = latLng.longitude.toString()
-        this.accuracy = accuracy
-        searchText?.let { text = it }
-    }
+    fun searchParametersWith(accuracy: Int, searchText: String? = null) =
+        SearchParameters().apply {
+            latitude = latLng.latitude.toString()
+            longitude = latLng.longitude.toString()
+            this.accuracy = accuracy
+            searchText?.let { text = it }
+        }
 
-    fun getPhotosUrlsUsing(params: SearchParameters) = photosInterface.search(params, numberOfPhotos, 0)
-        .imagesUrls(size)
+    fun getPhotosUrlsUsing(params: SearchParameters) =
+        photosInterface.search(params, numberOfPhotos, 0).imagesUrls(size)
 
-    val photosStreetText = getPhotosUrlsUsing(searchParametersWith(Flickr.ACCURACY_STREET, searchText))
+    val photosStreetText =
+        getPhotosUrlsUsing(searchParametersWith(Flickr.ACCURACY_STREET, searchText))
     if (photosStreetText.isNotEmpty()) return photosStreetText
 
     val photosCityText = getPhotosUrlsUsing(searchParametersWith(Flickr.ACCURACY_CITY, searchText))

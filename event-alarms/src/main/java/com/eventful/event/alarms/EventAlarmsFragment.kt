@@ -28,21 +28,16 @@ class EventAlarmsFragment : AlarmsFragment<AlarmsMode.SingleEvent, EventAlarmsVi
                 viewModel.intent(
                     AlarmsIntent.UpdateDialogStatus(
                         AddEditAlarmDialogStatus.WithMode.Shown(
-                            AddEditAlarmDialogMode.Add(event = mode.event)
-                        )
-                    )
-                )
+                            AddEditAlarmDialogMode.Add(event = mode.event))))
             }
         }
     }
 
     companion object {
-        fun new(
-            event: Event,
-            bottomNavItemsToRemove: IntArray
-        ): EventAlarmsFragment = EventAlarmsFragment().also {
-            it.mode = AlarmsMode.SingleEvent(event)
-            it.bottomNavItemsToRemove = bottomNavItemsToRemove
-        }
+        fun new(event: Event, bottomNavItemsToRemove: IntArray): EventAlarmsFragment =
+            EventAlarmsFragment().also {
+                it.mode = AlarmsMode.SingleEvent(event)
+                it.bottomNavItemsToRemove = bottomNavItemsToRemove
+            }
     }
 }

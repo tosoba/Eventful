@@ -49,14 +49,14 @@ abstract class EventAlarmsModule {
             updateAlarm: UpdateAlarm,
             currentEventProvider: CurrentEventProvider,
             ioDispatcher: CoroutineDispatcher
-        ): AlarmsFlowProcessor = AlarmsFlowProcessor(
-            getAlarms,
-            deleteAlarms,
-            createAlarm,
-            updateAlarm,
-            currentEventProvider,
-            ioDispatcher
-        )
+        ): AlarmsFlowProcessor =
+            AlarmsFlowProcessor(
+                getAlarms,
+                deleteAlarms,
+                createAlarm,
+                updateAlarm,
+                currentEventProvider,
+                ioDispatcher)
     }
 
     @Module

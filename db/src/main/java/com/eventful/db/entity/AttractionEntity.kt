@@ -14,12 +14,13 @@ data class AttractionEntity(
     @ColumnInfo(name = "image_url") override val imageUrl: String?,
     override val kind: String?
 ) : IAttraction {
-    constructor(other: IAttraction) : this(
+    constructor(
+        other: IAttraction
+    ) : this(
         other.id,
         other.name,
         other.url,
         other.links?.map { LinkEntity(it) },
         other.imageUrl,
-        other.kind
-    )
+        other.kind)
 }

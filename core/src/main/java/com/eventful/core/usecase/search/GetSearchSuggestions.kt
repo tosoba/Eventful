@@ -5,7 +5,6 @@ import com.eventful.core.repo.IEventRepository
 import javax.inject.Inject
 
 class GetSearchSuggestions @Inject constructor(private val eventRepo: IEventRepository) {
-    suspend operator fun invoke(
-        searchText: String
-    ): List<SearchSuggestion> = eventRepo.getSearchSuggestions(searchText)
+    suspend operator fun invoke(searchText: String): List<SearchSuggestion> =
+        eventRepo.getSearchSuggestions(searchText)
 }

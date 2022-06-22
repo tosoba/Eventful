@@ -1,10 +1,10 @@
 package com.eventful.nearby
 
+import com.eventful.core.android.provider.ConnectedStateProvider
+import com.eventful.core.android.provider.LocationStateProvider
 import com.eventful.core.usecase.event.GetNearbyEvents
 import com.eventful.core.usecase.event.GetPagedEvents
 import com.eventful.core.usecase.event.SaveEvents
-import com.eventful.core.android.provider.ConnectedStateProvider
-import com.eventful.core.android.provider.LocationStateProvider
 import com.eventful.test.mockLog
 import io.mockk.every
 import io.mockk.mockk
@@ -45,14 +45,14 @@ internal abstract class BaseNearbyFlowProcessorTests {
         connectedStateProvider: ConnectedStateProvider = mockk(relaxed = true),
         locationStateProvider: LocationStateProvider = mockk(relaxed = true),
         ioDispatcher: CoroutineDispatcher = testDispatcher
-    ): NearbyFlowProcessor = NearbyFlowProcessor(
-        getNearbyEvents,
-        saveEvents,
-        getPagedEvents,
-        connectedStateProvider,
-        locationStateProvider,
-        ioDispatcher
-    )
+    ): NearbyFlowProcessor =
+        NearbyFlowProcessor(
+            getNearbyEvents,
+            saveEvents,
+            getPagedEvents,
+            connectedStateProvider,
+            locationStateProvider,
+            ioDispatcher)
 
     protected fun NearbyFlowProcessor.updates(
         intents: Flow<NearbyIntent> = mockk(relaxed = true),

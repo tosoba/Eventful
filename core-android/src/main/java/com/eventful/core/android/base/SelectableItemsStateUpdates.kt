@@ -12,8 +12,7 @@ interface SelectableItemsState<S : SelectableItemsState<S, I>, I> {
 }
 
 interface SelectableItemsSnackbarState<S : SelectableItemsSnackbarState<S, I>, I> :
-    SelectableItemsState<S, I>,
-    HoldsSnackbarState<S> {
+    SelectableItemsState<S, I>, HoldsSnackbarState<S> {
     fun copyWithSnackbarStateAndTransformedItems(
         snackbarState: SnackbarState,
         transform: (Selectable<I>) -> Selectable<I>
@@ -32,40 +31,44 @@ interface ToggleItemSelectionUpdate<S : SelectableItemsState<S, I>, I, ID> : Sta
     val item: I
     fun I.id(): ID
 
-    override fun invoke(state: S): S = state.copyWithTransformedItems {
-        if (it.item.id() == item.id()) Selectable(item, !it.selected) else it
-    }
+    override fun invoke(state: S): S =
+        state.copyWithTransformedItems {
+            if (it.item.id() == item.id()) Selectable(item, !it.selected) else it
+        }
 }
 
 interface ItemSelectionConfirmedUpdate<S : SelectableItemsSnackbarState<S, I>, I> : StateUpdate<S> {
     val msgRes: SnackbarState.Shown.MsgRes
     val onSnackbarDismissed: () -> Unit
 
-    override fun invoke(state: S): S = state.copyWithSnackbarStateAndTransformedItems(
-        snackbarState = SnackbarState.Shown(
-            msg = msgRes,
-            length = Snackbar.LENGTH_SHORT,
-            onDismissed = onSnackbarDismissed
-        )
-    ) { selectable ->
-        selectable.copy(selected = false)
+    override fun invoke(state: S): S =
+        state.copyWithSnackbarStateAndTransformedItems(
+            snackbarState =
+                SnackbarState.Shown(
+                    msg = msgRes,
+                    length = Snackbar.LENGTH_SHORT,
+                    onDismissed = onSnackbarDismissed)) { selectable ->
+            selectable.copy(selected = false)
+        }
+}
+
+fun removedAlarmsMsgRes(alarmsCount: Int): Int =
+    if (alarmsCount > 1) {
+        R.string.alarms_removed
+    } else {
+        R.string.alarm_removed
     }
-}
 
-fun removedAlarmsMsgRes(alarmsCount: Int): Int = if (alarmsCount > 1) {
-    R.string.alarms_removed
-} else {
-    R.string.alarm_removed
-}
+fun addedToFavouritesMsgRes(eventsCount: Int): Int =
+    if (eventsCount > 1) {
+        R.string.events_added_to_favourites
+    } else {
+        R.string.event_added_to_favourites
+    }
 
-fun addedToFavouritesMsgRes(eventsCount: Int): Int = if (eventsCount > 1) {
-    R.string.events_added_to_favourites
-} else {
-    R.string.event_added_to_favourites
-}
-
-fun removedFromFavouritesMsgRes(eventsCount: Int): Int = if (eventsCount > 1) {
-    R.string.events_removed_from_favourites
-} else {
-    R.string.event_removed_from_favourites
-}
+fun removedFromFavouritesMsgRes(eventsCount: Int): Int =
+    if (eventsCount > 1) {
+        R.string.events_removed_from_favourites
+    } else {
+        R.string.event_removed_from_favourites
+    }

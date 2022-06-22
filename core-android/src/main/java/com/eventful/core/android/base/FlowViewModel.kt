@@ -20,14 +20,16 @@ abstract class FlowViewModel<Intent : Any, Update : StateUpdate<State>, State : 
 ) : ViewModel() {
 
     private val _signals: BroadcastChannel<Signal> = BroadcastChannel(Channel.BUFFERED)
-    val signals: Flow<Signal> get() = _signals.asFlow()
+    val signals: Flow<Signal>
+        get() = _signals.asFlow()
     suspend fun signal(signal: Signal) = _signals.send(signal)
 
     private val _intents: BroadcastChannel<Intent> = BroadcastChannel(Channel.CONFLATED)
     suspend fun intent(intent: Intent) = _intents.send(intent)
 
     private val _states: MutableStateFlow<State> = MutableStateFlow(initialState)
-    val states: StateFlow<State> get() = _states
+    val states: StateFlow<State>
+        get() = _states
     var state: State
         private set(value) = value.let { _states.value = it }
         get() = _states.value
@@ -40,21 +42,15 @@ abstract class FlowViewModel<Intent : Any, Update : StateUpdate<State>, State : 
                 currentState = states::value,
                 states = states,
                 intent = ::intent,
-                signal = _signals::send
-            )
+                signal = _signals::send)
             .onEachLogging(
-                "STATE_UPDATE",
-                javaClass.simpleName.replace(LogType.VIEW_MODEL.suffix, "")
-            )
+                "STATE_UPDATE", javaClass.simpleName.replace(LogType.VIEW_MODEL.suffix, ""))
             .scan(initialState) { currentState, update ->
                 val nextState = update(currentState)
                 processor.stateWillUpdate(currentState, nextState, update, savedStateHandle)
                 nextState
             }
-            .onEachLogging(
-                "STATE",
-                javaClass.simpleName.replace(LogType.VIEW_MODEL.suffix, "")
-            ) {
+            .onEachLogging("STATE", javaClass.simpleName.replace(LogType.VIEW_MODEL.suffix, "")) {
                 state = it
             }
             .launchIn(viewModelScope)

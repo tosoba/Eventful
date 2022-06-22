@@ -20,7 +20,9 @@ import javax.inject.Inject
 
 @FlowPreview
 @ExperimentalCoroutinesApi
-class NearbyFlowProcessor @Inject constructor(
+class NearbyFlowProcessor
+@Inject
+constructor(
     private val getNearbyEvents: GetNearbyEvents,
     private val saveEvents: SaveEvents,
     private val getPagedEvents: GetPagedEvents,
@@ -36,87 +38,93 @@ class NearbyFlowProcessor @Inject constructor(
         states: Flow<NearbyState>,
         intent: suspend (NearbyIntent) -> Unit,
         signal: suspend (NearbySignal) -> Unit
-    ): Flow<NearbyStateUpdate> = merge(
-        intents.updates(coroutineScope, currentState, intent, signal),
-        connectedStateProvider.updates(currentState, signal),
-        connectedStateProvider.snackbarUpdates(currentState),
-        locationStateProvider.updates(currentState, signal),
-        locationStateProvider.snackbarUpdates(signal)
-    )
+    ): Flow<NearbyStateUpdate> =
+        merge(
+            intents.updates(coroutineScope, currentState, intent, signal),
+            connectedStateProvider.updates(currentState, signal),
+            connectedStateProvider.snackbarUpdates(currentState),
+            locationStateProvider.updates(currentState, signal),
+            locationStateProvider.snackbarUpdates(signal))
 
     private fun Flow<NearbyIntent>.updates(
         coroutineScope: CoroutineScope,
         currentState: () -> NearbyState,
         intent: suspend (NearbyIntent) -> Unit,
         signal: suspend (NearbySignal) -> Unit
-    ): Flow<NearbyStateUpdate> = merge(
-        filterIsInstance<NearbyIntent.ClearSelectionClicked>()
-            .map { NearbyStateUpdate.ClearSelection },
-        filterIsInstance<NearbyIntent.EventLongClicked>()
-            .map { NearbyStateUpdate.ToggleEventSelection(it.event) },
-        filterIsInstance<NearbyIntent.HideSnackbar>()
-            .map { NearbyStateUpdate.HideSnackbar },
-        filterIsInstance<NearbyIntent.LoadMoreResults>()
-            .loadMoreResultsUpdates(currentState, signal),
-        filterIsInstance<NearbyIntent.AddToFavouritesClicked>()
-            .addToFavouritesUpdates(coroutineScope, currentState, intent, signal),
-        filterIsInstance<NearbyIntent.ReloadLocation>()
-            .filter { currentState().items.data.isNotEmpty() }
-            .onEach { locationStateProvider.reloadLocation() }
-            .map { null }
-            .filterNotNull()
-    )
+    ): Flow<NearbyStateUpdate> =
+        merge(
+            filterIsInstance<NearbyIntent.ClearSelectionClicked>().map {
+                NearbyStateUpdate.ClearSelection
+            },
+            filterIsInstance<NearbyIntent.EventLongClicked>().map {
+                NearbyStateUpdate.ToggleEventSelection(it.event)
+            },
+            filterIsInstance<NearbyIntent.HideSnackbar>().map { NearbyStateUpdate.HideSnackbar },
+            filterIsInstance<NearbyIntent.LoadMoreResults>()
+                .loadMoreResultsUpdates(currentState, signal),
+            filterIsInstance<NearbyIntent.AddToFavouritesClicked>()
+                .addToFavouritesUpdates(coroutineScope, currentState, intent, signal),
+            filterIsInstance<NearbyIntent.ReloadLocation>()
+                .filter { currentState().items.data.isNotEmpty() }
+                .onEach { locationStateProvider.reloadLocation() }
+                .map { null }
+                .filterNotNull())
 
     private fun ConnectedStateProvider.updates(
         currentState: () -> NearbyState,
         signal: suspend (NearbySignal) -> Unit
-    ): Flow<NearbyStateUpdate> = connectedStates.filter { connected ->
-        connected && currentState().items.run { loadingFailed && data.isEmpty() }
-    }.flatMapFirst {
-        locationStateProvider.locationStates.notNullLatLng.take(1)
-    }.flatMapLatest { latLng -> loadingEventsUpdates(latLng, false, currentState, signal) }
+    ): Flow<NearbyStateUpdate> =
+        connectedStates
+            .filter { connected ->
+                connected && currentState().items.run { loadingFailed && data.isEmpty() }
+            }
+            .flatMapFirst { locationStateProvider.locationStates.notNullLatLng.take(1) }
+            .flatMapLatest { latLng -> loadingEventsUpdates(latLng, false, currentState, signal) }
 
     private fun ConnectedStateProvider.snackbarUpdates(
         currentState: () -> NearbyState
-    ): Flow<NearbyStateUpdate> = connectedStates.filter { connected ->
-        !connected && currentState().items.loadingFailed
-    }.flatMapFirst {
-        locationStateProvider.locationStates.notNullLatLng.take(1)
-    }.map { NearbyStateUpdate.NoConnectionSnackbar }
+    ): Flow<NearbyStateUpdate> =
+        connectedStates
+            .filter { connected -> !connected && currentState().items.loadingFailed }
+            .flatMapFirst { locationStateProvider.locationStates.notNullLatLng.take(1) }
+            .map { NearbyStateUpdate.NoConnectionSnackbar }
 
     private fun LocationStateProvider.snackbarUpdates(
         signal: suspend (NearbySignal) -> Unit
-    ): Flow<NearbyStateUpdate> = locationStates
-        .filter { (_, status) -> status != LocationStatus.Initial && status != LocationStatus.Found }
-        .map { (latLng, status) ->
-            if (status !is LocationStatus.Loading) signal(NearbySignal.EventsLoadingFinished)
-            NearbyStateUpdate.LocationSnackbar(
-                latLng,
-                status,
-                locationStateProvider::reloadLocation
-            )
-        }
+    ): Flow<NearbyStateUpdate> =
+        locationStates
+            .filter { (_, status) ->
+                status != LocationStatus.Initial && status != LocationStatus.Found
+            }
+            .map { (latLng, status) ->
+                if (status !is LocationStatus.Loading) signal(NearbySignal.EventsLoadingFinished)
+                NearbyStateUpdate.LocationSnackbar(
+                    latLng, status, locationStateProvider::reloadLocation)
+            }
 
     private fun LocationStateProvider.updates(
         currentState: () -> NearbyState,
         signal: suspend (NearbySignal) -> Unit
-    ): Flow<NearbyStateUpdate> = locationStates
-        .filter { (_, status) -> status is LocationStatus.Found }
-        .map { it.latLng }
-        .filterNotNull()
-        .filterNot { currentState().items.loadingFailed }
-        .flatMapLatest { latLng -> loadingEventsUpdates(latLng, true, currentState, signal) }
+    ): Flow<NearbyStateUpdate> =
+        locationStates
+            .filter { (_, status) -> status is LocationStatus.Found }
+            .map { it.latLng }
+            .filterNotNull()
+            .filterNot { currentState().items.loadingFailed }
+            .flatMapLatest { latLng -> loadingEventsUpdates(latLng, true, currentState, signal) }
 
     private fun Flow<NearbyIntent.LoadMoreResults>.loadMoreResultsUpdates(
         currentState: () -> NearbyState,
         signal: suspend (NearbySignal) -> Unit
-    ): Flow<NearbyStateUpdate> = filterNot {
-        currentState().items.run { status is Loading || !canLoadMore || data.isEmpty() }
-    }.flatMapFirst {
-        locationStateProvider.locationStates.notNullLatLng.take(1)
-    }.flatMapFirst { latLng -> loadingEventsUpdates(latLng, false, currentState, signal) }
+    ): Flow<NearbyStateUpdate> =
+        filterNot {
+                currentState().items.run { status is Loading || !canLoadMore || data.isEmpty() }
+            }
+            .flatMapFirst { locationStateProvider.locationStates.notNullLatLng.take(1) }
+            .flatMapFirst { latLng -> loadingEventsUpdates(latLng, false, currentState, signal) }
 
-    private val Flow<LocationState>.notNullLatLng get() = map { it.latLng }.filterNotNull()
+    private val Flow<LocationState>.notNullLatLng
+        get() = map { it.latLng }.filterNotNull()
 
     private fun loadingEventsUpdates(
         latLng: LatLng,
@@ -125,16 +133,13 @@ class NearbyFlowProcessor @Inject constructor(
         signal: suspend (NearbySignal) -> Unit
     ): Flow<NearbyStateUpdate> = flow {
         emit(NearbyStateUpdate.Events.Loading(newLocation))
-        val resource = getPagedEvents(
-            currentEvents = if (newLocation) PagedDataList() else currentState().items,
-            toEvent = { selectable -> selectable.item }
-        ) { offset ->
-            getNearbyEvents(
-                latLng.latitude,
-                latLng.longitude,
-                offset = if (newLocation) 0 else offset
-            )
-        }
+        val resource =
+            getPagedEvents(
+                currentEvents = if (newLocation) PagedDataList() else currentState().items,
+                toEvent = { selectable -> selectable.item }) { offset ->
+                getNearbyEvents(
+                    latLng.latitude, latLng.longitude, offset = if (newLocation) 0 else offset)
+            }
         signal(NearbySignal.EventsLoadingFinished)
         emit(NearbyStateUpdate.Events.Loaded(resource, clearEventsIfSuccess = newLocation))
     }
@@ -149,11 +154,10 @@ class NearbyFlowProcessor @Inject constructor(
         withContext(ioDispatcher) { saveEvents(selectedEvents) }
         signal(NearbySignal.FavouritesSaved)
         NearbyStateUpdate.Events.AddedToFavourites(
-            msgRes = SnackbarState.Shown.MsgRes(
-                addedToFavouritesMsgRes(eventsCount = selectedEvents.size),
-                args = arrayOf(selectedEvents.size)
-            ),
-            onSnackbarDismissed = { coroutineScope.launch { intent(NearbyIntent.HideSnackbar) } }
-        )
+            msgRes =
+                SnackbarState.Shown.MsgRes(
+                    addedToFavouritesMsgRes(eventsCount = selectedEvents.size),
+                    args = arrayOf(selectedEvents.size)),
+            onSnackbarDismissed = { coroutineScope.launch { intent(NearbyIntent.HideSnackbar) } })
     }
 }

@@ -23,62 +23,52 @@ import org.junit.jupiter.api.Test
 internal class InitialSearchTextTests : BaseSearchFlowProcessorTests() {
 
     @Test
-    @DisplayName("When initial text is not blank - should call getSearchSuggestions and getPagedEvents")
-    fun initialSearchTextTest() = testScope.runBlockingTest {
-        val searchText = "test"
-        val initialState = SearchState(searchText = searchText)
-        val currentState = mockk<() -> SearchState> {
-            every { this@mockk() } returns initialState
-        }
-        val getPagedEvents = mockk<GetPagedEvents> {
-            coEvery {
-                this@mockk<Selectable<Event>>(any(), any(), any())
-            } returns Resource.successWith(
-                PagedResult(emptyList(), 0, 0)
-            )
-        }
-        val getSearchSuggestions = mockk<GetSearchSuggestions> {
-            coEvery { this@mockk(any()) } returns emptyList()
-        }
+    @DisplayName(
+        "When initial text is not blank - should call getSearchSuggestions and getPagedEvents")
+    fun initialSearchTextTest() =
+        testScope.runBlockingTest {
+            val searchText = "test"
+            val initialState = SearchState(searchText = searchText)
+            val currentState =
+                mockk<() -> SearchState> { every { this@mockk() } returns initialState }
+            val getPagedEvents =
+                mockk<GetPagedEvents> {
+                    coEvery { this@mockk<Selectable<Event>>(any(), any(), any()) } returns
+                        Resource.successWith(PagedResult(emptyList(), 0, 0))
+                }
+            val getSearchSuggestions =
+                mockk<GetSearchSuggestions> { coEvery { this@mockk(any()) } returns emptyList() }
 
-        flowProcessor(
-            getPagedEvents = getPagedEvents,
-            getSearchSuggestions = getSearchSuggestions
-        ).updates(
-            intents = emptyFlow(),
-            currentState = currentState
-        ).launchIn(testScope)
+            flowProcessor(
+                    getPagedEvents = getPagedEvents, getSearchSuggestions = getSearchSuggestions)
+                .updates(intents = emptyFlow(), currentState = currentState)
+                .launchIn(testScope)
 
-        coVerify(exactly = 1) { getSearchSuggestions(searchText) }
-        coVerify(exactly = 1) { getPagedEvents(initialState.items, any(), any()) }
-    }
+            coVerify(exactly = 1) { getSearchSuggestions(searchText) }
+            coVerify(exactly = 1) { getPagedEvents(initialState.items, any(), any()) }
+        }
 
     @Test
-    @DisplayName("When initial text not blank - should not call getSearchSuggestions and getPagedEvents")
-    fun noInitialSearchTextTest() = testScope.runBlockingTest {
-        val currentState = mockk<() -> SearchState> {
-            every { this@mockk() } returns SearchState()
-        }
-        val getPagedEvents = mockk<GetPagedEvents> {
-            coEvery {
-                this@mockk<Selectable<Event>>(any(), any(), any())
-            } returns Resource.successWith(
-                PagedResult(emptyList(), 0, 0)
-            )
-        }
-        val getSearchSuggestions = mockk<GetSearchSuggestions> {
-            coEvery { this@mockk(any()) } returns emptyList()
-        }
+    @DisplayName(
+        "When initial text not blank - should not call getSearchSuggestions and getPagedEvents")
+    fun noInitialSearchTextTest() =
+        testScope.runBlockingTest {
+            val currentState =
+                mockk<() -> SearchState> { every { this@mockk() } returns SearchState() }
+            val getPagedEvents =
+                mockk<GetPagedEvents> {
+                    coEvery { this@mockk<Selectable<Event>>(any(), any(), any()) } returns
+                        Resource.successWith(PagedResult(emptyList(), 0, 0))
+                }
+            val getSearchSuggestions =
+                mockk<GetSearchSuggestions> { coEvery { this@mockk(any()) } returns emptyList() }
 
-        flowProcessor(
-            getPagedEvents = getPagedEvents,
-            getSearchSuggestions = getSearchSuggestions
-        ).updates(
-            intents = emptyFlow(),
-            currentState = currentState
-        ).launchIn(testScope)
+            flowProcessor(
+                    getPagedEvents = getPagedEvents, getSearchSuggestions = getSearchSuggestions)
+                .updates(intents = emptyFlow(), currentState = currentState)
+                .launchIn(testScope)
 
-        coVerify(exactly = 0) { getSearchSuggestions(any()) }
-        coVerify(exactly = 0) { getPagedEvents<Selectable<Event>>(any(), any(), any()) }
-    }
+            coVerify(exactly = 0) { getSearchSuggestions(any()) }
+            coVerify(exactly = 0) { getPagedEvents<Selectable<Event>>(any(), any(), any()) }
+        }
 }

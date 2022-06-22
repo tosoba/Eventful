@@ -11,9 +11,9 @@ data class MainState(
     val upcomingAlarms: List<Alarm> = emptyList(),
     val upcomingEvents: List<Event> = emptyList()
 ) {
-    constructor(savedStateHandle: SavedStateHandle) : this(
-        locationState = savedStateHandle[KEY_LOCATION_STATE] ?: LocationState()
-    )
+    constructor(
+        savedStateHandle: SavedStateHandle
+    ) : this(locationState = savedStateHandle[KEY_LOCATION_STATE] ?: LocationState())
 
     companion object {
         const val KEY_LOCATION_STATE = "key_location_state"

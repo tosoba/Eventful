@@ -13,18 +13,21 @@ interface EventController {
     fun showEventDetails(event: Event)
 
     companion object {
-        val navigationItems = mapOf(
-            R.id.bottom_nav_event_details to 0,
-            R.id.bottom_nav_weather to 1,
-            R.id.bottom_nav_alarms to 2
-        )
+        val navigationItems =
+            mapOf(
+                R.id.bottom_nav_event_details to 0,
+                R.id.bottom_nav_weather to 1,
+                R.id.bottom_nav_alarms to 2)
     }
 }
 
-val Fragment.eventNavigationItemSelectedListener: BottomNavigationView.OnNavigationItemSelectedListener
-    get() = BottomNavigationView.OnNavigationItemSelectedListener { item ->
-        EventController.navigationItems[item.itemId]?.let {
-            parentFragment.castTo<EventController>()?.viewPager?.currentItem = it
-            true
-        } ?: false
-    }
+val Fragment.eventNavigationItemSelectedListener:
+    BottomNavigationView.OnNavigationItemSelectedListener
+    get() =
+        BottomNavigationView.OnNavigationItemSelectedListener { item ->
+            EventController.navigationItems[item.itemId]?.let {
+                parentFragment.castTo<EventController>()?.viewPager?.currentItem = it
+                true
+            }
+                ?: false
+        }

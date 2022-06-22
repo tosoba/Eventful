@@ -6,9 +6,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
 @ExperimentalCoroutinesApi
-fun <T, R> Flow<T>.flatMapFirst(
-    transform: suspend (value: T) -> Flow<R>
-): Flow<R> = map(transform).flattenFirst()
+fun <T, R> Flow<T>.flatMapFirst(transform: suspend (value: T) -> Flow<R>): Flow<R> =
+    map(transform).flattenFirst()
 
 @ExperimentalCoroutinesApi
 fun <T> Flow<Flow<T>>.flattenFirst(): Flow<T> = channelFlow {
@@ -35,8 +34,7 @@ fun <T> Flow<T>.takeWhileInclusive(predicate: suspend (T) -> Boolean): Flow<T> =
             emit(value)
             if (!predicate(value)) throw AbortFlowException()
         }
-    } catch (e: AbortFlowException) {
-    }
+    } catch (e: AbortFlowException) {}
 }
 
 fun <A, B : Any, R> Flow<A>.withLatestFrom(
@@ -53,8 +51,6 @@ fun <A, B : Any, R> Flow<A>.withLatestFrom(
                 outerScope.cancel(e) // cancel outer scope on cancellation exception, too
             }
         }
-        collect { a: A ->
-            latestB.get()?.let { b -> emit(transform(a, b)) }
-        }
+        collect { a: A -> latestB.get()?.let { b -> emit(transform(a, b)) } }
     }
 }

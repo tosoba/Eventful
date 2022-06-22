@@ -24,7 +24,9 @@ data class Event(
     override val priceRanges: List<PriceRange>?
 ) : IEvent, Parcelable {
 
-    constructor(other: IEvent) : this(
+    constructor(
+        other: IEvent
+    ) : this(
         other.id,
         other.name,
         other.url,
@@ -38,17 +40,19 @@ data class Event(
         other.kinds,
         other.venues?.map { Venue(it) },
         other.attractions?.map { Attraction(it) },
-        other.priceRanges?.map { PriceRange(it) }
-    )
+        other.priceRanges?.map { PriceRange(it) })
 
     val formattedAddress: String
         get() = venues?.firstOrNull()?.run { "$address, $city" } ?: "Unknown address"
 
     val formattedPriceRange: String
-        get() = priceRanges?.firstOrNull()?.run {
-            if (min.toInt() != max.toInt()) "${min.stringNoDecimal} - ${max.stringNoDecimal}$currency"
-            else "${min.stringNoDecimal}$currency"
-        } ?: "Unknown pricing"
+        get() =
+            priceRanges?.firstOrNull()?.run {
+                if (min.toInt() != max.toInt())
+                    "${min.stringNoDecimal} - ${max.stringNoDecimal}$currency"
+                else "${min.stringNoDecimal}$currency"
+            }
+                ?: "Unknown pricing"
 
     val formattedStartTime: String?
         get() = startTime?.substringBeforeLast(':')

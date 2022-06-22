@@ -1,11 +1,11 @@
 package com.eventful.search
 
+import com.eventful.core.android.provider.ConnectedStateProvider
 import com.eventful.core.usecase.event.GetPagedEvents
 import com.eventful.core.usecase.event.SaveEvents
 import com.eventful.core.usecase.event.SearchEvents
 import com.eventful.core.usecase.search.GetSearchSuggestions
 import com.eventful.core.usecase.search.SaveSearchSuggestion
-import com.eventful.core.android.provider.ConnectedStateProvider
 import com.eventful.test.mockLog
 import io.mockk.every
 import io.mockk.mockk
@@ -47,15 +47,15 @@ internal abstract class BaseSearchFlowProcessorTests {
         saveSearchSuggestion: SaveSearchSuggestion = mockk(relaxed = true),
         connectedStateProvider: ConnectedStateProvider = mockk(relaxed = true),
         ioDispatcher: CoroutineDispatcher = testDispatcher
-    ): SearchFlowProcessor = SearchFlowProcessor(
-        searchEvents,
-        getPagedEvents,
-        saveEvents,
-        getSearchSuggestions,
-        saveSearchSuggestion,
-        connectedStateProvider,
-        ioDispatcher
-    )
+    ): SearchFlowProcessor =
+        SearchFlowProcessor(
+            searchEvents,
+            getPagedEvents,
+            saveEvents,
+            getSearchSuggestions,
+            saveSearchSuggestion,
+            connectedStateProvider,
+            ioDispatcher)
 
     protected fun SearchFlowProcessor.updates(
         intents: Flow<SearchIntent> = mockk(relaxed = true),

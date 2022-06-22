@@ -13,18 +13,13 @@ import javax.inject.Inject
 
 class EventAlarmService : DaggerIntentService(NAME) {
 
-    @Inject
-    lateinit var getEventOfAlarm: GetEventOfAlarm
+    @Inject lateinit var getEventOfAlarm: GetEventOfAlarm
 
-    @Inject
-    lateinit var deleteAlarm: DeleteAlarms
+    @Inject lateinit var deleteAlarm: DeleteAlarms
 
-    @Inject
-    lateinit var ioDispatcher: CoroutineDispatcher
+    @Inject lateinit var ioDispatcher: CoroutineDispatcher
 
-    @Inject
-    @MainActivityIntent
-    lateinit var notificationContentIntent: Intent
+    @Inject @MainActivityIntent lateinit var notificationContentIntent: Intent
 
     override fun onHandleIntent(intent: Intent?) {
         val extras = intent?.extras
@@ -35,12 +30,7 @@ class EventAlarmService : DaggerIntentService(NAME) {
                 val thumbnail = applicationContext.loadBitmap(it.imageUrl)
                 withContext(Dispatchers.Main) {
                     AlarmNotifications.show(
-                        applicationContext,
-                        alarmId,
-                        it,
-                        thumbnail,
-                        notificationContentIntent
-                    )
+                        applicationContext, alarmId, it, thumbnail, notificationContentIntent)
                 }
                 deleteAlarm(listOf(alarmId), false)
             }
@@ -52,10 +42,7 @@ class EventAlarmService : DaggerIntentService(NAME) {
 
         private const val EXTRA_ID = "EXTRA_ID"
 
-        fun intent(
-            context: Context, alarmId: Int
-        ): Intent = Intent(context, EventAlarmService::class.java).apply {
-            putExtra(EXTRA_ID, alarmId)
-        }
+        fun intent(context: Context, alarmId: Int): Intent =
+            Intent(context, EventAlarmService::class.java).apply { putExtra(EXTRA_ID, alarmId) }
     }
 }

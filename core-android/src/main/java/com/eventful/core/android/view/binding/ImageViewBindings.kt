@@ -17,10 +17,7 @@ val eventRequestOptions by lazy {
 
 @BindingAdapter("event")
 fun bindEvent(imageView: ImageView, event: Event) {
-    Glide.with(imageView)
-        .load(event.imageUrl)
-        .apply(eventRequestOptions)
-        .into(imageView)
+    Glide.with(imageView).load(event.imageUrl).apply(eventRequestOptions).into(imageView)
 }
 
 @BindingAdapter("resource")

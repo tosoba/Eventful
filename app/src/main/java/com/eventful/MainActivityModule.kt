@@ -34,22 +34,25 @@ abstract class MainActivityModule {
 
     @ActivityScoped
     @ContributesAndroidInjector(
-        modules = [
-            NearbyModule::class,
-            SearchModule::class,
-            FavouritesModule::class,
-            AllAlarmsModule::class,
-            EventModule::class,
-            MainFragmentModule::class
-        ]
-    )
+        modules =
+            [
+                NearbyModule::class,
+                SearchModule::class,
+                FavouritesModule::class,
+                AllAlarmsModule::class,
+                EventModule::class,
+                MainFragmentModule::class])
     abstract fun mainActivity(): MainActivity
 
     @Multibinds
     abstract fun viewModels(): Map<Class<out ViewModel>, @JvmSuppressWildcards ViewModel>
 
     @Multibinds
-    abstract fun assistedViewModelFactories(): Map<Class<out ViewModel>, @JvmSuppressWildcards AssistedSavedStateViewModelFactory<out ViewModel>>
+    abstract fun assistedViewModelFactories():
+        Map<
+            Class<out ViewModel>,
+            @JvmSuppressWildcards
+            AssistedSavedStateViewModelFactory<out ViewModel>>
 
     @Binds
     @IntoMap
@@ -61,11 +64,9 @@ abstract class MainActivityModule {
     @Binds
     abstract fun connectivityStateProvider(mainViewModel: MainViewModel): ConnectedStateProvider
 
-    @Binds
-    abstract fun locationStateProvider(mainViewModel: MainViewModel): LocationStateProvider
+    @Binds abstract fun locationStateProvider(mainViewModel: MainViewModel): LocationStateProvider
 
-    @ContributesAndroidInjector
-    abstract fun eventAlarmService(): EventAlarmService
+    @ContributesAndroidInjector abstract fun eventAlarmService(): EventAlarmService
 
     companion object {
         @Provides
@@ -74,13 +75,11 @@ abstract class MainActivityModule {
             factory: InjectingSavedStateViewModelFactory
         ): MainViewModel = mainActivity.savedStateViewModelFrom(factory)
 
-        @Provides
-        fun mainFragmentNavDestinations(): IMainNavDestinations = FragmentFactory
+        @Provides fun mainFragmentNavDestinations(): IMainNavDestinations = FragmentFactory
 
         @Provides
         fun mainChildFragmentNavDestinations(): IMainChildFragmentNavDestinations = FragmentFactory
 
-        @Provides
-        fun eventChildFragmentsFactory(): IEventChildFragmentsFactory = FragmentFactory
+        @Provides fun eventChildFragmentsFactory(): IEventChildFragmentsFactory = FragmentFactory
     }
 }
