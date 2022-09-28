@@ -4,7 +4,7 @@ apply plugin: 'org.jmailen.kotlinter'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
+    
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
 
     implementation project(':core')

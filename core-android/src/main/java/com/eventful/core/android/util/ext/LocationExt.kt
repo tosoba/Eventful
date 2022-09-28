@@ -6,10 +6,11 @@ import android.location.Location
 import com.google.android.gms.location.LocationRequest
 import com.patloew.rxlocation.RxLocation
 import kotlinx.coroutines.rx2.await
+import kotlinx.coroutines.rx2.awaitSingleOrNull
 import java.util.concurrent.TimeUnit
 
 suspend fun RxLocation.reverseGeocode(location: Location): Address? =
-    geocoding().fromLocation(location).onErrorComplete().await()
+    geocoding().fromLocation(location).onErrorComplete().awaitSingleOrNull()
 
 @SuppressLint("MissingPermission")
 suspend fun RxLocation.currentLocation(
@@ -25,4 +26,4 @@ suspend fun RxLocation.currentLocation(
         .timeout(timeout, unit)
         .firstElement()
         .retry(retries)
-        .await()
+        .awaitSingleOrNull()

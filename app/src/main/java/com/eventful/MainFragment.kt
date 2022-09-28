@@ -24,6 +24,7 @@ import dagger.android.support.DaggerFragment
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -97,7 +98,7 @@ class MainFragment : DaggerFragment(R.layout.fragment_main), MenuController, Sna
     }
 
     override fun transitionToSnackbarState(newState: SnackbarState) {
-        if (!snackbarStateChannel.isClosedForSend) snackbarStateChannel.offer(newState)
+        if (!snackbarStateChannel.isClosedForSend) snackbarStateChannel.trySendBlocking(newState)
     }
 
     companion object {

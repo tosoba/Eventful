@@ -37,6 +37,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -162,6 +163,7 @@ class EventDetailsFragment :
                                     })
                                 .into(expandedImage)
                         }
+                        else -> {}
                     }
                 }
                 .launchIn(lifecycleScope)
@@ -176,7 +178,7 @@ class EventDetailsFragment :
     }
 
     override fun transitionToSnackbarState(newState: SnackbarState) {
-        if (!snackbarStateChannel.isClosedForSend) snackbarStateChannel.offer(newState)
+        if (!snackbarStateChannel.isClosedForSend) snackbarStateChannel.trySendBlocking(newState)
     }
 
     private var snackbarStateUpdatesJob: Job? = null

@@ -6,11 +6,11 @@ apply plugin: 'com.jakewharton.butterknife'
 apply plugin: 'org.jmailen.kotlinter'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 32
 
     defaultConfig {
-        minSdkVersion 17
-        targetSdkVersion 29
+        minSdkVersion 21
+        targetSdkVersion 32
         versionCode 1
         versionName "1.0"
 
@@ -44,7 +44,7 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
+    
 
     implementation project(':core')
 
@@ -55,9 +55,9 @@ dependencies {
     implementation "androidx.legacy:legacy-support-v4:$legacySupportV4Version"
     implementation "androidx.recyclerview:recyclerview:$recyclerViewVersion"
 
-    implementation "android.arch.lifecycle:runtime:$lifecycleVersion"
-    implementation "android.arch.lifecycle:extensions:$lifecycleVersion"
-    kapt "android.arch.lifecycle:compiler:$lifecycleVersion"
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.1'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+    kapt 'androidx.lifecycle:lifecycle-compiler:2.5.1'
     implementation "com.github.hadilq.liveevent:liveevent:$liveEventVersion"
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycleRuntimeKtxVersion"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$liveDataKtxVersion"
@@ -72,6 +72,7 @@ dependencies {
 
     implementation "com.squareup.retrofit2:converter-gson:$retrofitConverterGsonVersion"
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    implementation 'com.squareup.okhttp3:okhttp:4.10.0'
 
     implementation "com.patloew.rxlocation:rxlocation:$rxLocationVersion"
     implementation "com.github.pwittchen:reactivenetwork-rx2:$reactiveNetworkVersion"

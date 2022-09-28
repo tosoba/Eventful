@@ -13,6 +13,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 
@@ -57,9 +58,9 @@ abstract class BaseNavigationFragment : DaggerFragment() {
         if (backStackEntryCount >= 1) {
             childFragmentManager.popBackStack()
             if (backStackEntryCount == 1) hideBackNavArrow()
-            backStackSignalsChannel.offer(true)
+            backStackSignalsChannel.trySendBlocking(true)
         } else {
-            backStackSignalsChannel.offer(false)
+            backStackSignalsChannel.trySendBlocking(false)
         }
     }
 

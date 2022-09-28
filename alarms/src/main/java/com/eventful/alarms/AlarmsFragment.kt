@@ -31,6 +31,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -177,6 +178,7 @@ abstract class AlarmsFragment<M : AlarmsMode, VM : AlarmsViewModel> :
                                     setOnDismissListener { addEditAlarmDialog = null }
                                 }
                     }
+                    else -> {}
                 }
             }
             .launchIn(lifecycleScope)
@@ -204,7 +206,7 @@ abstract class AlarmsFragment<M : AlarmsMode, VM : AlarmsViewModel> :
     }
 
     override fun transitionToSnackbarState(newState: SnackbarState) {
-        if (!snackbarStateChannel.isClosedForSend) snackbarStateChannel.offer(newState)
+        if (!snackbarStateChannel.isClosedForSend) snackbarStateChannel.trySendBlocking(newState)
     }
 
     private var resumedOnlyViewUpdatesJob: Job? = null
@@ -225,6 +227,7 @@ abstract class AlarmsFragment<M : AlarmsMode, VM : AlarmsViewModel> :
                     is AlarmsViewUpdate.UpdateActionMode ->
                         actionModeController.update(update.numberOfSelectedAlarms)
                     is AlarmsViewUpdate.FinishActionMode -> actionModeController.finish(false)
+                    else -> {}
                 }
             }
             .launchIn(lifecycleScope)

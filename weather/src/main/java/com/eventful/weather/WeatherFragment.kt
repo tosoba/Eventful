@@ -22,6 +22,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -112,7 +113,7 @@ class WeatherFragment :
     }
 
     override fun transitionToSnackbarState(newState: SnackbarState) {
-        if (!snackbarStateChannel.isClosedForSend) snackbarStateChannel.offer(newState)
+        if (!snackbarStateChannel.isClosedForSend) snackbarStateChannel.trySendBlocking(newState)
     }
 
     private var viewUpdatesJob: Job? = null
